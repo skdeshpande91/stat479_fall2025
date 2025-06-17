@@ -1,6 +1,8 @@
 ---
 title: "Lecture 1: Boxscore Metrics"
 format: html
+execute: 
+  cache: true
 ---
 
 ## Overview
@@ -14,11 +16,9 @@ How do we determine this *using data*?
 
 ### Retrospective vs prospective Metrics
 
-
-
+While they may be predictive, box score metrics are primarily retrospective: they tell (part of) the story of what happened.
 
 ### Key Topics
-
 
 In this lecture, we will practice using functions from the **tidyverse** suite of packages (especially **dplyr**) to manipulate tables of NBA box score data.
 Hopefully, much of the functionality we encounter in this lecture will be familiar to you.
@@ -43,22 +43,23 @@ if(!"devtools" %in% rownames(installed.packages())){
 :::
 
 
-## Initial metrics
+## Basic box score statistics
 
-### Scraping box score data using **hoopR**
+### Scraping and wrangling box score data
 
 We will scrape NBA box score data using the [**hoopR**](http://hoopr.sportsdataverse.org/) package.
-
+We start by installing the package.
 ```{r install-hoopR}
 if(!"hoopR" %in% rownames(installed.packages())){
   message("Package `hoopR' is not currently installed. Installing now")
   devtools::install_github(repo = "sportsdataverse/hoopR")
 }
+library(tidyverse) # load the tidyverse suite of packages
 ```
 
 You can read more about the package [here]().
+One important function is `load_nba_player_box`, which scrapes individual player's box score for every game.
 
-This next bit can take a few minutes
 ```{r scrape-boxscores}
 raw_box <-
   hoopR::load_nba_player_box(seasons = 2002:(hoopR::most_recent_nba_season()))
@@ -70,4 +71,106 @@ raw_box <-
   Select only a few variables
 -->
 
+To study shooting ability, we need to aggregate the individual game-level data into season-level totals.
+Conceptually, we can accomplish this by first dividing the full data table into several smaller tables, one for each combination of player and season.
+Then, we can sum the number of field goals, three point shots, and free throws attempted and made by each player in each of their season.
+This order of operations is an example of the *split-apply-combine* paradigm, which is implemented in **dplyr** using `group_by`.
 
+<!--
+ 5: play-in
+ 2: regular-season
+ 3: play-offs
+-->
+
+```{r get-season-totals}
+season_box <-
+  raw_box %>%
+  select(season, athlete_display_name,
+         minutes, 
+         field_goals_made, field_goals_attempted,
+         three_point_field_goals_made, three_point_field_goals_attempted,
+         free_throws_made, free_throws_attempted,
+         did_not_play) %>%
+  rename(
+    Player = athlete_display_name,
+    FGM = field_goals_made,
+    FGA = field_goals_attempted,
+    TPM = three_point_field_goals_made,
+    TPA = three_point_field_goals_attempted,
+    FTM = free_throws_made, 
+    FTA = free_throws_attempted) %>%
+  filter(!did_not_play) %>%
+  filter(!(is.na(FGA) & is.na(TPA) & is.na(FTA))) %>% # filter out missing data records
+  group_by(Player, season) %>%
+  summarise(
+    minutes = sum(minutes),
+    n_games = n(),
+    FGM = sum(FTM),
+    FGA = sum(FGA),
+    TPM = sum(TPM),
+    TPA = sum(TPA),
+    FTM = sum(FTM),
+    FTA = sum(FTA),
+    .groups = "drop") 
+```
+
+In total, we have 11780 player-season observations.
+Here is a quick snapshot
+```{r view-dirk}
+season_box %>%
+  filter(Player == "Dirk Nowitzki")
+```
+
+### From totals to percentages
+
+One way to define the best shooter is to identify the player who made the most shots.
+We can identify this by arranging our data table in descending order.
+```{r arrange-fgm}
+season_box %>%
+  arrange(desc(FGM))
+```
+Based on this simple definition, it would appear that James Harden had the two best shooting seasons since at least 2002-03.
+Lets focus on his 2014-15 season: Harden made 847 field goals.
+The apparently next best performance is Kevin Durant's 2014-15 season: Durant made 839 field goals.
+The difference seems small --- only 8 field goals.
+Do we think this difference is big or small? 
+Taking a closer look, we see that Harden in 2017-18 took 377 *fewer* shots than Durant in 2014-15 while making eight more.
+This seems quite impressive!
+
+To make this more precise, we can compute the field goal **percentage** (and similarly for three pointers and free throws).
+To this end, let's filter out 
+
+```{r compute-percentages}
+season_box <-
+  season_box %>%
+  filter(FGM <= FGA & TPM <= TPA & FTA <= FTM) %>% # filter out nonsensical
+  mutate(
+    FGP = ifelse(FGA > 0, FGM/FGA, NA_real_),
+    TPP = ifelse(TPA > 0, TPM/TPA, NA_real_),
+    FTP = ifelse(FTA > 0, FTM/FTA, NA_real_))
+```
+
+```{r arrange-fgp}
+season_box %>% 
+  arrange(desc(FGP)) %>%
+  select(Player, season, FGP, FGM, FGA, n_games)
+```
+Ok, we need to filter this down 
+<!-- refine this -->
+
+```{r qualified}
+qualified <-
+  season_box %>%
+  filter(FGA >= 50 & TPA >= 25)
+```
+
+## More nuanced metrics
+
+### Effective Field Goal Percentage
+One criticism of FGP is that it treats 2-point shots the same as 3-point shots. As a result, the league leader in FGP is usually a center whose shots mostly come from near the rim.
+[Effective Field Goal Percentage](https://en.wikipedia.org/wiki/Effective_field_goal_percentage) (eFGP) adjusts FGP to account for the fact that a made 3-point shots is worth 50% more than a made 2-point shot. The formula for eFGP is
+$$
+\textrm{eFGP} = \frac{\textrm{FGM} + 0.5 \times \textrm{TPM}}{\textrm{FGA}}
+$$
+### True Shooting Percentage
+Both field goal percentage and effective field goal percentage totally ignore free throws. One metric that accounts for all field goals, three pointers, and free throws is true shooting percentage, whose formula is given by
