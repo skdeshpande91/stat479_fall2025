@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Getting Started with R &amp; RStudio – STAT479</title>
+<title>Constructing Advanced Metrics Using Box Score Data – STAT479</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -151,7 +151,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../guides/getting_started.html">Getting Started with R &amp; RStudio</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../exercises/exercises1_boxscore.html">Constructing Advanced Metrics Using Box Score Data</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -165,8 +165,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../guides/getting_started.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Getting Started with R &amp; RStudio</span></a>
+  <a href="../exercises/exercises1_boxscore.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Constructing Advanced Metrics Using Box Score Data</span></a>
   </div>
 </li>
     </ul>
@@ -179,12 +179,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#additional-r-resources" id="toc-additional-r-resources" class="nav-link active" data-scroll-target="#additional-r-resources">Additional R resources</a></li>
-  <li><a href="#installation" id="toc-installation" class="nav-link" data-scroll-target="#installation">Installation</a>
+  <li><a href="#batting-statistics-in-major-league-baseball" id="toc-batting-statistics-in-major-league-baseball" class="nav-link active" data-scroll-target="#batting-statistics-in-major-league-baseball">Batting Statistics in Major League Baseball</a>
   <ul class="collapse">
-  <li><a href="#package-re-installation" id="toc-package-re-installation" class="nav-link" data-scroll-target="#package-re-installation">Package re-installation</a></li>
+  <li><a href="#setup-installing-the-lahman-package" id="toc-setup-installing-the-lahman-package" class="nav-link" data-scroll-target="#setup-installing-the-lahman-package">Setup: Installing the Lahman package</a></li>
+  <li><a href="#loading-hitting-data" id="toc-loading-hitting-data" class="nav-link" data-scroll-target="#loading-hitting-data">Loading hitting data</a></li>
+  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section"></a></li>
   </ul></li>
-  <li><a href="#required-packages" id="toc-required-packages" class="nav-link" data-scroll-target="#required-packages">Required Packages</a></li>
   </ul>
 </nav>
     </div>
@@ -193,7 +193,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Getting Started with R &amp; RStudio</h1>
+<h1 class="title">Constructing Advanced Metrics Using Box Score Data</h1>
 </div>
 
 
@@ -210,62 +210,28 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>This course will make <strong>extensive</strong> use of the <a href="">R programming language</a> through the <a href="https://posit.co/download/rstudio-desktop/">RStudio</a> integrated development environment (IDE). Because the formal pre-requisites for this course are STAT 333 or 340, you are expected to have previous experience using the R programming language.</p>
-<div id="prereq-warning" class="callout callout-style-default callout-important callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>I will assume <em>fluency</em> with basic R functionality (e.g., assignment, writing and executing scripts, saving data objects, setting environments, installing and loading packages), data manipulation with <strong>dplyr</strong> and other <strong>tidyverse</strong> packages, and visualization using either base R graphics or <strong>ggplot2</strong>. I will additionally assume some familiarity with fitting statistical models in R and interpreting their output (e.g., using <code>lm</code> and <code>glm</code>).</p>
-<p>If you do <strong>not</strong> meet the formal course prerequisites and/or have not used R in a previous course, this is <strong>not</strong> the right course for you.</p>
-</div>
-</div>
-<section id="additional-r-resources" class="level3">
-<h3 class="anchored" data-anchor-id="additional-r-resources">Additional R resources</h3>
-<p>Having issued that warning <span class="citation" data-cites="prereq-warning">@prereq-warning</span>, you will see some new R functionality in the course. As the focus is on answer sports problems, we will not spend significant classtime going over new functions, packages, or techniques. If you find that there are gaps in your R knowledge, you are expected to fill them on your own time. Here are some helpful resources</p>
-<ul>
-<li><a href="https://r4ds.hadley.nz">R for Data Science</a></li>
-<li><a href="https://datasciencebook.ca">Data Science: A first introduction</a></li>
-</ul>
-</section>
-<section id="installation" class="level2">
-<h2 class="anchored" data-anchor-id="installation">Installation</h2>
-<p>While you are expected to have used R in previous courses (see warning), I <strong>strongly</strong> recommend installing the latest version of both R and RStudio at the beginning of the course. As of the time of this writing, that is R version 4.5 and RStudio version 2025.05.</p>
-<p>You can download a version of R specific to for your operating system from <a href="https://cloud.r-project.org">this website</a>.</p>
-<section id="package-re-installation" class="level3">
-<h3 class="anchored" data-anchor-id="package-re-installation">Package re-installation</h3>
-<p>Whenever you update your version of R, you need to re-install the packages; this is a perennial source of <a href="https://bsky.app/profile/benbushong.com/post/3lbqnkbazgh2e">frustration</a> for many R users] and <a href="https://bsky.app/profile/hadley.nz/post/3lnlrbqv7qs2i">some good-natured humor</a> from others (who <a href="https://bsky.app/profile/hadley.nz/post/3lnmafh3ljs2y">also</a> manually re-installs packages after every update!)</p>
-</section>
-</section>
-<section id="required-packages" class="level2">
-<h2 class="anchored" data-anchor-id="required-packages">Required Packages</h2>
-<p>Throughout the course, we will make extensive use of several packages in the <strong>tidyverse</strong>, primarily for data loading, pre-processing, and manipulation. We will also make extensive use of the packages <strong>glmnet</strong>, <strong>ranger</strong>, and <strong>xgboost</strong> for model fitting. We will occassionally also use <strong>ggplot2</strong> for creating visualizations.</p>
-<p>As the course progresses, we will introduce and install new package as required. For the most part, these packages will be specific to a particular sport (e.g., in Lecture 1 we will use the <a href="http://asbcllc.com/nbastatR/index.html"><strong>nbastatR</strong></a> to access NBA player box-score statistics).</p>
-<p>Every package that we will use in this class is available through either (i) the Comprehensive R Archive Network (CRAN) or (ii) a public GitHub repository maintained by the packager developer. We typically install CRAN packages using the <code>install.packages()</code> command. To install packages hosted on GitHub, we will use the <code>install_github</code> function in the <a href="https://cran.r-project.org/web/packages/devtools/index.html"><em>devtools</em></a> package (which itself is available on CRAN)</p>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Required installations
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Prior to Lecture 2, please make sure you have installed the <strong>tidyverse</strong> packages as well as <strong>devtools</strong>, <strong>ggplot2</strong>, <strong>glmnet</strong>, <strong>ranger</strong>, and <strong>xgboost</strong>.</p>
+<section id="batting-statistics-in-major-league-baseball" class="level1">
+<h1>Batting Statistics in Major League Baseball</h1>
+<p>We will rely on data from the Lahman Database.</p>
+<section id="setup-installing-the-lahman-package" class="level2">
+<h2 class="anchored" data-anchor-id="setup-installing-the-lahman-package">Setup: Installing the Lahman package</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="fu">c</span>(<span class="st">"devtools"</span>, <span class="st">"tidyverse"</span>, <span class="st">"ggplot2"</span>, </span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"glmnet"</span>, <span class="st">"ranger"</span>, <span class="st">"xgboost"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="st">"Lahman"</span> <span class="sc">%in%</span> <span class="fu">rownames</span>(<span class="fu">installed.packages</span>())){</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">"Package `Lahman' not already installed. Installing now"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"Lahman"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span>{</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(Lahman)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</div>
-</div>
+</section>
+<section id="loading-hitting-data" class="level2">
+<h2 class="anchored" data-anchor-id="loading-hitting-data">Loading hitting data</h2>
+</section>
+<section id="section" class="level2">
+<h2 class="anchored" data-anchor-id="section"></h2>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

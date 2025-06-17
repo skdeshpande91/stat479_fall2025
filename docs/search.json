@@ -1,24 +1,53 @@
 [
   {
-    "objectID": "guides/getting_started.html",
-    "href": "guides/getting_started.html",
-    "title": "Getting Started with R & RStudio",
+    "objectID": "lectures/lecture1.html",
+    "href": "lectures/lecture1.html",
+    "title": "Lecture 1: Boxscore Metrics",
     "section": "",
-    "text": "This course will make extensive use of the R programming language through the RStudio integrated development environment (IDE). Because the formal pre-requisites for this course are STAT 333 or 340, you are expected to have previous experience using the R programming language."
+    "text": "Who is the best shooter in the NBA?\nHow do we determine this using data? \n\n\n\n\n\nIn this lecture, we will practice using functions from the tidyverse suite of packages (especially dplyr) to manipulate tables of NBA box score data. Hopefully, much of the functionality we encounter in this lecture will be familiar to you. But, if you need a high-level refresher, I highly recommend the following resources:\n\nChapter 3 and Chapter 5 of R for Data Science.\nSection 1.9 and Chapter 3 of *Data Science: A First Introduction.\n\nWe will use\n\n\n\n\n\n\nSystem setup\n\n\n\n\n\nFor this lecture, we will use a new R package to scrape NBA boxscore data. In order to do this, it is critical that you have already installed the devtools package, as noted in the Getting Started guide. To check that you have successfully installed the package, run the following code.",
+    "crumbs": [
+      "Lecture 1: Boxscore Metrics"
+    ]
   },
   {
-    "objectID": "guides/getting_started.html#installation",
-    "href": "guides/getting_started.html#installation",
-    "title": "Getting Started with R & RStudio",
-    "section": "Installation",
-    "text": "Installation\nWhile you are expected to have used R in previous courses (see warning), I strongly recommend installing the latest version of both R and RStudio at the beginning of the course. As of the time of this writing, that is R version 4.5 and RStudio version 2025.05.\nYou can download a version of R specific to for your operating system from this website.\n\nPackage re-installation\nWhenever you update your version of R, you need to re-install the packages; this is a perennial source of frustration for many R users] and some good-natured humor from others (who also manually re-installs packages after every update!)"
+    "objectID": "lectures/lecture1.html#overview",
+    "href": "lectures/lecture1.html#overview",
+    "title": "Lecture 1: Boxscore Metrics",
+    "section": "",
+    "text": "Who is the best shooter in the NBA?\nHow do we determine this using data? \n\n\n\n\n\nIn this lecture, we will practice using functions from the tidyverse suite of packages (especially dplyr) to manipulate tables of NBA box score data. Hopefully, much of the functionality we encounter in this lecture will be familiar to you. But, if you need a high-level refresher, I highly recommend the following resources:\n\nChapter 3 and Chapter 5 of R for Data Science.\nSection 1.9 and Chapter 3 of *Data Science: A First Introduction.\n\nWe will use\n\n\n\n\n\n\nSystem setup\n\n\n\n\n\nFor this lecture, we will use a new R package to scrape NBA boxscore data. In order to do this, it is critical that you have already installed the devtools package, as noted in the Getting Started guide. To check that you have successfully installed the package, run the following code.",
+    "crumbs": [
+      "Lecture 1: Boxscore Metrics"
+    ]
   },
   {
-    "objectID": "guides/getting_started.html#required-packages",
-    "href": "guides/getting_started.html#required-packages",
-    "title": "Getting Started with R & RStudio",
-    "section": "Required Packages",
-    "text": "Required Packages\nThroughout the course, we will make extensive use of several packages in the tidyverse, primarily for data loading, pre-processing, and manipulation. We will also make extensive use of the packages glmnet, ranger, and xgboost for model fitting. We will occassionally also use ggplot2 for creating visualizations.\nAs the course progresses, we will introduce and install new package as required. For the most part, these packages will be specific to a particular sport (e.g., in Lecture 1 we will use the nbastatR to access NBA player box-score statistics).\nEvery package that we will use in this class is available through either (i) the Comprehensive R Archive Network (CRAN) or (ii) a public GitHub repository maintained by the packager developer. We typically install CRAN packages using the install.packages() command. To install packages hosted on GitHub, we will use the install_github function in the devtools package (which itself is available on CRAN)\n\n\n\n\n\n\nRequired installations\n\n\n\nPrior to Lecture 2, please make sure you have installed the tidyverse packages as well as devtools, ggplot2, glmnet, ranger, and xgboost.\n\ninstall.packages(c(\"devtools\", \"tidyverse\", \"ggplot2\", \n                   \"glmnet\", \"ranger\", \"xgboost\"))"
+    "objectID": "lectures/lecture1.html#initial-metrics",
+    "href": "lectures/lecture1.html#initial-metrics",
+    "title": "Lecture 1: Boxscore Metrics",
+    "section": "Initial metrics",
+    "text": "Initial metrics\n\nScraping box score data using **",
+    "crumbs": [
+      "Lecture 1: Boxscore Metrics"
+    ]
+  },
+  {
+    "objectID": "exercises/exercises1_boxscore.html",
+    "href": "exercises/exercises1_boxscore.html",
+    "title": "Constructing Advanced Metrics Using Box Score Data",
+    "section": "",
+    "text": "We will rely on data from the Lahman Database.\n\n\n\nif(!\"Lahman\" %in% rownames(installed.packages())){\n  message(\"Package `Lahman' not already installed. Installing now\")\n  install.packages(\"Lahman\")\n} else{\n  library(Lahman)\n}",
+    "crumbs": [
+      "Constructing Advanced Metrics Using Box Score Data"
+    ]
+  },
+  {
+    "objectID": "exercises/exercises1_boxscore.html#setup-installing-the-lahman-package",
+    "href": "exercises/exercises1_boxscore.html#setup-installing-the-lahman-package",
+    "title": "Constructing Advanced Metrics Using Box Score Data",
+    "section": "",
+    "text": "if(!\"Lahman\" %in% rownames(installed.packages())){\n  message(\"Package `Lahman' not already installed. Installing now\")\n  install.packages(\"Lahman\")\n} else{\n  library(Lahman)\n}",
+    "crumbs": [
+      "Constructing Advanced Metrics Using Box Score Data"
+    ]
   },
   {
     "objectID": "exercises.html",
@@ -54,5 +83,35 @@
     "title": "Lecture Notes",
     "section": "",
     "text": "Lecture notes will be posted here."
+  },
+  {
+    "objectID": "guides/getting_started.html",
+    "href": "guides/getting_started.html",
+    "title": "Getting Started with R & RStudio",
+    "section": "",
+    "text": "This course will make extensive use of the R programming language through the RStudio integrated development environment (IDE). Because the formal pre-requisites for this course are STAT 333 or 340, you are expected to have previous experience using the R programming language.",
+    "crumbs": [
+      "Getting Started with R & RStudio"
+    ]
+  },
+  {
+    "objectID": "guides/getting_started.html#installation",
+    "href": "guides/getting_started.html#installation",
+    "title": "Getting Started with R & RStudio",
+    "section": "Installation",
+    "text": "Installation\nWhile you are expected to have used R in previous courses (see warning), I strongly recommend installing the latest version of both R and RStudio at the beginning of the course. As of the time of this writing, that is R version 4.5 and RStudio version 2025.05.\nYou can download a version of R specific to for your operating system from this website.\n\nPackage re-installation\nWhenever you update your version of R, you need to re-install the packages; this is a perennial source of frustration for many R users] and some good-natured humor from others (who also manually re-installs packages after every update!)",
+    "crumbs": [
+      "Getting Started with R & RStudio"
+    ]
+  },
+  {
+    "objectID": "guides/getting_started.html#required-packages",
+    "href": "guides/getting_started.html#required-packages",
+    "title": "Getting Started with R & RStudio",
+    "section": "Required Packages",
+    "text": "Required Packages\nThroughout the course, we will make extensive use of several packages in the tidyverse, primarily for data loading, pre-processing, and manipulation. We will also make extensive use of the packages glmnet, ranger, and xgboost for model fitting. We will occassionally also use ggplot2 for creating visualizations.\nAs the course progresses, we will introduce and install new package as required. For the most part, these packages will be specific to a particular sport (e.g., in Lecture 1 we will use the nbastatR to access NBA player box-score statistics).\nEvery package that we will use in this class is available through either (i) the Comprehensive R Archive Network (CRAN) or (ii) a public GitHub repository maintained by the packager developer. We typically install CRAN packages using the install.packages() command. To install packages hosted on GitHub, we will use the install_github function in the devtools package (which itself is available on CRAN)\n\n\n\n\n\n\nRequired installations\n\n\n\nPrior to Lecture 2, please make sure you have installed the tidyverse packages as well as devtools, ggplot2, glmnet, ranger, and xgboost.\n\ninstall.packages(c(\"devtools\", \"tidyverse\", \"ggplot2\", \n                   \"glmnet\", \"ranger\", \"xgboost\"))",
+    "crumbs": [
+      "Getting Started with R & RStudio"
+    ]
   }
 ]
