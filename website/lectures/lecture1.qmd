@@ -45,11 +45,29 @@ if(!"devtools" %in% rownames(installed.packages())){
 
 ## Initial metrics
 
-### Scraping box score data using **
+### Scraping box score data using **hoopR**
 
+We will scrape NBA box score data using the [**hoopR**](http://hoopr.sportsdataverse.org/) package.
 
+```{r install-hoopR}
+if(!"hoopR" %in% rownames(installed.packages())){
+  message("Package `hoopR' is not currently installed. Installing now")
+  devtools::install_github(repo = "sportsdataverse/hoopR")
+}
+```
+
+You can read more about the package [here]().
+
+This next bit can take a few minutes
+```{r scrape-boxscores}
+raw_box <-
+  hoopR::load_nba_player_box(seasons = 2002:(hoopR::most_recent_nba_season()))
+```
 <!--
- Load in box score data using
+  Filter out pre-season
+  Aggregate over a season:
+   This will require some careful group-by
+  Select only a few variables
 -->
 
 

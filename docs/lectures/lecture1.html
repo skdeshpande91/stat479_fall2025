@@ -207,7 +207,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul></li>
   <li><a href="#initial-metrics" id="toc-initial-metrics" class="nav-link" data-scroll-target="#initial-metrics">Initial metrics</a>
   <ul class="collapse">
-  <li><a href="#scraping-box-score-data-using" id="toc-scraping-box-score-data-using" class="nav-link" data-scroll-target="#scraping-box-score-data-using">Scraping box score data using **</a></li>
+  <li><a href="#scraping-box-score-data-using-hoopr" id="toc-scraping-box-score-data-using-hoopr" class="nav-link" data-scroll-target="#scraping-box-score-data-using-hoopr">Scraping box score data using <strong>hoopR</strong></a></li>
   </ul></li>
   </ul>
 </nav>
@@ -277,10 +277,26 @@ System setup
 </section>
 <section id="initial-metrics" class="level2">
 <h2 class="anchored" data-anchor-id="initial-metrics">Initial metrics</h2>
-<section id="scraping-box-score-data-using" class="level3">
-<h3 class="anchored" data-anchor-id="scraping-box-score-data-using">Scraping box score data using **</h3>
+<section id="scraping-box-score-data-using-hoopr" class="level3">
+<h3 class="anchored" data-anchor-id="scraping-box-score-data-using-hoopr">Scraping box score data using <strong>hoopR</strong></h3>
+<p>We will scrape NBA box score data using the <a href="http://hoopr.sportsdataverse.org/"><strong>hoopR</strong></a> package.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="st">"hoopR"</span> <span class="sc">%in%</span> <span class="fu">rownames</span>(<span class="fu">installed.packages</span>())){</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">"Package `hoopR' is not currently installed. Installing now"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="at">repo =</span> <span class="st">"sportsdataverse/hoopR"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>You can read more about the package <a href="">here</a>.</p>
+<p>This next bit can take a few minutes</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>raw_box <span class="ot">&lt;-</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  hoopR<span class="sc">::</span><span class="fu">load_nba_player_box</span>(<span class="at">seasons =</span> <span class="dv">2002</span><span class="sc">:</span>(hoopR<span class="sc">::</span><span class="fu">most_recent_nba_season</span>()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <!--
- Load in box score data using
+  Filter out pre-season
+  Aggregate over a season:
+   This will require some careful group-by
+  Select only a few variables
 -->
 
 
