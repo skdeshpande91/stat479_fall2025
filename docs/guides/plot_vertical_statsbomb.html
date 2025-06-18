@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.7.31">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -71,7 +71,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-10c2ad7cdbdc86dea93900442ad0167d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -240,9 +240,9 @@ window.Quarto = {
    
   <ul>
   <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
-  <li><a href="#changing-coordinates" id="toc-changing-coordinates" class="nav-link" data-scroll-target="#changing-coordinates">Changing Coordinates</a></li>
-  <li><a href="#translating-and-rotating" id="toc-translating-and-rotating" class="nav-link" data-scroll-target="#translating-and-rotating">Translating and Rotating</a></li>
-  <li><a href="#putting-it-all-together" id="toc-putting-it-all-together" class="nav-link" data-scroll-target="#putting-it-all-together">Putting it all together</a></li>
+  <li><a href="#a-digression-on-coordinate-systems" id="toc-a-digression-on-coordinate-systems" class="nav-link" data-scroll-target="#a-digression-on-coordinate-systems">A digression on coordinate systems</a></li>
+  <li><a href="#translation-and-rotation" id="toc-translation-and-rotation" class="nav-link" data-scroll-target="#translation-and-rotation">Translation and Rotation</a></li>
+  <li><a href="#example-visualizing-beth-meads-goals-at-euro-2022" id="toc-example-visualizing-beth-meads-goals-at-euro-2022" class="nav-link" data-scroll-target="#example-visualizing-beth-meads-goals-at-euro-2022">Example: Visualizing Beth Mead’s goals at EURO 2022</a></li>
   </ul>
 </nav>
     </div>
@@ -271,67 +271,456 @@ window.Quarto = {
 <section id="overview" class="level2">
 <h2 class="anchored" data-anchor-id="overview">Overview</h2>
 <p>In Lectures 2 and 3, we built several expected goals (xg) models using data provided by StatsBomb. StatsBomb pre-processes their raw tracking data so that attacking play is oriented from left to right. I find it somewhat more aesthetically pleasing to visualize shot data vertically with the goal line on top and the half-line at the bottom.</p>
-<p>This page defines a function to transform StatsBomb shot location data so that it can be plotted vertically instead of horizontally. As you continue to work with StatsBomb data, feel free to use these functions</p>
+<p>This page defines a function to transform StatsBomb shot location data so that it can be plotted vertically instead of horizontally. As you continue to work with StatsBomb data, feel free to use these functions.</p>
 </section>
-<section id="changing-coordinates" class="level2">
-<h2 class="anchored" data-anchor-id="changing-coordinates">Changing Coordinates</h2>
-<p>StatsBomb preprocesses their raw location data to a standardized pitch of dimensions 120m x 80m. Appendix 2 of their <a href="https://github.com/statsbomb/open-data/blob/master/doc/StatsBomb%20Open%20Data%20Specification%20v1.1.pdf">Open Data Specification document</a> shows this pitch along with several landmarks like the penalty area and goalkeeper’s box.</p>
+<section id="a-digression-on-coordinate-systems" class="level2">
+<h2 class="anchored" data-anchor-id="a-digression-on-coordinate-systems">A digression on coordinate systems</h2>
+<p>StatsBomb converts their raw location data to a standardized pitch of dimensions 120y x 80y. Appendix 2 of their <a href="https://github.com/statsbomb/open-data/blob/master/doc/StatsBomb%20Open%20Data%20Specification%20v1.1.pdf">Open Data Specification document</a> shows the standardized pitch along with several landmarks like the penalty area and goalkeeper’s box.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="figures/statsbomb_coordinates.png" class="img-fluid figure-img" style="width:50.0%"></p>
 <figcaption>StatsBomb Coordinate System</figcaption>
 </figure>
 </div>
-<p>Somewhat counter-intuitively, the StatsBomb coordinates system places the origin in the <strong>upper left</strong> corner so that the <span class="math inline">\(x\)</span> coordinate increases as you move from left to right and the <span class="math inline">\(y\)</span> coordinate increases as you move from top to bottom. R graphics, by constrast, use a coordinate system in which the <span class="math inline">\(x\)</span> coordinate increases as you move from left to right and the <span class="math inline">\(y\)</span> coordinate increases as you move from bottom to top. For our purposes, we will stick to the R coordinate system. To convert from the StatsBomb coordinate system to the R coordinate system, we first multiply every StatsBomb <span class="math inline">\(y\)</span> coordinate by -1. We then add 80 so that the origin is now located in the lower-left corner of the pitch.</p>
-<p>To illustrate this transformation, we will manually convert the locations of several landmarks on the pitch. In the code, we use the prefix <code>sb_</code> to indicate that point is in the StatsBomb coordinate system</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>sb_bot_left_corner <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">80</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>sb_top_left_corner <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>sb_bot_right_corner <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">120</span>,<span class="dv">80</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>sb_top_right_corner <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">120</span>,<span class="dv">0</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>sb_half <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">60</span>,<span class="dv">40</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># corners of penalty area on the left </span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>sb_bot_left_pen_l <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">62</span>) <span class="co"># left penalty area</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>sb_top_left_pen_l <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">18</span>) <span class="co"># left penalty area</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>sb_bot_right_pen_l <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">18</span>,<span class="dv">62</span>) <span class="co"># left penalty area</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>sb_top_right_pen_l <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">18</span>,<span class="dv">18</span>) <span class="co"># left penalty area</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>bot_left_corner <span class="ot">&lt;-</span> sb_bot_left_corner <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">80</span>)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>top_left_corner <span class="ot">&lt;-</span> sb_top_left_corner <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">80</span>)</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>bot_right_corner <span class="ot">&lt;-</span> sb_bot_right_corner <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">80</span>)</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>top_right_corner <span class="ot">&lt;-</span> sb_top_right_corner <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">80</span>)</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>half <span class="ot">&lt;-</span> sb_half <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">80</span>)</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>bot_left_pen_l <span class="ot">&lt;-</span> sb_bot_left_pen_l <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">80</span>)</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>top_left_pen_l <span class="ot">&lt;-</span> sb_top_left_pen_l <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">80</span>)</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>bot_right_pen_l <span class="ot">&lt;-</span> sb_bot_right_pen_l <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">80</span>)</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>top_right_pen_l <span class="ot">&lt;-</span> sb_top_right_pen_l <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">80</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Notice that the origin (i.e., the point with coordinates <code>c(0,0)</code>) is in the top-left corner so that the <span class="math inline">\(x\)</span> coordinate increases as you more from left to right and the <span class="math inline">\(y\)</span> coordinate increases as you move from top to bottom. This coordinate system is standard for 2D computer graphics<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> and is often referred to as the “left-handed” coordinate system.</p>
+<p>When we build R graphics, we typically use the more conventional “right-handed” coordinate system in which the <span class="math inline">\(y\)</span> coordinates increases when we move from bottom. For instance, to create a plot region with <span class="math inline">\(0 \leq x \leq 120\)</span> and <span class="math inline">\(0 \leq y \leq 80,\)</span> we might use something like the following code</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>), <span class="at">mgp =</span> <span class="fu">c</span>(<span class="fl">1.8</span>, <span class="fl">0.5</span>, <span class="dv">0</span>)) <span class="co"># sets up margins for plot</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="dv">1</span>, <span class="at">type =</span> <span class="st">"n"</span>, <span class="co"># signals that we want an empty plot</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"x"</span>, <span class="at">ylab =</span> <span class="st">"y"</span>, <span class="co"># labels axes</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">120</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">80</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="plot_vertical_statsbomb_files/figure-html/initial-plot-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
+</figure>
 </div>
-<p>Thus, the point <span class="math inline">\((x_{s}, y_{s})\)</span> in the StatsBomb coordinate system maps to the point <span class="math inline">\((x_{r}, y_{r}) = (x_{s}, 80-y_{s})\)</span> in the R coordinate system.</p>
+</div>
+</div>
+<p>Luckily, there is a quick “fix”<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> that allows us to generate plots in R using the StatsBomb coordinate system: instead of specifying <code>ylim = c(0,80)</code>, we simply specify <code>ylim = c(80,0)</code>. This new specification tells R that when we move from bottom-to-top, the <span class="math inline">\(y\)</span> coordinate should go from 80 to 0.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>), <span class="at">mgp =</span> <span class="fu">c</span>(<span class="fl">1.8</span>, <span class="fl">0.5</span>, <span class="dv">0</span>))</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="dv">1</span>, <span class="at">type =</span> <span class="st">"n"</span>,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">120</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">80</span>, <span class="dv">0</span>),</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"x"</span>, <span class="at">ylab =</span> <span class="st">"y"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="plot_vertical_statsbomb_files/figure-html/flip-ylim-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Now that we have the coordinate system sorted, we will hard-code the coordinates several landmarks on the pitch. Doing so will help us determine an appropriate transformation of coordinates to produce a vertically oriented pitch. The main landmarks are the corners of the pitch; the corners of the left and right penalty boxes; the corners of the left and right goalkeepers’ areas; the corners of the left and right nets; the locations of the goal posts; and the half-circle.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># corners of pitch</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>top_left_corner <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>bot_left_corner <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">80</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>top_right_corner <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">120</span>,<span class="dv">0</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>bot_right_corner <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">120</span>, <span class="dv">80</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># endpoints of half-line</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>top_halfline <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">60</span>,<span class="dv">0</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>bot_halfline <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">60</span>, <span class="dv">80</span>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co"># corners of left penalty area</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>top_left_penl <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">18</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>bot_left_penl <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">62</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>top_right_penl <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">18</span>,<span class="dv">18</span>)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>bot_right_penl <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">18</span>,<span class="dv">62</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co"># corners of left goalkeeper area</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>top_left_gkl <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">30</span>)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>bot_left_gkl <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">50</span>)</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>top_right_gkl <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">6</span>,<span class="dv">30</span>)</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>bot_right_gkl <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">6</span>,<span class="dv">50</span>)</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co"># left goal posts</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>top_postl <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">36</span>)</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>bot_postl <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">44</span>)</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co"># corners of left net</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>top_left_netl <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>,<span class="dv">36</span>)</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>bot_left_netl <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">44</span>)</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>top_right_netl <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">36</span>)</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>bot_right_netl <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">44</span>)</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="co"># corners of right penalty area</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>top_left_penr <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">102</span>,<span class="dv">18</span>)</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>bot_left_penr <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">102</span>,<span class="dv">62</span>)</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>top_right_penr <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">120</span>,<span class="dv">18</span>)</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>bot_right_penr <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">120</span>,<span class="dv">62</span>)</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="co"># corners of right goal keeper's area</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>top_left_gkr <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">114</span>,<span class="dv">30</span>)</span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>bot_left_gkr <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">114</span>,<span class="dv">50</span>)</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>top_right_gkr <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">120</span>,<span class="dv">30</span>)</span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>bot_right_gkr <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">120</span>,<span class="dv">50</span>)</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="co"># right goal posts</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>top_postl <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">120</span>,<span class="dv">36</span>)</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>bot_postl <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">120</span>,<span class="dv">44</span>)</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="co"># corners of left net</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>top_left_netr <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">120</span>,<span class="dv">36</span>)</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>bot_left_netr <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">120</span>, <span class="dv">44</span>)</span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>top_right_netr <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">122</span>, <span class="dv">36</span>)</span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>bot_right_netr <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">122</span>,<span class="dv">44</span>)</span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a><span class="co"># half-circles</span></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>left_halfcirc <span class="ot">&lt;-</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="dv">60</span> <span class="sc">+</span> <span class="dv">10</span><span class="sc">*</span><span class="fu">cos</span>(<span class="fu">seq</span>(<span class="at">from =</span> pi<span class="sc">/</span><span class="dv">2</span>, <span class="at">to =</span> <span class="dv">3</span><span class="sc">*</span>pi<span class="sc">/</span><span class="dv">2</span>, <span class="at">length =</span> <span class="dv">100</span>)),</span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>             <span class="at">y =</span> <span class="dv">40</span> <span class="sc">-</span> <span class="dv">10</span> <span class="sc">*</span> <span class="fu">sin</span>(<span class="fu">seq</span>(<span class="at">from =</span> pi<span class="sc">/</span><span class="dv">2</span>, <span class="at">to =</span> <span class="dv">3</span><span class="sc">*</span>pi<span class="sc">/</span><span class="dv">2</span>, <span class="at">length =</span> <span class="dv">100</span>)))</span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>right_halfcirc <span class="ot">&lt;-</span></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="dv">60</span> <span class="sc">+</span> <span class="dv">10</span><span class="sc">*</span><span class="fu">cos</span>(<span class="fu">seq</span>(<span class="at">from =</span><span class="sc">-</span>pi<span class="sc">/</span><span class="dv">2</span>, <span class="at">to =</span> pi<span class="sc">/</span><span class="dv">2</span>, <span class="at">length =</span> <span class="dv">100</span>)),</span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>             <span class="at">y =</span> <span class="dv">40</span> <span class="sc">-</span> <span class="dv">10</span> <span class="sc">*</span> <span class="fu">sin</span>(<span class="fu">seq</span>(<span class="at">from =</span> <span class="sc">-</span>pi<span class="sc">/</span><span class="dv">2</span>, <span class="at">to =</span> pi<span class="sc">/</span><span class="dv">2</span>, <span class="at">length =</span> <span class="dv">100</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can now add in the penalty and goalkeepers’ areas to the pitch using the <code>rect</code> function. This function draws a rectangle whose bottom left coordinate is <code>c(xleft, ybottom)</code> and whose top right coordinate is <code>c(xright, ytop)</code>. We also add in the half line and circle</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>), </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">mgp =</span> <span class="fu">c</span>(<span class="fl">1.8</span>, <span class="fl">0.5</span>, <span class="dv">0</span>), </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">xpd =</span> <span class="cn">TRUE</span>) <span class="co"># xpd allows plotting in margins</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="dv">1</span>, <span class="at">type =</span> <span class="st">"n"</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"x"</span>, <span class="at">ylab =</span> <span class="st">"y"</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">120</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">80</span>,<span class="dv">0</span>))</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># boundaries of pitch</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="at">xleft =</span> bot_left_corner[<span class="dv">1</span>], <span class="at">ybottom =</span> bot_left_corner[<span class="dv">2</span>], </span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">xright =</span> top_right_corner[<span class="dv">1</span>], <span class="at">ytop =</span> top_right_corner[<span class="dv">2</span>])</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co"># left penalty area</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="at">xleft =</span> bot_left_penl[<span class="dv">1</span>], <span class="at">ybottom =</span> bot_left_penl[<span class="dv">2</span>],</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>     <span class="at">xright =</span> top_right_penl[<span class="dv">1</span>], <span class="at">ytop =</span> top_right_penl[<span class="dv">2</span>])</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co"># left goalkeeper's area</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="at">xleft =</span> bot_left_gkl[<span class="dv">1</span>], <span class="at">ybottom =</span> bot_left_gkl[<span class="dv">2</span>],</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>     <span class="at">xright =</span> top_right_gkl[<span class="dv">1</span>], <span class="at">ytop =</span> top_right_gkl[<span class="dv">2</span>])</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co"># left net</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="at">xleft =</span> bot_left_netl[<span class="dv">1</span>], <span class="at">ybottom =</span> bot_left_netl[<span class="dv">2</span>],</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>     <span class="at">xright =</span> top_right_netl[<span class="dv">1</span>], <span class="at">ytop =</span> top_right_netl[<span class="dv">2</span>])</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co"># right penalty area</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="at">xleft =</span> bot_left_penr[<span class="dv">1</span>], <span class="at">ybottom =</span> bot_left_penr[<span class="dv">2</span>],</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>     <span class="at">xright =</span> top_right_penr[<span class="dv">1</span>], <span class="at">ytop =</span> top_right_penr[<span class="dv">2</span>])</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="co"># right goalkeeper's area</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="at">xleft =</span> bot_left_gkr[<span class="dv">1</span>], <span class="at">ybottom =</span> bot_left_gkr[<span class="dv">2</span>],</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>     <span class="at">xright =</span> top_right_gkr[<span class="dv">1</span>], <span class="at">ytop =</span> top_right_gkr[<span class="dv">2</span>])</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="co"># right net</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="at">xleft =</span> bot_left_netr[<span class="dv">1</span>], <span class="at">ybottom =</span> bot_left_netr[<span class="dv">2</span>],</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>     <span class="at">xright =</span> top_right_netr[<span class="dv">1</span>], <span class="at">ytop =</span> top_right_netr[<span class="dv">2</span>])</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="co"># half-line</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="at">x =</span> <span class="fu">c</span>(top_halfline[<span class="dv">1</span>], bot_halfline[<span class="dv">1</span>]),</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> <span class="fu">c</span>(top_halfline[<span class="dv">2</span>], bot_halfline[<span class="dv">2</span>]))</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a><span class="co"># left half-circle </span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="at">x =</span> left_halfcirc<span class="sc">$</span>x, <span class="at">y =</span> left_halfcirc<span class="sc">$</span>y)</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a><span class="co"># right half-circle</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="at">x =</span> right_halfcirc<span class="sc">$</span>x, <span class="at">y =</span> right_halfcirc<span class="sc">$</span>y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="plot_vertical_statsbomb_files/figure-html/basic-pitch-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="translation-and-rotation" class="level2">
+<h2 class="anchored" data-anchor-id="translation-and-rotation">Translation and Rotation</h2>
+<p>We will form a vertical pitch layout by composing the following three transformations:</p>
+<ol type="1">
+<li>Translate the pitch so the origin is at mid-field, which is located at <span class="math inline">\((60,40).\)</span> Mathematically, the transformation is <span class="math inline">\((x,y) \rightarrow (x-60, y - 40)\)</span></li>
+<li>Rotate the pitch so that (i) the bottom right corner goes to the top right; (ii) the top right corner goes to the top left; (iii) the top left corner goes to the bottom left; and (iv) the bottom left corner goes to the bottom right. Mathematically, the transformation is <span class="math inline">\((x,y) \rightarrow (y, -x)\)</span><a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>.</li>
+<li>Translate the rotated frame so that the origin is in the top left corner. Mathematically, the transformation is <span class="math inline">\((x,y) \rightarrow (x+40,y+60).\)</span></li>
+</ol>
+<p>Putting these steps together, we have the transformation <span class="math display">\[
+(x,y) \rightarrow (x-60, y-40) \rightarrow (y-40, 60-x) \rightarrow (y,120-x)
+\]</span> It will be useful to define functions for these transformations</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>transform_x <span class="ot">&lt;-</span> <span class="cf">function</span>(x,y){<span class="fu">return</span>(y)}</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>transform_y <span class="ot">&lt;-</span> <span class="cf">function</span>(x,y){<span class="fu">return</span>(<span class="dv">120</span><span class="sc">-</span>x)}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Recall that the function <code>rect</code> draws a rectangle using the coordinates of its bottom left and top right corners. We can compute the coordinates of the bottom left (resp. top right) corner of a rectangle in a vertical orientation by transforming the coordinates of the <em>top</em> left (resp. <em>bottom</em> right) corners of a rectangle in the original horizontal orientation.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>), <span class="at">mgp =</span> <span class="fu">c</span>(<span class="fl">1.8</span>, <span class="fl">0.5</span>, <span class="dv">0</span>))</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="dv">1</span>, <span class="at">type =</span> <span class="st">"n"</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">80</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">120</span>,<span class="dv">0</span>), <span class="co"># note the different limits!</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"x"</span>, <span class="at">ylab =</span> <span class="st">"y"</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># boundaries of pitch</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="at">xleft =</span> <span class="fu">transform_x</span>(top_left_corner[<span class="dv">1</span>], top_left_corner[<span class="dv">2</span>]),</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">ybottom =</span> <span class="fu">transform_y</span>(top_left_corner[<span class="dv">1</span>], top_left_corner[<span class="dv">2</span>]),</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">xright =</span> <span class="fu">transform_x</span>(bot_right_corner[<span class="dv">1</span>], bot_right_corner[<span class="dv">2</span>]),</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">ytop =</span> <span class="fu">transform_y</span>(bot_right_corner[<span class="dv">1</span>], bot_right_corner[<span class="dv">2</span>]))</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co"># original left penalty area now on bottom</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="at">xleft =</span> <span class="fu">transform_x</span>(top_left_penl[<span class="dv">1</span>], top_left_penl[<span class="dv">2</span>]),</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>     <span class="at">ybottom =</span> <span class="fu">transform_y</span>(top_left_penl[<span class="dv">1</span>], top_left_penl[<span class="dv">2</span>]),</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>     <span class="at">xright =</span> <span class="fu">transform_x</span>(bot_right_penl[<span class="dv">1</span>], bot_right_penl[<span class="dv">2</span>]),</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>     <span class="at">ytop =</span> <span class="fu">transform_y</span>(bot_right_penl[<span class="dv">1</span>], bot_right_penl[<span class="dv">2</span>]))</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co"># original left goalkeeper's area now on bottom</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="at">xleft =</span> <span class="fu">transform_x</span>(top_left_gkl[<span class="dv">1</span>], top_left_gkl[<span class="dv">2</span>]),</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>     <span class="at">ybottom =</span> <span class="fu">transform_y</span>(top_left_gkl[<span class="dv">1</span>], top_left_gkl[<span class="dv">2</span>]),</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>     <span class="at">xright =</span> <span class="fu">transform_x</span>(bot_right_gkl[<span class="dv">1</span>], bot_right_gkl[<span class="dv">2</span>]),</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>     <span class="at">ytop =</span> <span class="fu">transform_y</span>(bot_right_gkl[<span class="dv">1</span>], bot_right_gkl[<span class="dv">2</span>]))</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="co"># original left net now on bottom</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="at">xleft =</span> <span class="fu">transform_x</span>(top_left_netl[<span class="dv">1</span>], top_left_netl[<span class="dv">2</span>]),</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>     <span class="at">ybottom =</span> <span class="fu">transform_y</span>(top_left_netl[<span class="dv">1</span>], top_left_netl[<span class="dv">2</span>]),</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>     <span class="at">xright =</span> <span class="fu">transform_x</span>(bot_right_netl[<span class="dv">1</span>], bot_right_netl[<span class="dv">2</span>]),</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>     <span class="at">ytop =</span> <span class="fu">transform_y</span>(bot_right_netl[<span class="dv">1</span>], bot_right_netl[<span class="dv">2</span>]))</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="co"># original right penalty area now on top</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="at">xleft =</span> <span class="fu">transform_x</span>(top_left_penr[<span class="dv">1</span>], top_left_penr[<span class="dv">2</span>]),</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>     <span class="at">ybottom =</span> <span class="fu">transform_y</span>(top_left_penr[<span class="dv">1</span>], top_left_penr[<span class="dv">2</span>]),</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>     <span class="at">xright =</span> <span class="fu">transform_x</span>(bot_right_penr[<span class="dv">1</span>], bot_right_penr[<span class="dv">2</span>]),</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>     <span class="at">ytop =</span> <span class="fu">transform_y</span>(bot_right_penr[<span class="dv">1</span>], bot_right_penr[<span class="dv">2</span>]))</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a><span class="co"># original right goalkeeper's area now on top</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="at">xleft =</span> <span class="fu">transform_x</span>(top_left_gkr[<span class="dv">1</span>], top_left_gkr[<span class="dv">2</span>]),</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>     <span class="at">ybottom =</span> <span class="fu">transform_y</span>(top_left_gkr[<span class="dv">1</span>], top_left_gkr[<span class="dv">2</span>]),</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>     <span class="at">xright =</span> <span class="fu">transform_x</span>(bot_right_gkr[<span class="dv">1</span>], bot_right_gkr[<span class="dv">2</span>]),</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>     <span class="at">ytop =</span> <span class="fu">transform_y</span>(bot_right_gkr[<span class="dv">1</span>], bot_right_gkr[<span class="dv">2</span>]))</span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a><span class="co"># original right net now on bottom</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="at">xleft =</span> <span class="fu">transform_x</span>(top_left_netr[<span class="dv">1</span>], top_left_netr[<span class="dv">2</span>]),</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>     <span class="at">ybottom =</span> <span class="fu">transform_y</span>(top_left_netr[<span class="dv">1</span>], top_left_netr[<span class="dv">2</span>]),</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>     <span class="at">xright =</span> <span class="fu">transform_x</span>(bot_right_netr[<span class="dv">1</span>], bot_right_netr[<span class="dv">2</span>]),</span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>     <span class="at">ytop =</span> <span class="fu">transform_y</span>(bot_right_netr[<span class="dv">1</span>], bot_right_netr[<span class="dv">2</span>]))</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a><span class="co"># half-line</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="at">x =</span> <span class="fu">transform_x</span>( <span class="fu">c</span>(top_halfline[<span class="dv">1</span>], bot_halfline[<span class="dv">1</span>]), <span class="fu">c</span>(top_halfline[<span class="dv">2</span>], bot_halfline[<span class="dv">2</span>])),</span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> <span class="fu">transform_y</span>( <span class="fu">c</span>(top_halfline[<span class="dv">1</span>], bot_halfline[<span class="dv">1</span>]), <span class="fu">c</span>(top_halfline[<span class="dv">2</span>], bot_halfline[<span class="dv">2</span>])))</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a><span class="co"># original left half-circle now on bottom</span></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="at">x =</span> <span class="fu">transform_x</span>(left_halfcirc<span class="sc">$</span>x, left_halfcirc<span class="sc">$</span>y),</span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> <span class="fu">transform_y</span>(left_halfcirc<span class="sc">$</span>x, left_halfcirc<span class="sc">$</span>y))</span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a><span class="co"># original right half-circle now on top</span></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="at">x =</span> <span class="fu">transform_x</span>(right_halfcirc<span class="sc">$</span>x, right_halfcirc<span class="sc">$</span>y),</span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> <span class="fu">transform_y</span>(right_halfcirc<span class="sc">$</span>x, right_halfcirc<span class="sc">$</span>y))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="plot_vertical_statsbomb_files/figure-html/plot-vertical-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="384"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>For convenience, we can write a function that plots either the full pitch or the attacking in either the horizontal or vertical orientation. The function <code>plot_pitch</code> has two arguments:</p>
+<ul>
+<li><code>half</code>: Set <code>half = TRUE</code> to plot the attacking half and <code>half = FALSE</code> to plot the full pitch. Default is <code>TRUE</code></li>
+<li><code>vertical</code>: Set <code>vertical = TRUE</code> to plot in a vertical orientation and <code>vertical = FALSE</code> to plot in a horizontal orientation. Default is <code>TRUE</code></li>
+</ul>
+<p>You can download an R script implementing this function from this link. If you save that script in your course or project repository, you can source it as needed. You can also unfold the next code block to see how the function <code>plot_pitch</code> is implemented.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">1</span>), <span class="at">mgp =</span> <span class="fu">c</span>(<span class="fl">1.8</span>, <span class="fl">0.5</span>, <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>plot_pitch <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">half =</span> <span class="cn">TRUE</span>, <span class="at">vertical =</span> <span class="cn">TRUE</span>){</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">4</span>,<span class="dv">1</span>), <span class="co"># lower left &amp; right margins but increase top margin</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">mgp =</span> <span class="fu">c</span>(<span class="fl">1.8</span>, <span class="fl">0.5</span>, <span class="dv">0</span>), </span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">xpd =</span> <span class="cn">TRUE</span>) <span class="co"># allows plotting in the margin</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(vertical){</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># plot vertical pitch</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(half){</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>      <span class="co"># only plot the attacking half</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">plot</span>(<span class="dv">1</span>, <span class="at">type =</span> <span class="st">"n"</span>,</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">80</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">60</span>,<span class="dv">0</span>),</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>           <span class="at">xaxt =</span> <span class="st">"n"</span>, <span class="at">yaxt =</span> <span class="st">"n"</span>, <span class="co"># suppresses axis marks</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>           <span class="at">xlab =</span> <span class="cn">NA</span>, <span class="at">ylab =</span> <span class="cn">NA</span>, <span class="co"># suppress labels</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>           <span class="at">bty =</span> <span class="st">"n"</span>) <span class="co"># suppresses the bounding box</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>      <span class="co"># pitch</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rect</span>(<span class="at">xleft =</span> <span class="fu">transform_x</span>(top_halfline[<span class="dv">1</span>], top_halfline[<span class="dv">2</span>]),</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>           <span class="at">ybottom =</span> <span class="fu">transform_y</span>(top_halfline[<span class="dv">1</span>], top_halfline[<span class="dv">2</span>]),</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>           <span class="at">xright =</span> <span class="fu">transform_x</span>(bot_right_corner[<span class="dv">1</span>], bot_right_corner[<span class="dv">2</span>]),</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>           <span class="at">ytop =</span> <span class="fu">transform_y</span>(bot_right_corner[<span class="dv">1</span>], bot_right_corner[<span class="dv">2</span>]))</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>      <span class="co"># original right penalty area now on top</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rect</span>(<span class="at">xleft =</span> <span class="fu">transform_x</span>(top_left_penr[<span class="dv">1</span>], top_left_penr[<span class="dv">2</span>]),</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>           <span class="at">ybottom =</span> <span class="fu">transform_y</span>(top_left_penr[<span class="dv">1</span>], top_left_penr[<span class="dv">2</span>]),</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>           <span class="at">xright =</span> <span class="fu">transform_x</span>(bot_right_penr[<span class="dv">1</span>], bot_right_penr[<span class="dv">2</span>]),</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>           <span class="at">ytop =</span> <span class="fu">transform_y</span>(bot_right_penr[<span class="dv">1</span>], bot_right_penr[<span class="dv">2</span>]))</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>      <span class="co"># original right goalkeeper's area now on top</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rect</span>(<span class="at">xleft =</span> <span class="fu">transform_x</span>(top_left_gkr[<span class="dv">1</span>], top_left_gkr[<span class="dv">2</span>]),</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>           <span class="at">ybottom =</span> <span class="fu">transform_y</span>(top_left_gkr[<span class="dv">1</span>], top_left_gkr[<span class="dv">2</span>]),</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>           <span class="at">xright =</span> <span class="fu">transform_x</span>(bot_right_gkr[<span class="dv">1</span>], bot_right_gkr[<span class="dv">2</span>]),</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>           <span class="at">ytop =</span> <span class="fu">transform_y</span>(bot_right_gkr[<span class="dv">1</span>], bot_right_gkr[<span class="dv">2</span>]))</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>      <span class="co"># original right net now on top</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rect</span>(<span class="at">xleft =</span> <span class="fu">transform_x</span>(top_left_netr[<span class="dv">1</span>], top_left_netr[<span class="dv">2</span>]),</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>           <span class="at">ybottom =</span> <span class="fu">transform_y</span>(top_left_netr[<span class="dv">1</span>], top_left_netr[<span class="dv">2</span>]),</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>           <span class="at">xright =</span> <span class="fu">transform_x</span>(bot_right_netr[<span class="dv">1</span>], bot_right_netr[<span class="dv">2</span>]),</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>           <span class="at">ytop =</span> <span class="fu">transform_y</span>(bot_right_netr[<span class="dv">1</span>], bot_right_netr[<span class="dv">2</span>]))</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>      <span class="co"># half-circle</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>      <span class="fu">lines</span>(<span class="at">x =</span> <span class="fu">transform_x</span>(right_halfcirc<span class="sc">$</span>x, right_halfcirc<span class="sc">$</span>y),</span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>            <span class="at">y =</span> <span class="fu">transform_y</span>(right_halfcirc<span class="sc">$</span>x, right_halfcirc<span class="sc">$</span>y))</span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span>{</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>      <span class="co"># plot the full field</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>      <span class="fu">plot</span>(<span class="dv">1</span>, <span class="at">type =</span> <span class="st">"n"</span>,</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>           <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">80</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">120</span>,<span class="dv">0</span>), </span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>           <span class="at">xaxt =</span> <span class="st">"n"</span>, <span class="at">yaxt =</span> <span class="st">"n"</span>, <span class="co"># suppresses axis marks</span></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>           <span class="at">xlab =</span> <span class="cn">NA</span>, <span class="at">ylab =</span> <span class="cn">NA</span>, <span class="co"># suppress labels</span></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>           <span class="at">bty =</span> <span class="st">"n"</span>) <span class="co"># suppresses the bounding box</span></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>      <span class="co"># boundaries of pitch</span></span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rect</span>(<span class="at">xleft =</span> <span class="fu">transform_x</span>(top_left_corner[<span class="dv">1</span>], top_left_corner[<span class="dv">2</span>]),</span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>           <span class="at">ybottom =</span> <span class="fu">transform_y</span>(top_left_corner[<span class="dv">1</span>], top_left_corner[<span class="dv">2</span>]),</span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>           <span class="at">xright =</span> <span class="fu">transform_x</span>(bot_right_corner[<span class="dv">1</span>], bot_right_corner[<span class="dv">2</span>]),</span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>           <span class="at">ytop =</span> <span class="fu">transform_y</span>(bot_right_corner[<span class="dv">1</span>], bot_right_corner[<span class="dv">2</span>]))</span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>      <span class="co"># original left penalty area now on bottom</span></span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rect</span>(<span class="at">xleft =</span> <span class="fu">transform_x</span>(top_left_penl[<span class="dv">1</span>], top_left_penl[<span class="dv">2</span>]),</span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>           <span class="at">ybottom =</span> <span class="fu">transform_y</span>(top_left_penl[<span class="dv">1</span>], top_left_penl[<span class="dv">2</span>]),</span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a>           <span class="at">xright =</span> <span class="fu">transform_x</span>(bot_right_penl[<span class="dv">1</span>], bot_right_penl[<span class="dv">2</span>]),</span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a>           <span class="at">ytop =</span> <span class="fu">transform_y</span>(bot_right_penl[<span class="dv">1</span>], bot_right_penl[<span class="dv">2</span>]))</span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a>      <span class="co"># original left goalkeeper's area now on bottom</span></span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rect</span>(<span class="at">xleft =</span> <span class="fu">transform_x</span>(top_left_gkl[<span class="dv">1</span>], top_left_gkl[<span class="dv">2</span>]),</span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a>           <span class="at">ybottom =</span> <span class="fu">transform_y</span>(top_left_gkl[<span class="dv">1</span>], top_left_gkl[<span class="dv">2</span>]),</span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a>           <span class="at">xright =</span> <span class="fu">transform_x</span>(bot_right_gkl[<span class="dv">1</span>], bot_right_gkl[<span class="dv">2</span>]),</span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a>           <span class="at">ytop =</span> <span class="fu">transform_y</span>(bot_right_gkl[<span class="dv">1</span>], bot_right_gkl[<span class="dv">2</span>]))</span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a>      <span class="co"># original left net now on bottom</span></span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rect</span>(<span class="at">xleft =</span> <span class="fu">transform_x</span>(top_left_netl[<span class="dv">1</span>], top_left_netl[<span class="dv">2</span>]),</span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a>           <span class="at">ybottom =</span> <span class="fu">transform_y</span>(top_left_netl[<span class="dv">1</span>], top_left_netl[<span class="dv">2</span>]),</span>
+<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a>           <span class="at">xright =</span> <span class="fu">transform_x</span>(bot_right_netl[<span class="dv">1</span>], bot_right_netl[<span class="dv">2</span>]),</span>
+<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a>           <span class="at">ytop =</span> <span class="fu">transform_y</span>(bot_right_netl[<span class="dv">1</span>], bot_right_netl[<span class="dv">2</span>]))</span>
+<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a>      <span class="co"># original right penalty area now on top</span></span>
+<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rect</span>(<span class="at">xleft =</span> <span class="fu">transform_x</span>(top_left_penr[<span class="dv">1</span>], top_left_penr[<span class="dv">2</span>]),</span>
+<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a>           <span class="at">ybottom =</span> <span class="fu">transform_y</span>(top_left_penr[<span class="dv">1</span>], top_left_penr[<span class="dv">2</span>]),</span>
+<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a>           <span class="at">xright =</span> <span class="fu">transform_x</span>(bot_right_penr[<span class="dv">1</span>], bot_right_penr[<span class="dv">2</span>]),</span>
+<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a>           <span class="at">ytop =</span> <span class="fu">transform_y</span>(bot_right_penr[<span class="dv">1</span>], bot_right_penr[<span class="dv">2</span>]))</span>
+<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a>      <span class="co"># original right goalkeeper's area now on top</span></span>
+<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rect</span>(<span class="at">xleft =</span> <span class="fu">transform_x</span>(top_left_gkr[<span class="dv">1</span>], top_left_gkr[<span class="dv">2</span>]),</span>
+<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a>           <span class="at">ybottom =</span> <span class="fu">transform_y</span>(top_left_gkr[<span class="dv">1</span>], top_left_gkr[<span class="dv">2</span>]),</span>
+<span id="cb7-73"><a href="#cb7-73" aria-hidden="true" tabindex="-1"></a>           <span class="at">xright =</span> <span class="fu">transform_x</span>(bot_right_gkr[<span class="dv">1</span>], bot_right_gkr[<span class="dv">2</span>]),</span>
+<span id="cb7-74"><a href="#cb7-74" aria-hidden="true" tabindex="-1"></a>           <span class="at">ytop =</span> <span class="fu">transform_y</span>(bot_right_gkr[<span class="dv">1</span>], bot_right_gkr[<span class="dv">2</span>]))</span>
+<span id="cb7-75"><a href="#cb7-75" aria-hidden="true" tabindex="-1"></a>      <span class="co"># original right net now on bottom</span></span>
+<span id="cb7-76"><a href="#cb7-76" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rect</span>(<span class="at">xleft =</span> <span class="fu">transform_x</span>(top_left_netr[<span class="dv">1</span>], top_left_netr[<span class="dv">2</span>]),</span>
+<span id="cb7-77"><a href="#cb7-77" aria-hidden="true" tabindex="-1"></a>           <span class="at">ybottom =</span> <span class="fu">transform_y</span>(top_left_netr[<span class="dv">1</span>], top_left_netr[<span class="dv">2</span>]),</span>
+<span id="cb7-78"><a href="#cb7-78" aria-hidden="true" tabindex="-1"></a>           <span class="at">xright =</span> <span class="fu">transform_x</span>(bot_right_netr[<span class="dv">1</span>], bot_right_netr[<span class="dv">2</span>]),</span>
+<span id="cb7-79"><a href="#cb7-79" aria-hidden="true" tabindex="-1"></a>           <span class="at">ytop =</span> <span class="fu">transform_y</span>(bot_right_netr[<span class="dv">1</span>], bot_right_netr[<span class="dv">2</span>]))</span>
+<span id="cb7-80"><a href="#cb7-80" aria-hidden="true" tabindex="-1"></a>      <span class="co"># half-line</span></span>
+<span id="cb7-81"><a href="#cb7-81" aria-hidden="true" tabindex="-1"></a>      <span class="fu">lines</span>(<span class="at">x =</span> <span class="fu">transform_x</span>( <span class="fu">c</span>(top_halfline[<span class="dv">1</span>], bot_halfline[<span class="dv">1</span>]), <span class="fu">c</span>(top_halfline[<span class="dv">2</span>],bot_halfline[<span class="dv">2</span>])),</span>
+<span id="cb7-82"><a href="#cb7-82" aria-hidden="true" tabindex="-1"></a>            <span class="at">y =</span> <span class="fu">transform_y</span>( <span class="fu">c</span>(top_halfline[<span class="dv">1</span>], bot_halfline[<span class="dv">1</span>]), <span class="fu">c</span>(top_halfline[<span class="dv">2</span>], bot_halfline[<span class="dv">2</span>])))</span>
+<span id="cb7-83"><a href="#cb7-83" aria-hidden="true" tabindex="-1"></a>      <span class="co"># original left half-circle now on bottom</span></span>
+<span id="cb7-84"><a href="#cb7-84" aria-hidden="true" tabindex="-1"></a>      <span class="fu">lines</span>(<span class="at">x =</span> <span class="fu">transform_x</span>(left_halfcirc<span class="sc">$</span>x, left_halfcirc<span class="sc">$</span>y),</span>
+<span id="cb7-85"><a href="#cb7-85" aria-hidden="true" tabindex="-1"></a>            <span class="at">y =</span> <span class="fu">transform_y</span>(left_halfcirc<span class="sc">$</span>x, left_halfcirc<span class="sc">$</span>y))</span>
+<span id="cb7-86"><a href="#cb7-86" aria-hidden="true" tabindex="-1"></a>      <span class="co"># original right half-circle now on top</span></span>
+<span id="cb7-87"><a href="#cb7-87" aria-hidden="true" tabindex="-1"></a>      <span class="fu">lines</span>(<span class="at">x =</span> <span class="fu">transform_x</span>(right_halfcirc<span class="sc">$</span>x, right_halfcirc<span class="sc">$</span>y),</span>
+<span id="cb7-88"><a href="#cb7-88" aria-hidden="true" tabindex="-1"></a>            <span class="at">y =</span> <span class="fu">transform_y</span>(right_halfcirc<span class="sc">$</span>x, right_halfcirc<span class="sc">$</span>y))</span>
+<span id="cb7-89"><a href="#cb7-89" aria-hidden="true" tabindex="-1"></a>    }<span class="co"># closes if/else checking whether to plot attacking half</span></span>
+<span id="cb7-90"><a href="#cb7-90" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span>{</span>
+<span id="cb7-91"><a href="#cb7-91" aria-hidden="true" tabindex="-1"></a>    <span class="co"># plot horizontal pitch</span></span>
+<span id="cb7-92"><a href="#cb7-92" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(half){</span>
+<span id="cb7-93"><a href="#cb7-93" aria-hidden="true" tabindex="-1"></a>      <span class="fu">plot</span>(<span class="dv">1</span>, <span class="at">type =</span> <span class="st">"n"</span>,</span>
+<span id="cb7-94"><a href="#cb7-94" aria-hidden="true" tabindex="-1"></a>           <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">60</span>,<span class="dv">120</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">80</span>, <span class="dv">0</span>),</span>
+<span id="cb7-95"><a href="#cb7-95" aria-hidden="true" tabindex="-1"></a>           <span class="at">xaxt =</span> <span class="st">"n"</span>, <span class="at">yaxt =</span> <span class="st">"n"</span>, <span class="co"># suppresses axis marks</span></span>
+<span id="cb7-96"><a href="#cb7-96" aria-hidden="true" tabindex="-1"></a>           <span class="at">xlab =</span> <span class="cn">NA</span>, <span class="at">ylab =</span> <span class="cn">NA</span>,<span class="co"># suppresses labels</span></span>
+<span id="cb7-97"><a href="#cb7-97" aria-hidden="true" tabindex="-1"></a>           <span class="at">bty =</span> <span class="st">"n"</span>) <span class="co"># suppresses the bounding box</span></span>
+<span id="cb7-98"><a href="#cb7-98" aria-hidden="true" tabindex="-1"></a>      <span class="co"># boundaries of attacking half</span></span>
+<span id="cb7-99"><a href="#cb7-99" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rect</span>(<span class="at">xleft =</span> bot_halfline[<span class="dv">1</span>], <span class="at">ybottom =</span> bot_halfline[<span class="dv">2</span>], </span>
+<span id="cb7-100"><a href="#cb7-100" aria-hidden="true" tabindex="-1"></a>           <span class="at">xright =</span> top_right_corner[<span class="dv">1</span>], <span class="at">ytop =</span> top_right_corner[<span class="dv">2</span>])</span>
+<span id="cb7-101"><a href="#cb7-101" aria-hidden="true" tabindex="-1"></a>      <span class="co"># right penalty area</span></span>
+<span id="cb7-102"><a href="#cb7-102" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rect</span>(<span class="at">xleft =</span> bot_left_penr[<span class="dv">1</span>], <span class="at">ybottom =</span> bot_left_penr[<span class="dv">2</span>],</span>
+<span id="cb7-103"><a href="#cb7-103" aria-hidden="true" tabindex="-1"></a>           <span class="at">xright =</span> top_right_penr[<span class="dv">1</span>], <span class="at">ytop =</span> top_right_penr[<span class="dv">2</span>])</span>
+<span id="cb7-104"><a href="#cb7-104" aria-hidden="true" tabindex="-1"></a>      <span class="co"># right goalkeeper's area</span></span>
+<span id="cb7-105"><a href="#cb7-105" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rect</span>(<span class="at">xleft =</span> bot_left_gkr[<span class="dv">1</span>], <span class="at">ybottom =</span> bot_left_gkr[<span class="dv">2</span>],</span>
+<span id="cb7-106"><a href="#cb7-106" aria-hidden="true" tabindex="-1"></a>           <span class="at">xright =</span> top_right_gkr[<span class="dv">1</span>], <span class="at">ytop =</span> top_right_gkr[<span class="dv">2</span>])</span>
+<span id="cb7-107"><a href="#cb7-107" aria-hidden="true" tabindex="-1"></a>      <span class="co"># right net</span></span>
+<span id="cb7-108"><a href="#cb7-108" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rect</span>(<span class="at">xleft =</span> bot_left_netr[<span class="dv">1</span>], <span class="at">ybottom =</span> bot_left_netr[<span class="dv">2</span>],</span>
+<span id="cb7-109"><a href="#cb7-109" aria-hidden="true" tabindex="-1"></a>           <span class="at">xright =</span> top_right_netr[<span class="dv">1</span>], <span class="at">ytop =</span> top_right_netr[<span class="dv">2</span>])</span>
+<span id="cb7-110"><a href="#cb7-110" aria-hidden="true" tabindex="-1"></a>      <span class="co"># right half-circle</span></span>
+<span id="cb7-111"><a href="#cb7-111" aria-hidden="true" tabindex="-1"></a>      <span class="fu">lines</span>(<span class="at">x =</span> right_halfcirc<span class="sc">$</span>x, <span class="at">y =</span> right_halfcirc<span class="sc">$</span>y)</span>
+<span id="cb7-112"><a href="#cb7-112" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span>{</span>
+<span id="cb7-113"><a href="#cb7-113" aria-hidden="true" tabindex="-1"></a>      <span class="fu">plot</span>(<span class="dv">1</span>, <span class="at">type =</span> <span class="st">"n"</span>,</span>
+<span id="cb7-114"><a href="#cb7-114" aria-hidden="true" tabindex="-1"></a>           <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">120</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">80</span>,<span class="dv">0</span>),</span>
+<span id="cb7-115"><a href="#cb7-115" aria-hidden="true" tabindex="-1"></a>           <span class="at">xaxt =</span> <span class="st">"n"</span>, <span class="at">yaxt =</span> <span class="st">"n"</span>, <span class="co"># suppresses axis marks</span></span>
+<span id="cb7-116"><a href="#cb7-116" aria-hidden="true" tabindex="-1"></a>           <span class="at">xlab =</span> <span class="cn">NA</span>, <span class="at">ylab =</span> <span class="cn">NA</span>, <span class="co"># suppress labels</span></span>
+<span id="cb7-117"><a href="#cb7-117" aria-hidden="true" tabindex="-1"></a>           <span class="at">bty =</span> <span class="st">"n"</span>) <span class="co"># suppresses the bounding box</span></span>
+<span id="cb7-118"><a href="#cb7-118" aria-hidden="true" tabindex="-1"></a>      <span class="co"># boundaries of pitch</span></span>
+<span id="cb7-119"><a href="#cb7-119" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rect</span>(<span class="at">xleft =</span> bot_left_corner[<span class="dv">1</span>], <span class="at">ybottom =</span> bot_left_corner[<span class="dv">2</span>], </span>
+<span id="cb7-120"><a href="#cb7-120" aria-hidden="true" tabindex="-1"></a>           <span class="at">xright =</span> top_right_corner[<span class="dv">1</span>], <span class="at">ytop =</span> top_right_corner[<span class="dv">2</span>])</span>
+<span id="cb7-121"><a href="#cb7-121" aria-hidden="true" tabindex="-1"></a>      <span class="co"># left penalty area</span></span>
+<span id="cb7-122"><a href="#cb7-122" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rect</span>(<span class="at">xleft =</span> bot_left_penl[<span class="dv">1</span>], <span class="at">ybottom =</span> bot_left_penl[<span class="dv">2</span>],</span>
+<span id="cb7-123"><a href="#cb7-123" aria-hidden="true" tabindex="-1"></a>           <span class="at">xright =</span> top_right_penl[<span class="dv">1</span>], <span class="at">ytop =</span> top_right_penl[<span class="dv">2</span>])</span>
+<span id="cb7-124"><a href="#cb7-124" aria-hidden="true" tabindex="-1"></a>      <span class="co"># left goalkeeper's area</span></span>
+<span id="cb7-125"><a href="#cb7-125" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rect</span>(<span class="at">xleft =</span> bot_left_gkl[<span class="dv">1</span>], <span class="at">ybottom =</span> bot_left_gkl[<span class="dv">2</span>],</span>
+<span id="cb7-126"><a href="#cb7-126" aria-hidden="true" tabindex="-1"></a>           <span class="at">xright =</span> top_right_gkl[<span class="dv">1</span>], <span class="at">ytop =</span> top_right_gkl[<span class="dv">2</span>])</span>
+<span id="cb7-127"><a href="#cb7-127" aria-hidden="true" tabindex="-1"></a>      <span class="co"># left net</span></span>
+<span id="cb7-128"><a href="#cb7-128" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rect</span>(<span class="at">xleft =</span> bot_left_netl[<span class="dv">1</span>], <span class="at">ybottom =</span> bot_left_netl[<span class="dv">2</span>],</span>
+<span id="cb7-129"><a href="#cb7-129" aria-hidden="true" tabindex="-1"></a>           <span class="at">xright =</span> top_right_netl[<span class="dv">1</span>], <span class="at">ytop =</span> top_right_netl[<span class="dv">2</span>])</span>
+<span id="cb7-130"><a href="#cb7-130" aria-hidden="true" tabindex="-1"></a>      <span class="co"># right penalty area</span></span>
+<span id="cb7-131"><a href="#cb7-131" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rect</span>(<span class="at">xleft =</span> bot_left_penr[<span class="dv">1</span>], <span class="at">ybottom =</span> bot_left_penr[<span class="dv">2</span>],</span>
+<span id="cb7-132"><a href="#cb7-132" aria-hidden="true" tabindex="-1"></a>           <span class="at">xright =</span> top_right_penr[<span class="dv">1</span>], <span class="at">ytop =</span> top_right_penr[<span class="dv">2</span>])</span>
+<span id="cb7-133"><a href="#cb7-133" aria-hidden="true" tabindex="-1"></a>      <span class="co"># right goalkeeper's area</span></span>
+<span id="cb7-134"><a href="#cb7-134" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rect</span>(<span class="at">xleft =</span> bot_left_gkr[<span class="dv">1</span>], <span class="at">ybottom =</span> bot_left_gkr[<span class="dv">2</span>],</span>
+<span id="cb7-135"><a href="#cb7-135" aria-hidden="true" tabindex="-1"></a>           <span class="at">xright =</span> top_right_gkr[<span class="dv">1</span>], <span class="at">ytop =</span> top_right_gkr[<span class="dv">2</span>])</span>
+<span id="cb7-136"><a href="#cb7-136" aria-hidden="true" tabindex="-1"></a>      <span class="co"># right net</span></span>
+<span id="cb7-137"><a href="#cb7-137" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rect</span>(<span class="at">xleft =</span> bot_left_netr[<span class="dv">1</span>], <span class="at">ybottom =</span> bot_left_netr[<span class="dv">2</span>],</span>
+<span id="cb7-138"><a href="#cb7-138" aria-hidden="true" tabindex="-1"></a>           <span class="at">xright =</span> top_right_netr[<span class="dv">1</span>], <span class="at">ytop =</span> top_right_netr[<span class="dv">2</span>])</span>
+<span id="cb7-139"><a href="#cb7-139" aria-hidden="true" tabindex="-1"></a>      <span class="co"># half-line</span></span>
+<span id="cb7-140"><a href="#cb7-140" aria-hidden="true" tabindex="-1"></a>      <span class="fu">lines</span>(<span class="at">x =</span> <span class="fu">c</span>(top_halfline[<span class="dv">1</span>], bot_halfline[<span class="dv">1</span>]),</span>
+<span id="cb7-141"><a href="#cb7-141" aria-hidden="true" tabindex="-1"></a>            <span class="at">y =</span> <span class="fu">c</span>(top_halfline[<span class="dv">2</span>], bot_halfline[<span class="dv">2</span>]))</span>
+<span id="cb7-142"><a href="#cb7-142" aria-hidden="true" tabindex="-1"></a>      <span class="co"># left half-circle </span></span>
+<span id="cb7-143"><a href="#cb7-143" aria-hidden="true" tabindex="-1"></a>      <span class="fu">lines</span>(<span class="at">x =</span> left_halfcirc<span class="sc">$</span>x, <span class="at">y =</span> left_halfcirc<span class="sc">$</span>y)</span>
+<span id="cb7-144"><a href="#cb7-144" aria-hidden="true" tabindex="-1"></a>      <span class="co"># right half-circle</span></span>
+<span id="cb7-145"><a href="#cb7-145" aria-hidden="true" tabindex="-1"></a>      <span class="fu">lines</span>(<span class="at">x =</span> right_halfcirc<span class="sc">$</span>x, <span class="at">y =</span> right_halfcirc<span class="sc">$</span>y)</span>
+<span id="cb7-146"><a href="#cb7-146" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb7-147"><a href="#cb7-147" aria-hidden="true" tabindex="-1"></a>  } <span class="co"># closes if/else checking whether to plot horizontally or vertically</span></span>
+<span id="cb7-148"><a href="#cb7-148" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb7-149"><a href="#cb7-149" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
-<section id="translating-and-rotating" class="level2">
-<h2 class="anchored" data-anchor-id="translating-and-rotating">Translating and Rotating</h2>
-<p>Now that we are using the familiar R coordinate system, we are going to rotate our landmarks (i.e., the center circle and the penalty area) Practically, we will (i) translate everything so that the center circle is now the origin and (ii) rotate all coordinates 90 degrees counter clockwise. The first translation transform the point <span class="math inline">\((x,y) \rightarrow (x-60, y-40)\)</span> while a 90 degree counter clockwise rotation maps <span class="math inline">\((x,y)\rightarrow (y,-x).\)</span> Composing these two steps, we need to transform points in the R coordinate system as <span class="math display">\[
-(x_{r}, y_{r}) \rightarrow (y_{r}-40, 60-x_{r}).
-\]</span></p>
-</section>
-<section id="putting-it-all-together" class="level2">
-<h2 class="anchored" data-anchor-id="putting-it-all-together">Putting it all together</h2>
-<p>We’re now in a position to write a function that maps a point <span class="math inline">\((x_{s}, y_{s})\)</span> in the StatsBomb coordinate system into the R coordinate system, translate the pitch so that the origin is at the center circle, and then rotates everything 90 degrees counterclockwise. Mathematically the transformation is <span class="math display">\[
-(x_{s}, y_{s}) \rightarrow (40-y_{s}, 60-x_{s})
-\]</span></p>
+<section id="example-visualizing-beth-meads-goals-at-euro-2022" class="level2">
+<h2 class="anchored" data-anchor-id="example-visualizing-beth-meads-goals-at-euro-2022">Example: Visualizing Beth Mead’s goals at EURO 2022</h2>
+<p>We’ll use our new function <code>plot_pitch()</code> to illustrate all 5 of Beth Mead’s goals at EURO 2022.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>oi_colors <span class="ot">&lt;-</span> </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">palette.colors</span>(<span class="at">palette =</span> <span class="st">"Okabe-Ito"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The code in the next block, which is very similar to that used in Lecture 2, does the following things:</p>
+<ol type="1">
+<li>Loads &amp; preprocesses the event data from EURO 2022 (<code>competition_id = 53</code> and <code>season_id = 106</code>)</li>
+<li>Filters to all goals scored by Beth Mead.</li>
+<li>Selects only the starting and ending locations of the shots (in the horizontal orientation)</li>
+<li>Computes the starting and ending coordinates in the vertical orientation of each shot</li>
+</ol>
+<p>We will first plot the goals on the full horizontal pitch</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_pitch</span>(<span class="at">half =</span> <span class="cn">FALSE</span>, <span class="at">vertical =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(mead_goals)){</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lines</span>(<span class="at">x =</span> <span class="fu">c</span>(mead_goals<span class="sc">$</span>location.x[i], mead_goals<span class="sc">$</span>shot.end_location.x[i]),</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="fu">c</span>(mead_goals<span class="sc">$</span>location.y[i], mead_goals<span class="sc">$</span>shot.end_location.y[i]),</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">col =</span> oi_colors[i<span class="sc">+</span><span class="dv">1</span>])</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="fu">mtext</span>(<span class="st">"Beth Mead Goals (EURO 2022)"</span>, <span class="at">side =</span> <span class="dv">3</span>, <span class="at">line =</span> <span class="dv">1</span>)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="fu">mtext</span>(<span class="st">"Created with free data from StatsBomb</span><span class="sc">\n</span><span class="st"> https://github.com/statsbomb/open-data"</span>,</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">side =</span> <span class="dv">1</span>, <span class="at">line =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="plot_vertical_statsbomb_files/figure-html/mead-half-vertical-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>And here are the same goals but in the attacking half in a vertical orientation</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_pitch</span>(<span class="at">half =</span> <span class="cn">TRUE</span>, <span class="at">vertical =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(mead_goals)){</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lines</span>(<span class="at">x =</span> <span class="fu">c</span>(mead_goals<span class="sc">$</span>vert_location.x[i], mead_goals<span class="sc">$</span>vert_shot.end_location.x[i]),</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="fu">c</span>(mead_goals<span class="sc">$</span>vert_location.y[i], mead_goals<span class="sc">$</span>vert_shot.end_location.y[i]),</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">col =</span> oi_colors[i<span class="sc">+</span><span class="dv">1</span>])</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="fu">mtext</span>(<span class="st">"Beth Mead Goals (EURO 2022)"</span>, <span class="at">side =</span> <span class="dv">3</span>, <span class="at">line =</span> <span class="dv">1</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="fu">mtext</span>(<span class="st">"Created with free data from StatsBomb</span><span class="sc">\n</span><span class="st"> https://github.com/statsbomb/open-data"</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">side =</span> <span class="dv">1</span>, <span class="at">line =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="plot_vertical_statsbomb_files/figure-html/mead-full-horizontal-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="384"></p>
+</figure>
+</div>
+</div>
+</div>
 
 
 </section>
 
-</main> <!-- /main -->
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>See <a href="https://www.w3.org/TR/SVG/coords.html#InitialCoordinateSystem">here</a> for the gory details or check out the <a href="https://en.wikipedia.org/wiki/2D_computer_graphics#">Wikipedia entry</a> on 2D graphics.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>I found this solution <a href="https://stat.ethz.ch/pipermail/r-help/2008-November/180229.html">here</a> after Googling “R change origin top left”.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Counter-clockwise rotations in the usual right-handed coordinate system (with <span class="math inline">\(y\)</span> increasing from bottom-to-top) are <em>clockwise</em> rotations in the left-handed coordinate system we are using, in which <span class="math inline">\(y\)</span> increases from top-to-bottom. We want to rotate 90 degrees counter-clockwise in the right-handed system, which is equivalent to a 270 degree clockwise rotation in the left-handed system. See <a href="https://en.wikipedia.org/wiki/2D_computer_graphics#Non-standard_orientation_of_the_coordinate_system">this Wikipedia entry</a> for more details.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
