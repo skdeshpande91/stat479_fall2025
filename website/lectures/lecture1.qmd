@@ -50,6 +50,7 @@ if(!"devtools" %in% rownames(installed.packages())){
 We will scrape NBA box score data using the [**hoopR**](http://hoopr.sportsdataverse.org/) package.
 We start by installing the package.
 ```{r install-hoopR}
+#| output: false
 if(!"hoopR" %in% rownames(installed.packages())){
   message("Package `hoopR' is not currently installed. Installing now")
   devtools::install_github(repo = "sportsdataverse/hoopR")
@@ -61,15 +62,10 @@ You can read more about the package [here]().
 One important function is `load_nba_player_box`, which scrapes individual player's box score for every game.
 
 ```{r scrape-boxscores}
+#| output: false
 raw_box <-
   hoopR::load_nba_player_box(seasons = 2002:(hoopR::most_recent_nba_season()))
 ```
-<!--
-  Filter out pre-season
-  Aggregate over a season:
-   This will require some careful group-by
-  Select only a few variables
--->
 
 To study shooting ability, we need to aggregate the individual game-level data into season-level totals.
 Conceptually, we can accomplish this by first dividing the full data table into several smaller tables, one for each combination of player and season.
@@ -85,7 +81,8 @@ This order of operations is an example of the *split-apply-combine* paradigm, wh
 ```{r get-season-totals}
 season_box <-
   raw_box %>%
-  select(season, athlete_display_name,
+  select(season, season_type, 
+         athlete_display_name,
          minutes, 
          field_goals_made, field_goals_attempted,
          three_point_field_goals_made, three_point_field_goals_attempted,
@@ -100,22 +97,24 @@ season_box <-
     FTM = free_throws_made, 
     FTA = free_throws_attempted) %>%
   filter(!did_not_play) %>%
+  filter(season_type == 2) %>%
   filter(!(is.na(FGA) & is.na(TPA) & is.na(FTA))) %>% # filter out missing data records
   group_by(Player, season) %>%
   summarise(
-    minutes = sum(minutes),
-    n_games = n(),
     FGM = sum(FTM),
     FGA = sum(FGA),
     TPM = sum(TPM),
     TPA = sum(TPA),
     FTM = sum(FTM),
     FTA = sum(FTA),
-    .groups = "drop") 
+    minutes = sum(minutes),
+    n_games = n(),
+    .groups = "drop") %>%
+  filter(FGM <= FGA)
 ```
 
-In total, we have 11780 player-season observations.
-Here is a quick snapshot
+We have data for `{r} nrow(season_box)` player-seasons across `{r} length(unique(season_box$Player))` players.
+Here is a quick snapshot of the data for one player.
 ```{r view-dirk}
 season_box %>%
   filter(Player == "Dirk Nowitzki")
@@ -129,6 +128,8 @@ We can identify this by arranging our data table in descending order.
 season_box %>%
   arrange(desc(FGM))
 ```
+
+<!--
 Based on this simple definition, it would appear that James Harden had the two best shooting seasons since at least 2002-03.
 Lets focus on his 2014-15 season: Harden made 847 field goals.
 The apparently next best performance is Kevin Durant's 2014-15 season: Durant made 839 field goals.
@@ -136,14 +137,12 @@ The difference seems small --- only 8 field goals.
 Do we think this difference is big or small? 
 Taking a closer look, we see that Harden in 2017-18 took 377 *fewer* shots than Durant in 2014-15 while making eight more.
 This seems quite impressive!
-
+-->
 To make this more precise, we can compute the field goal **percentage** (and similarly for three pointers and free throws).
-To this end, let's filter out 
 
 ```{r compute-percentages}
 season_box <-
   season_box %>%
-  filter(FGM <= FGA & TPM <= TPA & FTA <= FTM) %>% # filter out nonsensical
   mutate(
     FGP = ifelse(FGA > 0, FGM/FGA, NA_real_),
     TPP = ifelse(TPA > 0, TPM/TPA, NA_real_),
@@ -153,16 +152,63 @@ season_box <-
 ```{r arrange-fgp}
 season_box %>% 
   arrange(desc(FGP)) %>%
-  select(Player, season, FGP, FGM, FGA, n_games)
+  select(Player, season, FGP)
 ```
-Ok, we need to filter this down 
-<!-- refine this -->
 
-```{r qualified}
-qualified <-
-  season_box %>%
-  filter(FGA >= 50 & TPA >= 25)
+Sorting the players by their $\textrm{FGP},$ we find that several players made 100% of their field goals.
+But very few of these players are immediately recognizable --- and, indeed, none of them have been in the MVP conversation, despite the fact that they made all their shots! 
+
+To understand what's going on, let's take a look at the number of attempts and the number of games played.
+```{r arrange-fgp-games}
+season_box %>% 
+  arrange(desc(FGP)) %>%
+  select(Player, season, FGP, n_games, FGA)
 ```
+
+Taking a closer look, we see that the players with the exceptionally high field goal percentages took very few shots.
+To claim that any of these player-seasons are among the best ever would strain credulity.
+So, in order to determine the best shooting performance, we will need to limit our data to players who took a minimum number of shots.
+
+:::{#threshold-note .callout-note}
+## Setting thresholds
+
+The interpretation of our downstream results can be quite sensitive to the choice of threshold.
+If we set a very low threshold, our analysis will involve many players, including those with very limited playing time.
+Since we do not believe these players would be among the best shooters --- otherwise, they would have received more playing time! --- we may instead consider a larger, more restrictive threshold (e.g. $\textrm{FGM} > 1500$).
+If the threshold is too high, however, we may limit our analysis to just a small handful of players and risk overlooking impressive performances. 
+
+Because there is no single correct way to set a threshold, it is vitally important that you clearly explain and justify whatever choice you make.
+:::
+
+
+ 
+<!-- idea for replacement level:
+ NBA roster has 15 players, of which 12 are active. 
+ For the most part, teams play 8-10 people, so let's say 10
+ For each season, compute 100 * 10/12% quantile for MPG and then take the average
+ across the league. This is 
+-->
+For simplicity, we will restrict our attention to those players who attempted at least 100 field goals.
+```{r qualified}
+season_box %>%
+  filter(FGA >= 100) %>%
+  arrange(desc(FGP))
+```
+The vast majority of these players are centers and forwards.
+Many of them do not attempt three point shots! 
+
+What if we restrict our attention players who took at least 100 shots over the course of a season and took at least 50 three point shots?
+
+```{r fgp-ranked-threshold2}
+season_box %>%
+  filter(FGA >= 100 & TPA >= 50) %>%
+  arrange(desc(FGP), desc(TPP)) %>%
+  select(Player, season, FGP, TPP, FGA, TPA, n_games)
+```
+
+
+
+
 
 ## More nuanced metrics
 
@@ -172,5 +218,16 @@ One criticism of FGP is that it treats 2-point shots the same as 3-point shots. 
 $$
 \textrm{eFGP} = \frac{\textrm{FGM} + 0.5 \times \textrm{TPM}}{\textrm{FGA}}
 $$
+
+We can create a column for \textrm{eFGP} in our data table using `mutate`
+```{r compute-efgp}
+season_box 
+
+```
+
 ### True Shooting Percentage
-Both field goal percentage and effective field goal percentage totally ignore free throws. One metric that accounts for all field goals, three pointers, and free throws is true shooting percentage, whose formula is given by
+Both field goal percentage and effective field goal percentage totally ignore free throws. One metric that accounts for all field goals, three pointers, and free throws is [true shooting percentage](https://en.wikipedia.org/wiki/True_shooting_percentage) ($\textrm{TSP}$), whose formula is given by
+$$
+\textrm{TSP} = \frac{\textrm{PTS}}{2 \times \left(\textrm{FGA} + (0.44 \times \textrm{FTA})\right)},
+$$
+where $\textrm{PTS} =  \textrm{FTM} + 2 \times \textrm{FGM} + \textrm{TPM}$ is the total number of points scored.
