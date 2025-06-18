@@ -1,0 +1,84 @@
+---
+title: "Plotting StatsBomb Data Vertically"
+format: html
+---
+
+## Overview
+In Lectures 2 and 3, we built several expected goals (xg) models using data provided by StatsBomb.
+StatsBomb pre-processes their raw tracking data so that attacking play is oriented from left to right. 
+I find it somewhat more aesthetically pleasing to visualize shot data vertically with the goal line on top and the half-line at the bottom.
+
+This page defines a function to transform StatsBomb shot location data so that it can be plotted vertically instead of horizontally. 
+As you continue to work with StatsBomb data, feel free to use these functions
+
+## Changing Coordinates
+
+StatsBomb preprocesses their raw location data to a standardized pitch of dimensions 120m x 80m. 
+Appendix 2 of their [Open Data Specification document](https://github.com/statsbomb/open-data/blob/master/doc/StatsBomb%20Open%20Data%20Specification%20v1.1.pdf) shows this pitch along with several landmarks like the penalty area and goalkeeper's box.
+
+![StatsBomb Coordinate System](figures/statsbomb_coordinates.png){width=50% fig-align="center"}
+
+
+Somewhat counter-intuitively, the StatsBomb coordinates system places the origin in the **upper left** corner so that the $x$ coordinate increases as you move from left to right and the $y$ coordinate increases as you move from top to bottom.
+R graphics, by constrast, use a coordinate system in which the $x$ coordinate increases as you move from left to right and the $y$ coordinate increases as you move from bottom to top. 
+For our purposes, we will stick to the R coordinate system. 
+To convert from the StatsBomb coordinate system to the R coordinate system, we first multiply every StatsBomb $y$ coordinate by -1. 
+We then add 80 so that the origin is now located in the lower-left corner of the pitch. 
+
+To illustrate this transformation, we will manually convert the locations of several landmarks on the pitch.
+In the code, we use the prefix `sb_` to indicate that point is in the StatsBomb coordinate system
+```{r define-convert-landmarks}
+sb_bot_left_corner <- c(0,80)
+sb_top_left_corner <- c(0,0)
+sb_bot_right_corner <- c(120,80)
+sb_top_right_corner <- c(120,0)
+
+sb_half <- c(60,40)
+# corners of penalty area on the left 
+sb_bot_left_pen_l <- c(0, 62) # left penalty area
+sb_top_left_pen_l <- c(0, 18) # left penalty area
+sb_bot_right_pen_l <- c(18,62) # left penalty area
+sb_top_right_pen_l <- c(18,18) # left penalty area
+
+bot_left_corner <- sb_bot_left_corner * c(1,-1) + c(0, 80)
+top_left_corner <- sb_top_left_corner * c(1,-1) + c(0, 80)
+bot_right_corner <- sb_bot_right_corner * c(1,-1) + c(0,80)
+top_right_corner <- sb_top_right_corner * c(1,-1) + c(0, 80)
+
+half <- sb_half * c(1,-1) + c(0, 80)
+bot_left_pen_l <- sb_bot_left_pen_l * c(1,-1) + c(0,80)
+top_left_pen_l <- sb_top_left_pen_l * c(1,-1) + c(0,80)
+bot_right_pen_l <- sb_bot_right_pen_l * c(1,-1) + c(0,80)
+top_right_pen_l <- sb_top_right_pen_l * c(1,-1) + c(0,80)
+```
+
+
+
+Thus, the point $(x_{s}, y_{s})$ in the StatsBomb coordinate system maps to the point $(x_{r}, y_{r}) = (x_{s}, 80-y_{s})$ in the R coordinate system.
+
+```{r}
+#| code-fold: true
+par(mar = c(3,1,3,1), mgp = c(1.8, 0.5, 0))
+```
+
+
+## Translating and Rotating
+
+Now that we are using the familiar R coordinate system, we are going to rotate our landmarks (i.e., the center circle and the penalty area)
+Practically, we will (i) translate everything so that the center circle is now the origin and (ii) rotate all coordinates 90 degrees counter clockwise. 
+The first translation transform the point $(x,y) \rightarrow (x-60, y-40)$ while a 90 degree counter clockwise rotation maps $(x,y)\rightarrow (y,-x).$
+Composing these two steps, we need to transform points in the R coordinate system as
+$$
+(x_{r}, y_{r}) \rightarrow (y_{r}-40, 60-x_{r}).
+$$
+
+## Putting it all together
+
+We're now in a position to write a function that maps a point $(x_{s}, y_{s})$ in the StatsBomb coordinate system into the R coordinate system, translate the pitch so that the origin is at the center circle, and then rotates everything 90 degrees counterclockwise.
+Mathematically the transformation is
+$$
+(x_{s}, y_{s}) \rightarrow (40-y_{s}, 60-x_{s})
+$$
+
+
+

@@ -186,7 +186,11 @@ window.Quarto = {
     <ul class="dropdown-menu" aria-labelledby="nav-menu-guides">    
         <li>
     <a class="dropdown-item" href="../guides/getting_started.html">
- <span class="dropdown-text">Getting Started with R &amp; RStudio</span></a>
+ <span class="dropdown-text">Getting Started</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../guides/plot_vertical_statsbomb.html">
+ <span class="dropdown-text">Plotting StatsBomb Data Vertically</span></a>
   </li>  
     </ul>
   </li>
@@ -242,6 +246,7 @@ window.Quarto = {
   <li><a href="#more-nuanced-metrics" id="toc-more-nuanced-metrics" class="nav-link" data-scroll-target="#more-nuanced-metrics">More nuanced metrics</a>
   <ul class="collapse">
   <li><a href="#effective-field-goal-percentage" id="toc-effective-field-goal-percentage" class="nav-link" data-scroll-target="#effective-field-goal-percentage">Effective Field Goal Percentage</a></li>
+  <li><a href="#true-shooting-percentage" id="toc-true-shooting-percentage" class="nav-link" data-scroll-target="#true-shooting-percentage">True Shooting Percentage</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -321,30 +326,12 @@ System setup
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="at">repo =</span> <span class="st">"sportsdataverse/hoopR"</span>)</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse) <span class="co"># load the tidyverse suite of packages</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-✔ dplyr     1.1.4     ✔ readr     2.1.5
-✔ forcats   1.0.0     ✔ stringr   1.5.1
-✔ ggplot2   3.5.2     ✔ tibble    3.3.0
-✔ lubridate 1.9.4     ✔ tidyr     1.3.1
-✔ purrr     1.0.4     
-── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-✖ dplyr::filter() masks stats::filter()
-✖ dplyr::lag()    masks stats::lag()
-ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
-</div>
 </div>
 <p>You can read more about the package <a href="">here</a>. One important function is <code>load_nba_player_box</code>, which scrapes individual player’s box score for every game.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>raw_box <span class="ot">&lt;-</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  hoopR<span class="sc">::</span><span class="fu">load_nba_player_box</span>(<span class="at">seasons =</span> <span class="dv">2002</span><span class="sc">:</span>(hoopR<span class="sc">::</span><span class="fu">most_recent_nba_season</span>()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>raw_box <span class="ot">&lt;-</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  hoopR<span class="sc">::</span><span class="fu">load_nba_player_box</span>(<span class="at">seasons =</span> <span class="dv">2002</span><span class="sc">:</span>(hoopR<span class="sc">::</span><span class="fu">most_recent_nba_season</span>()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<!--
-  Filter out pre-season
-  Aggregate over a season:
-   This will require some careful group-by
-  Select only a few variables
--->
 <p>To study shooting ability, we need to aggregate the individual game-level data into season-level totals. Conceptually, we can accomplish this by first dividing the full data table into several smaller tables, one for each combination of player and season. Then, we can sum the number of field goals, three point shots, and free throws attempted and made by each player in each of their season. This order of operations is an example of the <em>split-apply-combine</em> paradigm, which is implemented in <strong>dplyr</strong> using <code>group_by</code>.</p>
 <!--
  5: play-in
@@ -352,62 +339,65 @@ System setup
  3: play-offs
 -->
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>season_box <span class="ot">&lt;-</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  raw_box <span class="sc">%&gt;%</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(season, athlete_display_name,</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>         minutes, </span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>         field_goals_made, field_goals_attempted,</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>         three_point_field_goals_made, three_point_field_goals_attempted,</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>         free_throws_made, free_throws_attempted,</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>         did_not_play) <span class="sc">%&gt;%</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">Player =</span> athlete_display_name,</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">FGM =</span> field_goals_made,</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">FGA =</span> field_goals_attempted,</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">TPM =</span> three_point_field_goals_made,</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">TPA =</span> three_point_field_goals_attempted,</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">FTM =</span> free_throws_made, </span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">FTA =</span> free_throws_attempted) <span class="sc">%&gt;%</span></span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>did_not_play) <span class="sc">%&gt;%</span></span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(<span class="fu">is.na</span>(FGA) <span class="sc">&amp;</span> <span class="fu">is.na</span>(TPA) <span class="sc">&amp;</span> <span class="fu">is.na</span>(FTA))) <span class="sc">%&gt;%</span> <span class="co"># filter out missing data records</span></span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Player, season) <span class="sc">%&gt;%</span></span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">minutes =</span> <span class="fu">sum</span>(minutes),</span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_games =</span> <span class="fu">n</span>(),</span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">FGM =</span> <span class="fu">sum</span>(FTM),</span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">FGA =</span> <span class="fu">sum</span>(FGA),</span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">TPM =</span> <span class="fu">sum</span>(TPM),</span>
-<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">TPA =</span> <span class="fu">sum</span>(TPA),</span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">FTM =</span> <span class="fu">sum</span>(FTM),</span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">FTA =</span> <span class="fu">sum</span>(FTA),</span>
-<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>season_box <span class="ot">&lt;-</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  raw_box <span class="sc">%&gt;%</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(season, season_type, </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>         athlete_display_name,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>         minutes, </span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>         field_goals_made, field_goals_attempted,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>         three_point_field_goals_made, three_point_field_goals_attempted,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>         free_throws_made, free_throws_attempted,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>         did_not_play) <span class="sc">%&gt;%</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">Player =</span> athlete_display_name,</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">FGM =</span> field_goals_made,</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">FGA =</span> field_goals_attempted,</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">TPM =</span> three_point_field_goals_made,</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">TPA =</span> three_point_field_goals_attempted,</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">FTM =</span> free_throws_made, </span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">FTA =</span> free_throws_attempted) <span class="sc">%&gt;%</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>did_not_play) <span class="sc">%&gt;%</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(season_type <span class="sc">==</span> <span class="dv">2</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(<span class="fu">is.na</span>(FGA) <span class="sc">&amp;</span> <span class="fu">is.na</span>(TPA) <span class="sc">&amp;</span> <span class="fu">is.na</span>(FTA))) <span class="sc">%&gt;%</span> <span class="co"># filter out missing data records</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Player, season) <span class="sc">%&gt;%</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">FGM =</span> <span class="fu">sum</span>(FTM),</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">FGA =</span> <span class="fu">sum</span>(FGA),</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">TPM =</span> <span class="fu">sum</span>(TPM),</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">TPA =</span> <span class="fu">sum</span>(TPA),</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">FTM =</span> <span class="fu">sum</span>(FTM),</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">FTA =</span> <span class="fu">sum</span>(FTA),</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">minutes =</span> <span class="fu">sum</span>(minutes),</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_games =</span> <span class="fu">n</span>(),</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(FGM <span class="sc">&lt;=</span> FGA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>In total, we have 11780 player-season observations. Here is a quick snapshot</p>
+<p>We have data for 11766 player-seasons across 2403 players. Here is a quick snapshot of the data for one player.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>season_box <span class="sc">%&gt;%</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Player <span class="sc">==</span> <span class="st">"Dirk Nowitzki"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>season_box <span class="sc">%&gt;%</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Player <span class="sc">==</span> <span class="st">"Dirk Nowitzki"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 18 × 10
-   Player        season minutes n_games   FGM   FGA   TPM   TPA   FTM   FTA
-   &lt;chr&gt;          &lt;int&gt;   &lt;dbl&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
- 1 Dirk Nowitzki   2002    3248      84   505  1422   155   378   505   590
- 2 Dirk Nowitzki   2003    3839      97   586  1802   175   451   586   661
- 3 Dirk Nowitzki   2004    3127      82   407  1410   106   305   407   465
- 4 Dirk Nowitzki   2005    3571      91   707  1701   101   258   707   819
- 5 Dirk Nowitzki   2006    4069     104   744  1983   133   338   744   827
- 6 Dirk Nowitzki   2007    3058      84   540  1435    76   192   540   601
- 7 Dirk Nowitzki   2008    2980      82   520  1405    85   238   520   596
- 8 Dirk Nowitzki   2009    3446      91   571  1786    67   191   571   638
- 9 Dirk Nowitzki   2010    3273      87   576  1602    55   128   576   628
-10 Dirk Nowitzki   2011    3331      94   570  1575    89   218   570   629
-11 Dirk Nowitzki   2012    2231      66   356  1111    79   218   356   397
-12 Dirk Nowitzki   2013    1628      52   164   707    63   151   164   191
-13 Dirk Nowitzki   2014    2896      88   363  1401   132   342   363   407
-14 Dirk Nowitzki   2015    2478      83   281  1151   109   293   281   317
-15 Dirk Nowitzki   2016    2533      80   266  1195   130   353   266   297
-16 Dirk Nowitzki   2017    1421      54    98   678    79   209    98   112
-17 Dirk Nowitzki   2018    1901      77    97   758   138   337    97   108
-18 Dirk Nowitzki   2019     798      52    39   379    67   208    39    50</code></pre>
+   Player        season   FGM   FGA   TPM   TPA   FTM   FTA minutes n_games
+   &lt;chr&gt;          &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;dbl&gt;   &lt;int&gt;
+ 1 Dirk Nowitzki   2002   440  1258   139   350   440   516    2891      76
+ 2 Dirk Nowitzki   2003   483  1489   148   390   483   548    3117      80
+ 3 Dirk Nowitzki   2004   371  1310    99   290   371   423    2915      77
+ 4 Dirk Nowitzki   2005   615  1445    91   228   615   708    3020      78
+ 5 Dirk Nowitzki   2006   539  1564   110   271   539   598    3086      81
+ 6 Dirk Nowitzki   2007   498  1341    72   173   498   551    2819      78
+ 7 Dirk Nowitzki   2008   478  1314    79   220   478   544    2769      77
+ 8 Dirk Nowitzki   2009   485  1616    61   170   485   545    3051      81
+ 9 Dirk Nowitzki   2010   536  1496    51   121   536   586    3041      81
+10 Dirk Nowitzki   2011   395  1179    66   168   395   443    2505      73
+11 Dirk Nowitzki   2012   318  1034    78   212   318   355    2078      62
+12 Dirk Nowitzki   2013   164   707    63   151   164   191    1628      52
+13 Dirk Nowitzki   2014   338  1275   131   330   338   376    2633      81
+14 Dirk Nowitzki   2015   255  1067   105   276   255   289    2297      78
+15 Dirk Nowitzki   2016   250  1112   126   342   250   280    2362      75
+16 Dirk Nowitzki   2017    98   678    79   209    98   112    1421      54
+17 Dirk Nowitzki   2018    97   758   138   337    97   108    1901      77
+18 Dirk Nowitzki   2019    39   379    67   208    39    50     798      52</code></pre>
 </div>
 </div>
 </section>
@@ -415,62 +405,154 @@ System setup
 <h3 class="anchored" data-anchor-id="from-totals-to-percentages">From totals to percentages</h3>
 <p>One way to define the best shooter is to identify the player who made the most shots. We can identify this by arranging our data table in descending order.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>season_box <span class="sc">%&gt;%</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(FGM))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>season_box <span class="sc">%&gt;%</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(FGM))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 11,808 × 10
-   Player             season minutes n_games   FGM   FGA   TPM   TPA   FTM   FTA
-   &lt;chr&gt;               &lt;int&gt;   &lt;dbl&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
- 1 James Harden         2015    3640      99   878  1780   256   674   878  1002
- 2 James Harden         2017    3391      93   847  1760   298   880   847   996
- 3 Kevin Durant         2014    3967     101   839  2137   241   633   839   972
- 4 James Harden         2019    3320      90   836  2186   430  1178   836   956
- 5 Kevin Durant         2010    3472      88   810  1791   138   386   810   902
- 6 James Harden         2020    2943      81   792  1751   341   969   792   920
- 7 Dwyane Wade          2006    3617      92   783  1736    24   106   783   990
- 8 Kobe Bryant          2008    4057     103   780  2153   182   521   780   936
- 9 Shai Gilgeous-Ale…   2025    3426     100   777  2151   198   549   777   872
-10 Russell Westbrook    2017    3017      87   768  2119   220   645   768   912
-# ℹ 11,798 more rows</code></pre>
+<pre><code># A tibble: 11,766 × 10
+   Player            season   FGM   FGA   TPM   TPA   FTM   FTA minutes n_games
+   &lt;chr&gt;              &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;dbl&gt;   &lt;int&gt;
+ 1 Kevin Durant        2010   756  1668   128   351   756   840    3241      82
+ 2 James Harden        2019   754  1922   382  1041   754   858    2896      79
+ 3 James Harden        2017   746  1542   266   765   746   881    2985      82
+ 4 James Harden        2016   720  1631   243   669   720   837    3142      83
+ 5 James Harden        2015   715  1486   215   567   715   824    3006      82
+ 6 Russell Westbrook   2017   712  1967   207   596   712   842    2822      82
+ 7 Kevin Durant        2014   707  1715   198   508   707   809    3153      82
+ 8 James Harden        2020   694  1523   302   852   694   804    2496      69
+ 9 Kobe Bryant         2006   675  2109   179   506   675   788    3184      78
+10 James Harden        2013   674  1350   182   494   674   792    3006      79
+# ℹ 11,756 more rows</code></pre>
 </div>
 </div>
-<p>Based on this simple definition, it would appear that James Harden had the two best shooting seasons since at least 2002-03. Lets focus on his 2014-15 season: Harden made 847 field goals. The apparently next best performance is Kevin Durant’s 2014-15 season: Durant made 839 field goals. The difference seems small — only 8 field goals. Do we think this difference is big or small? Taking a closer look, we see that Harden in 2017-18 took 377 <em>fewer</em> shots than Durant in 2014-15 while making eight more. This seems quite impressive!</p>
-<p>To make this more precise, we can compute the field goal <strong>percentage</strong> (and similarly for three pointers and free throws). To this end, let’s filter out</p>
+<!--
+Based on this simple definition, it would appear that James Harden had the two best shooting seasons since at least 2002-03.
+Lets focus on his 2014-15 season: Harden made 847 field goals.
+The apparently next best performance is Kevin Durant's 2014-15 season: Durant made 839 field goals.
+The difference seems small --- only 8 field goals.
+Do we think this difference is big or small? 
+Taking a closer look, we see that Harden in 2017-18 took 377 *fewer* shots than Durant in 2014-15 while making eight more.
+This seems quite impressive!
+-->
+<p>To make this more precise, we can compute the field goal <strong>percentage</strong> (and similarly for three pointers and free throws).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>season_box <span class="ot">&lt;-</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  season_box <span class="sc">%&gt;%</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(FGM <span class="sc">&lt;=</span> FGA <span class="sc">&amp;</span> TPM <span class="sc">&lt;=</span> TPA <span class="sc">&amp;</span> FTA <span class="sc">&lt;=</span> FTM) <span class="sc">%&gt;%</span> <span class="co"># filter out nonsensical</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">FGP =</span> <span class="fu">ifelse</span>(FGA <span class="sc">&gt;</span> <span class="dv">0</span>, FGM<span class="sc">/</span>FGA, <span class="cn">NA_real_</span>),</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">TPP =</span> <span class="fu">ifelse</span>(TPA <span class="sc">&gt;</span> <span class="dv">0</span>, TPM<span class="sc">/</span>TPA, <span class="cn">NA_real_</span>),</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">FTP =</span> <span class="fu">ifelse</span>(FTA <span class="sc">&gt;</span> <span class="dv">0</span>, FTM<span class="sc">/</span>FTA, <span class="cn">NA_real_</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>season_box <span class="ot">&lt;-</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  season_box <span class="sc">%&gt;%</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">FGP =</span> <span class="fu">ifelse</span>(FGA <span class="sc">&gt;</span> <span class="dv">0</span>, FGM<span class="sc">/</span>FGA, <span class="cn">NA_real_</span>),</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">TPP =</span> <span class="fu">ifelse</span>(TPA <span class="sc">&gt;</span> <span class="dv">0</span>, TPM<span class="sc">/</span>TPA, <span class="cn">NA_real_</span>),</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">FTP =</span> <span class="fu">ifelse</span>(FTA <span class="sc">&gt;</span> <span class="dv">0</span>, FTM<span class="sc">/</span>FTA, <span class="cn">NA_real_</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>season_box <span class="sc">%&gt;%</span> </span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(FGP)) <span class="sc">%&gt;%</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Player, season, FGP, FGM, FGA, n_games)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>season_box <span class="sc">%&gt;%</span> </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(FGP)) <span class="sc">%&gt;%</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Player, season, FGP)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 821 × 6
-   Player             season   FGP   FGM   FGA n_games
-   &lt;chr&gt;               &lt;int&gt; &lt;dbl&gt; &lt;int&gt; &lt;int&gt;   &lt;int&gt;
- 1 Chandler Hutchison   2022 1         2     2       6
- 2 Chuck Hayes          2016 1         2     2       2
- 3 Ike Diogu            2012 1         2     2       2
- 4 Malik Newman         2020 1         2     2       1
- 5 Samaki Walker        2006 1         2     2       7
- 6 Trey Johnson         2009 0.8       4     5       4
- 7 Moses Wright         2022 0.75      3     4       4
- 8 David Stockton       2018 0.667     4     6       5
- 9 Eric Mika            2020 0.667     2     3       1
-10 Jarrett Jack         2017 0.667     2     3       2
-# ℹ 811 more rows</code></pre>
+<pre><code># A tibble: 11,766 × 3
+   Player             season   FGP
+   &lt;chr&gt;               &lt;int&gt; &lt;dbl&gt;
+ 1 Alvin Williams       2007     1
+ 2 Andris Biedrins      2014     1
+ 3 Chandler Hutchison   2022     1
+ 4 Chuck Hayes          2016     1
+ 5 Daishen Nix          2025     1
+ 6 Dajuan Wagner        2007     1
+ 7 Ike Diogu            2012     1
+ 8 Jared Harper         2021     1
+ 9 Jarnell Stokes       2017     1
+10 Jelani McCoy         2008     1
+# ℹ 11,756 more rows</code></pre>
 </div>
 </div>
-<p>Ok, we need to filter this down <!-- refine this --></p>
+<p>Sorting the players by their <span class="math inline">\(\textrm{FGP},\)</span> we find that several players made 100% of their field goals. But very few of these players are immediately recognizable — and, indeed, none of them have been in the MVP conversation, despite the fact that they made all their shots!</p>
+<p>To understand what’s going on, let’s take a look at the number of attempts and the number of games played.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>qualified <span class="ot">&lt;-</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  season_box <span class="sc">%&gt;%</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(FGA <span class="sc">&gt;=</span> <span class="dv">50</span> <span class="sc">&amp;</span> TPA <span class="sc">&gt;=</span> <span class="dv">25</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>season_box <span class="sc">%&gt;%</span> </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(FGP)) <span class="sc">%&gt;%</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Player, season, FGP, n_games, FGA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 11,766 × 5
+   Player             season   FGP n_games   FGA
+   &lt;chr&gt;               &lt;int&gt; &lt;dbl&gt;   &lt;int&gt; &lt;int&gt;
+ 1 Alvin Williams       2007     1       2     2
+ 2 Andris Biedrins      2014     1       6     1
+ 3 Chandler Hutchison   2022     1       6     2
+ 4 Chuck Hayes          2016     1       2     2
+ 5 Daishen Nix          2025     1       3     1
+ 6 Dajuan Wagner        2007     1       1     1
+ 7 Ike Diogu            2012     1       2     2
+ 8 Jared Harper         2021     1       8     3
+ 9 Jarnell Stokes       2017     1       2     1
+10 Jelani McCoy         2008     1       6     1
+# ℹ 11,756 more rows</code></pre>
+</div>
+</div>
+<p>Taking a closer look, we see that the players with the exceptionally high field goal percentages took very few shots. To claim that any of these player-seasons are among the best ever would strain credulity. So, in order to determine the best shooting performance, we will need to limit our data to players who took a minimum number of shots.</p>
+<div id="threshold-note" class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Setting thresholds
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The interpretation of our downstream results can be quite sensitive to the choice of threshold. If we set a very low threshold, our analysis will involve many players, including those with very limited playing time. Since we do not believe these players would be among the best shooters — otherwise, they would have received more playing time! — we may instead consider a larger, more restrictive threshold (e.g.&nbsp;<span class="math inline">\(\textrm{FGM} &gt; 1500\)</span>). If the threshold is too high, however, we may limit our analysis to just a small handful of players and risk overlooking impressive performances.</p>
+<p>Because there is no single correct way to set a threshold, it is vitally important that you clearly explain and justify whatever choice you make.</p>
+</div>
+</div>
+<!-- idea for replacement level:
+ NBA roster has 15 players, of which 12 are active. 
+ For the most part, teams play 8-10 people, so let's say 10
+ For each season, compute 100 * 10/12% quantile for MPG and then take the average
+ across the league. This is 
+-->
+<p>For simplicity, we will restrict our attention to those players who attempted at least 100 field goals.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>season_box <span class="sc">%&gt;%</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(FGA <span class="sc">&gt;=</span> <span class="dv">100</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(FGP))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 8,847 × 13
+   Player       season   FGM   FGA   TPM   TPA   FTM   FTA minutes n_games   FGP
+   &lt;chr&gt;         &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;dbl&gt;   &lt;int&gt; &lt;dbl&gt;
+ 1 Chris Ander…   2010   164   251     0     3   164   236    1693      76 0.653
+ 2 Tyler Hansb…   2014   126   196     0     2   126   185     981      64 0.643
+ 3 Corey Magge…   2007   519   808    13    65   519   633    2295      75 0.642
+ 4 Jarron Coll…   2004   188   295     0     1   188   262    1732      81 0.637
+ 5 Chris Ander…   2011    86   137     0     1    86   135     728      45 0.628
+ 6 Shelden Wil…   2010    75   121     0     1    75    98     597      54 0.620
+ 7 Tyson Chand…   2012   217   355     0     2   217   315    2063      62 0.611
+ 8 Tyson Chand…   2010   115   190     0     0   115   157    1165      51 0.605
+ 9 Leon Powe      2007   106   177     0     2   106   144     723      59 0.599
+10 Dwight Powe…   2024    63   106     1     3    63    89     836      63 0.594
+# ℹ 8,837 more rows
+# ℹ 2 more variables: TPP &lt;dbl&gt;, FTP &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<p>The vast majority of these players are centers and forwards. Many of them do not attempt three point shots!</p>
+<p>What if we restrict our attention players who took at least 100 shots over the course of a season and took at least 50 three point shots?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>season_box <span class="sc">%&gt;%</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(FGA <span class="sc">&gt;=</span> <span class="dv">100</span> <span class="sc">&amp;</span> TPA <span class="sc">&gt;=</span> <span class="dv">50</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(FGP), <span class="fu">desc</span>(TPP)) <span class="sc">%&gt;%</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Player, season, FGP, TPP, FGA, TPA, n_games)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5,985 × 7
+   Player           season   FGP   TPP   FGA   TPA n_games
+   &lt;chr&gt;             &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;int&gt;   &lt;int&gt;
+ 1 Corey Maggette     2007 0.642 0.2     808    65      75
+ 2 Jimmy Butler III   2020 0.576 0.244   760   119      59
+ 3 Corey Maggette     2005 0.571 0.304   986   168      66
+ 4 Corey Maggette     2006 0.565 0.338   375    71      32
+ 5 Kevin Martin       2009 0.564 0.415   811   277      51
+ 6 Corey Maggette     2008 0.553 0.384  1000   203      70
+ 7 Jimmy Butler III   2025 0.553 0.308   597   104      55
+ 8 Kevin Martin       2008 0.549 0.402   914   266      61
+ 9 Corey Maggette     2009 0.539 0.253   634    95      51
+10 Danilo Gallinari   2016 0.536 0.364   700   239      53
+# ℹ 5,975 more rows</code></pre>
+</div>
 </div>
 </section>
 </section>
@@ -480,7 +562,34 @@ System setup
 <h3 class="anchored" data-anchor-id="effective-field-goal-percentage">Effective Field Goal Percentage</h3>
 <p>One criticism of FGP is that it treats 2-point shots the same as 3-point shots. As a result, the league leader in FGP is usually a center whose shots mostly come from near the rim. <a href="https://en.wikipedia.org/wiki/Effective_field_goal_percentage">Effective Field Goal Percentage</a> (eFGP) adjusts FGP to account for the fact that a made 3-point shots is worth 50% more than a made 2-point shot. The formula for eFGP is <span class="math display">\[
 \textrm{eFGP} = \frac{\textrm{FGM} + 0.5 \times \textrm{TPM}}{\textrm{FGA}}
-\]</span> ### True Shooting Percentage Both field goal percentage and effective field goal percentage totally ignore free throws. One metric that accounts for all field goals, three pointers, and free throws is true shooting percentage, whose formula is given by</p>
+\]</span></p>
+<p>We can create a column for in our data table using <code>mutate</code></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>season_box </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 11,766 × 13
+   Player      season   FGM   FGA   TPM   TPA   FTM   FTA minutes n_games    FGP
+   &lt;chr&gt;        &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;dbl&gt;   &lt;int&gt;  &lt;dbl&gt;
+ 1 A.J. Guyton   2002    22   244    46   123    22    27     607      45 0.0902
+ 2 A.J. Guyton   2003     0     4     0     1     0     0       9       2 0     
+ 3 A.J. Lawson   2023     2    44    10    25     2     8     109      15 0.0455
+ 4 A.J. Lawson   2024    15   121    13    50    15    23     314      42 0.124 
+ 5 A.J. Lawson   2025    43   190    33   101    43    63     485      26 0.226 
+ 6 A.J. Price    2010    60   354    60   174    60    75     863      56 0.169 
+ 7 A.J. Price    2011    54   320    41   149    54    81     799      50 0.169 
+ 8 A.J. Price    2012    28   174    26    88    28    35     567      43 0.161 
+ 9 A.J. Price    2013    49   413    70   200    49    62    1276      57 0.119 
+10 A.J. Price    2014     0    46     6    22     0     2      99      28 0     
+# ℹ 11,756 more rows
+# ℹ 2 more variables: TPP &lt;dbl&gt;, FTP &lt;dbl&gt;</code></pre>
+</div>
+</div>
+</section>
+<section id="true-shooting-percentage" class="level3">
+<h3 class="anchored" data-anchor-id="true-shooting-percentage">True Shooting Percentage</h3>
+<p>Both field goal percentage and effective field goal percentage totally ignore free throws. One metric that accounts for all field goals, three pointers, and free throws is <a href="https://en.wikipedia.org/wiki/True_shooting_percentage">true shooting percentage</a> (<span class="math inline">\(\textrm{TSP}\)</span>), whose formula is given by <span class="math display">\[
+\textrm{TSP} = \frac{\textrm{PTS}}{2 \times \left(\textrm{FGA} + (0.44 \times \textrm{FTA})\right)},
+\]</span> where <span class="math inline">\(\textrm{PTS} =  \textrm{FTM} + 2 \times \textrm{FGM} + \textrm{TPM}\)</span> is the total number of points scored.</p>
 
 
 </section>

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>STAT 479 (Fall 2025): Sports Analytics – STAT479</title>
+<title>Plotting StatsBomb Data Vertically – STAT479</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,26 +20,61 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-10c2ad7cdbdc86dea93900442ad0167d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-10c2ad7cdbdc86dea93900442ad0167d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -68,18 +103,47 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
-<link rel="stylesheet" href="styles.css">
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
 </head>
 
-<body class="nav-fixed quarto-light">
+<body class="nav-sidebar docked nav-fixed quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">STAT479</span>
     </a>
   </div>
@@ -90,7 +154,7 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page"> 
+    <a class="nav-link" href="../index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item dropdown ">
@@ -99,7 +163,7 @@ ul.task-list li input[type="checkbox"] {
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-lectures">    
         <li>
-    <a class="dropdown-item" href="./lectures/lecture1.html">
+    <a class="dropdown-item" href="../lectures/lecture1.html">
  <span class="dropdown-text">Lecture 1: Boxscore Metrics</span></a>
   </li>  
     </ul>
@@ -110,7 +174,7 @@ ul.task-list li input[type="checkbox"] {
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-exercises">    
         <li>
-    <a class="dropdown-item" href="./exercises/exercises1_boxscore.html">
+    <a class="dropdown-item" href="../exercises/exercises1_boxscore.html">
  <span class="dropdown-text">Constructing Advanced Metrics Using Box Score Data</span></a>
   </li>  
     </ul>
@@ -121,11 +185,11 @@ ul.task-list li input[type="checkbox"] {
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-guides">    
         <li>
-    <a class="dropdown-item" href="./guides/getting_started.html">
+    <a class="dropdown-item" href="../guides/getting_started.html">
  <span class="dropdown-text">Getting Started</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./guides/plot_vertical_statsbomb.html">
+    <a class="dropdown-item" href="../guides/plot_vertical_statsbomb.html">
  <span class="dropdown-text">Plotting StatsBomb Data Vertically</span></a>
   </li>  
     </ul>
@@ -136,17 +200,49 @@ ul.task-list li input[type="checkbox"] {
 </div>
       </div> <!-- /container-fluid -->
     </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../guides/plot_vertical_statsbomb.html">Plotting StatsBomb Data Vertically</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
 </header>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../guides/getting_started.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Getting Started</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../guides/plot_vertical_statsbomb.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Plotting StatsBomb Data Vertically</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#course-information" id="toc-course-information" class="nav-link active" data-scroll-target="#course-information">Course information</a></li>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#changing-coordinates" id="toc-changing-coordinates" class="nav-link" data-scroll-target="#changing-coordinates">Changing Coordinates</a></li>
+  <li><a href="#translating-and-rotating" id="toc-translating-and-rotating" class="nav-link" data-scroll-target="#translating-and-rotating">Translating and Rotating</a></li>
+  <li><a href="#putting-it-all-together" id="toc-putting-it-all-together" class="nav-link" data-scroll-target="#putting-it-all-together">Putting it all together</a></li>
   </ul>
 </nav>
     </div>
@@ -155,7 +251,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">STAT 479 (Fall 2025): Sports Analytics</h1>
+<h1 class="title">Plotting StatsBomb Data Vertically</h1>
 </div>
 
 
@@ -172,20 +268,65 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Welcome to STAT 479 (Special Topics in Statistics)! This iteration of the course will focus on sports analytics.</p>
-<p>Lectures notes, instructions for the course project, and additional tutorials and exercises will be posted to this website. So, please bookmark this page and check it regularly throughout the course.</p>
-<section id="course-information" class="level2">
-<h2 class="anchored" data-anchor-id="course-information">Course information</h2>
-<p><strong>Description</strong>: Illustrates the use of statistical modeling and data science techniques to derive actionable insights from sports data. Emphasizes not only technical calculation of advanced metrics but also on written and oral communication to other data scientists and to non-technical audience. Topics may include: deriving team rankings from paired competitions; measuring an individual player’s contribution to their team’s overall success; assessing player performance and team strategy in terms of expected outcomes; forecasting the impact of new rule changes using simulation; and creating new metrics using high-resolution player tracking data.</p>
-<p><strong>Learning Outcomes</strong>: Throughout the course you will</p>
-<ol type="1">
-<li>Implement appropriate statistical methods to assess player and team performance</li>
-<li>Work with play-by-play and high-resolution tracking data</li>
-<li>Provide constructive and actionable feedback on your peers’ analytic reports</li>
-<li>Build a personal portfolio of sports data analyses</li>
-</ol>
-<p><strong>Location &amp; Schedule:</strong> Tuesdays &amp; Thursdays, 11:00am-12:15pm, 1524 Morgridge Hall</p>
-<p><strong>Instructor &amp; Office Hours:</strong> <a href="https://skdeshpande91.github.io">Sameer Deshpande</a> (sameer.deshpande@wisc.edu). Office Hours TBA.</p>
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<p>In Lectures 2 and 3, we built several expected goals (xg) models using data provided by StatsBomb. StatsBomb pre-processes their raw tracking data so that attacking play is oriented from left to right. I find it somewhat more aesthetically pleasing to visualize shot data vertically with the goal line on top and the half-line at the bottom.</p>
+<p>This page defines a function to transform StatsBomb shot location data so that it can be plotted vertically instead of horizontally. As you continue to work with StatsBomb data, feel free to use these functions</p>
+</section>
+<section id="changing-coordinates" class="level2">
+<h2 class="anchored" data-anchor-id="changing-coordinates">Changing Coordinates</h2>
+<p>StatsBomb preprocesses their raw location data to a standardized pitch of dimensions 120m x 80m. Appendix 2 of their <a href="https://github.com/statsbomb/open-data/blob/master/doc/StatsBomb%20Open%20Data%20Specification%20v1.1.pdf">Open Data Specification document</a> shows this pitch along with several landmarks like the penalty area and goalkeeper’s box.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/statsbomb_coordinates.png" class="img-fluid figure-img" style="width:50.0%"></p>
+<figcaption>StatsBomb Coordinate System</figcaption>
+</figure>
+</div>
+<p>Somewhat counter-intuitively, the StatsBomb coordinates system places the origin in the <strong>upper left</strong> corner so that the <span class="math inline">\(x\)</span> coordinate increases as you move from left to right and the <span class="math inline">\(y\)</span> coordinate increases as you move from top to bottom. R graphics, by constrast, use a coordinate system in which the <span class="math inline">\(x\)</span> coordinate increases as you move from left to right and the <span class="math inline">\(y\)</span> coordinate increases as you move from bottom to top. For our purposes, we will stick to the R coordinate system. To convert from the StatsBomb coordinate system to the R coordinate system, we first multiply every StatsBomb <span class="math inline">\(y\)</span> coordinate by -1. We then add 80 so that the origin is now located in the lower-left corner of the pitch.</p>
+<p>To illustrate this transformation, we will manually convert the locations of several landmarks on the pitch. In the code, we use the prefix <code>sb_</code> to indicate that point is in the StatsBomb coordinate system</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>sb_bot_left_corner <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">80</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>sb_top_left_corner <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>sb_bot_right_corner <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">120</span>,<span class="dv">80</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>sb_top_right_corner <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">120</span>,<span class="dv">0</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>sb_half <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">60</span>,<span class="dv">40</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># corners of penalty area on the left </span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>sb_bot_left_pen_l <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">62</span>) <span class="co"># left penalty area</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>sb_top_left_pen_l <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">18</span>) <span class="co"># left penalty area</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>sb_bot_right_pen_l <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">18</span>,<span class="dv">62</span>) <span class="co"># left penalty area</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>sb_top_right_pen_l <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">18</span>,<span class="dv">18</span>) <span class="co"># left penalty area</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>bot_left_corner <span class="ot">&lt;-</span> sb_bot_left_corner <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">80</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>top_left_corner <span class="ot">&lt;-</span> sb_top_left_corner <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">80</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>bot_right_corner <span class="ot">&lt;-</span> sb_bot_right_corner <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">80</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>top_right_corner <span class="ot">&lt;-</span> sb_top_right_corner <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">80</span>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>half <span class="ot">&lt;-</span> sb_half <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">80</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>bot_left_pen_l <span class="ot">&lt;-</span> sb_bot_left_pen_l <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">80</span>)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>top_left_pen_l <span class="ot">&lt;-</span> sb_top_left_pen_l <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">80</span>)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>bot_right_pen_l <span class="ot">&lt;-</span> sb_bot_right_pen_l <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">80</span>)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>top_right_pen_l <span class="ot">&lt;-</span> sb_top_right_pen_l <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">80</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Thus, the point <span class="math inline">\((x_{s}, y_{s})\)</span> in the StatsBomb coordinate system maps to the point <span class="math inline">\((x_{r}, y_{r}) = (x_{s}, 80-y_{s})\)</span> in the R coordinate system.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">1</span>), <span class="at">mgp =</span> <span class="fu">c</span>(<span class="fl">1.8</span>, <span class="fl">0.5</span>, <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="translating-and-rotating" class="level2">
+<h2 class="anchored" data-anchor-id="translating-and-rotating">Translating and Rotating</h2>
+<p>Now that we are using the familiar R coordinate system, we are going to rotate our landmarks (i.e., the center circle and the penalty area) Practically, we will (i) translate everything so that the center circle is now the origin and (ii) rotate all coordinates 90 degrees counter clockwise. The first translation transform the point <span class="math inline">\((x,y) \rightarrow (x-60, y-40)\)</span> while a 90 degree counter clockwise rotation maps <span class="math inline">\((x,y)\rightarrow (y,-x).\)</span> Composing these two steps, we need to transform points in the R coordinate system as <span class="math display">\[
+(x_{r}, y_{r}) \rightarrow (y_{r}-40, 60-x_{r}).
+\]</span></p>
+</section>
+<section id="putting-it-all-together" class="level2">
+<h2 class="anchored" data-anchor-id="putting-it-all-together">Putting it all together</h2>
+<p>We’re now in a position to write a function that maps a point <span class="math inline">\((x_{s}, y_{s})\)</span> in the StatsBomb coordinate system into the R coordinate system, translate the pitch so that the origin is at the center circle, and then rotates everything 90 degrees counterclockwise. Mathematically the transformation is <span class="math display">\[
+(x_{s}, y_{s}) \rightarrow (40-y_{s}, 60-x_{s})
+\]</span></p>
 
 
 </section>
