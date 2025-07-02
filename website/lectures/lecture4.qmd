@@ -14,8 +14,109 @@ Expected runs framework
 
 
 
-## From pitch-by-pitch to plate appearance
+## Obtaining pitch-by-pitch data
 
+
+### PitchF/X and StatCast
+<!--
+  What is PitchF/X and What is StatCast
+-->
+
+### Accessing data from StatCast
+
+Major League Baseball hosts a public-facing web interface for accessing StatCast data.
+Using that interface, users can pull up data for individual players or about all pitches of a certain type.
+Powering this website is an application programming interface (API), which allows software applications to connect to the underlying StatCast database.
+It is through this API that the **baseballR** package acquires data.
+If you have not yet installed that package, you can do so using the following code
+```{r install-statcast, eval=FALSE}
+devtools::install_github(repo = "BillPetti/baseballr")
+```
+The **baseballR** package provides a function [`baseballr::statcast_search()`](https://billpetti.github.io/baseballr/reference/statcast_search.html) that allows users query all StatCast data by date, player, or player type.
+One of the original StatCast authors, Bill Petti, wrote a wrapper function that uses `baseballr::statcast_search()` to pull down an entire season's worth of pitch-by-pitch data; see [this blog post](https://billpetti.github.io/2021-04-02-build-statcast-database-rstats-version-3.0/) for more the wrapper function code and [this earlier post]() for details about its design.
+Since he published his original function, StatCast has added some new fields, necessitating a few changes.
+The code below defines a new scraper, which we will use in the course. An R script containing this code is available at []().
+At a high level, the scraping function pulls data from StatCast on a week-by-week basis. 
+
+```{r annual-statcast-query-def, eval = FALSE}
+#| code-fold: true
+#| code-summary: "Show the code"
+annual_statcast_query <- function(season) {
+  
+  data_base_column_types <- 
+    read_csv("https://app.box.com/shared/static/q326nuker938n2nduy81au67s2pf9a3j.csv")
+  
+  dates <- 
+    seq.Date(as.Date(paste0(season, '-03-01')),
+             as.Date(paste0(season, '-12-01')), 
+             by = '4 days')
+  
+  date_grid <- 
+    tibble::tibble(start_date = dates, 
+                   end_date = dates + 3)
+  
+  safe_savant <- 
+    purrr::safely(scrape_statcast_savant)
+  
+  payload <- 
+    purrr::map(.x = seq_along(date_grid$start_date),
+               ~{message(paste0('\nScraping week of ', date_grid$start_date[.x], '...\n'))
+                 payload <- 
+                   safe_savant(start_date = date_grid$start_date[.x], 
+                               end_date = date_grid$end_date[.x], 
+                               type = 'pitcher')
+                 return(payload)
+                 })
+  
+  payload_df <- purrr::map(payload, 'result')
+  
+  number_rows <- 
+    purrr::map_df(.x = seq_along(payload_df),
+                  ~{number_rows <- 
+                    tibble::tibble(week = .x, 
+                                   number_rows = length(payload_df[[.x]]$game_date))
+                  }) %>%
+    dplyr::filter(number_rows > 0) %>%
+    dplyr::pull(week)
+  
+  payload_df_reduced <- payload_df[number_rows]
+  
+  payload_df_reduced_formatted <- 
+    purrr::map(.x = seq_along(payload_df_reduced), 
+               ~{cols_to_transform <- 
+                 c("pitcher", "fielder_2", "fielder_3",
+                   "fielder_4", "fielder_5", "fielder_6", "fielder_7",
+                   "fielder_8", "fielder_9")
+               df <- 
+                 purrr::pluck(payload_df_reduced, .x) %>%
+                 dplyr::mutate_at(.vars = cols_to_transform, as.numeric) %>%
+                 dplyr::mutate_at(.vars = cols_to_transform, function(x) {ifelse(is.na(x), 999999999, x)})
+               character_columns <- 
+                 data_base_column_types %>%
+                 dplyr::filter(class == "character") %>%
+                 dplyr::pull(variable)
+               numeric_columns <- 
+                 data_base_column_types %>%
+                 dplyr::filter(class == "numeric") %>%
+                 dplyr::pull(variable)
+               integer_columns <- 
+                 data_base_column_types %>%
+                 dplyr::filter(class == "integer") %>%
+                 dplyr::pull(variable)
+               df <- 
+                 df %>%
+                 dplyr::mutate_if(names(df) %in% character_columns, as.character) %>%
+                 dplyr::mutate_if(names(df) %in% numeric_columns, as.numeric) %>%
+                 dplyr::mutate_if(names(df) %in% integer_columns, as.integer)
+               return(df)
+               })
+  
+  combined <- payload_df_reduced_formatted %>%
+    dplyr::bind_rows()
+  
+  return(combined)
+}
+```
 
 
 <!--
