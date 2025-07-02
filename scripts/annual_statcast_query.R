@@ -5,7 +5,7 @@
 annual_statcast_query <- function(season) {
   
   data_base_column_types <- 
-    read_csv("https://app.box.com/shared/static/q326nuker938n2nduy81au67s2pf9a3j.csv")
+    readr::read_csv("https://app.box.com/shared/static/q326nuker938n2nduy81au67s2pf9a3j.csv")
   
   dates <- 
     seq.Date(as.Date(paste0(season, '-03-01')),
@@ -17,7 +17,7 @@ annual_statcast_query <- function(season) {
                    end_date = dates + 3)
   
   safe_savant <- 
-    purrr::safely(scrape_statcast_savant)
+    purrr::safely(baseballr::scrape_statcast_savant)
   
   payload <- 
     purrr::map(.x = seq_along(date_grid$start_date),
