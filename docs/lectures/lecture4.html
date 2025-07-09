@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.7.31">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -36,7 +71,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-10c2ad7cdbdc86dea93900442ad0167d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -68,6 +103,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -104,11 +168,11 @@ ul.task-list li input[type="checkbox"] {
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture2.html">
- <span class="dropdown-text">Lecture 2: Expected Goals in Soccer</span></a>
+ <span class="dropdown-text">Lecture 2: Expected Value-based Evaluation</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture3.html">
- <span class="dropdown-text">Lecture 3: Building our own XG model</span></a>
+ <span class="dropdown-text">Lecture 3: Estimating the Expected Value of a Game State</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture4.html">
@@ -182,13 +246,13 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../lectures/lecture2.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lecture 2: Expected Goals in Soccer</span></a>
+ <span class="menu-text">Lecture 2: Expected Value-based Evaluation</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../lectures/lecture3.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lecture 3: Building our own XG model</span></a>
+ <span class="menu-text">Lecture 3: Estimating the Expected Value of a Game State</span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -219,15 +283,22 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a>
+  <li><a href="#overview-allocation-of-credit-in-baseball" id="toc-overview-allocation-of-credit-in-baseball" class="nav-link active" data-scroll-target="#overview-allocation-of-credit-in-baseball">Overview: Allocation of credit in baseball</a>
   <ul class="collapse">
+  <li><a href="#conditioning-on-results" id="toc-conditioning-on-results" class="nav-link" data-scroll-target="#conditioning-on-results">Conditioning on Results</a></li>
   <li><a href="#key-topics" id="toc-key-topics" class="nav-link" data-scroll-target="#key-topics">Key Topics</a></li>
   </ul></li>
-  <li><a href="#from-pitch-by-pitch-to-plate-appearance" id="toc-from-pitch-by-pitch-to-plate-appearance" class="nav-link" data-scroll-target="#from-pitch-by-pitch-to-plate-appearance">From pitch-by-pitch to plate appearance</a></li>
+  <li><a href="#obtaining-pitch-by-pitch-data" id="toc-obtaining-pitch-by-pitch-data" class="nav-link" data-scroll-target="#obtaining-pitch-by-pitch-data">Obtaining pitch-by-pitch data</a>
+  <ul class="collapse">
+  <li><a href="#pitchfx-and-statcast" id="toc-pitchfx-and-statcast" class="nav-link" data-scroll-target="#pitchfx-and-statcast">PitchF/X and StatCast</a></li>
+  <li><a href="#accessing-data-from-statcast" id="toc-accessing-data-from-statcast" class="nav-link" data-scroll-target="#accessing-data-from-statcast">Accessing data from StatCast</a></li>
+  </ul></li>
   <li><a href="#expected-runs" id="toc-expected-runs" class="nav-link" data-scroll-target="#expected-runs">Expected Runs</a>
   <ul class="collapse">
-  <li><a href="#adjusting-for-platoon-advantages-park-effects" id="toc-adjusting-for-platoon-advantages-park-effects" class="nav-link" data-scroll-target="#adjusting-for-platoon-advantages-park-effects">Adjusting for platoon advantages &amp; park effects</a></li>
+  <li><a href="#computing-rhotextrmo-textrmbr" id="toc-computing-rhotextrmo-textrmbr" class="nav-link" data-scroll-target="#computing-rhotextrmo-textrmbr">Computing <span class="math inline">\(\rho(\textrm{o}, \textrm{br})\)</span></a></li>
+  <li><a href="#run-expectancy-re24" id="toc-run-expectancy-re24" class="nav-link" data-scroll-target="#run-expectancy-re24">Run expectancy (RE24)</a></li>
   </ul></li>
+  <li><a href="#adjusting-re24-for-platoon-advantage-ballpark" id="toc-adjusting-re24-for-platoon-advantage-ballpark" class="nav-link" data-scroll-target="#adjusting-re24-for-platoon-advantage-ballpark">Adjusting RE24 for platoon advantage &amp; ballpark</a></li>
   <li><a href="#base-running" id="toc-base-running" class="nav-link" data-scroll-target="#base-running">Base-running</a></li>
   <li><a href="#batting" id="toc-batting" class="nav-link" data-scroll-target="#batting">Batting</a></li>
   </ul>
@@ -255,35 +326,359 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="overview" class="level2">
-<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<section id="overview-allocation-of-credit-in-baseball" class="level2">
+<h2 class="anchored" data-anchor-id="overview-allocation-of-credit-in-baseball">Overview: Allocation of credit in baseball</h2>
+<section id="conditioning-on-results" class="level3">
+<h3 class="anchored" data-anchor-id="conditioning-on-results">Conditioning on Results</h3>
+<!--
+  Compare two plays in baseball. The batter hits a homerun; obviously they should get credit, pitcher should get little credit, and the fielders
+  
+  But in this second play the situation is a bit murkier, the batter puts the ball in play (which is better than striking out!); the baserunners advances, but the fielder 
+  
+  If we can divide up credit to the players and sum up over all plays, then we 
+  
+  Credit in baseball is often expressed in terms of run expectancy. Loosely, this combines what is expected to happen with what actually happened. Neither extreme is quite what we want
+  
+  Eventually when we aggregate, it is more useful to turn absolute numbers into a comparison. How much better than is one player's performance than another's.
+  This is at the heart of the concept of "wins above replacement".
+  
+  While there are many proprietary approaches to computing this, we will emulate the calculation outlined by Baumer et al. in their landmark openWAR paper
+  
+  As with most lectures, there is a **lot** more in these notes than presented in lecture.
+  
+-->
+</section>
 <section id="key-topics" class="level3">
 <h3 class="anchored" data-anchor-id="key-topics">Key Topics</h3>
 <p>Expected runs framework</p>
 </section>
 </section>
-<section id="from-pitch-by-pitch-to-plate-appearance" class="level2">
-<h2 class="anchored" data-anchor-id="from-pitch-by-pitch-to-plate-appearance">From pitch-by-pitch to plate appearance</h2>
+<section id="obtaining-pitch-by-pitch-data" class="level2">
+<h2 class="anchored" data-anchor-id="obtaining-pitch-by-pitch-data">Obtaining pitch-by-pitch data</h2>
+<section id="pitchfx-and-statcast" class="level3">
+<h3 class="anchored" data-anchor-id="pitchfx-and-statcast">PitchF/X and StatCast</h3>
 <!--
-  1. How to scrape pitch-by-pitch data from StatCast
-  2. How to get plate appearances? Filter down to the smallest 
-  3. Clean up certain fields
+  What is PitchF/X and What is StatCast
 -->
+</section>
+<section id="accessing-data-from-statcast" class="level3">
+<h3 class="anchored" data-anchor-id="accessing-data-from-statcast">Accessing data from StatCast</h3>
+<p>Major League Baseball hosts a public-facing web interface for accessing StatCast data. Using that interface, users can pull up data for individual players or about all pitches of a certain type. Powering this website is an application programming interface (API), which allows software applications to connect to the underlying StatCast database. It is through this API that the <strong>baseballR</strong> package acquires data. If you have not yet installed that package, you can do so using the following code</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="at">repo =</span> <span class="st">"BillPetti/baseballr"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The <strong>baseballR</strong> package provides a function <a href="https://billpetti.github.io/baseballr/reference/statcast_search.html"><code>baseballr::statcast_search()</code></a> that allows users query all StatCast data by date, player, or player type. One of the original StatCast authors, Bill Petti, wrote a wrapper function that uses <code>baseballr::statcast_search()</code> to pull down an entire season’s worth of pitch-by-pitch data; see <a href="https://billpetti.github.io/2021-04-02-build-statcast-database-rstats-version-3.0/">this blog post</a> for more the wrapper function code and <a href="">this earlier post</a> for details about its design. Since he published his original function, StatCast has added some new fields, necessitating a few changes. The code below defines a new scraper, which we will use in the course. An R script containing this code is available at <a href="https://github.com/skdeshpande91/stat479_fall2025/blob/main/scripts/annual_statcast_query.R">this link</a>. At a high level, the scraping function pulls data from StatCast on a week-by-week basis.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>annual_statcast_query <span class="ot">&lt;-</span> <span class="cf">function</span>(season) {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  data_base_column_types <span class="ot">&lt;-</span> </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">read_csv</span>(<span class="st">"https://app.box.com/shared/static/q326nuker938n2nduy81au67s2pf9a3j.csv"</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  dates <span class="ot">&lt;-</span> </span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">seq.Date</span>(<span class="fu">as.Date</span>(<span class="fu">paste0</span>(season, <span class="st">'-03-01'</span>)),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>             <span class="fu">as.Date</span>(<span class="fu">paste0</span>(season, <span class="st">'-12-01'</span>)), </span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>             <span class="at">by =</span> <span class="st">'4 days'</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  date_grid <span class="ot">&lt;-</span> </span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    tibble<span class="sc">::</span><span class="fu">tibble</span>(<span class="at">start_date =</span> dates, </span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>                   <span class="at">end_date =</span> dates <span class="sc">+</span> <span class="dv">3</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  safe_savant <span class="ot">&lt;-</span> </span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    purrr<span class="sc">::</span><span class="fu">safely</span>(scrape_statcast_savant)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  payload <span class="ot">&lt;-</span> </span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    purrr<span class="sc">::</span><span class="fu">map</span>(<span class="at">.x =</span> <span class="fu">seq_along</span>(date_grid<span class="sc">$</span>start_date),</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>               <span class="sc">~</span>{<span class="fu">message</span>(<span class="fu">paste0</span>(<span class="st">'</span><span class="sc">\n</span><span class="st">Scraping week of '</span>, date_grid<span class="sc">$</span>start_date[.x], <span class="st">'...</span><span class="sc">\n</span><span class="st">'</span>))</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>                 payload <span class="ot">&lt;-</span> </span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">safe_savant</span>(<span class="at">start_date =</span> date_grid<span class="sc">$</span>start_date[.x], </span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>                               <span class="at">end_date =</span> date_grid<span class="sc">$</span>end_date[.x], </span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>                               <span class="at">type =</span> <span class="st">'pitcher'</span>)</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>                 <span class="fu">return</span>(payload)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>                 })</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  payload_df <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map</span>(payload, <span class="st">'result'</span>)</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>  number_rows <span class="ot">&lt;-</span> </span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    purrr<span class="sc">::</span><span class="fu">map_df</span>(<span class="at">.x =</span> <span class="fu">seq_along</span>(payload_df),</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>                  <span class="sc">~</span>{number_rows <span class="ot">&lt;-</span> </span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>                    tibble<span class="sc">::</span><span class="fu">tibble</span>(<span class="at">week =</span> .x, </span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">number_rows =</span> <span class="fu">length</span>(payload_df[[.x]]<span class="sc">$</span>game_date))</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>                  }) <span class="sc">%&gt;%</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(number_rows <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">pull</span>(week)</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>  payload_df_reduced <span class="ot">&lt;-</span> payload_df[number_rows]</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>  payload_df_reduced_formatted <span class="ot">&lt;-</span> </span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>    purrr<span class="sc">::</span><span class="fu">map</span>(<span class="at">.x =</span> <span class="fu">seq_along</span>(payload_df_reduced), </span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>               <span class="sc">~</span>{cols_to_transform <span class="ot">&lt;-</span> </span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>                 <span class="fu">c</span>(<span class="st">"pitcher"</span>, <span class="st">"fielder_2"</span>, <span class="st">"fielder_3"</span>,</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"fielder_4"</span>, <span class="st">"fielder_5"</span>, <span class="st">"fielder_6"</span>, <span class="st">"fielder_7"</span>,</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"fielder_8"</span>, <span class="st">"fielder_9"</span>)</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>               df <span class="ot">&lt;-</span> </span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>                 purrr<span class="sc">::</span><span class="fu">pluck</span>(payload_df_reduced, .x) <span class="sc">%&gt;%</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>                 dplyr<span class="sc">::</span><span class="fu">mutate_at</span>(<span class="at">.vars =</span> cols_to_transform, as.numeric) <span class="sc">%&gt;%</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>                 dplyr<span class="sc">::</span><span class="fu">mutate_at</span>(<span class="at">.vars =</span> cols_to_transform, <span class="cf">function</span>(x) {<span class="fu">ifelse</span>(<span class="fu">is.na</span>(x), <span class="dv">999999999</span>, x)})</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>               character_columns <span class="ot">&lt;-</span> </span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>                 data_base_column_types <span class="sc">%&gt;%</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>                 dplyr<span class="sc">::</span><span class="fu">filter</span>(class <span class="sc">==</span> <span class="st">"character"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>                 dplyr<span class="sc">::</span><span class="fu">pull</span>(variable)</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>               numeric_columns <span class="ot">&lt;-</span> </span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>                 data_base_column_types <span class="sc">%&gt;%</span></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>                 dplyr<span class="sc">::</span><span class="fu">filter</span>(class <span class="sc">==</span> <span class="st">"numeric"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>                 dplyr<span class="sc">::</span><span class="fu">pull</span>(variable)</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>               integer_columns <span class="ot">&lt;-</span> </span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>                 data_base_column_types <span class="sc">%&gt;%</span></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>                 dplyr<span class="sc">::</span><span class="fu">filter</span>(class <span class="sc">==</span> <span class="st">"integer"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>                 dplyr<span class="sc">::</span><span class="fu">pull</span>(variable)</span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>               df <span class="ot">&lt;-</span> </span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>                 df <span class="sc">%&gt;%</span></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>                 dplyr<span class="sc">::</span><span class="fu">mutate_if</span>(<span class="fu">names</span>(df) <span class="sc">%in%</span> character_columns, as.character) <span class="sc">%&gt;%</span></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>                 dplyr<span class="sc">::</span><span class="fu">mutate_if</span>(<span class="fu">names</span>(df) <span class="sc">%in%</span> numeric_columns, as.numeric) <span class="sc">%&gt;%</span></span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>                 dplyr<span class="sc">::</span><span class="fu">mutate_if</span>(<span class="fu">names</span>(df) <span class="sc">%in%</span> integer_columns, as.integer)</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>               <span class="fu">return</span>(df)</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>               })</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>  combined <span class="ot">&lt;-</span> payload_df_reduced_formatted <span class="sc">%&gt;%</span></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">bind_rows</span>()</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(combined)</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>To use this function, it is enough to run something like.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>statcast2024 <span class="ot">&lt;-</span> <span class="fu">annual_statcast_query</span>(<span class="dv">2024</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="statcast-warning" class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Long run time
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Scraping a single season of StatCast data can take on the order of 10’s of minutes. If you do scrape the data yourself, I <strong>highly</strong> recommend saving the data table in an <code>.RData</code> file that can be loaded into future R sessions. For instance,</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>statcast2024 <span class="ot">&lt;-</span> <span class="fu">annual_statcast_query</span>(<span class="dv">2024</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(statcast2024, <span class="at">file =</span> <span class="st">"statcast2024.RData"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.5
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ ggplot2   3.5.2     ✔ tibble    3.3.0
+✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+✔ purrr     1.0.4     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"~/Dropbox/Teaching/2025-26/stat479_f25_sports/lecture_planning/pitchFraming/statcast2024.RData"</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"~/Dropbox/Teaching/2025-26/stat479_f25_sports/lecture_planning/pitchFraming/statcast2023.RData"</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"~/Dropbox/Teaching/2025-26/stat479_f25_sports/lecture_planning/pitchFraming/statcast2022.RData"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>In the 2024 season, we have StatCast data for 784,978 pitches. The dataset records 118 different variables for each pitch. Some of them are contextual variables like <code>game_pk</code>, which is the unique identifier for a game, and <code>game_date</code>, which is the date of the game, while others like <code>batter</code>, <code>pitcher</code>, and <code>fielder_2</code> list the players involved in the pitch. The dataset also includes information about the pitch trajectory like <code>plate_x</code> and <code>plate_z</code>, which record the horizontal and vertical coordinates of the pitch as it crosses the front edge of home plate, and the pitch outcome The data table also contains 118 variables, many of which are defined in the <a href="https://baseballsavant.mlb.com/csv-docs">StatCast documentation</a>. The function <code>annual_statcast_query</code> actually scrapes data not only from the regular season but also from the pre-season and the play-offs. For our analysis, we will focus only on the regular season data. The variable <code>game_type</code> records the type of game in which each pitch was thrown.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(statcast2024<span class="sc">$</span>game_type, <span class="at">useNA =</span> <span class="st">'always'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+     D      F      L      R      S      W   &lt;NA&gt; 
+  5182   2488   3540 695136  77056   1576      0 </code></pre>
+</div>
+</div>
+<p>Looking at the <a href="https://baseballsavant.mlb.com/csv-docs">StatCast documentation</a>, we see that regular season pitches have <code>game_type=="R"</code>. We additionally filter out any pitches with nonsensical values like 4 balls or 3 strikes (for 2024, this turns out to be only 1 pitch).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>statcast2024 <span class="ot">&lt;-</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  statcast2024 <span class="sc">%&gt;%</span> </span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(game_type <span class="sc">==</span> <span class="st">"R"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(strikes <span class="sc">&gt;=</span> <span class="dv">0</span> <span class="sc">&amp;</span> strikes <span class="sc">&lt;</span> <span class="dv">3</span> <span class="sc">&amp;</span> </span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>           balls <span class="sc">&gt;=</span> <span class="dv">0</span> <span class="sc">&amp;</span> balls <span class="sc">&lt;</span> <span class="dv">4</span> <span class="sc">&amp;</span> </span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>           outs_when_up <span class="sc">&gt;=</span> <span class="dv">0</span> <span class="sc">&amp;</span> outs_when_up <span class="sc">&lt;</span> <span class="dv">3</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(game_pk, inning, <span class="fu">desc</span>(inning_topbot), at_bat_number, pitch_number)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We’re now left with 695,135 regular season pitches.</p>
+</section>
 </section>
 <section id="expected-runs" class="level2">
 <h2 class="anchored" data-anchor-id="expected-runs">Expected Runs</h2>
+<p>Of the following two hypothetical at-bats, which do we think will generate more runs for the batting team</p>
+<ol type="1">
+<li>There are no outs and there are runners on all three bases.</li>
+<li>There are 2 outs and there are no baserunners.</li>
+</ol>
+<p>With runners on and no outs in the first scenario, there is a good chance of scoring at least one run if the batter gets a hit in the at-bat. By contrast, in the second scenario, it is perhaps more likely that the batting team scores no runs. On this view, batting teams would value the first scenario much more highly and fielding teams much prefer the second.</p>
+<p>We can more precisely quantify this intuition using <strong>expected runs</strong>, which is a key tool used in sabermetrics. The expected runs <span class="math inline">\(\rho(\textrm{o}, \textrm{br})\)</span> is the average number of runs scored in the remainder of the half-inning following at-bats beginning with <span class="math inline">\(\textrm{o}\)</span> outs and baserunner configuration <span class="math inline">\(\textrm{br}.\)</span> We will encode baserunner configuration using a binary string of length 3. If there is a runner on first base, the first digit will be a 1 and if there is not a runner on first base, the first digit will be a 0. Similarly, the second and third digits respectively indicate whether there are runners on second and third base. So if <span class="math inline">\(\textrm{br} = "011"\)</span> that means that there are runners on second and third base at the beginning of the at-bat but not on first base. The raw StatCast data contains variables <code>on_1b</code>, <code>on_2b</code>, and <code>on_3b</code>. From a quick visual inspection of the dataset (e.g., with <code>statcast2024$on_1b[1:100]</code>), we find many <code>NA</code> values. These correspond to pitches when there is nobody on that particular base. When the value is not <code>NA</code>, it is the numeric id of the batting team player who is on that base. To create the 3-digit binary string encoding baserunner configuration, notice that <code>1*(!is.na(on_1b))</code> will return a 1 if there is somone on first base and 0 otherwise. So by pasting together the results of <code>1*(!is.na(on_1b))</code>, <code>1*(!is.na(on_2b))</code>, and <code>1*(!is.na(on_3b))</code>, we can form the 3-digit binary string described above. In the codeblock below, we also rename the column <code>outs_when_up</code> to <code>Outs</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>statcast2024 <span class="ot">&lt;-</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  statcast2024 <span class="sc">%&gt;%</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">BaseRunner =</span> </span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">paste0</span>(<span class="dv">1</span><span class="sc">*</span>(<span class="sc">!</span><span class="fu">is.na</span>(on_1b)),</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>             <span class="dv">1</span><span class="sc">*</span>(<span class="sc">!</span><span class="fu">is.na</span>(on_2b)),</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>             <span class="dv">1</span><span class="sc">*</span>(<span class="sc">!</span><span class="fu">is.na</span>(on_3b)))) <span class="sc">%&gt;%</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Outs =</span> outs_when_up)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>There are 3 possible values for the number of outs (<span class="math inline">\(\textrm{o} \in \{0,1,2\}\)</span>) and 8 possible values for the baserunner configuration (<span class="math inline">\(\textrm{br} \in \{"000", "100", "010", "001", "110", "101", "011", "111"\}\)</span>). So, there are 24 different values of run expectancy, which is often presented in a table with rows corresponding to baserunner configuration and columns corresponding to outs.</p>
+<section id="computing-rhotextrmo-textrmbr" class="level3">
+<h3 class="anchored" data-anchor-id="computing-rhotextrmo-textrmbr">Computing <span class="math inline">\(\rho(\textrm{o}, \textrm{br})\)</span></h3>
+<p>For each at-bat across these 2009 to 2023 seasons, we will compute the number of runs scored by the batting team in the remainder of the half-inning after every at-bat. Then, we will divide the at-bats into 24 groups, one for each combination of outs and baserunner configuration and compute the average number of runs scored in the remainder of the half-inning.</p>
+<section id="computing-runs-scored-in-the-half-inning" class="level4">
+<h4 class="anchored" data-anchor-id="computing-runs-scored-in-the-half-inning">Computing runs scored in the half-inning</h4>
+<p>Suppose that in a given at-bat <span class="math inline">\(a\)</span> that there are <span class="math inline">\(n_{a}\)</span> pitches. Within at-bat <span class="math inline">\(a,\)</span> for each <span class="math inline">\(i = 1, \ldots, n_{a},\)</span> let <span class="math inline">\(R_{i,a}\)</span> be the number of runs scored in the half-inning after that pitch (including any runs scored as a result of pitch <span class="math inline">\(i\)</span>). So <span class="math inline">\(R_{1,a}\)</span> is the number of runs scored in the half-inning after the first pitch, <span class="math inline">\(R_{2,a}\)</span> is the number of runs scored subsequent to the second pitch, etc. Our first step towards building the necessary at-bat-level data set will be to append a column of <span class="math inline">\(R_{i,a}\)</span> values to each season’s StatCast data.</p>
+<p>We start by illustrating the computation using a single half-inning from a single game. The code below pulls out all pitches thrown in the 8th inning of the <a href="https://www.espn.com/mlb/playbyplay/_/gameId/401568469">March 20, 2024 game between the Dodgers and Padres</a>. During this inning, the Dodgers scored 4 runs.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>dodgers_inning <span class="ot">&lt;-</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  statcast2024 <span class="sc">%&gt;%</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(game_pk <span class="sc">==</span> <span class="dv">745444</span> <span class="sc">&amp;</span> inning <span class="sc">==</span> <span class="dv">8</span> <span class="sc">&amp;</span> inning_topbot <span class="sc">==</span> <span class="st">"Top"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(at_bat_number, pitch_number, </span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>         bat_score, post_bat_score, events, description, des) <span class="sc">%&gt;%</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(at_bat_number, pitch_number)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The column <code>bat_score</code> records the batting team’s score <strong>before</strong> each pitch is thrown. The column <code>post_bat_score</code> records the batting team’s score <strong>after</strong> the the outcome of the pitch. For most of the 25 pitches, we find that <code>bat_score</code> is equal to <code>post_bat_score</code>; this is because only a few pitches result in scoring events.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(<span class="at">bat_score =</span> dodgers_inning<span class="sc">$</span>bat_score, <span class="at">post_bat_score =</span> dodgers_inning<span class="sc">$</span>post_bat_score)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
+bat_score         1    1    1    1    1    1    1    1    1     1     1     1
+post_bat_score    1    1    1    1    1    1    1    1    1     1     1     1
+               [,13] [,14] [,15] [,16] [,17] [,18] [,19] [,20] [,21] [,22]
+bat_score          1     1     2     3     3     3     4     5     5     5
+post_bat_score     1     2     3     3     3     4     5     5     5     5
+               [,23] [,24] [,25]
+bat_score          5     5     5
+post_bat_score     5     5     5</code></pre>
+</div>
+</div>
+<p>Looking at the <a href="https://www.espn.com/mlb/playbyplay/_/gameId/401568469">play-by-play</a>, we see that the Dodgers score their second run after the 14th pitch of the half-inning (on a Enrique Hernández sacrifice fly). They scored their third run on the very next pitch (Gavin Lux grounding into a fielder’s choice). They scored their fourth and fifth runs on consecutive pitches as well (on singles by Mookie Betts and Shohei Ohtani).</p>
+<p><img src="figures/lecture4_dodgers_pbp.png" class="img-fluid quarto-figure quarto-figure-center" style="width:50.0%" alt="Dodgers-Padres Play-by-Play"> We can verify this by looking at the variable <code>des</code>, which stores a narrative description about what happened during the at-bat.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>dodgers_inning<span class="sc">$</span>des[<span class="fu">c</span>(<span class="dv">14</span>,<span class="dv">15</span>, <span class="dv">18</span>, <span class="dv">19</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Enrique Hernández out on a sacrifice fly to left fielder José Azocar. Max Muncy scores."                                                                                             
+[2] "Gavin Lux reaches on a fielder's choice, fielded by first baseman Jake Cronenworth. Teoscar Hernández scores. James Outman to 2nd. Fielding error by first baseman Jake Cronenworth."
+[3] "Mookie Betts singles on a ground ball to left fielder José Azocar. James Outman scores. Gavin Lux to 2nd."                                                                           
+[4] "Shohei Ohtani singles on a line drive to left fielder José Azocar. Gavin Lux scores. Mookie Betts to 2nd."                                                                           </code></pre>
+</div>
+</div>
+<p>Notice that the maximum value of <code>post_bat_score</code> is the batting team’s score at the <strong>end</strong> of the inning<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Thus, to compute <span class="math inline">\(R_{i,a}\)</span> for all pitches in this inning, it is enough to subtract the corresponding <code>bat_score</code> value from the maximum value of <code>post_bat_score</code> across the whole half-inning.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(dodgers_inning<span class="sc">$</span>post_bat_score) <span class="sc">-</span> dodgers_inning<span class="sc">$</span>bat_score</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] 4 4 4 4 4 4 4 4 4 4 4 4 4 4 3 2 2 2 1 0 0 0 0 0 0</code></pre>
+</div>
+</div>
+<p>We now append a column with these values to our data table <code>dodgers_inning</code></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>dodgers_inning <span class="ot">&lt;-</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  dodgers_inning <span class="sc">%&gt;%</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">RunsRemaining =</span> <span class="fu">max</span>(post_bat_score) <span class="sc">-</span> bat_score)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We now need to extend these calculation to every half-inning of every game. To do this, we will take advantage of the <code>group_by()</code> command in <strong>dplyr</strong> to apply the same calculation to small groups defined by game and half-inning.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>statcast2024 <span class="ot">&lt;-</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  statcast2024 <span class="sc">%&gt;%</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(game_pk, inning, inning_topbot) <span class="sc">%&gt;%</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">RunsRemaining =</span> <span class="fu">max</span>(post_bat_score) <span class="sc">-</span> bat_score) <span class="sc">%&gt;%</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="from-pitches-to-at-bats" class="level4">
+<h4 class="anchored" data-anchor-id="from-pitches-to-at-bats">From pitches to at-bats</h4>
+<p>We now have the number of runs scored in the half-inning after each pitch. But to compute run expectancy, we need this quantity at the at-bat level and not the pitch-level. Using our notation from before, note that <span class="math inline">\(R_{1,a}\)</span> is the number of runs scored after the first pitch of at-bat <span class="math inline">\(a.\)</span> So, to compute run expectancy, it is enough to pull out the first pitch from each at-bat (i.e., those pitches with<code>pitch_number == 1</code>) using the <code>filter()</code> function.</p>
+</section>
+<section id="putting-it-all-together" class="level4">
+<h4 class="anchored" data-anchor-id="putting-it-all-together">Putting it all together</h4>
+<p>We can loop over the pitch-by-pitch data from multiple seasons, append <span class="math inline">\(R_{i,a}\)</span> values to each one, and the number of outs, baserunner configuration, and <span class="math inline">\(R_{1,a}\)</span> for each at-bat in that season. In the code below, we loop over each season and save the at-bat level run expectancy data in a list. Then we stack the data frames on top over each other using the <code>bind_rows()</code> command.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>er_data_list <span class="ot">&lt;-</span> <span class="fu">list</span>() <span class="co"># list of save at-bat level data for previous seasons</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(y <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>){</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  er_data <span class="ot">&lt;-</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">get</span>(<span class="fu">paste0</span>(<span class="st">"statcast"</span>, y<span class="sc">+</span><span class="dv">2021</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(game_type <span class="sc">==</span> <span class="st">"R"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(strikes <span class="sc">&gt;=</span> <span class="dv">0</span> <span class="sc">&amp;</span> strikes <span class="sc">&lt;</span> <span class="dv">3</span> <span class="sc">&amp;</span> </span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>           balls <span class="sc">&gt;=</span> <span class="dv">0</span> <span class="sc">&amp;</span> balls <span class="sc">&lt;</span> <span class="dv">4</span> <span class="sc">&amp;</span> </span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>           outs_when_up <span class="sc">&gt;=</span> <span class="dv">0</span> <span class="sc">&amp;</span> outs_when_up <span class="sc">&lt;</span> <span class="dv">3</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(game_pk, inning, inning_topbot) <span class="sc">%&gt;%</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">RunsRemaining =</span> <span class="fu">max</span>(post_bat_score) <span class="sc">-</span> bat_score) <span class="sc">%&gt;%</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">BaseRunner =</span> </span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>             <span class="fu">paste0</span>(<span class="dv">1</span><span class="sc">*</span>(<span class="sc">!</span><span class="fu">is.na</span>(on_1b)), <span class="co"># 1st digit of string for baserunner</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>                    <span class="dv">1</span><span class="sc">*</span>(<span class="sc">!</span><span class="fu">is.na</span>(on_2b)), <span class="co"># 2nd digit of string for baserunner</span></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>                    <span class="dv">1</span><span class="sc">*</span>(<span class="sc">!</span><span class="fu">is.na</span>(on_3b)))) <span class="sc">%&gt;%</span> <span class="co"># 3rd digit of string for baserunner</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(game_pk, </span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>            inning, </span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>            <span class="fu">desc</span>(inning_topbot), <span class="co"># show bottom of innings before top</span></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>            at_bat_number, pitch_number) <span class="sc">%&gt;%</span></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(pitch_number <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rename</span>(<span class="at">Outs =</span> outs_when_up) <span class="sc">%&gt;%</span></span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(Outs, BaseRunner, RunsRemaining)</span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a> er_data_list[[y]] <span class="ot">&lt;-</span> er_data</span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a> <span class="fu">rm</span>(er_data)</span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a><span class="co"># stack data from all previous seasons into one bit dataframe</span></span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>er_data_all <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">bind_rows</span>(er_data_list)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can now group the rows of <code>er_data_all</code> by combinations of baserunner and outs to compute <span class="math inline">\(\rho(\textrm{o}, \textrm{br}).\)</span></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>expected_runs <span class="ot">&lt;-</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  er_data_all <span class="sc">%&gt;%</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Outs, BaseRunner) <span class="sc">%&gt;%</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">rho =</span> <span class="fu">mean</span>(RunsRemaining), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>For reasons that will become clear shortly, we will create a new column that combines the out and baserunner configuration into a single string and will also add a new row for an end of inning (with corresponding <span class="math inline">\(\rho\)</span> value equal to 0)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>expected_runs <span class="ot">&lt;-</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  expected_runs <span class="sc">%&gt;%</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_row</span>(<span class="at">Outs=</span><span class="dv">3</span>, <span class="at">BaseRunner=</span><span class="st">"000"</span>, <span class="at">rho =</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">obr_key =</span> <span class="fu">paste</span>(Outs, BaseRunner, <span class="at">sep =</span> <span class="st">"."</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="run-expectancy-re24" class="level3">
+<h3 class="anchored" data-anchor-id="run-expectancy-re24">Run expectancy (RE24)</h3>
+<p>Paraphrasing from <a href="https://library.fangraphs.com/misc/re24/">FanGraphs</a>, <strong>R</strong>un <strong>E</strong>xpectancy based on the <strong>24</strong> baserunner-out states (<strong>RE24</strong>) measures the change in expected runs from the beginning of a plate appearance to the end of the plate appearance. It also measures the For each at-bat, we now need to look at the run expectancy at the start of the at-bat, the run-expectancy at the end of the at-bat.</p>
+<section id="runs-scored-in-each-at-bat" class="level4">
+<h4 class="anchored" data-anchor-id="runs-scored-in-each-at-bat">Runs scored in each at-bat</h4>
+<p>We need to compute how many runs were scored during each at-bat. To do this, we can go back to our pitch-level data, group everything by at-bat number and look at the <code>max(post_bat_score)</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>statcast2024 <span class="ot">&lt;-</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  statcast2024 <span class="sc">%&gt;%</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(game_pk, at_bat_number) <span class="sc">%&gt;%</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">RunsAB =</span> <span class="fu">max</span>(post_bat_score) <span class="sc">-</span> bat_score) <span class="sc">%&gt;%</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<!--
+  BIG TO DO: how to get the next at-bat's starting state
+  Filter down to pitch_number == 1, make sure to arrange by at_bat_number
+  Group by game, inning, and inning top-bat. Then use lead() to get the next state
+  Whenever there is an NA this signals that this was the last at-bat of the inning
+  We can set this to be a null-state 3.000 that has expected runs equal to 0.
+-->
 <!--
   Definition, based on the 24 combinations of outs and baserunners
   Build the matrix
   Add EPA start and EPA after for each plate appearance. Also get number of runs scored in that plate appearance
 -->
-<section id="adjusting-for-platoon-advantages-park-effects" class="level3">
-<h3 class="anchored" data-anchor-id="adjusting-for-platoon-advantages-park-effects">Adjusting for platoon advantages &amp; park effects</h3>
+</section>
+</section>
+</section>
+<section id="adjusting-re24-for-platoon-advantage-ballpark" class="level2">
+<h2 class="anchored" data-anchor-id="adjusting-re24-for-platoon-advantage-ballpark">Adjusting RE24 for platoon advantage &amp; ballpark</h2>
 <!--
   Regress delta onto park and indicator Bhand == Phand
   Get those residuals and add them to the data frame
 -->
-</section>
 </section>
 <section id="base-running" class="level2">
 <h2 class="anchored" data-anchor-id="base-running">Base-running</h2>
@@ -304,7 +699,13 @@ mu = epsilon-eta attributable to the hitter
 
 </section>
 
-</main> <!-- /main -->
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Try to justify why this is the case!<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Lecture 2: Expected Goals in Soccer – STAT479</title>
+<title>Lecture 2: Expected Value-based Evaluation – STAT479</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -19,6 +19,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -135,11 +170,11 @@ window.Quarto = {
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture2.html">
- <span class="dropdown-text">Lecture 2: Expected Goals in Soccer</span></a>
+ <span class="dropdown-text">Lecture 2: Expected Value-based Evaluation</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture3.html">
- <span class="dropdown-text">Lecture 3: Building our own XG model</span></a>
+ <span class="dropdown-text">Lecture 3: Estimating the Expected Value of a Game State</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture4.html">
@@ -192,7 +227,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../lectures/lecture2.html">Lecture 2: Expected Goals in Soccer</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../lectures/lecture2.html">Lecture 2: Expected Value-based Evaluation</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -213,13 +248,13 @@ window.Quarto = {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../lectures/lecture2.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Lecture 2: Expected Goals in Soccer</span></a>
+ <span class="menu-text">Lecture 2: Expected Value-based Evaluation</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../lectures/lecture3.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lecture 3: Building our own XG model</span></a>
+ <span class="menu-text">Lecture 3: Estimating the Expected Value of a Game State</span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -251,10 +286,12 @@ window.Quarto = {
    
   <ul>
   <li><a href="#motivation-beth-meades-performance-at-euro2022" id="toc-motivation-beth-meades-performance-at-euro2022" class="nav-link active" data-scroll-target="#motivation-beth-meades-performance-at-euro2022">Motivation: Beth Meade’s Performance at EURO2022</a></li>
-  <li><a href="#digression-conditional-probability" id="toc-digression-conditional-probability" class="nav-link" data-scroll-target="#digression-conditional-probability">Digression: Conditional Probability</a></li>
-  <li><a href="#working-with-statsbombs-xg" id="toc-working-with-statsbombs-xg" class="nav-link" data-scroll-target="#working-with-statsbombs-xg">Working with StatsBomb’s XG</a></li>
-  <li><a href="#goals-above-expected-team-based" id="toc-goals-above-expected-team-based" class="nav-link" data-scroll-target="#goals-above-expected-team-based">Goals Above Expected (Team-Based)</a></li>
-  <li><a href="#goals-above-expected-player-based" id="toc-goals-above-expected-player-based" class="nav-link" data-scroll-target="#goals-above-expected-player-based">Goals Above Expected (Player-Based)</a></li>
+  <li><a href="#working-with-soccer-event-data" id="toc-working-with-soccer-event-data" class="nav-link" data-scroll-target="#working-with-soccer-event-data">Working with soccer event data</a></li>
+  <li><a href="#an-initial-expected-goals-model" id="toc-an-initial-expected-goals-model" class="nav-link" data-scroll-target="#an-initial-expected-goals-model">An initial expected goals model</a>
+  <ul class="collapse">
+  <li><a href="#accounting-for-additional-features" id="toc-accounting-for-additional-features" class="nav-link" data-scroll-target="#accounting-for-additional-features">Accounting for additional features</a></li>
+  </ul></li>
+  <li><a href="#conditioning-on-even-more-features" id="toc-conditioning-on-even-more-features" class="nav-link" data-scroll-target="#conditioning-on-even-more-features">Conditioning on even more features</a></li>
   </ul>
 </nav>
     </div>
@@ -263,7 +300,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Lecture 2: Expected Goals in Soccer</h1>
+<h1 class="title">Lecture 2: Expected Value-based Evaluation</h1>
 </div>
 
 
@@ -282,7 +319,13 @@ window.Quarto = {
 
 <section id="motivation-beth-meades-performance-at-euro2022" class="level2">
 <h2 class="anchored" data-anchor-id="motivation-beth-meades-performance-at-euro2022">Motivation: Beth Meade’s Performance at EURO2022</h2>
-<p>Consider the following goals scored by Beth Meade during EURO 2022.</p>
+<!--
+Beth Mead scored 6 goals in the EURO2022 and won the tournament's Golden Boot award.
+Let's take a look at some of her goals.
+Which was the most impressive?
+
+
+-->
 <div class="columns">
 <div class="column" style="width:49%;">
 <div class="quarto-video"><video id="video_shortcode_videojs_video1" class="video-js vjs-default-skin vjs-fluid" controls="" preload="auto" data-setup="{}" title=""><source src="https://youtube.com/clip/UgkxS9IXis1jcLq7Q5oTB2ED6Dkb34FT7TmM?si=-2MwgWJsy2HkeWgb"></video></div>
@@ -290,44 +333,302 @@ window.Quarto = {
 <div class="quarto-video"><video id="video_shortcode_videojs_video2" class="video-js vjs-default-skin vjs-fluid" controls="" preload="auto" data-setup="{}" title=""><source src="https://youtube.com/clip/UgkxJKtmAvMQ9eXTygNxJUkLL1BvVN7o2njn?si=TUaiNTdkohxUWfqr"></video></div>
 </div>
 </div>
-<p>We can make these statements more quantiatively precise using <em>expected goals</em></p>
-<p>Definition of xG</p>
-</section>
-<section id="digression-conditional-probability" class="level2">
-<h2 class="anchored" data-anchor-id="digression-conditional-probability">Digression: Conditional Probability</h2>
 <!--
-  1. Statistically, xg is an example of conditional probability
-  2. Notationally it is written like this. On the left ofthe bar
-  3. One way to compute this is to divide. Example: P(goal | footedness or play-type)
-  4. In the examples above, we want to condition on many more variables. This involves doing something more sophisticated than simple binning & averaging. We usually fit a model (stay tuned)
+We can argue about this endlessly.
+In doing so, we found ourselves dissecting various aspects -- the footedness, the type of shot, the circumstances ---
+To resolve this question, we can try to *quantify* the differences between these goals.
+One way -- not the only way -- is to imagine what might have happened if we could reply every shot.
+We could count up the time
+As we will see in this lecture, we can provide a *quantitative* answer to this question through the framework of expected goals
+
+
+Why is XG compelling for assessing the quality of a chance? If something is expected to go in, we shouldn't be surprised when it does. Similarly, if it is unlikely to go in, then we should give a lot of credit to the player for converting the chance!
 -->
 </section>
-<section id="working-with-statsbombs-xg" class="level2">
-<h2 class="anchored" data-anchor-id="working-with-statsbombs-xg">Working with StatsBomb’s XG</h2>
-<!--
-  1. There are many existing xg models. They differ in terms of (i) the covariates (i.e., what goes on the right hand side of the conditioning statement) and (ii) the estimation procedure. We will explore different ones next lecture
-  2. For today, we will use XG provided by StatsBomb
-  3. Load up the data; focus on EURO 2022 only
--->
-<p>As an illustration, here is a visualization of all of Beth Meade’s shots along with the associated XG value. Notice that some are very low and some are very high.</p>
+<section id="working-with-soccer-event-data" class="level2">
+<h2 class="anchored" data-anchor-id="working-with-soccer-event-data">Working with soccer event data</h2>
+<p>We will make use of high-resolution tracking data provided by the company Huddle StatsBomb. As a bit of background, StatsBomb extracts player locations using <!-- video processing --> To their great credit, StatsBomb releases a small snapshot of their data for public use. We can access this data directly in R using the <strong>StatsBombR</strong> package.</p>
+<p>You can check if the package is installed using the code <code>"StatsBombR" %in% rownames(installed.packages()).</code> If that code returns <code>FALSE</code>, then you can install the package using the code <code>devtools::install_github("statsbomb/StatsBombR")</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># save a nice color-blind friednly color palette into our environment</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>oi_colors <span class="ot">&lt;-</span> <span class="fu">palette.colors</span>(<span class="at">palette =</span> <span class="st">"Okabe-Ito"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>StatsBomb organizes its free data by competition/tournament. The screenshot below shows a table of all the available competitions. We can load this table into our R environment using the function <code>StatsBombR::FreeCompetitions()</code> <!--
+Screenshot of the table of matches and table of matches for 
+--> Each competition and season have unique id and we can also see whether it was a men’s or women’s competition. To see which matches from selected competitions have publicy available data, we can pass the corresponding rows of this table to the function <code>StatsBombR::FreeMatches()</code>. Figure 2 shows the table of matches from the 2022 EURO Competition; StatsBomb graciously provided data for all matches from the tournament, which can be obtained using the code below.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>StatsBombR<span class="sc">::</span><span class="fu">FreeCompetitions</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(competition_id <span class="sc">==</span> <span class="dv">53</span> <span class="sc">&amp;</span> season_id <span class="sc">==</span> <span class="dv">106</span>) <span class="sc">%&gt;%</span> <span class="co"># Finds competition corresponding to EURO 2022</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeMatches</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Finally, to get raw-event level data for certain matches, we need to pass the corresponding rows to the function <code>StatsBombR::free_allevents().</code> StatsBomb also recommends running some basic pre-processing, all of which is nicely packaged together in the functions <code>StatsBombR::allclean()</code> and <code>StatsBombR::get.opposingteam().</code></p>
+<p>As an example, the code chunk below pulls out publicly available event data for every women’s international match.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>wi_events <span class="ot">&lt;-</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeCompetitions</span>() <span class="sc">%&gt;%</span> <span class="co"># get table of available competitions</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(competition_gender <span class="sc">==</span> <span class="st">"female"</span> <span class="sc">&amp;</span> </span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>           competition_international) <span class="sc">%&gt;%</span> <span class="co"># filter to women's internationals</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeMatches</span>() <span class="sc">%&gt;%</span> <span class="co"># Gets match data for all women's internationals</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">free_allevents</span>() <span class="sc">%&gt;%</span> <span class="co"># Gets all events for all matches</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">allclean</span>() <span class="sc">%&gt;%</span> <span class="co"># Apply StatsBomb's pre-processing</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">get.opposingteam</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Navigating complex code
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>It is not easy to code complicated pipelines like the above in a single attempt. In fact, I had to build the code line-by-line. For instance, I initially ran just the first line and manually inspected the table of free competitions (using <code>View()</code>) to figure out which variables I needed to <code>filter()</code> on in the second line. It is very helpful to develop pipelines incrementally and to check intermediate results before putting everything together in one block of code.</p>
+</div>
+</div>
 </section>
-<section id="goals-above-expected-team-based" class="level2">
-<h2 class="anchored" data-anchor-id="goals-above-expected-team-based">Goals Above Expected (Team-Based)</h2>
+<section id="an-initial-expected-goals-model" class="level2">
+<h2 class="anchored" data-anchor-id="an-initial-expected-goals-model">An initial expected goals model</h2>
+<p>Suppose we observe a dataset consisting of <span class="math inline">\(n\)</span> shots. For each shot <span class="math inline">\(i = 1, \ldots, n,\)</span> let <span class="math inline">\(Y_{i}\)</span> be a binary indicator of whether the shot resulted in a goal (<span class="math inline">\(Y_{i} = 1\)</span>) or not (<span class="math inline">\(Y_{i} = 0\)</span>). From the high-resolution tracking data, we can extract a potentially huge number of features about the shot at the moment of it was taken. Possible features include, but are certainly not limited to, the player taking the shot, the body part and side of the body used, the positions of the defenders and goal keepers, and contextual information like the score. Mathematically, we can collect all these features into a (potentially large) vector <span class="math inline">\(\boldsymbol{\mathbf{X}}_{i}.\)</span></p>
+<p>Expected goals (XG) models work by (i) positing an infinite super-population of shots represented by pairs <span class="math inline">\((\boldsymbol{\mathbf{X}}, Y)\)</span> of feature vector <span class="math inline">\(\boldsymbol{\mathbf{X}}\)</span> and binary outcome <span class="math inline">\(Y\)</span>; and (ii) assuming that the shots in our dataset constitute a random sample <span class="math inline">\((\boldsymbol{\mathbf{X}}_{1}, Y_{1}), \ldots, (\boldsymbol{\mathbf{X}}_{n}, Y_{n})\)</span> from that population. ::: {.callout-note icon=false} ## Conditional Expectations</p>
+<p>For each combination of features <span class="math inline">\(\boldsymbol{\mathbf{x}}\)</span>, the expect goals given <span class="math inline">\(\boldsymbol{\mathbf{x}},\)</span> which we will denote by <span class="math inline">\(\textrm{XG}(\boldsymbol{\mathbf{X}})\)</span> is just the average value of <span class="math inline">\(Y\)</span> among the (assumed infinite) sub-population of shots with features <span class="math inline">\(\boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}.\)</span> Mathematically, XG is <em>conditional expectation</em>: <span class="math display">\[
+\textrm{XG}(\boldsymbol{\mathbf{x}}) = \mathbb{E}[Y \vert \boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}],
+\]</span> :::</p>
+<p>Because the shot outcome <span class="math inline">\(Y\)</span> is binary, <span class="math inline">\(\textrm{XG}(\boldsymbol{\mathbf{x}})\)</span> is the proportion of goals scored within the sub-population of shots defined by the feature combinations <span class="math inline">\(\boldsymbol{\mathbf{x}}.\)</span> In other words, it is the <em>conditional probability</em> of a goal given the shot features <span class="math inline">\(\boldsymbol{\mathbf{x}}.\)</span> On this view, <span class="math inline">\(\textrm{XG}(\boldsymbol{\mathbf{x}})\)</span> provides a quantitative answer to our motivating question “If we were to replay a particular shot over and over again, what fraction of the time does it result in a goal?”</p>
+<p>The StatsBomb variable <code>shot.body_part.name</code> records the body part with which each shot was taken. Within our dataset of women’s international matches, we can see the breakdown of these body parts</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(wi_events<span class="sc">$</span>shot.body_part.name)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+      Head  Left Foot      Other Right Foot 
+       769       1024         23       2059 </code></pre>
+</div>
+</div>
+<p>For this analysis, we will focus on fitting XG models using data from shots taken with a player’s feet or head.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>wi_shots <span class="ot">&lt;-</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  wi_events <span class="sc">%&gt;%</span> <span class="co"># Adds opposing team information</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(type.name <span class="sc">==</span> <span class="st">"Shot"</span> <span class="sc">&amp;</span> shot.body_part.name <span class="sc">!=</span> <span class="st">"Other"</span>) <span class="sc">%&gt;%</span>  <span class="co"># Subsets only shot event data</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Y =</span> <span class="fu">ifelse</span>(shot.outcome.name <span class="sc">==</span> <span class="st">"Goal"</span>, <span class="dv">1</span>, <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Later, it will be useful for us to focus only on the shots from EURO2022, so we will also create a table <code>euro2022_shots</code> of all shots from that competition using similar code.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>euro2022_shots <span class="ot">&lt;-</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeCompetitions</span>() <span class="sc">%&gt;%</span> <span class="co"># get table of available competitions</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(competition_id <span class="sc">==</span> <span class="dv">53</span> <span class="sc">&amp;</span> season_id <span class="sc">==</span> <span class="dv">106</span>) <span class="sc">%&gt;%</span> <span class="co"># Finds competition corresponding to EURO 2022</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeMatches</span>() <span class="sc">%&gt;%</span> <span class="co"># Gets match data for all EURO 2022</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">free_allevents</span>() <span class="sc">%&gt;%</span> <span class="co"># Gets all events for all matches</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">allclean</span>() <span class="sc">%&gt;%</span> <span class="co"># Apply StatsBomb's pre-processing</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">get.opposingteam</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(type.name <span class="sc">==</span> <span class="st">"Shot"</span> <span class="sc">&amp;</span> shot.body_part.name <span class="sc">!=</span> <span class="st">"Other"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Y =</span> <span class="fu">ifelse</span>(shot.outcome.name <span class="sc">==</span> <span class="st">"Goal"</span>, <span class="dv">1</span>, <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Now suppose we only include the body part in <span class="math inline">\(\boldsymbol{\mathbf{X}}\)</span>. If we had full access to the infinite super-population of women’s international shots, then we could compute <span class="math display">\[\textrm{XG}(\text{right-footed shot}) = \mathbb{P}(\text{goal} \vert \text{right-footed shot})\]</span> by (i) forming a sub-group containing only those right-footed shots and then (ii) calculating the proportion of goals scored within that sub-group. We could similarly compute <span class="math inline">\(\textrm{XG}(\text{left-footed shot})\)</span> and <span class="math inline">\(\textrm{XG}(\text{header})\)</span> by calcuating the proportion of goals scored within the sub-groups containing, resptively, only left-footed shots and only headers.</p>
+<p>Of course, we don’t have access to the infinite super-population of shots. However, on the assumption that our observed data constitute a sample from that super-population, we can <em>estimate</em> <span class="math inline">\(\textrm{XG}\)</span> by mimicking the idealized calculations described above:</p>
+<ol type="1">
+<li>Break the dataset of all observed shots in women’s international matches into several groups based on the body part</li>
+<li>Within these two groups, compute the proportion of goals</li>
+</ol>
+<p>To keep things simple, we dropped the 23 shots that were taken with a body part other than the feet or the head.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>xg_model1 <span class="ot">&lt;-</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">%&gt;%</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(shot.body_part.name) <span class="sc">%&gt;%</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">XG1 =</span> <span class="fu">mean</span>(Y),</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">n =</span> <span class="fu">n</span>())</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>xg_model1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 3
+  shot.body_part.name   XG1     n
+  &lt;chr&gt;               &lt;dbl&gt; &lt;int&gt;
+1 Head                0.112   769
+2 Left Foot           0.113  1024
+3 Right Foot          0.102  2059</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Generalizing our model results
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A key assumption of all XG models is that the observed data is a random sample drawn from the super-population. The only women’s internationals matches for which StatsBomb data were from the 2019 and 2023 World Cup and the 2022 EURO tournaments. These matches are arguably <strong>not</strong> highly representative of all women’s international matches, meaning that we should exercise some caution when using models fitted to these data to analyze matches from other competitions (e.g., an international friendly or a match in a domestic league).</p>
+</div>
+</div>
+<section id="accounting-for-additional-features" class="level3">
+<h3 class="anchored" data-anchor-id="accounting-for-additional-features">Accounting for additional features</h3>
+<p>We can now create a table of just Beth Mead’s shots from EURO 2022 and add a column with the XG for each shot. To do this, we first filter our table <code>wi_shots</code> using the player name (note, StatsBomb uses her full name!). Then, for every left-footed shot Mead attempted, we want to copy over the corresponding value from the table <code>xg_model1</code>, which in this cse is 0.113. Similarly, we want to copy over the corresponding values for right-footed shots and headers from <code>xg_model1</code> into our table for Mead’s shots. We can do this using an <a href="https://r4ds.hadley.nz/joins.html#sec-mutating-joins">inner join</a>. In the code below, we actually create a temporary version of <code>xg_model1</code> that drops the column recording the overall counts of the body part used for the shots in <code>wi_shots</code>. This way, when we perform the join, we don’t create a new column with these counts.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>tmp_xg1 <span class="ot">&lt;-</span> xg_model1 <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">!</span>n) <span class="co"># temporary copy of the table without sample size column</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>mead_shots <span class="ot">&lt;-</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  euro2022_shots <span class="sc">%&gt;%</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(player.name <span class="sc">==</span> <span class="st">"Bethany Mead"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(<span class="at">y =</span> tmp_xg1, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>))</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(tmp_xg1) <span class="co"># delete temporary copy</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can now look at the what our model says about the three goals from above. The first, against Austria in the 15th minute; the second, against Norway in the 37th minute, and the third against Sweden in the 33rd minute When These turn out to be in rows 1, 4, and 14 of the table <code>mead_shots</code></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>mead_shots <span class="sc">%&gt;%</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(OpposingTeam, minute, shot.body_part.name, Y, XG1) <span class="sc">%&gt;%</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">14</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 5
+  OpposingTeam    minute shot.body_part.name     Y   XG1
+  &lt;chr&gt;            &lt;int&gt; &lt;chr&gt;               &lt;dbl&gt; &lt;dbl&gt;
+1 Austria Women's     15 Right Foot              1 0.102
+2 Norway Women's      37 Left Foot               1 0.113
+3 Sweden Women's      33 Right Foot              1 0.102</code></pre>
+</div>
+</div>
+<p>According to our first model, these three goals appear equally impressive: our model put the respective chances of each shot resulting in a goal at about 10%, 11%, and 10%. But, watching the videos a bit more closely, this conclusions is <strong>not</strong> especially satisfying: Mead scored the first goal in a one-on-one situation but had to shoot through several defenders on the second and third goal The discrepancy between our qualitative comparisons and our quantitative modeling results stems from the fact that we only conditioned on the body part and did not account for the other ways that the shots are different. In other words, our initial XG model is much too coarse to quantify the differences between the three chances that we believe are important.</p>
+<p>To better compare the three goals, we need to build a a finer XG model that conditions on more features, including ones that differ between the two shots. To this end, notice that Mead uses a different <em>technique</em> on the three shots: she lobs the ball into the net on the first goal, shoots the ball from the ground on the second goal, and scores the third goal off of a half volley, striking the ball as it bounced up off the ground. The StatsBomb variable <code>shot.technique.name</code> records the technique of each shot type</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(wi_shots<span class="sc">$</span>shot.technique.name)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+     Backheel Diving Header   Half Volley           Lob        Normal 
+           25            10           529            15          3015 
+Overhead Kick        Volley 
+           14           244 </code></pre>
+</div>
+</div>
+<p>By conditioning on both body part and technique, we can begin to build a more refined XG model. The code to do this is almost identical to the code used in our first model. The only difference is that we now group by two variables <code>shot.body_part.name</code> and <code>shot.technique_name</code>. Because we are grouping by two variables, specify the argument <code>.groups="drop"</code> argument when calling <code>summarize</code>; this prevents a (mostly innocuous) warning message<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. We additionally append our new XG estimates to the table containing all of Mead’s shots.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>xg_model2 <span class="ot">&lt;-</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">%&gt;%</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(shot.body_part.name, shot.technique.name) <span class="sc">%&gt;%</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">XG2 =</span> <span class="fu">mean</span>(Y),</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">n =</span> <span class="fu">n</span>(), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>tmp_xg2 <span class="ot">&lt;-</span> xg_model2 <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span>n)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>mead_shots <span class="ot">&lt;-</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  mead_shots <span class="sc">%&gt;%</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(<span class="at">y =</span> xg_model2, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>, <span class="st">"shot.technique.name"</span>))</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(tmp_xg2)</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>mead_shots <span class="sc">%&gt;%</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(OpposingTeam, minute, shot.body_part.name, shot.technique.name, Y, XG2) <span class="sc">%&gt;%</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">14</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 6
+  OpposingTeam    minute shot.body_part.name shot.technique.name     Y    XG2
+  &lt;chr&gt;            &lt;int&gt; &lt;chr&gt;               &lt;chr&gt;               &lt;dbl&gt;  &lt;dbl&gt;
+1 Austria Women's     15 Right Foot          Lob                     1 0.333 
+2 Norway Women's      37 Left Foot           Normal                  1 0.121 
+3 Sweden Women's      33 Right Foot          Half Volley             1 0.0801</code></pre>
+</div>
+</div>
 </section>
-<section id="goals-above-expected-player-based" class="level2">
-<h2 class="anchored" data-anchor-id="goals-above-expected-player-based">Goals Above Expected (Player-Based)</h2>
+</section>
+<section id="conditioning-on-even-more-features" class="level2">
+<h2 class="anchored" data-anchor-id="conditioning-on-even-more-features">Conditioning on even more features</h2>
+<p>At least for these three goals, our new XG estimates seem more reasonable: the one-on-one lob against Austria has a much higher XG than the shots through traffic against Norway and Sweden. But are we fully satisfied with this model? One could credibly argue that even though our model returns somewhat more sensible XG estimates, it is still too coarse for to meaningfully compare the shots above. After all, because it does not condition on distance, our model would return exactly the same XG for right-footed volleys taken one meter and 15 meters away from the goal. Similarly, we could try to account for the number of defenders between the shot and the goal and the position of the keeper.</p>
+<p>If we had access to the infinite super-population of shots, conditioning on more features is conceptually straightforward: we look at the corresponding sub-group of the super-population defined by a particular combination of features and compute the average <span class="math inline">\(Y.\)</span> Unfortunately, with finite data, trying to “bin-and-average” using lots of features can lead to erratic estimates. For instance, here are the five largest and five smallest XG estimates based on body-part and shot technique.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>xg_model2 <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(XG2)) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="fu">row_number</span>() <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, (<span class="fu">n</span>()<span class="sc">-</span><span class="dv">4</span>)<span class="sc">:</span><span class="fu">n</span>()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 4
+   shot.body_part.name shot.technique.name    XG2     n
+   &lt;chr&gt;               &lt;chr&gt;                &lt;dbl&gt; &lt;int&gt;
+ 1 Right Foot          Lob                 0.333     12
+ 2 Left Foot           Volley              0.162     74
+ 3 Right Foot          Backheel            0.136     22
+ 4 Left Foot           Normal              0.121    750
+ 5 Head                Normal              0.113    759
+ 6 Right Foot          Volley              0.0412   170
+ 7 Head                Diving Header       0         10
+ 8 Left Foot           Backheel            0          3
+ 9 Left Foot           Lob                 0          3
+10 Left Foot           Overhead Kick       0          2</code></pre>
+</div>
+</div>
+<p>Because none of the 3 left-footed lobs in our dataset led to goals, our model estimates <span class="math inline">\(\textrm{XG}(\text{left-footed lob})\)</span> as 0. Similarly, the rather large <span class="math inline">\(\textrm{XG}(\text{right-footed lob})\)</span> estimate of around 33% is based on only 12 shots. Attempting to condition on even more variables would result in estimates based on even smaller sample sizes!</p>
+<p>So, it would appear that we’re stuck between a rock and a hard place. On the one hand, our XG model with two features is too coarse to quantify important differences between the motivating shots. But on the other hand, binning and averaging with even more features carries the risk of producing highly erratic, extreme, and somewhat nonsensical estimates<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> To overcome this challenge, we can build a <em>statistical model</em>.</p>
+<p>Later in the course, we will discuss how to estimate more granular XG models with loads more features. But for today, we’ll use XG estimates from StatsBomb LLC (Huddl?). Although this is a proprietary model, StatsBomb has published a lot of information about what all goes into it. In addition to the body part and technique, they also construct several features based on location of the players (in 2 dimensions) and the ball (in 3 dimensions).</p>
 <!--
-  We see that in the first goal, Meade's XG was quite high. So, in some sense, we might want to give her much less credit.
-  Summing over all her shots, we can get a sense of 
-  
+  1. Even this model seems a bit too coarse
+  2. Also notice that there are some pretty extreme values; see left foot lob and a right foot lob
+  3. Issue is sample size; although we define XG in terms of "binning and averaging" in an infinte super-population, with a finite dataset, this isn't always practical (or advised). 
+  4. Statistics has developed a whole range of **regression models** precisely to overcome this issue. They chiefly operate by making different assumptions and attempting to "borrow strength" using data about one (x,y) value to make a prediction about a "nearby" x value. They differ in how they operationalize this strength borrowing
+  5. We will consider these methods in more detail later in the course. But for now, we will content ourselves with using a fairly sophistical model developed by StatsBomb
+
+One advantage of conditioning on a small number of features is that we have more data per combination with which to estimate XG.
+The downside, of course, is that the models are a bit too coarse and can't account for all the context around the shot.
 -->
-<p>Mathematically, let <span class="math inline">\(Y_{ij}\)</span> be the outcome of shot <span class="math inline">\(j\)</span> taken by player <span class="math inline">\(i\)</span> with <span class="math inline">\(Y_{ij} = 1\)</span> if a goal is scored off that shot and <span class="math inline">\(Y_{ij} = 0\)</span> otherwise. Additionally <span class="math inline">\(\textrm{XG}_{ij}\)</span> be the corresponding XG value for that shot.</p>
-<p>We can compute the difference <span class="math inline">\(y_{ij} - \textrm{xg}_{ij}\)</span> for each shot that player <span class="math inline">\(i\)</span> takes</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>mead_shots <span class="sc">%&gt;%</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Y <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(OpposingTeam, minute, shot.body_part.name, shot.technique.name, Y, shot.statsbomb_xg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 6
+  OpposingTeam     minute shot.body_part.name shot.technique.name     Y
+  &lt;chr&gt;             &lt;int&gt; &lt;chr&gt;               &lt;chr&gt;               &lt;dbl&gt;
+1 Austria Women's      15 Right Foot          Lob                     1
+2 Norway Women's       33 Head                Normal                  1
+3 Norway Women's       37 Left Foot           Normal                  1
+4 Norway Women's       80 Left Foot           Volley                  1
+5 Northern Ireland     43 Left Foot           Normal                  1
+6 Sweden Women's       33 Right Foot          Half Volley             1
+# ℹ 1 more variable: shot.statsbomb_xg &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<p>Recall that XG quantifies a certain hypothetical long-term frequency of scoring a goal: if the shot was replayed under exactly the conditions quantified by the feature vector <span class="math inline">\(\boldsymbol{\mathbf{x}}\)</span>, <span class="math inline">\(\textrm{XG}(\boldsymbol{\mathbf{x}})\)</span> is the proportion of times a goal is scored. So, we should be fairly impressed when a player scores a goal on a shot with very low XG. We can quantify the degree to which players under- or over-perform the model expectations by comparing the In the case of Beth Mead, we want to sum the difference <span class="math inline">\(Y_{i} = \textrm{XG}_{i}\)</span> where <span class="math inline">\(\textrm{XG}_{i}\)</span> is the StatsBomb XG estimate.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(mead_shots<span class="sc">$</span>Y <span class="sc">-</span> mead_shots<span class="sc">$</span>shot.statsbomb_xg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2.896323</code></pre>
+</div>
+</div>
+<p>During Euro 2022, Beth Mead scored a total of 6 goals, which was about 2.9 goals <strong>more</strong> than what the StatsBomb XG model expected, based on the contexts in which she attempted shots. We can repeat this calculation – summing over the difference between shot outcome <span class="math inline">\(Y\)</span> and <span class="math inline">\(\textrm{XG}\)</span> — for all players in EURO 2022 to find the players that most over-performed and most under-performed the model expectations.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>goe <span class="ot">&lt;-</span> </span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  euro2022_shots <span class="sc">%&gt;%</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">diff =</span> Y <span class="sc">-</span> shot.statsbomb_xg) <span class="sc">%&gt;%</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(player.name) <span class="sc">%&gt;%</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">GOE =</span> <span class="fu">sum</span>(diff),</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(GOE))</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>goe</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 200 × 3
+   player.name               GOE     n
+   &lt;chr&gt;                   &lt;dbl&gt; &lt;int&gt;
+ 1 Alexandra Popp          3.34     16
+ 2 Bethany Mead            2.90     15
+ 3 Alessia Russo           1.79     12
+ 4 Francesca Kirby         1.79      5
+ 5 Lina Magull             1.70     14
+ 6 Ingrid Filippa Angeldal 1.37     10
+ 7 Romée Leuchter          1.19      2
+ 8 Hanna Ulrika Bennison   0.952     1
+ 9 Nicole Anyomi           0.896     1
+10 Julie Blakstad          0.879     1
+# ℹ 190 more rows</code></pre>
+</div>
+</div>
+<p>It turns out that Alexandra Popp, the German captain, outperformed StatsBomb’s XG model expectations, by an even wider margin than Beth Mead. Like Mead, Popp scored 6 goals during the tournament off a similar number of shots (16 for Popp and 15 for Mead). Interestingly, Mead won the Golden Boot because she had one more assist…</p>
 
 
 </section>
 
-</main> <!-- /main -->
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>See <a href="https://stackoverflow.com/questions/78422148/understanding-the-purpose-of-groups-drop-in-dplyrs-summarise-function">this StackOverflow post</a> and the <a href="https://dplyr.tidyverse.org/reference/summarise.html#arg--groups">documentation</a> for <code>summarise</code> for details.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Indeed, it seems absurd to claim that, at least in women’s international soccer, players will <strong>never</strong> score off left-footed lobs! As the statistician Dennis Lindley put it we must “never believe in anything absolutely” and should “leave a little probability for the moon being made of green cheese; it can be as small as 1 in a million, but have it there since otherwise an army of astronauts returning with samples of the said cheese will leave you unmoved” ( <a href="https://archive.org/details/makingdecisions00dvli/page/104/mode/2up">source</a>). Lindley termed this principle <a href="https://en.wikipedia.org/wiki/Cromwell%27s_rule">“Cromwell’s Rule”</a>, a reference to a <a href="https://www.olivercromwell.org/Letters_and_speeches/letters/Letter_129.pdf">Oliver Cromwell’s famous quote</a> “I beesech you, in the bowels of Christ, think it possible that you may be mistaken.”<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
