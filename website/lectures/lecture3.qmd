@@ -25,12 +25,10 @@ Which scenario do you think will result in more runs for the batting team?
 Intuitively, we might expect the second scenario to lead to more runs; after all, the batting team will score at least one run if the batter gets a hit while there is no guarantee of scoring a run in the first scenario even if the batter gets on base.
 We can more precisely quantify this intuition using **expected runs**, which is a key tool used in sabermetrics. 
 The expected runs $\rho(\textrm{o}, \textrm{br})$ is the average number of runs scored in the remainder of the half-inning following at-bats beginning with $\textrm{o}$ outs and baserunner configuration $\textrm{br}.$
-Like expected goals (XG) from [Lecture 2](), expected runs is a **conditional expectation**. 
-
-
+Like expected goals (XG) from [Lecture 2](lectures/lecture2.html), expected runs is a **conditional expectation**. 
 
 During a  game between the Los Angeles Dodgers and San Diego Padres, Shohei Ohtani actually faced both of the scenarios mentioned above and singled in both at-bats.
-By the end of this lecture, we will be able to quantify exactly how valuable each of those singles were to his team using run expectancy.
+By the end of this lecture, we will be able to quantify exactly how valuable each of those singles using **run values**, which combine changes in the number of a team is *expected* to score and the number of runs actually scored in an at-bat.
 
 
 <!-- motivating example: Dodgers-padres, top 3, Ohtani singles to right field; there are 2 outs and nobody on; he does steal second and advances to 3rd but is left stranded; top 8, Ohtani   singled to left field, 1 out, runners on 1st and 2nd, this drove in a run!
@@ -38,17 +36,6 @@ By the end of this lecture, we will be able to quantify exactly how valuable eac
 which play was more valuable: we have to think about what might have happened if this was done over and over
 
 -->
-
-
-
-<!--
-[Last time](lecture2.html) we looked expected goals (XG) in soccer.
-At a high-level, XG attempts to answer the question "If a particular shot is replayed over and over again, what proportion of time will it result in a goal?"
-Mathematically, XG is  a *conditional expectation*: given a large collection of features $\boldsymbol{\mathbf{x}}$ about a shot, $\textrm{XG}(\boldsymbol{\mathbf{x}}) = \mathbb{E}[Y \vert \boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}],$ where $Y$ is a binary indicator of whether or not the shot resulted in a goal.
--->
-
-
-
 
 
 ## Working with baseball tracking data
@@ -179,6 +166,7 @@ library(tidyverse)
 load("~/Dropbox/Teaching/2025-26/stat479_f25_sports/lecture_planning/pitchFraming/statcast2024.RData")
 load("~/Dropbox/Teaching/2025-26/stat479_f25_sports/lecture_planning/pitchFraming/statcast2023.RData")
 load("~/Dropbox/Teaching/2025-26/stat479_f25_sports/lecture_planning/pitchFraming/statcast2022.RData")
+load("~/Dropbox/Teaching/2025-26/stat479_f25_sports/lecture_planning/pitchFraming/statcast2021.RData")
 ```
 
 In the 2024 season, we have StatCast data for 784,978 pitches.
@@ -237,25 +225,13 @@ So, there are 24 different values of run expectancy, which is often presented in
 
 Computing $\rho(\textrm{o}, \textrm{br})$ is conceptually straightforward: we need to divide our observed at-bats into 24 bins, one for each combination of $(\textrm{o}, \textrm{br})$ and then compute the average value of $R$ within each bin.
 This is *exactly* the same "binning-and-averaging" procedure we used to fit our initial XG models in [Lecture 2](lecture2.html).
-We will do this using at-bats taken in the first 8 innings of regular season games played between 2008 and 2023, with the exception of the 2020 season (i.e., all data from the "tracking era" up to but not including the 2024 season).
-The 2020 season was dramatically shortened due to the COVID-19 pandemic and featured many rule changes (e.g., seven-inning double headers and new rules for extra innings)
-
+We will do this using at-bats taken in the first 8 innings of played in the 2021, 2022, and 2023 regular seasons.
 We focus only on the first 8 innings because the 9th and extra innings are fundamentally different than the others.
 Specifically, the bottom half of the 9th (or later) innings is only played if the game is tied or the home team is trailing after the top of the 9th inning concludes.
 In those half-innings, if played, the game stops as soon as a winning run is scored.
 For instance, say that the home team is trailing by 1 runs in the bottom of the 9th and that there are runners on first and second base.
 If the batter hits a home run, the at-bat is recorded as resulting in only two runs (the tying run from second and the winning run from first).
 But the exact same scenario would result in 3 runs in an earlier inning. 
-
-<!--
-In the code below, we loop over data from the season and compute the number of runs scord by the batting team in the remainder of the half-inning after every at-bat 9 (`RunsRemaining`)
-We also compute the number of runs scored during the at-bat (`RunsScored`). 
-
-For each at-bat across these 2009 to 2023 seasons, we will compute the number of runs scored by the batting team in the remainder of the half-inning after every at-bat.
-Then, we will divide the at-bats into 24 groups, one for each combination of outs and baserunner configuration and compute the average number of runs scored in the remainder of the half-inning. 
--->
-
-
 
 #### Computing runs scored in the half-inning
 Suppose that in a given at-bat $a$ that there are $n_{a}$ pitches.
@@ -264,14 +240,16 @@ So $R_{1,a}$ is the number of runs scored in the half-inning after the first pit
 Our first step towards building the necessary at-bat-level data set will be to append a column of $R_{i,a}$ values to each season's StatCast data.
 
 We start by illustrating the computation using a single half-inning from the Dodgers-Padres game introduced earlier.
-The code below pulls out all pitches thrown in the top of the 8th inning of the .
+The code below pulls out all pitches thrown in the top of the 8th inning of the game.
 During this inning, the Dodgers scored 4 runs.
 ```{r dodgers-inning}
 dodgers_inning <-
   statcast2024 %>%
   filter(game_pk == 745444 & inning == 8 & inning_topbot == "Top") %>%
   select(at_bat_number, pitch_number, Outs, BaseRunner,
-         bat_score, post_bat_score, events, description, des) %>%
+         bat_score, post_bat_score, events, description, des,
+         type, 
+         on_1b, on_2b, on_3b, hc_x, hc_y, hit_location) %>%
   arrange(at_bat_number, pitch_number)
 ```
 The column `bat_score` records the batting team's score **before** each pitch is thrown.
@@ -330,9 +308,10 @@ Then we stack the data frames on top over each other using the `bind_rows()` com
 
 ```{r build-er-data}
 er_data_list <- list() # list of save at-bat level data for previous seasons
-for(y in 1:2){
+for(year in 2021:2023){
+  ix <- year-2020
   er_data <-
-    get(paste0("statcast", y+2021)) %>%
+    get(paste0("statcast", year)) %>%
     filter(game_type == "R" & inning <= 8) %>%
     filter(strikes >= 0 & strikes < 3 & 
            balls >= 0 & balls < 4 & 
@@ -351,7 +330,7 @@ for(y in 1:2){
     filter(pitch_number == 1) %>%
     rename(Outs = outs_when_up) %>%
     select(Outs, BaseRunner, RunsRemaining)
- er_data_list[[y]] <- er_data
+ er_data_list[[ix]] <- er_data
  rm(er_data)
 }
 # stack data from all previous seasons into one bit dataframe
@@ -397,7 +376,18 @@ $$
 $$
 :::
 
-We ultimately want to compute the run value of each at-bat in the 2024 season.
+
+To do compute the run value of each at-bat in the 2024 season, we must compute
+
+  1. The number of runs scored during each at-bat
+  2. The game state (i.e., the number of outs and the base-runner configuration) at the start and end of each at-bat
+  3. The change in expected runs during the at-bat (i.e., $\rho(\textrm{o}_{\text{end}}, \textrm{br}_{\text{end}}) - \rho(\textrm{o}_{\text{start}}, \textrm{br}_{\text{start}})$).
+
+We will first develop the necessary code using the data from Dodger's 8th inning from their game against the Padres.
+Then, we will deploy that code to the whole `statcast2024` table by grouping by `game_pk` and `at_bat_number`. 
+
+
+
 <!--
   1. RunsScore
   2. Filter to pitch_number == 1
@@ -411,19 +401,50 @@ add columns to `statcast2024` containing the values of $\textrm{RunsScored},$ $\
 
 ### Calculating RunsScored
 
-```{r statcast24-abruns}
-statcast2024 <-
-  statcast2024 %>%
-  group_by(game_pk, at_bat_number) %>%
-  mutate(RunsAB = max(post_bat_score) - bat_score) %>%
+
+
+### Computing the starting and ending states
+
+Except for the very last pitch in a team's innings, the ending state of that pitch is, by definition, the starting state of the next pitch.
+In order to compute $\rho(\textrm{o}_{\text{end}}, \textrm{br}_{\text{end}}),$ and $\rho(\textrm{o}_{\text{start}}, \textrm{br}_{\text{start}})$ for each at bat, we will first create a columns in `statcast2024` that encode the game state at the beginning and end of the at-bat.
+
+To build up our code, let's continue with our running example of the Dodgers' 8th inning, focusing on the at the second through fifth at-bats[^1] of the inning.
+```{r dodgers-first-3ab}
+tmp <- dodgers_inning %>%
+  arrange(at_bat_number, pitch_number) %>%
+  mutate(next_out = lead(Outs),
+         next_br = lead(BaseRunner),
+         next_on_1b = lead(on_1b),
+         next_on_2b = lead(on_2b),
+         next_on_3b = lead(on_3b),
+         next_hcx = lead(hc_x),
+         next_hcy = lead(hc_y),
+         next_hl = lead(hit_location)) %>%
+  group_by(at_bat_number) %>%
+  mutate(endOuts = last(next_out),
+         endBaseRunner = last(next_br),
+         end_on_1b = last(next_on_1b),
+         end_on_2b = last(next_on_2b),
+         end_on_3b = last(next_on_3b),
+         end_hc_x = last(next_hcx),
+         end_hc_y = last(next_hcy),
+         end_hit_location = last(next_hl)) %>%
+  select(at_bat_number, pitch_number, Outs, BaseRunner, on_1b, on_2b, on_3b, hc_x, hc_y, hit_location,
+         endOuts, endBaseRunner, end_on_1b, end_on_2b, end_on_3b, end_hc_x, end_hc_y, end_hit_location,
+         des) %>%
   ungroup()
+
+# then do a join
+
+# create a column with the very next pitch
+# then, after grouping by at-bat number, create a column with the next value
+
 ```
 
-### Appending starting and ending expected runs
 
-Let's look at the Dodgers inning again
 
-We can use the `lead()` function to take the next starting state and ; ending state of at-bat a is the starting state of at-bat a+1
+
+We can use the `lead()` function to take the next starting state and ending state of at-bat a is the starting state of at-bat a+1
 If we arrange the at-bats in increasing order of at-bat, then we want to copy over the starting state from row (a+1) into new columns of (a) for the ending state.
 We can do this using the [`lead`](https://dplyr.tidyverse.org/reference/lead-lag.html) function.
 
@@ -438,12 +459,24 @@ expected_runs <-
   add_row(Outs=3, BaseRunner="000", rho = 0)
 ```
 
+
+
+```{r statcast24-abruns}
+statcast2024 <-
+  statcast2024 %>%
+  group_by(game_pk, at_bat_number) %>%
+  mutate(RunsAB = max(post_bat_score) - bat_score) %>%
+  ungroup()
+```
+
+
+
+
 ```{r}
 
-post_rho <- expected_runs %>% rename(postOuts = Outs, postBaseRunner = BaseRunner, postrho = rho)
+post_rho <- expected_runs %>% rename(endOuts = Outs, endBaseRunner = BaseRunner, postrho = rho)
 
 dodgers_inning %>%
-  filter(pitch_number == 1) %>%
   arrange(at_bat_number) %>%
   select(at_bat_number, Outs, BaseRunner) %>%
   mutate(postOuts = lead(Outs),
