@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.31">
+<meta name="generator" content="quarto-1.7.32">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -71,7 +71,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-10c2ad7cdbdc86dea93900442ad0167d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -185,6 +185,10 @@ window.Quarto = {
  <span class="dropdown-text">Lecture 5: Wins Above Replacement II</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../lectures/lecture6.html">
+ <span class="dropdown-text">Flexible Regression Methods</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../lectures/lecture8.html">
  <span class="dropdown-text">Lecture 8: Pitch Framing &amp; Multi-level modeling</span></a>
   </li>  
@@ -267,6 +271,12 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="../lectures/lecture5.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Lecture 5: Wins Above Replacement II</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Flexible Regression Methods</span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -465,7 +475,7 @@ Generalizing our model results
 </div>
 <section id="accounting-for-additional-features" class="level3">
 <h3 class="anchored" data-anchor-id="accounting-for-additional-features">Accounting for additional features</h3>
-<p>We can now create a table of just Beth Mead’s shots from EURO 2022 and add a column with the XG for each shot. To do this, we first filter our table <code>wi_shots</code> using the player name (note, StatsBomb uses her full name!). Then, for every left-footed shot Mead attempted, we want to copy over the corresponding value from the table <code>xg_model1</code>, which in this cse is 0.113. Similarly, we want to copy over the corresponding values for right-footed shots and headers from <code>xg_model1</code> into our table for Mead’s shots. We can do this using an <a href="https://r4ds.hadley.nz/joins.html#sec-mutating-joins">inner join</a>. In the code below, we actually create a temporary version of <code>xg_model1</code> that drops the column recording the overall counts of the body part used for the shots in <code>wi_shots</code>. This way, when we perform the join, we don’t create a new column with these counts.</p>
+<p>We can now create a table of just Beth Mead’s shots from EURO 2022 and add a column with the XG for each shot. To do this, we first filter our table <code>wi_shots</code> using the player name (note, StatsBomb uses her full name!). Then, for every left-footed shot Mead attempted, we want to copy over the corresponding value from the table <code>xg_model1</code>, which in this cse is 0.113. Similarly, we want to copy over the corresponding values for right-footed shots and headers from <code>xg_model1</code> into our table for Mead’s shots. We can do this using an <a href="https://r4ds.hadley.nz/joins.html#sec-mutating-joins">left join</a>. In the code below, we actually create a temporary version of <code>xg_model1</code> that drops the column recording the overall counts of the body part used for the shots in <code>wi_shots</code>. This way, when we perform the join, we don’t create a new column with these counts.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>tmp_xg1 <span class="ot">&lt;-</span> xg_model1 <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">!</span>n) <span class="co"># temporary copy of the table without sample size column</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
