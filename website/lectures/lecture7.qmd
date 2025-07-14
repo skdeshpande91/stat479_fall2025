@@ -1,0 +1,65 @@
+---
+title: "WAR II: Defensive Credit & Defining Replacement-Level"
+format: html
+execute: 
+  cache: true
+---
+
+How difficult is a ball-in-play (BIP) to field? 
+Intuitively, if the pitcher gives up a home run, the remaining fielders should not get any blame. And if a fielder makes an error, the pitcher should not get any blame.
+
+Of the total $-\delta_{i}$ we need to 
+
+## Probability of making an out
+
+
+We will fit a generalized additive model, similar to what
+To do this, we will go back to our pitch-level data and pull out those pitches that resulted in hits. 
+Later, we will want to join this to our atbat table so that there's a column for p(fielded out) 
+
+Then, we will grab the coordinates where the ball was fielded and whether an out was made (likely based on `events`)
+
+<!--
+  do the same thing as above but this time re-define Y to be out & done by a particular fielder
+-->
+
+## Fielding run values
+
+
+<!--
+  1. Fit a GAM for probability an out occurs on BIP i: p_i
+  2. Give -delta * (1 - p_i) to pitcher and -delta * p_i to fielders. Call this delta_f
+  3. For each fielding position, we need to know prob. that they could have made that out
+  For BIP i we compute probability that each position could make the out; then we normalize to get s_il. 
+  Regress delta_f * s onto parks; residualize to get RAA_f
+-->
+
+### Pitching run values
+
+<!--
+  Regress delta_f for pitchers onto park and platoon indicator
+-->
+
+## Replacement Level
+
+Most teams carry 13 position players and 12 pitchers, we designate the $30 \times 13 = 390$ position players with the most PAs to be the non-replacement players. Everyone else is replacement level
+
+
+We can compute the average RAA for all replacement level players. Then we look at (RAA_p - RAA_shadow)/10 to be WAR
+
+
+<!--
+  hit location: position of first fielder to touch the ball
+    Use this when 
+  hc_x, hc_y: plot them all to get a sense of where things are; we can rotate by 180 ccw so that home plate is at the bottom and then we can translate so home plate is at (0,0)
+-->
+
+```{r}
+#| echo: false
+load("~/Dropbox/Teaching/2025-26/stat479_f25_sports/lecture_planning/pitchFraming/statcast2024.RData")
+```
+
+<!--
+  when hc_x is NA but type == 1 that might be a home run and there is just no coordinate
+  fit a GAM with out or not 
+-->

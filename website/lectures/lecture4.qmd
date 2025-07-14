@@ -1,62 +1,457 @@
 ---
-title: "Lecture 4: Wins above Replacement I"
+title: "Flexible regression: Building our own XG model"
 format: html
-execute:
+execute: 
   cache: true
 ---
 
 
-## Overview: Allocation of credit in baseball
+## Overview
+
+Last lecture, we fit two very basic models for XG.
+The first used only body part to predict the probability of the shot resulting in a goal while the second used both body part and shot technique.
+By looking at a few of Beth Mead's shots from EURO 2022, we decided that the second model was a better because it assigned a higher XG to her one-on-one lob than the shot through multiple defenders.
+In this lecture, we will 
+
+Like in [Lecture 3](), we will work with all shot event data from women's international competitions that StatsBomb makes publicly available.
+As before, we make sure to load the **tidyverse** suite of packages and define a color-blind friendly palette.
+```{r pkg-setup}
+#| output: false
+library(tidyverse)
+# save a nice color-blind friednly color palette into our environment
+oi_colors <- palette.colors(palette = "Okabe-Ito") 
+```
+
+Using some code from [Lecture 3](), we load in all the shot event data and create a binary outcome recording whether the shot resulted in a goal.
+```{r load-data}
+#| output: false
+#| message: false
+#| warning: false
+wi_shots <-
+  StatsBombR::FreeCompetitions() |> # get table of available competitions
+  filter(competition_gender == "female" & competition_international)|> # filter to women's internationals
+  StatsBombR::FreeMatches() |> # Gets match data for all women's internationals
+  StatsBombR::free_allevents() |> # Gets all events for all matches
+  StatsBombR::allclean() |> # Apply StatsBomb's pre-processing
+  StatsBombR::get.opposingteam() |>
+  filter(type.name == "Shot" & shot.body_part.name != "Other") |>  # Subsets only shot event data
+  mutate(Y = ifelse(shot.outcome.name == "Goal", 1, 0))
+```
+
+We will also construct the two simple XG models, one that conditions only on body part and the other that conditions on body part and technique.
+We then use a join to add a column
+
+```{r orig-xg-models}
+xg_model1 <- 
+  wi_shots |>
+  group_by(shot.body_part.name) |>
+  summarize(XG1 = mean(Y))
+xg_model2 <-
+  wi_shots |>
+  group_by(shot.body_part.name, shot.technique.name) |>
+  summarise(XG2 = mean(Y), .groups = "drop") 
+
+wi_shots <-
+  wi_shots |>
+  left_join(y = xg_model1, by = c("shot.body_part.name")) |>
+  left_join(y = xg_model2, by = c("shot.body_part.name", "shot.technique.name"))
+```
+
+## Comparing XG models
 
 
-### Conditioning on Results
+### Model assessment
+
+To make this more concrete, suppose we have observed a shots dataset of pairs $(\boldsymbol{\mathbf{x}}_{1}, y_{1}), \ldots (\boldsymbol{\mathbf{x}}_{n}, y_{n})$ of feature vectors $\boldsymbol{\mathbf{X}}$ and binary indicators $Y$ recording whether the shot resulted in a goal or not.
+Recall from [Lecture 3]() that a key assumption of XG models is the observed dataset comprises a *sample* from some infinite super-population of shots.
+For each feature combination $\boldsymbol{\mathbf{x}},$ the corresponding $\textrm{XG}(\boldsymbol{\mathbf{x}})$ is defined to be the conditional expectation $\textrm{XG}(\boldsymbol{\mathbf{x}}) := \mathbb{E}[Y \vert \boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}].$
+Because $Y$ is a binary indicator, $\textrm{XG}(\boldsymbol{\mathbf{x}})$ can be interpretted as the probability that a shot with features $\boldsymbol{\mathbf{x}}$ results in a goal.
+
+Now, suppose we have used our data to fit an XG model.
+We can go back to every shot $i$ in our dataset and use each fitted model to obtain $\hat{p}_{i}.$
+We would like to assess how close these predictions are to 
+
+
+#### Misclassification Rate
+
+Given a binary observations $y_{1}, \ldots, y_{n}$ and predicted probabilities $\hat{p}_{1}, \ldots, \hat{p}_{n},$ the *misclassification rate* is defined as
+$$
+\textrm{MISS} = n^{-1}\sum_{i = 1}^{n}{\mathbb{I}(y_{i} \neq \mathbb{I}(\hat{p}_{i} \geq 0.5))},
+$$
+where $\mathbb{I}(\hat{p}_{i} \geq 0.5)$ equals 1 when $\hat{p}_{i} \geq 0.5$ and equals 0 otherwise and $\mathbb{I}(y_{i} \neq \mathbb{I}(\hat{p}_{i} \geq 0.5))$ equals 1 when $y_{i}$ is not equal to $\mathbb{I}(\hat{p}_{i} \geq 0.5)$ and equals 0 otherwise.
+
+In the context of XG, misclassification rate measures the proportion of times we predict an XG higher than 0.5 for. non-goal or an XG lower than 0.5 for a goal.
+That is, misclassification rate penalizes XG predictions that are on the wrong side of the 50% threshold.
+
+
+```{r misclassification}
+misclass <- function(y, phat){
+  return( mean( (y != 1*(phat >= 0.5))))
+}
+
+cat("BodyPart misclassification", 
+    round(misclass(wi_shots$Y, wi_shots$XG1), digits = 3), "\n")
+cat("BodyPart+Technique misclassificaiton", 
+    round(misclass(wi_shots$Y, wi_shots$XG2), digits = 3), "\n")
+
+```
+Our two simple models have identical misclassification rates of about 10.7%.
+At first glance this is a bit surprising because the two models have different predicted XG values
+```{r unik-xg-values}
+cat("Unique XG1 values:", sort(unique(wi_shots$XG1)), "\n")
+
+cat("Unique XG2 values:", sort(unique(wi_shots$XG2)), "\n")
+```
+Notice that our two simple models output predicted XG values that are all less than 0.5.
+So, the thresholded values $\mathbb{I}(\hat{p}_{i} \geq 0.5)$ are identical for both models' $\hat{p}_{i}$'s.
+Just for comparison's sake, let's compute the misclassification rate of the proprietary StatsBomb XG model
+```{r misclass-statsbomb}
+cat("StatsBomb misclassificaiton", 
+    round(misclass(wi_shots$Y, wi_shots$shot.statsbomb_xg), digits = 3), "\n")
+```
+
+#### Brier Score & Average log-loss
+
+One drawback of misclassification loss is that it only penalizes predictions for being on the wrong side of 50% but does not penalize predictions based on how far away they are from 0 or 1.
+For instance, if one model predicts that a shot has an XG of 0.999 and another model predicts an XG of 0.501 for the same shot, the misclassification loss is exactly the same.
+
+
+The **Brier score** is based on the squared error loss, which takes into account how far a predicted probability $\hat{p}$ is from $0$ and $1$ 
+$$
+\text{Brier} = n^{-1}\sum_{i = 1}^{n}{(y_{i} - \hat{p}_{i})^2}.
+$$
+Whereas misclassification loss (i.e., $\mathbb{I}(y \neq \mathbb{I}(\hat{p} >= 0.5))$) penalizes probability forecasts on the wrong side of the 50% threshold, the squared loss $(y_{i} - \hat{p})^{2}$ is larger when $\hat{p}$ is further away from $y.$
+
+```{r compute-brier}
+brier <- function(y, phat){
+  return(mean( (y - phat)^2 ))
+}
+
+cat("BodyPart Brier", 
+    round(brier(wi_shots$Y, wi_shots$XG1), digits = 4), "\n")
+cat("BodyPart+Technique Brier", 
+    round(brier(wi_shots$Y, wi_shots$XG2) , digits = 4), "\n")
+cat("StatsBomb Brier",
+    round(brier(wi_shots$Y, wi_shots$shot.statsbomb_xg), digits = 4), "\n")
+```
+Now, we see that the model that conditions on both body part and technique has an ever-so-slightly smaller Brier score.
+
+The **average log-loss** provides another way to penalize differences between predicted probabilities $\hat{p}$ and binary outcomes $y$
+$$
+\textrm{Avg. log-loss} = -1 \times \sum_{i = 1}^{n}{\left[ y_{i} \times \log(\hat{p}_{i}) + (1 - y_{i})\times\log(1-\hat{p}_{i})\right]}.
+$$
+Log-loss penalizes extreme mistakes **much** more aggressively than the Brier score.
+In practice, we often threshold $\hat{p}$ values that are very close to 0 or 1 when computing log-loss
+
+```{r compute-logloss}
+logloss <- function(y, phat){
+  
+  if(any(phat < 1e-12)) phat[phat < 1e-12] <- 1e-12
+  if(any(phat > 1-1e-12)) phat[phat > 1-1e-12] <- 1e-12
+  return(-1 * mean( y * log(phat) + (1-y) * log(1-phat)))
+}
+
+cat("BodyPart Brier:", 
+    round(logloss(wi_shots$Y, wi_shots$XG1), digits = 4), "\n")
+cat("BodyPart+Technique Brier:", 
+    round(logloss(wi_shots$Y, wi_shots$XG2) , digits = 4), "\n")
+cat("StatsBomb Brier:",
+    round(logloss(wi_shots$Y, wi_shots$shot.statsbomb_xg), digits = 4), "\n")
+
+```
+
+Typically, we prefer models with **smaller* mis-classification rates, Brier scores, and average log-losses [^1].
+
+[^1]: try to convince yourself why!
+
+
+### Training and testing
+
+So far, we have evaluated our models using the same data on which they were trained.
+
+
+To illustrate, in the code below we first create a copy of `wi_shots` and then add a column called `train` containing random 0's and 1's.
+We generate those random 0's and 1's in such a way that around 75% of them are equal to 1.
+We then pull out the training data 
+```{r simple-train-test}
+# add an id number for every shot
+n <- nrow(wi_shots)
+n_train <- floor(0.75 * n)
+n_test <- n - n_train
+
+wi_shots <-
+  wi_shots |>
+  mutate(id = 1:n)
+
+
+set.seed(478)
+train_data <-
+  wi_shots |>
+  slice_sample(n = n_train) |>
+  select(-XG1,-XG2)
+test_data <-
+  wi_shots |>
+  anti_join(y = train_data, by = "id") |>
+  select(-XG1, -XG2)
+```
+
+As a sanity check, we can check whether any of the `id`'s in `test_data` are also in `train_data`:
+```{r sanity-check}
+any(train_data$id %in% test_data$id)
+```
+
+
+Now that we have a single training and testing split, let's fit our two simple XG models and then computing the average training and testing losses
+
+```{r single-fold-simple}
+model1 <- 
+  train_data |>
+  group_by(shot.body_part.name) |>
+  summarise(XG1 = mean(Y))
+model2 <-
+  train_data |>
+  group_by(shot.body_part.name, shot.technique.name) |>
+  summarise(XG2 = mean(Y), .groups = "drop")
+
+train_data <-
+  train_data |>
+  inner_join(y = model1, by = c("shot.body_part.name")) |>
+  inner_join(y = model2, by = c("shot.body_part.name", "shot.technique.name"))
+
+test_data <-
+  test_data |>
+  inner_join(y = model1, by = c("shot.body_part.name")) |>
+  inner_join(y = model2, by = c("shot.body_part.name", "shot.technique.name"))
+
+cat("BodyPart train log-loss:",
+    round(logloss(train_data$Y, train_data$XG1), digits = 4), 
+    "test log-loss:",
+    round(logloss(test_data$Y, test_data$XG1), digits = 4), "\n")
+
+cat("BodyPart+Technique train log-loss:",
+    round(logloss(train_data$Y, train_data$XG2), digits = 4), 
+    "BodyBart+Technique test log-loss:",
+    round(logloss(test_data$Y, test_data$XG2), digits = 4), "\n")
+```
+
+For this training/testing split, we find that although conditioning on both body-part and technique produced a slightly smaller training log-loss than conditioning only on body-part, the more complex model had **larger** testing loss.
+In other words, we obtained slightly more accurate out-of-sample predictions with the simpler model than the more complex model.
+This would suggest that the more complex model **overfit** the training data
+
+Of course, this was baesd on just training/testing split.
+We commonly do the same calculation using multiple training/testing splits and look at the average losses.
+
+
+```{r cv-simple}
+n_sims <- 10
+train_logloss <- 
+  matrix(nrow = 2, ncol = n_sims,
+         dimnames = list(c("XG1","XG2"), c()))
+test_logloss <- 
+  matrix(nrow = 2, ncol = n_sims,
+         dimnames = list(c("XG1","XG2"), c()))
+
+for(r in 1:n_sims){
+  set.seed(479+r) # for replicability
+  train_data <-
+    wi_shots |>
+    slice_sample(n = n_train) |>
+    select(-XG1,-XG2)
+  test_data <-
+    wi_shots |>
+    anti_join(y = train_data, by = "id") |>
+    select(-XG1, -XG2)
+  model1 <- 
+    train_data |>
+    group_by(shot.body_part.name) |>
+    summarise(XG1 = mean(Y))
+  
+  model2 <-
+    train_data |>
+    group_by(shot.body_part.name, shot.technique.name) |>
+    summarise(XG2 = mean(Y), .groups = "drop")
+
+  train_data <-
+    train_data |>
+    inner_join(y = model1, by = c("shot.body_part.name")) |>
+    inner_join(y = model2, by = c("shot.body_part.name", "shot.technique.name"))
+
+  test_data <-
+    test_data |>
+    inner_join(y = model1, by = c("shot.body_part.name")) |>
+    inner_join(y = model2, by = c("shot.body_part.name", "shot.technique.name"))
+  
+  train_logloss["XG1", r] <- 
+    logloss(train_data$Y, train_data$XG1)
+  train_logloss["XG2",r] <-
+    logloss(train_data$Y, train_data$XG2)
+  
+  test_logloss["XG1", r] <- 
+    logloss(test_data$Y, test_data$XG1)
+  test_logloss["XG2",r] <-
+    logloss(test_data$Y, test_data$XG2)
+}
+cat("XG1 training logloss:", round(mean(train_logloss["XG1",]), digits = 4), "\n")
+cat("XG2 training logloss:", round(mean(train_logloss["XG2",]), digits = 4), "\n")
+
+cat("XG1 test logloss:", round(mean(test_logloss["XG1",]), digits = 4), "\n")
+cat("XG2 test logloss:", round(mean(test_logloss["XG2",]), digits = 4), "\n")
+```
+We see exactly the same pattern: our more complex model seemed to do slightly *worse* than our simplest model that accounted for 
 
 
 
 <!--
-  Compare two plays in baseball. The batter hits a homerun; obviously they should get credit, pitcher should get little credit, and the fielders
-  
-  But in this second play the situation is a bit murkier, the batter puts the ball in play (which is better than striking out!); the baserunners advances, but the fielder 
-  
-  If we can divide up credit to the players and sum up over all plays, then we 
-  
-  Credit in baseball is often expressed in terms of run expectancy. Loosely, this combines what is expected to happen with what actually happened. Neither extreme is quite what we want
-  
-  Eventually when we aggregate, it is more useful to turn absolute numbers into a comparison. How much better than is one player's performance than another's.
-  This is at the heart of the concept of "wins above replacement".
-  
-  While there are many proprietary approaches to computing this, we will emulate the calculation outlined by Baumer et al. in their landmark openWAR paper
-  
-  As with most lectures, there is a **lot** more in these notes than presented in lecture.
-  
+  SEction 2.2 of ISLR; especially focus on 2.2.3, the classification setting
 -->
 
 
-
-## Adjusting RE24 for platoon advantage & ballpark
-
-<!--
-  Regress delta onto park and indicator Bhand == Phand
-  Get those residuals and add them to the data frame
--->
+## Logistic Regression
 
 
-## Base-running
+```{r distance2goal}
 
-Quote from Baumer et al. "baserunners should only get credit for advancement beyond what would be expected given their starting locations, number of outs, and the hitting event that occurred"
-<!--
-  Regress residuals (epsilon) from above onto indicators for gamestate; hitting event that occured
-  Resulting residual (eta): represent the portion of the adjusted oﬀensive run value that is attributable to the baserunners.
--->
-### Expected base advancement
+set.seed(478)
+train_data <-
+  wi_shots |>
+  slice_sample(n = n_train) |>
+  select(-XG1,-XG2)
+test_data <-
+  wi_shots |>
+  anti_join(y = train_data, by = "id") |>
+  select(-XG1, -XG2)
 
-## Batting
+fit1 <-
+  glm(Y~DistToGoal, data = train_data,
+      family = binomial("logit"))
+train_pred1 <- predict(object = fit1,
+                       newdata = train_data,
+                       type = "response")
+test_pred1 <-
+  predict(object = fit1,
+          newdata = test_data,
+          type = "response")
 
-<!--
-eta: portion of adjusted offensive run value attributable to baserunners.
-mu = epsilon-eta attributable to the hitter
-** need to compare batter relative to other players at his position **
+fit2 <- 
+  glm(Y ~ DistToGoal+shot.body_part.name+shot.technique.name,
+      data = train_data,
+      family = binomial("logit"))
 
--->
+test_pred2 <-
+  predict(object = fit2,
+          newdata = test_data,
+          type = "response")
 
+
+
+logloss(train_data$Y, train_pred1)
+logloss(test_data$Y, test_pred1)
+```
+
+```{r factorize}
+wi_shots <-
+  wi_shots |>
+  mutate(shot.body_part.name = factor(shot.body_part.id),
+         shot.technique.name = factor(shot.technique.name))
+```
+
+
+So distance seems to help a little bit!
+But, the logistic regression model we just fit makes the **strong** assumption the change in XG between left & right footed shots is the same from these two locations.
+
+
+But hang-on, this; let's look at the triangle formed between shot and the goal; from this distance, you have to be much more precise just to get the ball on target.
+We'll construct a new feature -- ConeAngle -- that measures precisely this angle.
+It's not hard to compute with a bit trigonometry. 
+
+### Spatial smoothing with generalized additive models
+
+The above model accounted for shot location somewhat indirectly through distance and `ConeAngle`.
+A somewhat more general model would take the form `BodyPart + Technique + f(X,Y)` for some to-be-estimated function $f$.
+We would moreover assume that $f$ is *smooth*, in the sense that moving from one part of the pitch to another 
+
+We can also visualize these estimates
+
+
+### Incorporating more spatial features
+
+<!-- throw the kitchen sink into the model; this is harder to plot; but we can still do the training/testing --> 
+
+## Tree-based modeling
+
+<!-- interactions are hard! --> 
+
+```{r get_vars}
+
+shot_vars <- 
+  c("Y", "position.name",
+    "shot.type.name", 
+    "shot.technique.name", "shot.body_part.name",
+    "location.x", "location.y",
+    "shot.end_location.x", "shot.end_location.y",
+    "DistToGoal", "DistToKeeper", # dist. to keeper is distance from GK to goal
+    "AngleToGoal", "AngleToKeeper",
+    "AngleDeviation", 
+    "avevelocity","density", "density.incone",
+    "distance.ToD1", "distance.ToD2",
+    "AttackersBehindBall", "DefendersBehindBall",
+    "DefendersInCone", "InCone.GK", "DefArea")
+
+wi_shots <-
+  wi_shots |>
+  mutate(player.name = factor(player.name),
+         position.name = factor(position.name),
+         shot.type.name = factor(shot.type.name),
+         shot.technique.name = factor(shot.technique.name),
+         shot.body_part.name = factor(shot.body_part.name))
+set.seed(479)
+train_data <-
+  wi_shots |>
+  slice_sample(n = n_train)
+
+test_data <-
+  wi_shots |>
+  anti_join(y = train_data, by = "id")
+
+train_data <-
+  train_data |> 
+  select(all_of(shot_vars)) |>
+  drop_na()
+test_data <-
+  test_data |> 
+  select(all_of(shot_vars)) |>
+  drop_na()
+
+```
+
+```{r rf-fit}
+
+train_y <- train_data$Y
+test_y <- test_data$Y
+
+train_data <-
+  train_data |>
+  mutate(Y = factor(Y, levels = 0:1)) # randomForest requires outcome to be a factor
+
+test_data <-
+  test_data |>
+  mutate(Y = factor(Y, levels = 0:1)) # randomForest requires outcome to be a factor
+
+
+fit <-
+  randomForest::randomForest(formula = Y~., 
+                             data = train_data)
+train_preds <- 
+  predict(object = fit,
+          newdata = train_data,
+          type = "prob")
+
+test_preds <- 
+  predict(object = fit,
+          newdata = test_data, 
+          type = "prob")
+
+```
+
+## OK, but here are two passes that from the same distance but 
 

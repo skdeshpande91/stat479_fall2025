@@ -1,48 +1,36 @@
 ---
-title: "Flexible Regression Methods"
+title: "Wins Above Replacement I"
 format: html
-execute: 
-  cache: true
 ---
 
-## Conditional expectations revisited
+## Recap & Roadmap
 
+
+## Adjusted Run Value
 
 <!--
-  1. We previously considered XG and run expectancy. The idea is that our observed data (shots in the case of XG and plate-appearances in the case of run expectacy) consisted of a collection of features X and an outcome Y. In the case of XG, X were features about a particular shot (e.g., body part, technique, distance from the goal/keeper) and Y was an
-  And in the case of run expectancy, X consisted of the
-  2. The formal definition of XG provides a few interpretations: (i) say we could repeatedly play the shot or PA over and over and over again. Each time we do that, we observe a different draw from the slice of the population. 
-  3. Figure (from 333 lectures) visualizes this. How the mean value of Y changes as we vary x
+  Formally we write $delta_i = \alpha_{1} * \ind{1} + \cdots + \alpha_{B} * \ind{B} + \beta_{adv} * \ind{platoon-advantage} + \epsilon
   
-  Given a large collection of features $\boldsymbol{\mathbf{x}}$ about a shot, $\textrm{XG}(\boldsymbol{\mathbf{x}}) = \mathbb{E}[Y \vert \boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}],$ where $Y$ is a binary indicator of whether or not the shot resulted in a goal.
+  Systematically, we know that some parks are harder to score runs in than others. And when the batter and pitcher are of different handedness, there can be some differences
+  We want to remove those systematic components, which are not within the batters control. Formally
+  
+  We can fit a linear model with an intercept using `lm`: not, we're really not interested in the coefficients or doing any significant testing. we just want to adjust the values
+  We now have our residual epsilon, which captures the portion of delta *not* attributable to ballpark or platoon. How much of epsilon can be attributed to the batter and how much to the baserunner?
 -->
 
-## Parametric Statistical Models
 
-### Linear Regression
-
+## Baserunning
 
 <!--
-  Take our StatCast data, do a linear regression with no intercept
+  Baserunner should get credit only for advancement beyond what would be expected given their starting location, the number of outs, and the hitting event that occured
+    We can actually estimate this nonparametricly using our baserunning data-frame: we have the movement and can pull . We compute the average nonparametricly and 
 -->
 
-### Logistic Regression
+## Batting
 
 <!--
-  XG model based on distance
+eta: portion of adjusted offensive run value attributable to baserunners.
+mu = epsilon-eta attributable to the hitter
+** need to compare batter relative to other players at his position **
+
 -->
-
-### Generalized Additive Models
-
-<!--
-  We saw in section 5 that we can expand this 
--->
-
-## Nonparametric Metrics
-
-
-### Regression Trees
-
-### Random Forests
-
-### XGBoost
