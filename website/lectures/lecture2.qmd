@@ -1,0 +1,82 @@
+---
+title: "What makes a good metric?"
+format: html
+execute: 
+  cache: true
+  
+bibliography: stat479_refs.bib
+---
+
+## Overview
+
+Last time, we introduced several metrics quantifying NBA shooting performance.
+
+```{r load-data}
+#| output: false
+#| warning: false
+#| message: false
+library(tidyverse)
+# save a nice color-blind friednly color palette into our environment
+oi_colors <- palette.colors(palette = "Okabe-Ito") 
+load("nba_box_scores.RData")
+```
+
+
+## Season-to-season repeatability
+
+Like last time, we will focus on players who attempted more than 400 field goals, at least 100 of which were three point shots.
+
+```{r qualified}
+qual_box <-
+  season_box |>
+  filter(FGA >= 400 & TPA >= 100)
+```
+
+
+```{r next_TS}
+lag_tsp <- 
+  qual_box |>
+  select(Player, season, TSP) |>
+  group_by(Player) |>
+  arrange(season) |>
+  mutate(nextTSP = lead(TSP)) |>
+  ungroup() |>
+  arrange(Player, season)
+```
+
+```{r plot_tsp}
+#| fig-align: center
+#| fig-width: 6.5
+#| fig-height: 6.5
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+plot(lag_tsp$TSP, lag_tsp$nextTSP,
+     xlab = "TSP (season n)", ylab = "TSP (season n+1)",
+     xlim = range(c(lag_tsp$TSP, lag_tsp$nextTSP), na.rm = TRUE),
+     ylim = range(c(lag_tsp$TSP, lag_tsp$nextTSP), na.rm = TRUE),
+     pch = 16, cex = 0.5)
+abline(a = 0, b = 1, col = oi_colors[3])
+```
+## Correlation
+
+
+```{r lag_stats}
+lag_stats <- 
+  qual_box |>
+  select(Player, season, TSP, eFGP, FGP, TPP) |>
+  group_by(Player) |>
+  arrange(desc(season)) |>
+  mutate(nextTSP = lead(TSP),
+         nexteFGP = lead(eFGP),
+         nextFGP = lead(FGP),
+         nextTPP = lead(TPP)) |>
+  ungroup() |>
+  arrange(Player, season) |>
+  filter(!is.na(nextTSP))
+```
+
+```{r compute-corr}
+cor(lag_stats$eFGP, lag_stats$nexteFGP)
+cor(lag_stats$TSP, lag_stats$nextTSP)
+cor(lag_stats$TPP, lag_stats$nextTPP)
+cor(lag_stats$FGP, lag_stats$nextFGP)
+```

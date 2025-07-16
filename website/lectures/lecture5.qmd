@@ -1,7 +1,7 @@
 ---
-title: "Run expectancy in baseball"
+title: "Lecture 5: Run values in baseball"
 format: html
-execute:
+execute: 
   cache: true
 ---
 
@@ -43,20 +43,6 @@ execute:
   As with most lectures, there is a **lot** more in these notes than presented in lecture.
   
 -->
-
-
-
----
-title: "Lecture 5: Estimating the Expected Value of a Game State"
-format: html
-execute: 
-  cache: true
----
-
-
-## Overview
-
-
 
 <!--During the [March 20, 2024 game between the Dodgers and Padres](https://www.espn.com/mlb/playbyplay/_/gameId/401568469), Shohei Ohtani singled in the top of the 3rd inning and the top of the 8th inning.
 
@@ -212,9 +198,6 @@ So, if you want to work with several seasons (e.g., going back all the way to 20
 #| echo: false
 library(tidyverse)
 load("~/Dropbox/Teaching/2025-26/stat479_f25_sports/lecture_planning/pitchFraming/statcast2024.RData")
-load("~/Dropbox/Teaching/2025-26/stat479_f25_sports/lecture_planning/pitchFraming/statcast2023.RData")
-load("~/Dropbox/Teaching/2025-26/stat479_f25_sports/lecture_planning/pitchFraming/statcast2022.RData")
-load("~/Dropbox/Teaching/2025-26/stat479_f25_sports/lecture_planning/pitchFraming/statcast2021.RData")
 ```
 
 In the 2024 season, we have StatCast data for 784,978 pitches.
@@ -255,7 +238,6 @@ player_lookup <-
   mutate(Name = paste(name_first, name_last))
 ```
 
-In the data, it does n
 
 ## Expected Runs
 
@@ -345,12 +327,7 @@ dodgers_inning <-
   mutate(RunsRemaining = last(post_bat_score) - bat_score)
 ```
 
-
-
-
-
 #### Putting it all together
-
 
 We're now ready to extend these calculation to every half-inning of every game in the season.
 To do this, we will take advantage of the `group_by()` command in **dplyr** to apply the same calculation to small groups defined by game and half-inning.
@@ -508,48 +485,30 @@ dodgers_inning %>%
 ```
 
 In [Lecture 5]() and [Lecture 6](), we will work not only with the game-state (i.e., the values of `Outs` and `BaseRunner`) at the end of every at-bat but also with the actual identities of the base-runners and the location where a ball-in-play was fielded (if the batter hit the ball) at the end of every at-bat.
-We can following an essentially identical strategy of (i) sorting pitches by at-bat and pitch numbers; (ii) computing the leading value of several columns within each half-inning; (iii) grouping by at-bat number; and (iv) taking the lats of those leading values.
+We can following an essentially identical strategy of (i) sorting pitches by at-bat and pitch numbers; (ii) computing the leading value of several columns within each half-inning; (iii) grouping by at-bat number; and (iv) taking the lasts of those leading values.
 
 The code below performs this calculation and also pulls out the rows corresponding to just the first pitch of every at-bat. 
 ```{r endstate}
 atbat2024 <-
-  statcast2024 %>%
-  group_by(game_pk, inning, inning_topbot) %>% # divide into half-innings
-  arrange(at_bat_number, pitch_number) %>%
+  statcast2024 |>
+  group_by(game_pk, inning, inning_topbot) |> # divide into half-innings
+  arrange(at_bat_number, pitch_number) |>
   mutate(next_Outs = lead(Outs), # gets the value from the next pitch in the inning
-         next_BaseRunner = lead(BaseRunner),
-         next_on_1b = lead(on_1b),
-         next_on_2b = lead(on_2b),
-         next_on_3b = lead(on_3b)) %>%
-  ungroup() %>%
-  group_by(game_pk, at_bat_number) %>%
-  arrange(pitch_number) %>%
+         next_BaseRunner = lead(BaseRunner)) |>
+  ungroup() |>
+  group_by(game_pk, at_bat_number) |>
+  arrange(pitch_number) |>
   mutate(end_Outs = last(next_Outs), # goes to last pitch of each at bat and gets next value of variable
-         end_BaseRunner = last(next_BaseRunner), # that is, the starting value of the first pitch in
-         end_on_1b = last(next_on_1b), # next at-bat
-         end_on_2b = last(next_on_2b), # 
-         end_on_3b = last(next_on_3b), # e.g., runner on 3rd at start of next at-bat
-         end_hc_x = last(hc_x), # hits are on last pitch of at-bat; get x-coordinate
-         end_hc_y = last(hc_y), # get y-coordinate of hit from last pitch of at-bat
-         end_hit_location = last(hit_location), # get position of hit from last pitch of at-bat
-         end_type = last(type),
-         end_bb_type = last(bb_type),
-         end_events = last(events)
-         
-         ) %>%
-  ungroup() %>%
-  arrange(game_date, game_pk, at_bat_number, pitch_number) %>%
-  filter(pitch_number == 1) %>%
-  mutate(end_bat_score = bat_score + RunsScored, end_fld_score = fld_score) %>%
-  select(game_pk, at_bat_number,inning, inning_topbot, 
-         batter, pitcher, stand, p_throws, 
-         fielder_2, fielder_3, fielder_4, fielder_5, fielder_6, fielder_7, fielder_8,
-          Outs, BaseRunner, on_1b, on_2b, on_3b, 
-         bat_score, fld_score, 
+         end_BaseRunner = last(next_BaseRunner)) |> # that is, the starting value of the first pitch in
+  ungroup() |>
+  arrange(game_date, game_pk, at_bat_number, pitch_number) |>
+  filter(pitch_number == 1) |>
+  mutate(end_bat_score = bat_score + RunsScored, end_fld_score = fld_score) |>
+  select(game_pk, at_bat_number,
+         batter,
+         inning, inning_topbot, Outs, BaseRunner,
          RunsScored, RunsRemaining,
-         end_Outs, end_BaseRunner, end_on_1b, end_on_2b, end_on_3b,
-         end_hc_x, end_hc_y, end_hit_location,
-         end_type, end_bb_type, end_events,
+         end_Outs, end_BaseRunner,
          des)
 ```
 
@@ -634,339 +593,9 @@ And the StatCast data is not complete; for instance, it is missing 3 games in wh
 
 ```{r save_atbat}
 #| echo: false
-save(atbat2024, file = "~/Dropbox/Teaching/2025-26/stat479_f25_sports/lecture_planning/pitchFraming/atbat2024.RData")
+save(atbat2024, file = "~/Dropbox/Teaching/2025-26/stat479_f25_sports/lecture_planning/openWAR/runValues.RData")
 
 ```
-
-<!--
-  Our dataset contains 675 PA in 155 games from Aaron Judge; in 2024 he actually player 158 games and had 704 PA.
--->
-
-
-
-<!--
-  1. Compute run-value of each at-bat
-  2. Mimic Chapter 5 of Albert & Baumer & Marchi; sum up run-value and group by the base-runner configuration
-  3. Summing up run-values over all plate appearances is what's known as RE24; how big is this
-  4. " We can summarize a player’s batting performance in a season by the total number of plate appearances, the sum of the runs potentials, and the sum of the run values. One can remove pitchers and non-starters by focusing on batters with at least 400 plate appearances"
-  
--->
-
-We can verify this by looking at the variable `des`, which stores a narrative description about what happened during the at-bat. 
-```{r dodgers-desc}
-dodgers_inning$des[c(14,15, 18, 19)]
-```
-Notice that, because we've sorted the pitches in ascending order by at-bat and pitch number, the very last row of the table corresponds to the last pitch of the inning.
-Accordingly, the last value in the `post_bat_score` column is the batting team's score at the end of the inning.
-Thus, to compute $R_{i,a}$ for all pitches in this inning, it is enough to subtract the `bat_score` in each row from the last `post_bat_score` in the table.
-To access this last value, we use the function `last()`.
-```{r dodgers-ria}
-last(dodgers_inning$post_bat_score) - dodgers_inning$bat_score
-```
-
-We now append a column with these values to our data table `dodgers_inning`
-```{r dodgers-append-ria}
-dodgers_inning <-
-  dodgers_inning %>%
-  mutate(RunsRemaining = last(post_bat_score) - bat_score)
-```
-
-
-
-
-
-#### Putting it all together
-
-
-We're now ready to extend these calculation to every half-inning of every game in the season.
-To do this, we will take advantage of the `group_by()` command in **dplyr** to apply the same calculation to small groups defined by game and half-inning.
-```{r statcast-append-ria}
-statcast2024 <-
-  statcast2024 %>%
-  group_by(game_pk, inning, inning_topbot) %>% # divide up by game and half-inning
-  arrange(at_bat_number, pitch_number) %>% # arrange pitches by at-bat and pitch-number
-  mutate(RunsRemaining = last(post_bat_score) - bat_score) %>%
-  ungroup()
-```
-
-
-Now we have the number of runs scored in the half-inning after each pitch.
-But to compute run expectancy, we need this quantity at the at-bat level and not at the pitch-level.
-Using our notation from before, note that $R_{1,a}$ is the number of runs scored after the first pitch of at-bat $a.$
-So, to compute run expectancy, it is enough to pull out the first pitch from each at-bat (i.e., those pitches with `pitch_number == 1`) using the `filter()` function.
-
-```{r compute-er2024}
-expected_runs <-
-  statcast2024 %>%
-  filter(pitch_number == 1) %>% # get first pitch in every at-bat
-  select(Outs, BaseRunner, RunsRemaining) %>%
-  group_by(Outs, BaseRunner) %>%
-  summarize(rho = mean(RunsRemaining), .groups = "drop")
-```
-
-The table `expected_runs` contains one row for every combination of outs and base-runner configuration.
-Traditionally, expected runs is reported using an $8\times 3$ matrix, with rows corresponding to base-runner configurations and columns corresponding to outs.
-We can re-format `expected_runs` to this matrix format using the [`pivot_wider()`](https://tidyr.tidyverse.org/reference/pivot_wider.html) function
-```{r pivot-rho}
-expected_runs %>% 
-  pivot_wider(names_from = Outs,
-              values_from = rho,
-              names_prefix="Outs: ")
-```
-
-
-## Run value
-
-Suppose a batter comes up to the plate when there 2 outs and no runners on base . 
-Based on the game state at the start of the at-bat (i.e., `Outs=2` and `BaseRunners='000'`), his team can expect to score 0.1 runs in the remainder of the half-inning.
-Now suppose the batter hits a double, advancing to second base and changing the game state to `Outs=2` and `BaseRunners='010'`
-According to our expected runs matrix, from this updated state, the batting team expects to score 0.343 runs in the remaining of the half-inning.
-If, however, the batter had struck out in this plate appearance, then he would have ended the half-inning, from which point his team can expect to score no runs in the remainder of the half-inning.
-So, on average, the batter earns his team about 0.24 runs, on average, by hitting a double and advancing to second, and loses his team about 0.1 runs, on average, by striking out from the game state `Outs=2` and `BaseRunners='000'`.
-
-::: {.callout-note icon=false}
-
-## Run value
-The **run value** of an at-bat is defined as the the number of runs scored in the at-bat plus the difference in expected runs from the starting to ending state.
-That is, denoting the number of runs scored in the at-bat as $\textrm{RunsScored}$ and the starting and ending states as $(\textrm{o}_{\text{start}}, \textrm{br}_{\text{start}})$ and $(\textrm{o}_{\text{end}}, \textrm{br}_{\text{end}}),$ then
-$$
-\textrm{RunValue} = \textrm{RunsScored} + \rho(\textrm{o}_{\text{end}}, \textrm{br}_{\text{end}}) - \rho(\textrm{o}_{\text{start}}, \textrm{br}_{\text{start}}) 
-$$
-:::
-In a sense, run value rewards batter credits for two things, actually scoring runs and putting their team in positions to score more runs.
-At the same time, it penalizes batters who do not hit home runs or drive in runs and/or move their team to a less-favorable run expectancy.
-
-
-To do compute the run value of each at-bat in the 2024 season, we must compute
-
-  1. The number of runs scored during each at-bat
-  2. The game state (i.e., the number of outs and the base-runner configuration) at the start and end of each at-bat
-  3. The change in expected runs during the at-bat (i.e., $\rho(\textrm{o}_{\text{end}}, \textrm{br}_{\text{end}}) - \rho(\textrm{o}_{\text{start}}, \textrm{br}_{\text{start}})$).
-
-We will first develop the necessary code using the data from Dodger's 8th inning from their game against the Padres.
-Then, we will deploy that code to the whole `statcast2024` table by grouping by `game_pk` and `at_bat_number`. 
-
-
-### Calculating RunsScored
-
-StatCast numbers every at-bat within the game and every pitch within each at-bat.
-To compute the number of runs scored within each at-bat, we will:
-
-  1. Sort the pitches by at-bat number and then by pitch number in ascending order
-  2. Take the different between the *last* value of `post_bat_score` and *first* value of `bat_score` within each at-bat.
-
-Let's try to verify this by looking at pitches from the third, fourth, and fifth at-bats of Dodgers' 8th inning against the Padres[^atbatindex]
-
-[^atbatindex]: StatCast assigns each at-bat in a game a unique number. The third, fourth, and fifth at-bats during the Dodger's 8th inning were the 61st, 62nd, and 63rd at-bats of the game.
-
-```{r dodgets-345ab}
-dodgers_inning %>%
-  filter(at_bat_number %in% 61:63) %>%
-  arrange(at_bat_number, pitch_number) %>%
-  select(at_bat_number, pitch_number, bat_score, description, post_bat_score)
-```
-
-Based on the `description` column, we see that the first pitch of at-bat 62 was a foul ball and the second pitch was hit into play.
-When we look at the corresponding row (row 6) of the table, we see that that Dodgers' pre-pitch score was 1 (`bar_score = 1`) and that they scored 1 run as a result of the hit (`post_bat_score = 2`).
-Reassuringly, the difference between the value of `post_bat_score` in row 6 (the last row for at-bat 62) and the value of `bat_score` in row 5 (the first row for at-bat 62) is 1.
-We can similarly verify our procedure works in at-bat 61: the fourth value of `post_bat_score` and the first value of `bat_score` are equal and the Dodgers did not score in this at-bat.
-
-We can apply our procedure to the entirety of the Dodgers' half-inning 
-```{r dodgers-run-scored}
-dodgers_inning <-
-  dodgers_inning %>%
-  group_by(at_bat_number) %>%
-  arrange(pitch_number) %>%
-  mutate(RunsScored = last(post_bat_score) - first(bat_score)) %>%
-  ungroup() %>%
-  arrange(at_bat_number, pitch_number)
-```
-
-We can now apply this formula to all pitches in `statcast2024` by grouping by `game_pk` and `at_bat_number`
-
-```{r runs-scored}
-statcast2024 <-
-  statcast2024 %>%
-  group_by(game_pk, at_bat_number) %>% # divide by at-bats within each game
-  arrange(pitch_number) %>% # sort pitches within at-bat
-  mutate(RunsScored = last(post_bat_score) - first(bat_score)) %>%
-  ungroup() %>% # remove grouping
-  arrange(game_date, game_pk, at_bat_number, pitch_number)
-```
-
-### Computing the starting and ending states
-
-Except for the very last pitch in a team's innings, the ending state of that pitch is, by definition, the starting state of the next pitch.
-In order to compute $\rho(\textrm{o}_{\text{end}}, \textrm{br}_{\text{end}}),$ and $\rho(\textrm{o}_{\text{start}}, \textrm{br}_{\text{start}})$ for each at-bat, we will first create a columns in `statcast2024` that encode the game state at the beginning and end of the at-bat.
-
-To build up our code, let's continue with our running example of the Dodgers' 8th inning, focusing on the at the second through fourth at-bats of the inning.
-```{r dodgers-state-3ab}
-dodgers_inning %>%
-  filter(at_bat_number %in% 60:62) %>%
-  arrange(at_bat_number, pitch_number) %>%
-  select(at_bat_number, pitch_number, Outs, BaseRunner)
-```
-We start by creating new columns recording the `Outs` and `BaseRunner` values of the *next* pitch using the [`lead`](https://dplyr.tidyverse.org/reference/lead-lag.html) function. [^lastrow].
-
-[^lastrow]: The next value of a variable is undefined in the last row of a column, resulting in some `NA`'s. We'll deal with those later on. 
-
-```{r dodgers-state-lead}
-dodgers_inning %>%
-  filter(at_bat_number %in% 60:62) %>%
-  arrange(at_bat_number, pitch_number) %>%
-  select(at_bat_number, pitch_number, Outs, BaseRunner) %>%
-  mutate(next_Outs = lead(Outs),
-         next_BaseRunner = lead(BaseRunner))
-```
-Now, within each at-bat, we can look at the *last* values of `next_Outs` and `next_BaseRunner` to figure out the ending state of the at-bat.
-```{r dodgers-end-state-3ab}
-dodgers_inning %>%
-  filter(at_bat_number %in% 60:62) %>%
-  arrange(at_bat_number, pitch_number) %>%
-  select(at_bat_number, pitch_number, Outs, BaseRunner) %>%
-  mutate(next_Outs = lead(Outs),
-         next_BaseRunner = lead(BaseRunner)) %>%
-  group_by(at_bat_number) %>%
-  mutate(endOuts = last(next_Outs),
-         endBaseRunner = last(next_BaseRunner)) %>%
-  select(at_bat_number, pitch_number, Outs, BaseRunner, endOuts, endBaseRunner) %>%
-  ungroup()
-```
-
-In [Lecture 5]() and [Lecture 6](), we will work not only with the game-state (i.e., the values of `Outs` and `BaseRunner`) at the end of every at-bat but also with the actual identities of the base-runners and the location where a ball-in-play was fielded (if the batter hit the ball) at the end of every at-bat.
-We can following an essentially identical strategy of (i) sorting pitches by at-bat and pitch numbers; (ii) computing the leading value of several columns within each half-inning; (iii) grouping by at-bat number; and (iv) taking the lats of those leading values.
-
-The code below performs this calculation and also pulls out the rows corresponding to just the first pitch of every at-bat. 
-```{r endstate}
-atbat2024 <-
-  statcast2024 %>%
-  group_by(game_pk, inning, inning_topbot) %>% # divide into half-innings
-  arrange(at_bat_number, pitch_number) %>%
-  mutate(next_Outs = lead(Outs), # gets the value from the next pitch in the inning
-         next_BaseRunner = lead(BaseRunner),
-         next_on_1b = lead(on_1b),
-         next_on_2b = lead(on_2b),
-         next_on_3b = lead(on_3b)) %>%
-  ungroup() %>%
-  group_by(game_pk, at_bat_number) %>%
-  arrange(pitch_number) %>%
-  mutate(end_Outs = last(next_Outs), # goes to last pitch of each at bat and gets next value of variable
-         end_BaseRunner = last(next_BaseRunner), # that is, the starting value of the first pitch in
-         end_on_1b = last(next_on_1b), # next at-bat
-         end_on_2b = last(next_on_2b), # 
-         end_on_3b = last(next_on_3b), # e.g., runner on 3rd at start of next at-bat
-         end_hc_x = last(hc_x), # hits are on last pitch of at-bat; get x-coordinate
-         end_hc_y = last(hc_y), # get y-coordinate of hit from last pitch of at-bat
-         end_hit_location = last(hit_location), # get position of hit from last pitch of at-bat
-         end_type = last(type),
-         end_bb_type = last(bb_type),
-         end_events = last(events)
-         
-         ) %>%
-  ungroup() %>%
-  arrange(game_date, game_pk, at_bat_number, pitch_number) %>%
-  filter(pitch_number == 1) %>%
-  mutate(end_bat_score = bat_score + RunsScored, end_fld_score = fld_score) %>%
-  select(game_pk, at_bat_number,inning, inning_topbot, 
-         batter, pitcher, stand, p_throws, 
-         fielder_2, fielder_3, fielder_4, fielder_5, fielder_6, fielder_7, fielder_8,
-          Outs, BaseRunner, on_1b, on_2b, on_3b, 
-         bat_score, fld_score, 
-         RunsScored, RunsRemaining,
-         end_Outs, end_BaseRunner, end_on_1b, end_on_2b, end_on_3b,
-         end_hc_x, end_hc_y, end_hit_location,
-         end_type, end_bb_type, end_events,
-         des)
-```
-
-### Computing run-values
-
-Now that we have a table `atbat2024` containing information about the starting and ending states of each at-bat, we are ready to compute run-values.
-In particular, we can use a join (just like we did with XG in Lecture 2) to add in the values of the starting and ending expected runs.
-
-Before doing that, though, we need to deal with the `NA`'s introduced by `lead()`.
-Looking at the at-bats from the Dodger's 8th inning from our running example, we see that those `NA`'s correspond to the very last at-bat of the half-inning.
-
-Before doing that, though, let's take a quick look at the rows in the table corresponding to the Dodgers' 8th inning from our running example
-
-```{r atbat-dodgers}
-atbat2024 %>%
-  filter(game_pk == 745444 & inning == 8 & inning_topbot == "Top") %>%
-  select(at_bat_number, Outs, BaseRunner, end_Outs, end_BaseRunner)
-```
-
-Because the "end of the inning" state is not one of the 24 combinations of outs and baserunner configurations in the `expected_runs` table, we're going to row to that table with `Outs=3`, `BaseRunners='000'`, and `rho = 0` (since the team cannot score any more runs in the inning once it is over!).
-```{r cleanup-expected-runs}
-expected_runs <-
-  expected_runs %>%
-  add_row(Outs=3, BaseRunner="000", rho = 0)
-
-atbat2024 <-
-  atbat2024 %>%
-  mutate(end_Outs = ifelse(is.na(end_Outs), 3, end_Outs),
-         end_BaseRunner = ifelse(is.na(end_BaseRunner), '000', end_BaseRunner))
-```
-
-We're now ready to use a `join` to append the starting and ending expected runs.
-```{r join-expected-runs}
-end_expected_runs <- 
-  expected_runs %>%
-  rename(end_Outs = Outs,
-         end_BaseRunner = BaseRunner,
-         end_rho = rho)
-
-atbat2024 <-
-  atbat2024 %>%
-  left_join(y = expected_runs, by = c("Outs", "BaseRunner")) %>%
-  left_join(y = end_expected_runs, by = c("end_Outs", "end_BaseRunner"))
-rm(end_expected_runs)
-```
-
-We can now finally compute run values
-```{r compute-runvalue}
-atbat2024 <-
-  atbat2024 %>%
-  mutate(RunValue = RunsScored + end_rho - rho)
-```
-
-
-
-## Aggregate run value leaders
-
-
-Now that we have the run values for every at-bat, we can compute the total run value produced by every batter across the season.
-
-```{r re24}
-#| message: false
-
-tmp_players <- player_lookup %>% select(key_mlbam, Name)
-re24 <- 
-  atbat2024 %>%
-  group_by(batter) %>%
-  summarise(RE24 = sum(RunValue),
-            N = n()) %>%
-  rename(key_mlbam = batter) %>%
-  inner_join(y = tmp_players) %>%
-  select(Name, RE24, N) %>%
-  arrange(desc(RE24))
-
-re24
-```
-When we compare our top-10 to FanGraph's leaderboard for RE24, we see a lot of overlap.
-But there are some differences, especially with regards to the number of plate appearances and actual RE24 values.
-For the latter, FanGraph likely used a different expected run matrix.
-And the StatCast data is not complete; for instance, it is missing 3 games in which Judge played.
-
-
-```{r save_atbat}
-#| echo: false
-save(atbat2024, file = "~/Dropbox/Teaching/2025-26/stat479_f25_sports/lecture_planning/pitchFraming/atbat2024.RData")
-
-```
-
-<!--
-  Our dataset contains 675 PA in 155 games from Aaron Judge; in 2024 he actually player 158 games and had 704 PA.
--->
 
 
 

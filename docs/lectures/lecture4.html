@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.7.31">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Lecture 4: Wins above Replacement I – STAT479</title>
+<title>Flexible regression: Building our own XG model – STAT479</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -19,6 +19,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -36,7 +71,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-10c2ad7cdbdc86dea93900442ad0167d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -68,6 +103,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -104,26 +168,30 @@ ul.task-list li input[type="checkbox"] {
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture2.html">
- <span class="dropdown-text">Lecture 2: Expected Value-based Evaluation</span></a>
+ <span class="dropdown-text">What makes a good metric?</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture3.html">
- <span class="dropdown-text">Lecture 3: Estimating the Expected Value of a Game State</span></a>
+ <span class="dropdown-text">Actual and Expected Performance</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture4.html">
- <span class="dropdown-text">Lecture 4: Wins above Replacement I</span></a>
+ <span class="dropdown-text">Flexible regression: Building our own XG model</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture5.html">
- <span class="dropdown-text">Lecture 5: Wins Above Replacement II</span></a>
+ <span class="dropdown-text">Lecture 5: Run values in baseball</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture6.html">
- <span class="dropdown-text">Flexible Regression Methods</span></a>
+ <span class="dropdown-text">Wins Above Replacement I</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../lectures/lecture8.html">
+    <a class="dropdown-item" href="../lectures/lecture7.html">
+ <span class="dropdown-text">WAR II: Defensive Credit &amp; Defining Replacement-Level</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture9.html">
  <span class="dropdown-text">Lecture 8: Pitch Framing &amp; Multi-level modeling</span></a>
   </li>  
     </ul>
@@ -165,7 +233,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../lectures/lecture4.html">Lecture 4: Wins above Replacement I</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../lectures/lecture4.html">Flexible regression: Building our own XG model</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -186,36 +254,42 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../lectures/lecture2.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lecture 2: Expected Value-based Evaluation</span></a>
+ <span class="menu-text">What makes a good metric?</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../lectures/lecture3.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lecture 3: Estimating the Expected Value of a Game State</span></a>
+ <span class="menu-text">Actual and Expected Performance</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../lectures/lecture4.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Lecture 4: Wins above Replacement I</span></a>
+ <span class="menu-text">Flexible regression: Building our own XG model</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../lectures/lecture5.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lecture 5: Wins Above Replacement II</span></a>
+ <span class="menu-text">Lecture 5: Run values in baseball</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../lectures/lecture6.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Flexible Regression Methods</span></a>
+ <span class="menu-text">Wins Above Replacement I</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../lectures/lecture8.html" class="sidebar-item-text sidebar-link">
+  <a href="../lectures/lecture7.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">WAR II: Defensive Credit &amp; Defining Replacement-Level</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture9.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Lecture 8: Pitch Framing &amp; Multi-level modeling</span></a>
   </div>
 </li>
@@ -229,13 +303,18 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#overview-allocation-of-credit-in-baseball" id="toc-overview-allocation-of-credit-in-baseball" class="nav-link active" data-scroll-target="#overview-allocation-of-credit-in-baseball">Overview: Allocation of credit in baseball</a>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#comparing-xg-models" id="toc-comparing-xg-models" class="nav-link" data-scroll-target="#comparing-xg-models">Comparing XG models</a>
   <ul class="collapse">
-  <li><a href="#conditioning-on-results" id="toc-conditioning-on-results" class="nav-link" data-scroll-target="#conditioning-on-results">Conditioning on Results</a></li>
+  <li><a href="#model-assessment" id="toc-model-assessment" class="nav-link" data-scroll-target="#model-assessment">Model assessment</a></li>
+  <li><a href="#training-and-testing" id="toc-training-and-testing" class="nav-link" data-scroll-target="#training-and-testing">Training and testing</a></li>
   </ul></li>
-  <li><a href="#adjusting-re24-for-platoon-advantage-ballpark" id="toc-adjusting-re24-for-platoon-advantage-ballpark" class="nav-link" data-scroll-target="#adjusting-re24-for-platoon-advantage-ballpark">Adjusting RE24 for platoon advantage &amp; ballpark</a></li>
-  <li><a href="#base-running" id="toc-base-running" class="nav-link" data-scroll-target="#base-running">Base-running</a></li>
-  <li><a href="#batting" id="toc-batting" class="nav-link" data-scroll-target="#batting">Batting</a></li>
+  <li><a href="#logistic-regression" id="toc-logistic-regression" class="nav-link" data-scroll-target="#logistic-regression">Logistic Regression</a>
+  <ul class="collapse">
+  <li><a href="#spatial-smoothing-with-generalized-additive-models" id="toc-spatial-smoothing-with-generalized-additive-models" class="nav-link" data-scroll-target="#spatial-smoothing-with-generalized-additive-models">Spatial smoothing with generalized additive models</a></li>
+  <li><a href="#incorporating-more-spatial-features" id="toc-incorporating-more-spatial-features" class="nav-link" data-scroll-target="#incorporating-more-spatial-features">Incorporating more spatial features</a></li>
+  </ul></li>
+  <li><a href="#tree-based-modeling" id="toc-tree-based-modeling" class="nav-link" data-scroll-target="#tree-based-modeling">Tree-based modeling</a></li>
   </ul>
 </nav>
     </div>
@@ -244,7 +323,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Lecture 4: Wins above Replacement I</h1>
+<h1 class="title">Flexible regression: Building our own XG model</h1>
 </div>
 
 
@@ -261,56 +340,451 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="overview-allocation-of-credit-in-baseball" class="level2">
-<h2 class="anchored" data-anchor-id="overview-allocation-of-credit-in-baseball">Overview: Allocation of credit in baseball</h2>
-<section id="conditioning-on-results" class="level3">
-<h3 class="anchored" data-anchor-id="conditioning-on-results">Conditioning on Results</h3>
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<p>Last lecture, we fit two very basic models for XG. The first used only body part to predict the probability of the shot resulting in a goal while the second used both body part and shot technique. By looking at a few of Beth Mead’s shots from EURO 2022, we decided that the second model was a better because it assigned a higher XG to her one-on-one lob than the shot through multiple defenders. In this lecture, we will</p>
+<p>Like in <a href="">Lecture 3</a>, we will work with all shot event data from women’s international competitions that StatsBomb makes publicly available. As before, we make sure to load the <strong>tidyverse</strong> suite of packages and define a color-blind friendly palette.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># save a nice color-blind friednly color palette into our environment</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>oi_colors <span class="ot">&lt;-</span> <span class="fu">palette.colors</span>(<span class="at">palette =</span> <span class="st">"Okabe-Ito"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Using some code from <a href="">Lecture 3</a>, we load in all the shot event data and create a binary outcome recording whether the shot resulted in a goal.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>wi_shots <span class="ot">&lt;-</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeCompetitions</span>() <span class="sc">|&gt;</span> <span class="co"># get table of available competitions</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(competition_gender <span class="sc">==</span> <span class="st">"female"</span> <span class="sc">&amp;</span> competition_international)<span class="sc">|&gt;</span> <span class="co"># filter to women's internationals</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeMatches</span>() <span class="sc">|&gt;</span> <span class="co"># Gets match data for all women's internationals</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">free_allevents</span>() <span class="sc">|&gt;</span> <span class="co"># Gets all events for all matches</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">allclean</span>() <span class="sc">|&gt;</span> <span class="co"># Apply StatsBomb's pre-processing</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">get.opposingteam</span>() <span class="sc">|&gt;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(type.name <span class="sc">==</span> <span class="st">"Shot"</span> <span class="sc">&amp;</span> shot.body_part.name <span class="sc">!=</span> <span class="st">"Other"</span>) <span class="sc">|&gt;</span>  <span class="co"># Subsets only shot event data</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Y =</span> <span class="fu">ifelse</span>(shot.outcome.name <span class="sc">==</span> <span class="st">"Goal"</span>, <span class="dv">1</span>, <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We will also construct the two simple XG models, one that conditions only on body part and the other that conditions on body part and technique. We then use a join to add a column</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>xg_model1 <span class="ot">&lt;-</span> </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(shot.body_part.name) <span class="sc">|&gt;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">XG1 =</span> <span class="fu">mean</span>(Y))</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>xg_model2 <span class="ot">&lt;-</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(shot.body_part.name, shot.technique.name) <span class="sc">|&gt;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">XG2 =</span> <span class="fu">mean</span>(Y), <span class="at">.groups =</span> <span class="st">"drop"</span>) </span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>wi_shots <span class="ot">&lt;-</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(<span class="at">y =</span> xg_model1, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(<span class="at">y =</span> xg_model2, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>, <span class="st">"shot.technique.name"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="comparing-xg-models" class="level2">
+<h2 class="anchored" data-anchor-id="comparing-xg-models">Comparing XG models</h2>
+<section id="model-assessment" class="level3">
+<h3 class="anchored" data-anchor-id="model-assessment">Model assessment</h3>
+<p>To make this more concrete, suppose we have observed a shots dataset of pairs <span class="math inline">\((\boldsymbol{\mathbf{x}}_{1}, y_{1}), \ldots (\boldsymbol{\mathbf{x}}_{n}, y_{n})\)</span> of feature vectors <span class="math inline">\(\boldsymbol{\mathbf{X}}\)</span> and binary indicators <span class="math inline">\(Y\)</span> recording whether the shot resulted in a goal or not. Recall from <a href="">Lecture 3</a> that a key assumption of XG models is the observed dataset comprises a <em>sample</em> from some infinite super-population of shots. For each feature combination <span class="math inline">\(\boldsymbol{\mathbf{x}},\)</span> the corresponding <span class="math inline">\(\textrm{XG}(\boldsymbol{\mathbf{x}})\)</span> is defined to be the conditional expectation <span class="math inline">\(\textrm{XG}(\boldsymbol{\mathbf{x}}) := \mathbb{E}[Y \vert \boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}].\)</span> Because <span class="math inline">\(Y\)</span> is a binary indicator, <span class="math inline">\(\textrm{XG}(\boldsymbol{\mathbf{x}})\)</span> can be interpretted as the probability that a shot with features <span class="math inline">\(\boldsymbol{\mathbf{x}}\)</span> results in a goal.</p>
+<p>Now, suppose we have used our data to fit an XG model. We can go back to every shot <span class="math inline">\(i\)</span> in our dataset and use each fitted model to obtain <span class="math inline">\(\hat{p}_{i}.\)</span> We would like to assess how close these predictions are to</p>
+<section id="misclassification-rate" class="level4">
+<h4 class="anchored" data-anchor-id="misclassification-rate">Misclassification Rate</h4>
+<p>Given a binary observations <span class="math inline">\(y_{1}, \ldots, y_{n}\)</span> and predicted probabilities <span class="math inline">\(\hat{p}_{1}, \ldots, \hat{p}_{n},\)</span> the <em>misclassification rate</em> is defined as <span class="math display">\[
+\textrm{MISS} = n^{-1}\sum_{i = 1}^{n}{\mathbb{I}(y_{i} \neq \mathbb{I}(\hat{p}_{i} \geq 0.5))},
+\]</span> where <span class="math inline">\(\mathbb{I}(\hat{p}_{i} \geq 0.5)\)</span> equals 1 when <span class="math inline">\(\hat{p}_{i} \geq 0.5\)</span> and equals 0 otherwise and <span class="math inline">\(\mathbb{I}(y_{i} \neq \mathbb{I}(\hat{p}_{i} \geq 0.5))\)</span> equals 1 when <span class="math inline">\(y_{i}\)</span> is not equal to <span class="math inline">\(\mathbb{I}(\hat{p}_{i} \geq 0.5)\)</span> and equals 0 otherwise.</p>
+<p>In the context of XG, misclassification rate measures the proportion of times we predict an XG higher than 0.5 for. non-goal or an XG lower than 0.5 for a goal. That is, misclassification rate penalizes XG predictions that are on the wrong side of the 50% threshold.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>misclass <span class="ot">&lt;-</span> <span class="cf">function</span>(y, phat){</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>( <span class="fu">mean</span>( (y <span class="sc">!=</span> <span class="dv">1</span><span class="sc">*</span>(phat <span class="sc">&gt;=</span> <span class="fl">0.5</span>))))</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"BodyPart misclassification"</span>, </span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">misclass</span>(wi_shots<span class="sc">$</span>Y, wi_shots<span class="sc">$</span>XG1), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>BodyPart misclassification 0.107 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"BodyPart+Technique misclassificaiton"</span>, </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">misclass</span>(wi_shots<span class="sc">$</span>Y, wi_shots<span class="sc">$</span>XG2), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>BodyPart+Technique misclassificaiton 0.107 </code></pre>
+</div>
+</div>
+<p>Our two simple models have identical misclassification rates of about 10.7%. At first glance this is a bit surprising because the two models have different predicted XG values</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Unique XG1 values:"</span>, <span class="fu">sort</span>(<span class="fu">unique</span>(wi_shots<span class="sc">$</span>XG1)), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Unique XG1 values: 0.1015056 0.1118336 0.1132812 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Unique XG2 values:"</span>, <span class="fu">sort</span>(<span class="fu">unique</span>(wi_shots<span class="sc">$</span>XG2)), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Unique XG2 values: 0 0.04117647 0.06770833 0.08011869 0.08333333 0.1108898 0.113307 0.1213333 0.1363636 0.1621622 0.3333333 </code></pre>
+</div>
+</div>
+<p>Notice that our two simple models output predicted XG values that are all less than 0.5. So, the thresholded values <span class="math inline">\(\mathbb{I}(\hat{p}_{i} \geq 0.5)\)</span> are identical for both models’ <span class="math inline">\(\hat{p}_{i}\)</span>’s. Just for comparison’s sake, let’s compute the misclassification rate of the proprietary StatsBomb XG model</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"StatsBomb misclassificaiton"</span>, </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">misclass</span>(wi_shots<span class="sc">$</span>Y, wi_shots<span class="sc">$</span>shot.statsbomb_xg), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>StatsBomb misclassificaiton 0.088 </code></pre>
+</div>
+</div>
+</section>
+<section id="brier-score-average-log-loss" class="level4">
+<h4 class="anchored" data-anchor-id="brier-score-average-log-loss">Brier Score &amp; Average log-loss</h4>
+<p>One drawback of misclassification loss is that it only penalizes predictions for being on the wrong side of 50% but does not penalize predictions based on how far away they are from 0 or 1. For instance, if one model predicts that a shot has an XG of 0.999 and another model predicts an XG of 0.501 for the same shot, the misclassification loss is exactly the same.</p>
+<p>The <strong>Brier score</strong> is based on the squared error loss, which takes into account how far a predicted probability <span class="math inline">\(\hat{p}\)</span> is from <span class="math inline">\(0\)</span> and <span class="math inline">\(1\)</span> <span class="math display">\[
+\text{Brier} = n^{-1}\sum_{i = 1}^{n}{(y_{i} - \hat{p}_{i})^2}.
+\]</span> Whereas misclassification loss (i.e., <span class="math inline">\(\mathbb{I}(y \neq \mathbb{I}(\hat{p} &gt;= 0.5))\)</span>) penalizes probability forecasts on the wrong side of the 50% threshold, the squared loss <span class="math inline">\((y_{i} - \hat{p})^{2}\)</span> is larger when <span class="math inline">\(\hat{p}\)</span> is further away from <span class="math inline">\(y.\)</span></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>brier <span class="ot">&lt;-</span> <span class="cf">function</span>(y, phat){</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">mean</span>( (y <span class="sc">-</span> phat)<span class="sc">^</span><span class="dv">2</span> ))</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"BodyPart Brier"</span>, </span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">brier</span>(wi_shots<span class="sc">$</span>Y, wi_shots<span class="sc">$</span>XG1), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>BodyPart Brier 0.0953 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"BodyPart+Technique Brier"</span>, </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">brier</span>(wi_shots<span class="sc">$</span>Y, wi_shots<span class="sc">$</span>XG2) , <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>BodyPart+Technique Brier 0.0947 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"StatsBomb Brier"</span>,</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">brier</span>(wi_shots<span class="sc">$</span>Y, wi_shots<span class="sc">$</span>shot.statsbomb_xg), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>StatsBomb Brier 0.0706 </code></pre>
+</div>
+</div>
+<p>Now, we see that the model that conditions on both body part and technique has an ever-so-slightly smaller Brier score.</p>
+<p>The <strong>average log-loss</strong> provides another way to penalize differences between predicted probabilities <span class="math inline">\(\hat{p}\)</span> and binary outcomes <span class="math inline">\(y\)</span> <span class="math display">\[
+\textrm{Avg. log-loss} = -1 \times \sum_{i = 1}^{n}{\left[ y_{i} \times \log(\hat{p}_{i}) + (1 - y_{i})\times\log(1-\hat{p}_{i})\right]}.
+\]</span> Log-loss penalizes extreme mistakes <strong>much</strong> more aggressively than the Brier score. In practice, we often threshold <span class="math inline">\(\hat{p}\)</span> values that are very close to 0 or 1 when computing log-loss</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>logloss <span class="ot">&lt;-</span> <span class="cf">function</span>(y, phat){</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="fu">any</span>(phat <span class="sc">&lt;</span> <span class="fl">1e-12</span>)) phat[phat <span class="sc">&lt;</span> <span class="fl">1e-12</span>] <span class="ot">&lt;-</span> <span class="fl">1e-12</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="fu">any</span>(phat <span class="sc">&gt;</span> <span class="dv">1</span><span class="fl">-1e-12</span>)) phat[phat <span class="sc">&gt;</span> <span class="dv">1</span><span class="fl">-1e-12</span>] <span class="ot">&lt;-</span> <span class="fl">1e-12</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> <span class="fu">mean</span>( y <span class="sc">*</span> <span class="fu">log</span>(phat) <span class="sc">+</span> (<span class="dv">1</span><span class="sc">-</span>y) <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">1</span><span class="sc">-</span>phat)))</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"BodyPart Brier:"</span>, </span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">logloss</span>(wi_shots<span class="sc">$</span>Y, wi_shots<span class="sc">$</span>XG1), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>BodyPart Brier: 0.3394 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"BodyPart+Technique Brier:"</span>, </span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">logloss</span>(wi_shots<span class="sc">$</span>Y, wi_shots<span class="sc">$</span>XG2) , <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>BodyPart+Technique Brier: 0.3358 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"StatsBomb Brier:"</span>,</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">logloss</span>(wi_shots<span class="sc">$</span>Y, wi_shots<span class="sc">$</span>shot.statsbomb_xg), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>StatsBomb Brier: 0.2521 </code></pre>
+</div>
+</div>
+<p>Typically, we prefer models with **smaller* mis-classification rates, Brier scores, and average log-losses <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+</section>
+</section>
+<section id="training-and-testing" class="level3">
+<h3 class="anchored" data-anchor-id="training-and-testing">Training and testing</h3>
+<p>So far, we have evaluated our models using the same data on which they were trained.</p>
+<p>To illustrate, in the code below we first create a copy of <code>wi_shots</code> and then add a column called <code>train</code> containing random 0’s and 1’s. We generate those random 0’s and 1’s in such a way that around 75% of them are equal to 1. We then pull out the training data</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># add an id number for every shot</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(wi_shots)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>n_train <span class="ot">&lt;-</span> <span class="fu">floor</span>(<span class="fl">0.75</span> <span class="sc">*</span> n)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>n_test <span class="ot">&lt;-</span> n <span class="sc">-</span> n_train</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>wi_shots <span class="ot">&lt;-</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">id =</span> <span class="dv">1</span><span class="sc">:</span>n)</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">478</span>)</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_sample</span>(<span class="at">n =</span> n_train) <span class="sc">|&gt;</span></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>XG1,<span class="sc">-</span>XG2)</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>test_data <span class="ot">&lt;-</span></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">anti_join</span>(<span class="at">y =</span> train_data, <span class="at">by =</span> <span class="st">"id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>XG1, <span class="sc">-</span>XG2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>As a sanity check, we can check whether any of the <code>id</code>’s in <code>test_data</code> are also in <code>train_data</code>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">any</span>(train_data<span class="sc">$</span>id <span class="sc">%in%</span> test_data<span class="sc">$</span>id)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] FALSE</code></pre>
+</div>
+</div>
+<p>Now that we have a single training and testing split, let’s fit our two simple XG models and then computing the average training and testing losses</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>model1 <span class="ot">&lt;-</span> </span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  train_data <span class="sc">|&gt;</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(shot.body_part.name) <span class="sc">|&gt;</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">XG1 =</span> <span class="fu">mean</span>(Y))</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>model2 <span class="ot">&lt;-</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  train_data <span class="sc">|&gt;</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(shot.body_part.name, shot.technique.name) <span class="sc">|&gt;</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">XG2 =</span> <span class="fu">mean</span>(Y), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>  train_data <span class="sc">|&gt;</span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(<span class="at">y =</span> model1, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(<span class="at">y =</span> model2, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>, <span class="st">"shot.technique.name"</span>))</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>test_data <span class="ot">&lt;-</span></span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>  test_data <span class="sc">|&gt;</span></span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(<span class="at">y =</span> model1, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(<span class="at">y =</span> model2, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>, <span class="st">"shot.technique.name"</span>))</span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"BodyPart train log-loss:"</span>,</span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">logloss</span>(train_data<span class="sc">$</span>Y, train_data<span class="sc">$</span>XG1), <span class="at">digits =</span> <span class="dv">4</span>), </span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"test log-loss:"</span>,</span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">logloss</span>(test_data<span class="sc">$</span>Y, test_data<span class="sc">$</span>XG1), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>BodyPart train log-loss: 0.3392 test log-loss: 0.3405 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"BodyPart+Technique train log-loss:"</span>,</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">logloss</span>(train_data<span class="sc">$</span>Y, train_data<span class="sc">$</span>XG2), <span class="at">digits =</span> <span class="dv">4</span>), </span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"BodyBart+Technique test log-loss:"</span>,</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">logloss</span>(test_data<span class="sc">$</span>Y, test_data<span class="sc">$</span>XG2), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>BodyPart+Technique train log-loss: 0.3352 BodyBart+Technique test log-loss: 0.3637 </code></pre>
+</div>
+</div>
+<p>For this training/testing split, we find that although conditioning on both body-part and technique produced a slightly smaller training log-loss than conditioning only on body-part, the more complex model had <strong>larger</strong> testing loss. In other words, we obtained slightly more accurate out-of-sample predictions with the simpler model than the more complex model. This would suggest that the more complex model <strong>overfit</strong> the training data</p>
+<p>Of course, this was baesd on just training/testing split. We commonly do the same calculation using multiple training/testing splits and look at the average losses.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>n_sims <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>train_logloss <span class="ot">&lt;-</span> </span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">matrix</span>(<span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> n_sims,</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="fu">c</span>(<span class="st">"XG1"</span>,<span class="st">"XG2"</span>), <span class="fu">c</span>()))</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>test_logloss <span class="ot">&lt;-</span> </span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">matrix</span>(<span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> n_sims,</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="fu">c</span>(<span class="st">"XG1"</span>,<span class="st">"XG2"</span>), <span class="fu">c</span>()))</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(r <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_sims){</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">479</span><span class="sc">+</span>r) <span class="co"># for replicability</span></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>  train_data <span class="ot">&lt;-</span></span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>    wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">slice_sample</span>(<span class="at">n =</span> n_train) <span class="sc">|&gt;</span></span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(<span class="sc">-</span>XG1,<span class="sc">-</span>XG2)</span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a>  test_data <span class="ot">&lt;-</span></span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a>    wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">anti_join</span>(<span class="at">y =</span> train_data, <span class="at">by =</span> <span class="st">"id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb33-18"><a href="#cb33-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(<span class="sc">-</span>XG1, <span class="sc">-</span>XG2)</span>
+<span id="cb33-19"><a href="#cb33-19" aria-hidden="true" tabindex="-1"></a>  model1 <span class="ot">&lt;-</span> </span>
+<span id="cb33-20"><a href="#cb33-20" aria-hidden="true" tabindex="-1"></a>    train_data <span class="sc">|&gt;</span></span>
+<span id="cb33-21"><a href="#cb33-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(shot.body_part.name) <span class="sc">|&gt;</span></span>
+<span id="cb33-22"><a href="#cb33-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">XG1 =</span> <span class="fu">mean</span>(Y))</span>
+<span id="cb33-23"><a href="#cb33-23" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb33-24"><a href="#cb33-24" aria-hidden="true" tabindex="-1"></a>  model2 <span class="ot">&lt;-</span></span>
+<span id="cb33-25"><a href="#cb33-25" aria-hidden="true" tabindex="-1"></a>    train_data <span class="sc">|&gt;</span></span>
+<span id="cb33-26"><a href="#cb33-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(shot.body_part.name, shot.technique.name) <span class="sc">|&gt;</span></span>
+<span id="cb33-27"><a href="#cb33-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">XG2 =</span> <span class="fu">mean</span>(Y), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb33-28"><a href="#cb33-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-29"><a href="#cb33-29" aria-hidden="true" tabindex="-1"></a>  train_data <span class="ot">&lt;-</span></span>
+<span id="cb33-30"><a href="#cb33-30" aria-hidden="true" tabindex="-1"></a>    train_data <span class="sc">|&gt;</span></span>
+<span id="cb33-31"><a href="#cb33-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">inner_join</span>(<span class="at">y =</span> model1, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb33-32"><a href="#cb33-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">inner_join</span>(<span class="at">y =</span> model2, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>, <span class="st">"shot.technique.name"</span>))</span>
+<span id="cb33-33"><a href="#cb33-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-34"><a href="#cb33-34" aria-hidden="true" tabindex="-1"></a>  test_data <span class="ot">&lt;-</span></span>
+<span id="cb33-35"><a href="#cb33-35" aria-hidden="true" tabindex="-1"></a>    test_data <span class="sc">|&gt;</span></span>
+<span id="cb33-36"><a href="#cb33-36" aria-hidden="true" tabindex="-1"></a>    <span class="fu">inner_join</span>(<span class="at">y =</span> model1, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb33-37"><a href="#cb33-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">inner_join</span>(<span class="at">y =</span> model2, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>, <span class="st">"shot.technique.name"</span>))</span>
+<span id="cb33-38"><a href="#cb33-38" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb33-39"><a href="#cb33-39" aria-hidden="true" tabindex="-1"></a>  train_logloss[<span class="st">"XG1"</span>, r] <span class="ot">&lt;-</span> </span>
+<span id="cb33-40"><a href="#cb33-40" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logloss</span>(train_data<span class="sc">$</span>Y, train_data<span class="sc">$</span>XG1)</span>
+<span id="cb33-41"><a href="#cb33-41" aria-hidden="true" tabindex="-1"></a>  train_logloss[<span class="st">"XG2"</span>,r] <span class="ot">&lt;-</span></span>
+<span id="cb33-42"><a href="#cb33-42" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logloss</span>(train_data<span class="sc">$</span>Y, train_data<span class="sc">$</span>XG2)</span>
+<span id="cb33-43"><a href="#cb33-43" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb33-44"><a href="#cb33-44" aria-hidden="true" tabindex="-1"></a>  test_logloss[<span class="st">"XG1"</span>, r] <span class="ot">&lt;-</span> </span>
+<span id="cb33-45"><a href="#cb33-45" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logloss</span>(test_data<span class="sc">$</span>Y, test_data<span class="sc">$</span>XG1)</span>
+<span id="cb33-46"><a href="#cb33-46" aria-hidden="true" tabindex="-1"></a>  test_logloss[<span class="st">"XG2"</span>,r] <span class="ot">&lt;-</span></span>
+<span id="cb33-47"><a href="#cb33-47" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logloss</span>(test_data<span class="sc">$</span>Y, test_data<span class="sc">$</span>XG2)</span>
+<span id="cb33-48"><a href="#cb33-48" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb33-49"><a href="#cb33-49" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"XG1 training logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(train_logloss[<span class="st">"XG1"</span>,]), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>XG1 training logloss: 0.3424 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"XG2 training logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(train_logloss[<span class="st">"XG2"</span>,]), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>XG2 training logloss: 0.3378 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"XG1 test logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(test_logloss[<span class="st">"XG1"</span>,]), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>XG1 test logloss: 0.3314 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"XG2 test logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(test_logloss[<span class="st">"XG2"</span>,]), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>XG2 test logloss: 0.3448 </code></pre>
+</div>
+</div>
+<p>We see exactly the same pattern: our more complex model seemed to do slightly <em>worse</em> than our simplest model that accounted for</p>
 <!--
-  Compare two plays in baseball. The batter hits a homerun; obviously they should get credit, pitcher should get little credit, and the fielders
-  
-  But in this second play the situation is a bit murkier, the batter puts the ball in play (which is better than striking out!); the baserunners advances, but the fielder 
-  
-  If we can divide up credit to the players and sum up over all plays, then we 
-  
-  Credit in baseball is often expressed in terms of run expectancy. Loosely, this combines what is expected to happen with what actually happened. Neither extreme is quite what we want
-  
-  Eventually when we aggregate, it is more useful to turn absolute numbers into a comparison. How much better than is one player's performance than another's.
-  This is at the heart of the concept of "wins above replacement".
-  
-  While there are many proprietary approaches to computing this, we will emulate the calculation outlined by Baumer et al. in their landmark openWAR paper
-  
-  As with most lectures, there is a **lot** more in these notes than presented in lecture.
-  
+  SEction 2.2 of ISLR; especially focus on 2.2.3, the classification setting
 -->
 </section>
 </section>
-<section id="adjusting-re24-for-platoon-advantage-ballpark" class="level2">
-<h2 class="anchored" data-anchor-id="adjusting-re24-for-platoon-advantage-ballpark">Adjusting RE24 for platoon advantage &amp; ballpark</h2>
-<!--
-  Regress delta onto park and indicator Bhand == Phand
-  Get those residuals and add them to the data frame
+<section id="logistic-regression" class="level2">
+<h2 class="anchored" data-anchor-id="logistic-regression">Logistic Regression</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">478</span>)</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_sample</span>(<span class="at">n =</span> n_train) <span class="sc">|&gt;</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>XG1,<span class="sc">-</span>XG2)</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>test_data <span class="ot">&lt;-</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">anti_join</span>(<span class="at">y =</span> train_data, <span class="at">by =</span> <span class="st">"id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>XG1, <span class="sc">-</span>XG2)</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>fit1 <span class="ot">&lt;-</span></span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glm</span>(Y<span class="sc">~</span>DistToGoal, <span class="at">data =</span> train_data,</span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">family =</span> <span class="fu">binomial</span>(<span class="st">"logit"</span>))</span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>train_pred1 <span class="ot">&lt;-</span> <span class="fu">predict</span>(<span class="at">object =</span> fit1,</span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a>                       <span class="at">newdata =</span> train_data,</span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>                       <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a>test_pred1 <span class="ot">&lt;-</span></span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict</span>(<span class="at">object =</span> fit1,</span>
+<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a>          <span class="at">newdata =</span> test_data,</span>
+<span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a>          <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb41-21"><a href="#cb41-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-22"><a href="#cb41-22" aria-hidden="true" tabindex="-1"></a>fit2 <span class="ot">&lt;-</span> </span>
+<span id="cb41-23"><a href="#cb41-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glm</span>(Y <span class="sc">~</span> DistToGoal<span class="sc">+</span>shot.body_part.name<span class="sc">+</span>shot.technique.name,</span>
+<span id="cb41-24"><a href="#cb41-24" aria-hidden="true" tabindex="-1"></a>      <span class="at">data =</span> train_data,</span>
+<span id="cb41-25"><a href="#cb41-25" aria-hidden="true" tabindex="-1"></a>      <span class="at">family =</span> <span class="fu">binomial</span>(<span class="st">"logit"</span>))</span>
+<span id="cb41-26"><a href="#cb41-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-27"><a href="#cb41-27" aria-hidden="true" tabindex="-1"></a>test_pred2 <span class="ot">&lt;-</span></span>
+<span id="cb41-28"><a href="#cb41-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict</span>(<span class="at">object =</span> fit2,</span>
+<span id="cb41-29"><a href="#cb41-29" aria-hidden="true" tabindex="-1"></a>          <span class="at">newdata =</span> test_data,</span>
+<span id="cb41-30"><a href="#cb41-30" aria-hidden="true" tabindex="-1"></a>          <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb41-31"><a href="#cb41-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-32"><a href="#cb41-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-33"><a href="#cb41-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-34"><a href="#cb41-34" aria-hidden="true" tabindex="-1"></a><span class="fu">logloss</span>(train_data<span class="sc">$</span>Y, train_pred1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.3047536</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">logloss</span>(test_data<span class="sc">$</span>Y, test_pred1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.3087526</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>wi_shots <span class="ot">&lt;-</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">shot.body_part.name =</span> <span class="fu">factor</span>(shot.body_part.id),</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">shot.technique.name =</span> <span class="fu">factor</span>(shot.technique.name))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>So distance seems to help a little bit! But, the logistic regression model we just fit makes the <strong>strong</strong> assumption the change in XG between left &amp; right footed shots is the same from these two locations.</p>
+<p>But hang-on, this; let’s look at the triangle formed between shot and the goal; from this distance, you have to be much more precise just to get the ball on target. We’ll construct a new feature – ConeAngle – that measures precisely this angle. It’s not hard to compute with a bit trigonometry.</p>
+<section id="spatial-smoothing-with-generalized-additive-models" class="level3">
+<h3 class="anchored" data-anchor-id="spatial-smoothing-with-generalized-additive-models">Spatial smoothing with generalized additive models</h3>
+<p>The above model accounted for shot location somewhat indirectly through distance and <code>ConeAngle</code>. A somewhat more general model would take the form <code>BodyPart + Technique + f(X,Y)</code> for some to-be-estimated function <span class="math inline">\(f\)</span>. We would moreover assume that <span class="math inline">\(f\)</span> is <em>smooth</em>, in the sense that moving from one part of the pitch to another</p>
+<p>We can also visualize these estimates</p>
+</section>
+<section id="incorporating-more-spatial-features" class="level3">
+<h3 class="anchored" data-anchor-id="incorporating-more-spatial-features">Incorporating more spatial features</h3>
+<!-- throw the kitchen sink into the model; this is harder to plot; but we can still do the training/testing -->
+</section>
+</section>
+<section id="tree-based-modeling" class="level2">
+<h2 class="anchored" data-anchor-id="tree-based-modeling">Tree-based modeling</h2>
+<!-- interactions are hard! 
+
+
+::: {.cell}
+
+```{.r .cell-code}
+shot_vars <- 
+  c("Y", "position.name",
+    "shot.type.name", 
+    "shot.technique.name", "shot.body_part.name",
+    "location.x", "location.y",
+    "shot.end_location.x", "shot.end_location.y",
+    "DistToGoal", "DistToKeeper", # dist. to keeper is distance from GK to goal
+    "AngleToGoal", "AngleToKeeper",
+    "AngleDeviation", 
+    "avevelocity","density", "density.incone",
+    "distance.ToD1", "distance.ToD2",
+    "AttackersBehindBall", "DefendersBehindBall",
+    "DefendersInCone", "InCone.GK", "DefArea")
+
+wi_shots <-
+  wi_shots |>
+  mutate(player.name = factor(player.name),
+         position.name = factor(position.name),
+         shot.type.name = factor(shot.type.name),
+         shot.technique.name = factor(shot.technique.name),
+         shot.body_part.name = factor(shot.body_part.name))
+set.seed(479)
+train_data <-
+  wi_shots |>
+  slice_sample(n = n_train)
+
+test_data <-
+  wi_shots |>
+  anti_join(y = train_data, by = "id")
+
+train_data <-
+  train_data |> 
+  select(all_of(shot_vars)) |>
+  drop_na()
+test_data <-
+  test_data |> 
+  select(all_of(shot_vars)) |>
+  drop_na()
+```
+:::
+
+
+
+::: {.cell}
+
+```{.r .cell-code}
+train_y <- train_data$Y
+test_y <- test_data$Y
+
+train_data <-
+  train_data |>
+  mutate(Y = factor(Y, levels = 0:1)) # randomForest requires outcome to be a factor
+
+test_data <-
+  test_data |>
+  mutate(Y = factor(Y, levels = 0:1)) # randomForest requires outcome to be a factor
+
+
+fit <-
+  randomForest::randomForest(formula = Y~., 
+                             data = train_data)
+train_preds <- 
+  predict(object = fit,
+          newdata = train_data,
+          type = "prob")
+
+test_preds <- 
+  predict(object = fit,
+          newdata = test_data, 
+          type = "prob")
+```
+:::
+
+
+## OK, but here are two passes that from the same distance but 
+
 -->
-</section>
-<section id="base-running" class="level2">
-<h2 class="anchored" data-anchor-id="base-running">Base-running</h2>
-<p>Quote from Baumer et al.&nbsp;“baserunners should only get credit for advancement beyond what would be expected given their starting locations, number of outs, and the hitting event that occurred” <!--
-  Regress residuals (epsilon) from above onto indicators for gamestate; hitting event that occured
-  Resulting residual (eta): represent the portion of the adjusted oﬀensive run value that is attributable to the baserunners.
---> ### Expected base advancement</p>
-</section>
-<section id="batting" class="level2">
-<h2 class="anchored" data-anchor-id="batting">Batting</h2>
-<!--
-eta: portion of adjusted offensive run value attributable to baserunners.
-mu = epsilon-eta attributable to the hitter
-** need to compare batter relative to other players at his position **
-
--->
 
 
 </section>
 
-</main> <!-- /main -->
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>try to convince yourself why!<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
