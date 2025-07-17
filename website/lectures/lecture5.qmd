@@ -16,7 +16,7 @@ execute:
   In the second, Ohtani singles and drives in a run. Should he get all the credit? How much should go to the baserunner? And what exactly how much value was created?
   We need to look both at the actual runs scored (because, scoreboard). But also, we should give credit for putting his team in favorable positions.
   
-  Over the next 3 lectures, we will address this. Here is our plan. Today, we will introduce run value, which is a number that tracks (i) the number of runs scored in each at-bat and (ii) the 
+  Over the next 3 lectures, we will address this. Here is our plan. Today, we will introduce run value, which is a number that tracks (i) the number of runs scored in each at-bat and (ii) the change in the number of runs the team can **expect** to score in the remainder of the at-bat.
   Then we will look at assigning credit, after accounting for things outside the batting teams' control (e.g., the ballpark and handedness).
   Then we will look at defense: how much blame should go to the fielder for not making the out or the pitcher for giving up the hit.
   We will finally combine these and then convert our valuations to an easily-interpretable scale: wins above replacement. In doing so, we will 
@@ -177,7 +177,7 @@ annual_statcast_query <- function(season) {
 To use this function, it is enough to run something like.
 ```{r}
 #| eval: false
-statcast2024 <- annual_statcast_query(2024)
+raw_statcast2024 <- annual_statcast_query(2024)
 ```
 :::{#statcast-warning .callout-important}
 ## Time and disk space requirements
@@ -186,8 +186,8 @@ I **highly** recommend scraping the data for any season only once and saving the
 ```{r}
 #| eval: false
 library(tidyverse)
-statcast2024 <- annual_statcast_query(2024)
-save(statcast2024, file = "statcast2024.RData")
+raw_statcast2024 <- annual_statcast_query(2024)
+save(raw_statcast2024, file = "raw_statcast2024.RData")
 ```
 These `.RData` files take between 75MB and 150MB of space.
 So, if you want to work with several seasons (e.g., going back all the way to 2008, the first season for which pitch tracking data is available), you will need about 2.5GB of storage space on your computer.
@@ -196,8 +196,11 @@ So, if you want to work with several seasons (e.g., going back all the way to 20
 ### Working with StatCast data
 ```{r load-statcast}
 #| echo: false
+#| message: false
+#| warning: false
+#| output: false
 library(tidyverse)
-load("~/Dropbox/Teaching/2025-26/stat479_f25_sports/lecture_planning/pitchFraming/statcast2024.RData")
+load("~/Dropbox/Teaching/2025-26/stat479_f25_sports/lecture_planning/openWAR/raw_statcast2024.RData")
 ```
 
 In the 2024 season, we have StatCast data for 784,978 pitches.
@@ -209,13 +212,13 @@ The function `annual_statcast_query` actually scrapes data not only from the reg
 For our analysis, we will focus only on the regular season data.
 The variable `game_type` records the type of game in which each pitch was thrown.
 ```{r table-game_type}
-table(statcast2024$game_type, useNA = 'always')
+table(raw_statcast2024$game_type, useNA = 'always')
 ```
 Looking at the [StatCast documentation](https://baseballsavant.mlb.com/csv-docs), we see that regular season pitches have `game_type=="R"`.
 We additionally filter out any pitches with nonsensical values like 4 balls or 3 strikes (for 2024, this turns out to be only 1 pitch).
 ```{r filter-regular-season}
 statcast2024 <-
-  statcast2024 %>% 
+  raw_statcast2024 %>% 
   filter(game_type == "R") %>%
   filter(strikes >= 0 & strikes < 3 & 
            balls >= 0 & balls < 4 & 
@@ -228,16 +231,38 @@ For every pitch, the StatCast dataset records the identities of the batter (`bat
 However, it does not identify them by name, instead using an ID number, which is assigned by MLB Advanced Media. 
 We can look up the corresponding player names using a database maintained by the [Chadwick Register](https://github.com/chadwickbureau/register).
 The function `baseballr::chadwick_player_lu` downloads the Chadwick database and stores it as a data table in R.
+This database contains the names and MLB Advanced Media identifiers for players across all seasons, far more than we need for our purposes.
+So, in the code below, we first download the Chadwick player database and then extract only those players who appeared in the 2024 regular season.
 Like with the raw pitch-by-pitch data, I recommend that you download this player identity database once and save the table as an `.RData` object for future use.
 ```{r download-lookup}
 #| message: false
 #| output: false
 #| warning: false
-player_lookup <-
-  baseballr::chadwick_player_lu() %>%
-  mutate(Name = paste(name_first, name_last))
-```
+player2024_id <- # <1>
+  unique(
+    c(statcast2024$batter, statcast2024$pitcher,
+      statcast2024$on_1b, statcast2024$on_2b, statcast2024$on_3b,
+      statcast2024$fielder_2, statcast2024$fielder_3,
+      statcast2024$fielder_3, statcast2024$fielder_4,
+      statcast2024$fielder_5, statcast2024$fielder_6,
+      statcast2024$fielder_7, statcast2024$fielder_8,
+      statcast2024$fielder_9))
 
+chadwick_players <-
+  baseballr::chadwick_player_lu()
+save(chadwick_players, file = "chadwick_players.RData") # <2>
+
+player2024_lookup <-
+  chadwick_players %>%
+  filter(key_mlbam %in% player2024_id) %>%
+  mutate(FullName = paste(name_first, name_last), # <3>
+         Name = stringi::stri_trans_general(FullName, "Latin-ASCII")) # <4>
+save(player2024_lookup, file = "player2024_lookup.RData")
+```
+1. This vector contains the MLB Advanced Media ID for all players who appeared in 2024 as a batter, pitcher, fielder, or baserunner.
+2. Save a local copy of the full Chadwick database.
+3. Creates a column containing the player's first and last name.
+4. Removes any accents or special characters, which we will need in [Lecture 5]().
 
 ## Expected Runs
 
@@ -334,12 +359,14 @@ To do this, we will take advantage of the `group_by()` command in **dplyr** to a
 ```{r statcast-append-ria}
 statcast2024 <-
   statcast2024 %>%
-  group_by(game_pk, inning, inning_topbot) %>% # divide up by game and half-inning
-  arrange(at_bat_number, pitch_number) %>% # arrange pitches by at-bat and pitch-number
-  mutate(RunsRemaining = last(post_bat_score) - bat_score) %>%
+  group_by(game_pk, inning, inning_topbot) %>% # <1>
+  arrange(at_bat_number, pitch_number) %>% # <2>
+  mutate(RunsRemaining = last(post_bat_score) - bat_score) %>% #<3>
   ungroup()
 ```
-
+1. Divide the data based on the combination of game and half-inning
+2. Arrange pitches in the appropriate temporal order
+3. Add column for how many runs were scored after each pitch
 
 Now we have the number of runs scored in the half-inning after each pitch.
 But to compute run expectancy, we need this quantity at the at-bat level and not at the pitch-level.
@@ -349,11 +376,14 @@ So, to compute run expectancy, it is enough to pull out the first pitch from eac
 ```{r compute-er2024}
 expected_runs <-
   statcast2024 %>%
-  filter(pitch_number == 1) %>% # get first pitch in every at-bat
+  filter(pitch_number == 1) %>% # <1>
   select(Outs, BaseRunner, RunsRemaining) %>%
-  group_by(Outs, BaseRunner) %>%
-  summarize(rho = mean(RunsRemaining), .groups = "drop")
+  group_by(Outs, BaseRunner) %>% # <2> 
+  summarize(rho = mean(RunsRemaining), .groups = "drop") # <3>
 ```
+1. Get the first pitch in every at-bat
+2. Sub-divide the data based on the 24 combinations of out and baserunner 
+3. Compute the mean of `RunRemaining` for each game state combination
 
 The table `expected_runs` contains one row for every combination of outs and base-runner configuration.
 Traditionally, expected runs is reported using an $8\times 3$ matrix, with rows corresponding to base-runner configurations and columns corresponding to outs.
@@ -433,18 +463,23 @@ dodgers_inning <-
   arrange(at_bat_number, pitch_number)
 ```
 
-We can now apply this formula to all pitches in `statcast2024` by grouping by `game_pk` and `at_bat_number`
+We can now apply this formula to all pitches in `statcast2024` by grouping by `game_pk` and `at_bat_number`.
+We will also save a copy of the data table `statcast2024` so that we can load it into future R sessions.
 
 ```{r runs-scored}
 statcast2024 <-
   statcast2024 %>%
-  group_by(game_pk, at_bat_number) %>% # divide by at-bats within each game
-  arrange(pitch_number) %>% # sort pitches within at-bat
-  mutate(RunsScored = last(post_bat_score) - first(bat_score)) %>%
-  ungroup() %>% # remove grouping
+  group_by(game_pk, at_bat_number) %>% # <1>
+  arrange(pitch_number) %>% # <2>
+  mutate(RunsScored = last(post_bat_score) - first(bat_score)) %>% # <3>
+  ungroup() %>%
   arrange(game_date, game_pk, at_bat_number, pitch_number)
-```
 
+save(statcast2024, file = "statcast2024.RData")
+```
+1. Sub-divide the data based on individual at-bats
+2. Place pitches within each at-bat in sequential order
+3. Add column recording the number of runs scored in the at-bat
 ### Computing the starting and ending states
 
 Except for the very last pitch in a team's innings, the ending state of that pitch is, by definition, the starting state of the next pitch.
@@ -488,6 +523,35 @@ In [Lecture 5]() and [Lecture 6](), we will work not only with the game-state (i
 We can following an essentially identical strategy of (i) sorting pitches by at-bat and pitch numbers; (ii) computing the leading value of several columns within each half-inning; (iii) grouping by at-bat number; and (iv) taking the lasts of those leading values.
 
 The code below performs this calculation and also pulls out the rows corresponding to just the first pitch of every at-bat. 
+
+```{r runvalue_start}
+runValue2024 <-
+  statcast2024 |>
+  group_by(game_pk, inning, inning_topbot) |> # <1>
+  arrange(at_bat_number, pitch_number) |>
+  mutate(next_Outs = lead(Outs), # <2>
+         next_BaseRunner = lead(BaseRunner)) |>
+  ungroup() |>
+  group_by(game_pk, at_bat_number) |>
+  arrange(pitch_number) |>
+  mutate(end_Outs = last(next_Outs), # <3>
+         end_BaseRunner = last(next_BaseRunner)) |> 
+  ungroup() |>
+  arrange(game_date, game_pk, at_bat_number, pitch_number) |>
+  filter(pitch_number == 1) |> # <4> 
+  select(game_pk, at_bat_number, 
+         inning, inning_topbot, 
+         Outs, BaseRunner, 
+         RunsScored, RunsRemaining, 
+         end_Outs, end_BaseRunner)
+
+```
+1. Sub-divide into half-innings
+2. Get values of `Outs` and `BaseRunner` for next pitch in the inning
+3. Goes to last pitch of each at-bat and gets the next value of `Outs` and `BaseRunner`, which are the *starting* values of these variables in the next at-bat.
+4. Gets the first pitch from each at-bat
+
+<!--
 ```{r endstate}
 atbat2024 <-
   statcast2024 |>
@@ -503,18 +567,17 @@ atbat2024 <-
   ungroup() |>
   arrange(game_date, game_pk, at_bat_number, pitch_number) |>
   filter(pitch_number == 1) |>
-  mutate(end_bat_score = bat_score + RunsScored, end_fld_score = fld_score) |>
   select(game_pk, at_bat_number,
          batter,
          inning, inning_topbot, Outs, BaseRunner,
+         bat_score, fld_score,
          RunsScored, RunsRemaining,
-         end_Outs, end_BaseRunner,
-         des)
+         end_Outs, end_BaseRunner)
 ```
-
+-->
 ### Computing run-values
 
-Now that we have a table `atbat2024` containing information about the starting and ending states of each at-bat, we are ready to compute run-values.
+Now that we have a table `runValue` containing information about the starting and ending states of each at-bat, we are ready to compute run-values.
 In particular, we can use a join (just like we did with XG in Lecture 2) to add in the values of the starting and ending expected runs.
 
 Before doing that, though, we need to deal with the `NA`'s introduced by `lead()`.
@@ -523,7 +586,7 @@ Looking at the at-bats from the Dodger's 8th inning from our running example, we
 Before doing that, though, let's take a quick look at the rows in the table corresponding to the Dodgers' 8th inning from our running example
 
 ```{r atbat-dodgers}
-atbat2024 %>%
+runValue2024 %>%
   filter(game_pk == 745444 & inning == 8 & inning_topbot == "Top") %>%
   select(at_bat_number, Outs, BaseRunner, end_Outs, end_BaseRunner)
 ```
@@ -534,8 +597,8 @@ expected_runs <-
   expected_runs %>%
   add_row(Outs=3, BaseRunner="000", rho = 0)
 
-atbat2024 <-
-  atbat2024 %>%
+runValue2024 <-
+  runValue2024 %>%
   mutate(end_Outs = ifelse(is.na(end_Outs), 3, end_Outs),
          end_BaseRunner = ifelse(is.na(end_BaseRunner), '000', end_BaseRunner))
 ```
@@ -548,41 +611,66 @@ end_expected_runs <-
          end_BaseRunner = BaseRunner,
          end_rho = rho)
 
-atbat2024 <-
-  atbat2024 %>%
+runValue2024 <-
+  runValue2024 %>%
   left_join(y = expected_runs, by = c("Outs", "BaseRunner")) %>%
-  left_join(y = end_expected_runs, by = c("end_Outs", "end_BaseRunner"))
+  left_join(y = end_expected_runs, by = c("end_Outs", "end_BaseRunner")) |>
+  mutate(RunValue = RunsScored + end_rho - rho) |>
+  select(game_pk, at_bat_number, RunValue)
+
 rm(end_expected_runs)
+save(runValue2024, file = "runValue2024.RData")
 ```
 
-We can now finally compute run values
-```{r compute-runvalue}
-atbat2024 <-
-  atbat2024 %>%
-  mutate(RunValue = RunsScored + end_rho - rho)
+## Assessing batter production with run value
+
+Each row in `runValue2024` corresponds to a single at-bat in the 2024 regular season and is uniquely determined by the game identifier (`game_pk`) and at-bat number (`at_bat_number`).
+We're now in a position to quantify how run value Ohtani created during the Dodgers-Padres game introduced above?
+
+To do this, it is helpful to first look up Ohtani's MLB Advanced Media ID number using our table `player2024_lookup`.
+Then, we can extract the rows of `statcast2024` corresponding to the first pitch in each at-bat from the Dodgers-Padres game `statcast2024`.
+Then we can filter this subset to only those at-bats where Ohtani was the batter.
+Finally, we can join the associated run values.
+
+
+```{r ohatni-atbats}
+ohtani_id <- 
+  player2024_lookup$key_mlbam[which(player2024_lookup$FullName == "Shohei Ohtani")]
+
+ohtani_ab <-
+  statcast2024 |>
+  filter(game_pk == 745444) |>
+  filter(pitch_number == 1 & batter == ohtani_id) |>
+  select(game_pk, at_bat_number, inning, des) |>
+  inner_join(y = runValue2024, by = c("game_pk", "at_bat_number")) |>
+  select(at_bat_number, RunValue, des)
+ohtani_ab
 ```
+Over the course of the entire game, Ohtani created a total of `{r} sum(ohtani_ab$RunValue)` in run value. 
+The negative run value created in his first, third, and fourth at-bats (i.e., when he got out) is offset by the positive run value he created by singling in the top of the 3rd inning and driving in a run in the top of the 8th inning.
+Note the run value of his last at-at is exactly 1 because a single run scored but the base-runner configuration did not change as a result of the at-bat.
 
-
-
-## Aggregate run value leaders
-
-
-Now that we have the run values for every at-bat, we can compute the total run value produced by every batter across the season.
+By repeating this calculation over the course of the entire 2024 regular season, we can identify those batters who created the most run value for their teams. 
 
 ```{r re24}
 #| message: false
 
-tmp_players <- player_lookup %>% select(key_mlbam, Name)
-re24 <- 
-  atbat2024 %>%
-  group_by(batter) %>%
-  summarise(RE24 = sum(RunValue),
-            N = n()) %>%
-  rename(key_mlbam = batter) %>%
-  inner_join(y = tmp_players) %>%
-  select(Name, RE24, N) %>%
-  arrange(desc(RE24))
+tmp_lookup <-
+  player2024_lookup |>
+  select(key_mlbam, Name) |>
+  rename(batter = key_mlbam)
 
+re24 <-
+  statcast2024 |> 
+  filter(pitch_number == 1) |>
+  select(game_pk, at_bat_number, batter) |>
+  inner_join(y = runValue2024, by = c("game_pk", "at_bat_number")) |>
+  group_by(batter) |>
+  summarise(RE24 = sum(RunValue),
+            N = n()) |>
+  inner_join(y = tmp_lookup, by = "batter") |>
+  select(Name, RE24, N) |>
+  arrange(desc(RE24))
 re24
 ```
 When we compare our top-10 to FanGraph's leaderboard for RE24, we see a lot of overlap.
