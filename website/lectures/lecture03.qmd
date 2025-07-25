@@ -65,7 +65,7 @@ In contrast, our second model, which accounts for both the body part and the sho
 Intuitively, we might expect the second model's predictions to be more accurate because it leverages more information. 
 
 To make this more concrete, suppose we have observed a shots dataset of pairs $(\boldsymbol{\mathbf{x}}_{1}, y_{1}), \ldots (\boldsymbol{\mathbf{x}}_{n}, y_{n})$ of feature vectors $\boldsymbol{\mathbf{X}}$ and binary indicators $Y$ recording whether the shot resulted in a goal or not.
-Recall from [Lecture 2](lecture2.qmd) that a key assumption of XG models is the observed dataset comprises a *sample* from some infinite super-population of shots.
+Recall from [Lecture 2](lecture02.qmd) that a key assumption of XG models is the observed dataset comprises a *sample* from some infinite super-population of shots.
 For each feature combination $\boldsymbol{\mathbf{x}},$ the corresponding $\textrm{XG}(\boldsymbol{\mathbf{x}})$ is defined to be the conditional expectation $\textrm{XG}(\boldsymbol{\mathbf{x}}) := \mathbb{E}[Y \vert \boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}].$
 Because $Y$ is a binary indicator, $\textrm{XG}(\boldsymbol{\mathbf{x}})$ can be interpreted as the probability that a shot with features $\boldsymbol{\mathbf{x}}$ results in a goal.
 
@@ -378,7 +378,7 @@ This is because it fails to account for important *spatial* information that we 
 For instance, we might intuitively expect a model that accounts for the **distance** between the shot and goal to be more accurate.
 Unfortunately, it is not easy to apply the same "binning and averaging" approach that we used for our first two models to condition on distance.
 This is because, with finite data, we will not have much data (if any) for all possible values of distance.
-As we saw in [Lecture 2](lecture2.qmd#sec-addtl-features), averaging outcomes within bins with very small sample sizes can lead to extreme and erratic estimates.
+As we saw in [Lecture 2](lecture02.qmd#sec-addtl-features), averaging outcomes within bins with very small sample sizes can lead to extreme and erratic estimates.
 One way to overcome this challenge is to fit a *statistical model*. 
 
 Logistic regression is the canonical statistical model for predicting a binary outcome $Y$ using a vector $\boldsymbol{\mathbf{X}}$ of $p$ numerical features $X_{1}, \ldots, X_{p}$[^cat].
