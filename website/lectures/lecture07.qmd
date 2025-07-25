@@ -1,5 +1,5 @@
 ---
-title: "Wins Above Replacement I"
+title: "Lecture 7: Wins Above Replacement I"
 format: html
 ---
 
@@ -9,6 +9,14 @@ format: html
 ## Adjusted Run Value
 
 <!--
+
+24 July: no need for park adjustment. Maybe a platoon adjustment but even that may not be necessary.
+
+  Regress onto game state: residual is adjust run value over average. How much goes to baserunner and how much to batter.
+  In this game state x event, check to see what the baserunners normally do. 
+  Whatever doesn't go to baserunner, give to batter: e.g., on a single with runner on first. Most of the time, the runner advances to second. But when they advance to 3rd or score, we want to give more weight. P(k < K) is the prob. they advance fewer than what they actually did. Do some sort of weighting. Then give everything else to the batter. Don't necessarily normalize to 1
+
+
   Formally we write $delta_i = \alpha_{1} * \ind{1} + \cdots + \alpha_{B} * \ind{B} + \beta_{adv} * \ind{platoon-advantage} + \epsilon
   
   Systematically, we know that some parks are harder to score runs in than others. And when the batter and pitcher are of different handedness, there can be some differences

@@ -1,0 +1,73 @@
+---
+title: "Lecture 4: Adjusted Plus/Minus"
+format: html
+---
+
+## Overview
+
+## Stint-level NBA data
+
+1. What is a "stint"
+2. Use **hoopR** to pull 
+3. Refer to code elsewhere
+
+### Building a design matrix
+
+
+## Plus/Minus
+
+
+## Linear Regression
+
+Adjusted plus/minus attempts to account for the other 9 players.
+
+
+Formally, it assumes that there is some number $\alpha_{p}$ associated with each player $p$ and an average home-court advantage $\alpha_{0}$ such that
+$$
+Y_{i} = \alpha_{0} + \alpha_{h_{i1}} + \cdots + \alpha_{h_{i5}} - \alpha_{a_{i1}} - \cdots - \alpha_{a_{i5}} + \epsilon_{i},
+$$
+where the error term is assumed to have mean 0.
+
+How can we estimate these using data?
+
+One approach is least squares.
+
+
+Remember that big design matrix $X$ from earlier?
+It turns out we can re-formulate this problem as
+$$
+\lVert Y - \tilde{X} \boldsymbol{\alpha} \rVert_{2}^{2}
+$$
+
+
+A little bit of linear algebra shows that the least squares solution is obtained by
+
+
+But before we can do this, there's a slight problem: the matrix is not invertible.
+This is because the rows sum to 1!
+
+
+### Dropping players and restricting the scope
+
+Historically, analysts have gotten around this issue by simply dropping the columns associated with players who played fewer than some fixed number of minutes.
+Traditionally this is 250 minutes.
+
+
+In R, we can estimate the coefficients using `lm`
+
+
+## Predictive quality
+
+
+The loop below trains an adjusted plus/minus model
+
+We compare to a simple model that asserts all $\alpha_{p} = 0$ and that each $Y$;
+In the training data; we then compare the average out-of-sample squared error.
+
+If you have taken STAT 333, you'll recognize this as a kind of generalization of $R^{2}.$
+
+Adjusted plus/minus really doesn't seem to work that well!
+
+
+
+

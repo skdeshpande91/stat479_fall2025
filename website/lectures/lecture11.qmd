@@ -1,0 +1,62 @@
+---
+title: "Lecture 11: Pitch Framing"
+format: html
+---
+
+```{r set-up}
+library(tidyverse)
+
+```
+
+## Overview
+
+## Historical Strike Probabilities
+<!--
+  Load in StatCast data from 2021, 2022, and 2023
+  Pull out all taken pitches
+  Visualize the raw data; potentially fit separate models for handedness combos
+  Add in the predictions to 2024 data
+-->
+
+## An initial multi-level model
+
+<!--
+  lme4::glmer(called_strike ~ logit(strike_prob) + (1 | fielder_2), data = taken_pitches2024, family = binomial(link="logit"))
+
+  fixed.effects() function will give us the intercept and coefficient of the historical
+
+  VarCorr: variability of random catcher effects
+
+  Use the ranef function
+
+-->
+
+## A more involved multi-level model
+
+Catchers are not the only people who might influence the called strike probability!
+
+<!--
+  Include pitcher, catcher, umpire, batter
+  Look at the VarCorr to see what the largest standard deviations of the random effects are; the larger the sd, the more it suggests that it is pitcher or batter that drives this
+-->
+
+## Exercises
+
+<!--
+  None of the models adjusted for count. Re-run the historical strike prediction model to include count. What changes?
+  None of the models adjust for the quality of the pitcher: try to find, e.g., the pitchers ERA from the previous season or some other measure of skill (e.g. wOBA) and include that as a fixed effect (good potential project idea)
+
+  While parameter estimates are useful, let's take an approahc similar to what we did for WAR: try to divide credit between Y - E[Y] between catcher, batter, pitcher, and umpire. How does these compare? 
+
+  How much is pitch frmaing worth? Stay tuned!
+
+-->
+
+
+<!--
+  0. Set up a guide for scraping savant data: link to Bill Petti's website
+  1. Scrape pitch-by-pitch for a single season (2024); this takes a while!
+  2. Fit a GAM : p_throws + stand + s(plate_x, plate_z)
+  3. Take the estimated p-hat and convert to logistic scale; then do a mixed-model with player-level random effects
+  4. Suggest pitch framing estimate as a project
+-->
