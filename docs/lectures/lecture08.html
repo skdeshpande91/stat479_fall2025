@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Exercises – STAT479</title>
+<title>Lecture 8: Defensive creidt &amp; replacement level – STAT479</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,23 +23,23 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-10c2ad7cdbdc86dea93900442ad0167d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-10c2ad7cdbdc86dea93900442ad0167d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -68,18 +68,47 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
-<link rel="stylesheet" href="styles.css">
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
 </head>
 
-<body class="nav-fixed quarto-light">
+<body class="nav-sidebar docked nav-fixed quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">STAT479</span>
     </a>
   </div>
@@ -90,7 +119,7 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./index.html"> 
+    <a class="nav-link" href="../index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item dropdown ">
@@ -99,55 +128,55 @@ ul.task-list li input[type="checkbox"] {
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-lectures">    
         <li>
-    <a class="dropdown-item" href="./lectures/lecture01.html">
+    <a class="dropdown-item" href="../lectures/lecture01.html">
  <span class="dropdown-text">Lecture 1: Boxscore Metrics</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./lectures/lecture02.html">
+    <a class="dropdown-item" href="../lectures/lecture02.html">
  <span class="dropdown-text">Lecture 2: Expected Goals</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./lectures/lecture03.html">
+    <a class="dropdown-item" href="../lectures/lecture03.html">
  <span class="dropdown-text">Lecture 3: Estimating XG</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./lectures/lecture04.html">
+    <a class="dropdown-item" href="../lectures/lecture04.html">
  <span class="dropdown-text">Lecture 4: Adjusted Plus/Minus</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./lectures/lecture05.html">
+    <a class="dropdown-item" href="../lectures/lecture05.html">
  <span class="dropdown-text">Lecture 5: Regularized Adjusted Plus/Minus</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./lectures/lecture06.html">
+    <a class="dropdown-item" href="../lectures/lecture06.html">
  <span class="dropdown-text">Lecture 6: Run expectancy</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./lectures/lecture07.html">
+    <a class="dropdown-item" href="../lectures/lecture07.html">
  <span class="dropdown-text">Lecture 7: Wins Above Replacement I</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./lectures/lecture08.html">
+    <a class="dropdown-item" href="../lectures/lecture08.html">
  <span class="dropdown-text">Lecture 8: Defensive creidt &amp; replacement level</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./lectures/lecture09.html">
+    <a class="dropdown-item" href="../lectures/lecture09.html">
  <span class="dropdown-text">Lecture 9: WAR for Football</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./lectures/lecture10.html">
+    <a class="dropdown-item" href="../lectures/lecture10.html">
  <span class="dropdown-text">Lecture 10: nflWAR II</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./lectures/lecture11.html">
+    <a class="dropdown-item" href="../lectures/lecture11.html">
  <span class="dropdown-text">Lecture 11: Pitch Framing</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./lectures/lecture12.html">
+    <a class="dropdown-item" href="../lectures/lecture12.html">
  <span class="dropdown-text">Ranking professional golfers</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./lectures/lecture13.html">
+    <a class="dropdown-item" href="../lectures/lecture13.html">
  <span class="dropdown-text">Bradley-Terry Models</span></a>
   </li>  
     </ul>
@@ -158,7 +187,7 @@ ul.task-list li input[type="checkbox"] {
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-exercises">    
         <li>
-    <a class="dropdown-item" href="./exercises/exercises1_boxscore.html">
+    <a class="dropdown-item" href="../exercises/exercises1_boxscore.html">
  <span class="dropdown-text">Constructing Advanced Metrics Using Box Score Data</span></a>
   </li>  
     </ul>
@@ -169,11 +198,11 @@ ul.task-list li input[type="checkbox"] {
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-guides">    
         <li>
-    <a class="dropdown-item" href="./guides/getting_started.html">
+    <a class="dropdown-item" href="../guides/getting_started.html">
  <span class="dropdown-text">Getting Started</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./guides/plot_vertical_statsbomb.html">
+    <a class="dropdown-item" href="../guides/plot_vertical_statsbomb.html">
  <span class="dropdown-text">Plotting StatsBomb Data Vertically</span></a>
   </li>  
     </ul>
@@ -184,20 +213,126 @@ ul.task-list li input[type="checkbox"] {
 </div>
       </div> <!-- /container-fluid -->
     </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../lectures/lecture08.html">Lecture 8: Defensive creidt &amp; replacement level</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
 </header>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture01.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 1: Boxscore Metrics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture02.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 2: Expected Goals</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture03.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 3: Estimating XG</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture04.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 4: Adjusted Plus/Minus</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture05.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 5: Regularized Adjusted Plus/Minus</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture06.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 6: Run expectancy</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture07.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 7: Wins Above Replacement I</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture08.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Lecture 8: Defensive creidt &amp; replacement level</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture09.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 9: WAR for Football</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture10.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 10: nflWAR II</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture11.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 11: Pitch Framing</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture12.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Ranking professional golfers</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture13.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bradley-Terry Models</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#probability-of-making-an-out" id="toc-probability-of-making-an-out" class="nav-link active" data-scroll-target="#probability-of-making-an-out">Probability of making an out</a></li>
+  <li><a href="#fielding-run-values" id="toc-fielding-run-values" class="nav-link" data-scroll-target="#fielding-run-values">Fielding run values</a>
+  <ul class="collapse">
+  <li><a href="#pitching-run-values" id="toc-pitching-run-values" class="nav-link" data-scroll-target="#pitching-run-values">Pitching run values</a></li>
+  </ul></li>
+  <li><a href="#replacement-level" id="toc-replacement-level" class="nav-link" data-scroll-target="#replacement-level">Replacement Level</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Exercises</h1>
+<h1 class="title">Lecture 8: Defensive creidt &amp; replacement level</h1>
 </div>
 
 
@@ -214,9 +349,48 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Contains additional exercises to reproduce and extend analyses shown in lecture.</p>
+<p>How difficult is a ball-in-play (BIP) to field? Intuitively, if the pitcher gives up a home run, the remaining fielders should not get any blame. And if a fielder makes an error, the pitcher should not get any blame.</p>
+<p>Of the total <span class="math inline">\(-\delta_{i}\)</span> we need to</p>
+<section id="probability-of-making-an-out" class="level2">
+<h2 class="anchored" data-anchor-id="probability-of-making-an-out">Probability of making an out</h2>
+<p>We will fit a generalized additive model, similar to what To do this, we will go back to our pitch-level data and pull out those pitches that resulted in hits. Later, we will want to join this to our atbat table so that there’s a column for p(fielded out)</p>
+<p>Then, we will grab the coordinates where the ball was fielded and whether an out was made (likely based on <code>events</code>)</p>
+<!--
+  do the same thing as above but this time re-define Y to be out & done by a particular fielder
+-->
+</section>
+<section id="fielding-run-values" class="level2">
+<h2 class="anchored" data-anchor-id="fielding-run-values">Fielding run values</h2>
+<!--
+  1. Fit a GAM for probability an out occurs on BIP i: p_i
+  2. Give -delta * (1 - p_i) to pitcher and -delta * p_i to fielders. Call this delta_f
+  3. For each fielding position, we need to know prob. that they could have made that out
+  For BIP i we compute probability that each position could make the out; then we normalize to get s_il. 
+  Regress delta_f * s onto parks; residualize to get RAA_f
+-->
+<section id="pitching-run-values" class="level3">
+<h3 class="anchored" data-anchor-id="pitching-run-values">Pitching run values</h3>
+<!--
+  Regress delta_f for pitchers onto park and platoon indicator
+-->
+</section>
+</section>
+<section id="replacement-level" class="level2">
+<h2 class="anchored" data-anchor-id="replacement-level">Replacement Level</h2>
+<p>Most teams carry 13 position players and 12 pitchers, we designate the <span class="math inline">\(30 \times 13 = 390\)</span> position players with the most PAs to be the non-replacement players. Everyone else is replacement level</p>
+<p>We can compute the average RAA for all replacement level players. Then we look at (RAA_p - RAA_shadow)/10 to be WAR</p>
+<!--
+  hit location: position of first fielder to touch the ball
+    Use this when 
+  hc_x, hc_y: plot them all to get a sense of where things are; we can rotate by 180 ccw so that home plate is at the bottom and then we can translate so home plate is at (0,0)
+-->
+<!--
+  when hc_x is NA but type == 1 that might be a home run and there is just no coordinate
+  fit a GAM with out or not 
+-->
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

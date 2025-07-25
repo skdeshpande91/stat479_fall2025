@@ -202,7 +202,7 @@ Because there is no single correct way to set a threshold, it is vitally importa
  For each season, compute 100 * 10/12% quantile for MPG and then take the average
  across the league. This is 
 -->
-```{r qualified}
+```{r}
 season_box |>
   filter(FGA >= 400) |>
   arrange(desc(FGP)) |>
@@ -264,98 +264,4 @@ season_box %>%
   arrange(desc(TSP), desc(eFGP), desc(FGP)) %>%
   select(Player, season, TSP, eFGP, FGP, TPP, n_games)
 ```
-
-## Properties of a good metric
-
-We've now computed several metrics (FGM, FGP, eFGP, and TSP) that all attempt to quantify an NBA player's shooting ability.
-
-<!--
-  What is the purpose a metric in sports analytics? 
-  Some are purely there to describe what happened
-  
-  Others are there to inform what might happen in the future; i.e., what component represents "skill"
-  
-  Both types of metrics are important
-  
-  Later we will explore much more formal ways to account for this. 
-  
-  But in the context of shooting performance, we can at least how repeatable certain values are year-to-year
-  
-  We find that, among players who attempted at last 400 field goals and at least 100 three point shots, the correlations are pretty consistent. So, these metrics are fairly stable.
-  
-  Interestingly, TPP is the least
--->
-```{r qualified}
-qual_box <-
-  season_box |>
-  filter(FGA >= 400 & TPA >= 100)
-```
-
-
-```{r next_TS}
-lag_tsp <- 
-  qual_box |>
-  select(Player, season, TSP) |>
-  group_by(Player) |>
-  arrange(season) |>
-  mutate(nextTSP = lead(TSP)) |>
-  ungroup() |>
-  arrange(Player, season)
-```
-
-```{r plot_tsp}
-#| fig-align: center
-#| fig-width: 6.5
-#| fig-height: 6.5
-par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
-plot(lag_tsp$TSP, lag_tsp$nextTSP,
-     xlab = "TSP (season n)", ylab = "TSP (season n+1)",
-     xlim = range(c(lag_tsp$TSP, lag_tsp$nextTSP), na.rm = TRUE),
-     ylim = range(c(lag_tsp$TSP, lag_tsp$nextTSP), na.rm = TRUE),
-     pch = 16, cex = 0.5)
-abline(a = 0, b = 1, col = oi_colors[3])
-```
-## Correlation
-
-
-```{r lag_stats}
-lag_stats <- 
-  qual_box |>
-  select(Player, season, TSP, eFGP, FGP, TPP) |>
-  group_by(Player) |>
-  arrange(desc(season)) |>
-  mutate(nextTSP = lead(TSP),
-         nexteFGP = lead(eFGP),
-         nextFGP = lead(FGP),
-         nextTPP = lead(TPP)) |>
-  ungroup() |>
-  arrange(Player, season) |>
-  filter(!is.na(nextTSP))
-```
-
-```{r compute-corr}
-cor(lag_stats$eFGP, lag_stats$nexteFGP)
-cor(lag_stats$TSP, lag_stats$nextTSP)
-cor(lag_stats$TPP, lag_stats$nextTPP)
-cor(lag_stats$FGP, lag_stats$nextFGP)
-```
-
-<!--
-
-1. We defined several metrics that quantify nba shooting ability
-2. Some of these metrics capture/emphasize certain aspects of shooting more than than others
-3. We ended up with TSP
-4. Looking at the top 10, notice that there are no repeats? Does this mean that if a player has a high TSP in one season, we should expect them to have a lower TSP next season? Next time, we will address this.
--->
-
-```{r save-box-score}
-#| eval: false
-save(sesason_box, file = "nba_box_scores.RData")
-```
-
-
-<!--
-  Next time: how repeatably is tsp?
--->
-
 

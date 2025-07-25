@@ -57,7 +57,7 @@ To see which matches from selected competitions have publicly available data, we
 For instance, hereare the first few rows and some selected columns from the matches from EURO 2022.
 StatsBomb graciously provided data for all the matches in the tournament.
 Figure 2 shows the table of matches from the 2022 EURO Competition; StatsBomb graciously provided data for all matches from the tournament, which can be obtained using the code below.
-```{r get-euro2022-matches}
+```{r}
 #| label: get-euro2022-matches
 #| message: false
 #| warning: false
@@ -76,7 +76,7 @@ As an example, the code chunk below pulls out publicly available event data for 
 #| message: false
 #| warning: false
 wi_events <-
-  StatsBombR::FreeCompetitions() |> # <1> # get table of available competitions
+  StatsBombR::FreeCompetitions() |> # <1>
   dplyr::filter(competition_gender == "female" & competition_international) |> # <2>
   StatsBombR::FreeMatches() |> # <3>
   StatsBombR::free_allevents() |> # <4>

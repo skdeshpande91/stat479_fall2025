@@ -134,32 +134,56 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-lectures">    
         <li>
-    <a class="dropdown-item" href="../lectures/lecture1.html">
+    <a class="dropdown-item" href="../lectures/lecture01.html">
  <span class="dropdown-text">Lecture 1: Boxscore Metrics</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../lectures/lecture2.html">
- <span class="dropdown-text">Lecture 2: Expected Value-based Evaluation</span></a>
+    <a class="dropdown-item" href="../lectures/lecture02.html">
+ <span class="dropdown-text">Lecture 2: Expected Goals</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../lectures/lecture3.html">
- <span class="dropdown-text">Lecture 3: Estimating the Expected Value of a Game State</span></a>
+    <a class="dropdown-item" href="../lectures/lecture03.html">
+ <span class="dropdown-text">Lecture 3: Estimating XG</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../lectures/lecture4.html">
- <span class="dropdown-text">Lecture 4: Wins above Replacement I</span></a>
+    <a class="dropdown-item" href="../lectures/lecture04.html">
+ <span class="dropdown-text">Lecture 4: Adjusted Plus/Minus</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../lectures/lecture5.html">
- <span class="dropdown-text">Lecture 5: Wins Above Replacement II</span></a>
+    <a class="dropdown-item" href="../lectures/lecture05.html">
+ <span class="dropdown-text">Lecture 5: Regularized Adjusted Plus/Minus</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../lectures/lecture6.html">
- <span class="dropdown-text">Flexible Regression Methods</span></a>
+    <a class="dropdown-item" href="../lectures/lecture06.html">
+ <span class="dropdown-text">Lecture 6: Run expectancy</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../lectures/lecture8.html">
- <span class="dropdown-text">Lecture 8: Pitch Framing &amp; Multi-level modeling</span></a>
+    <a class="dropdown-item" href="../lectures/lecture07.html">
+ <span class="dropdown-text">Lecture 7: Wins Above Replacement I</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture08.html">
+ <span class="dropdown-text">Lecture 8: Defensive creidt &amp; replacement level</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture09.html">
+ <span class="dropdown-text">Lecture 9: WAR for Football</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture10.html">
+ <span class="dropdown-text">Lecture 10: nflWAR II</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture11.html">
+ <span class="dropdown-text">Lecture 11: Pitch Framing</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture12.html">
+ <span class="dropdown-text">Ranking professional golfers</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture13.html">
+ <span class="dropdown-text">Bradley-Terry Models</span></a>
   </li>  
     </ul>
   </li>
@@ -624,25 +648,64 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           }
         };
       }
-        // Attach click handler to the DT
-        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
-        for (const annoteDlNode of annoteDls) {
-          annoteDlNode.addEventListener('click', (event) => {
-            const clickedEl = event.target;
-            if (clickedEl !== selectedAnnoteEl) {
-              unselectCodeLines();
-              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
-              if (activeEl) {
-                activeEl.classList.remove('code-annotation-active');
-              }
-              selectCodeLines(clickedEl);
-              clickedEl.classList.add('code-annotation-active');
-            } else {
-              // Unselect the line
-              unselectCodeLines();
-              clickedEl.classList.remove('code-annotation-active');
+        const annoteTargets = window.document.querySelectorAll('.code-annotation-anchor');
+        for (let i=0; i<annoteTargets.length; i++) {
+          const annoteTarget = annoteTargets[i];
+          const targetCell = annoteTarget.getAttribute("data-target-cell");
+          const targetAnnotation = annoteTarget.getAttribute("data-target-annotation");
+          const contentFn = () => {
+            const content = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+            if (content) {
+              const tipContent = content.cloneNode(true);
+              tipContent.classList.add("code-annotation-tip-content");
+              return tipContent.outerHTML;
             }
-          });
+          }
+          const config = {
+            allowHTML: true,
+            content: contentFn,
+            onShow: (instance) => {
+              selectCodeLines(instance.reference);
+              instance.reference.classList.add('code-annotation-active');
+              window.tippy.hideAll();
+            },
+            onHide: (instance) => {
+              unselectCodeLines();
+              instance.reference.classList.remove('code-annotation-active');
+            },
+            maxWidth: 300,
+            delay: [50, 0],
+            duration: [200, 0],
+            offset: [5, 10],
+            arrow: true,
+            appendTo: function(el) {
+              return el.parentElement.parentElement.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'quarto',
+            placement: 'right',
+            popperOptions: {
+              modifiers: [
+              {
+                name: 'flip',
+                options: {
+                  flipVariations: false, // true by default
+                  allowedAutoPlacements: ['right'],
+                  fallbackPlacements: ['right', 'top', 'top-start', 'top-end', 'bottom', 'bottom-start', 'bottom-end', 'left'],
+                },
+              },
+              {
+                name: 'preventOverflow',
+                options: {
+                  mainAxis: false,
+                  altAxis: false
+                }
+              }
+              ]        
+            }      
+          };
+          window.tippy(annoteTarget, config); 
         }
     const findCites = (el) => {
       const parentEl = el.parentElement;
