@@ -131,10 +131,22 @@ $$
 &~~ + \epsilon_{i},
 \end{align}
 $$
-where the errors $\epsilon_{i}$ have mean zero and $\alpha_{g} + \alpha_{e}$ captures the average run value created on at-bats beginning in game state $g$ and resulting in an event $e.$
+where $\alpha_{g} + \alpha_{e}$ represents the average run value created on at-bats beginning in game state $g$ and resulting in an event $e.$
 That is, under this assumed model, the average run value created in an at-bat beginning with two outs and no runners on that ends in a single (like Ohtani's 3rd inning at-bat against the Padres) is $\alpha_{2.000} + \alpha_{\textrm{single}}.$
 
-Of course, we don't know the exact values of the $\alpha$'s in this decomposition and will need to estimate them using our data.
+Of course, we don't know the exact values of the $\alpha$'s in this decomposition.
+But, one way to estimate them using our data is by solving the minimiziation problem
+$$
+\hat{\boldsymbol{\alpha}} = \textrm{argmin} \sum_{i = 1}^{n}{(\delta_{i} - \alpha_{g_{i}} - \alpha_{e_{i}})^2},
+$$
+where $g_{i}$ and $e_{i}$ record the game state and event of at-bat $i.$
+
+It turns out solving this minimization problem is equivalent to fitting a linear regression model *without an intercept*.
+We can do this in R using the `lm()` function and including the phrase `-1` in the `formula` argument.
+Note that in the following code block, we first convert `gameState` and `end_events` into categorical variables.
+
+
+<!--
 To this end, we fit a *linear regression model*.
 In practice, we don't estimate the $\alpha$'s directly.
 Instead, we estimate the **differences** in average run value relative to a baseline situation.
@@ -142,16 +154,13 @@ For simplicity, we'll set the baseline game state to be 0 outs with no runners o
 
 Under this re-parametrization, $\beta_{g}$ captures the change in average run value create an at-bat beginning in game state $g$ and ending in a fieldout and an at
 That is $\beta_{g} = \alpha_{g} - \alpha_{0.000}.$
-Similarly, <!-- interpret \beta_{e} -->
-
-In R, to set our baseline, we need to recode `gameState` and `end_events` into *factor* variables.
-Then, we will re-level those factors so that 0.000 and field-out are considered to be the reference levels.
-Finally, we estimate these betas using ordinary least squares, as implemented with the `lm` function.
-
-For each of the 24 game states and values of `events`, we will model
-<!--
- write the relevant LaTeX equation here
+Similarly, 
 -->
+
+
+
+
+
 
 ```{r}
 #| label: adjust_delta
@@ -160,20 +169,20 @@ tmp_df <-
   dplyr::mutate(
     GameState = paste(Outs, BaseRunner, sep = "."),
     GameState = factor(GameState),
-    end_events = factor(end_events),
-    end_events = relevel(end_events, ref = "field_out")) |>
+    end_events = factor(end_events)) |>
   dplyr::select(RunValue, GameState, end_events)
 
 state_event_fit <-
   lm(RunValue ~ GameState + end_events, data = tmp_df)
 ```
 
-We find that many of the coefficients are significantly different than zero[^significance].
 
-[^significance]: Given that we had `{r} nrow(tmp_df)` observations with which to estimate around 40 parameters, this should not be surprising.
 ```{r}
 summary(state_event_fit)
 ```
+
+
+
 In this fitted model, the intercept, which quantifies the average run value for a baseline at-bats that begin with 0 outs and no baserunners and end in a field out, is estimated to be about -0.24.
 The remaining model parameters quantify the different in average run value between that baseline at-bat and one that differs in one respect but is otherwise identical.
 For instance, the parameter for `GameState0.010` represents how much more average run value there is for at-bats that begin with 0 outs and a runner on a second and end in a field out relative to the baseline.
