@@ -418,13 +418,13 @@ window.Quarto = {
 
 <section id="overview-allocation-of-credit-in-baseball" class="level2">
 <h2 class="anchored" data-anchor-id="overview-allocation-of-credit-in-baseball">Overview: Allocation of credit in baseball</h2>
-<p>The first game of the 2024 MLB Regular Season, between the Los Angeles Dodgers and the San Diego Padres, took place on March 20, 2024[^korea] During the game, Shohei Ohtani recorded <a href="https://www.mlb.com/video/shohei-ohtani-records-two-hits-rbi-in-dodgers-debut">two hits in his five plate appearances</a>:</p>
+<p>The first game of the 2024 MLB Regular Season, between the Los Angeles Dodgers and the San Diego Padres, took place on March 20, 2024<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> During the game, Shohei Ohtani recorded <a href="https://www.mlb.com/video/shohei-ohtani-records-two-hits-rbi-in-dodgers-debut">two hits in his five plate appearances</a>:</p>
 <ol type="1">
-<li>In the top of the 3rd inning, with 2 outs and no runners on base, Ohtani singled into right field.</li>
-<li>In the top of the 8th inning, with 1 out and runners on first and second base, Ohtani singled into left center field, driving in one run.</li>
+<li>In the 3rd inning, with 2 outs and no runners on base, Ohtani singled into right field.</li>
+<li>In the 8th inning, with 1 out and runners on first and second base, Ohtani singled into left center field, driving in one run.</li>
 </ol>
 <p>Which of these singles was most valuable to Dodgers? And how much of that value should be credited to Ohtani specifically?</p>
-<p>Because the second directly resulted in a run scoring, it is tempting to conclude that the second single was more valuable than the first. However, although the Dodgers didn’t score as a result of the first single, Ohtani reached first base, putting his team in a position to potential score more runs than if he had not reached first<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. In terms of allocating credit, it seems natural to give Ohtani all the credit for whatever value was created on his first single. But on his second single, at least some of the value created is attributable to a baserunner scoring from second base. How should we divide credit between Ohtani and that baserunner?</p>
+<p>Because the second directly resulted in a run scoring, it is tempting to conclude that the second single was more valuable than the first. However, although the Dodgers didn’t score as a result of the first single, Ohtani reached first base, putting his team in a position to potential score more runs than if he had not reached first<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>. In terms of allocating credit, it seems natural to give Ohtani all the credit for whatever value was created on his first single. But on his second single, at least some of the value created is attributable to a baserunner scoring from second base. How should we divide credit between Ohtani and that baserunner?</p>
 <p>Over the next several lectures, we will work with pitch-level tracking data from Major League Baseball to answer these questions. In this lecture, we begin by computing <em>run values</em>, a metric that combines changes in the number of a team can <em>expect</em> to score and the number of runs actually scored in an at-bat. In <a href="../lectures/lecture07.html">Lecture 7</a>, we will distribute the run value created in every at-bat between the batter and base runners involved in the at-bat. We will then begin <a href="../lectures/lecture08.html">Lecture 8</a> by distributing the negative of the run value created by th batting team between the pitcher and fielders involved in each at-bat. Finally, we will aggregate the total run value over average created by each player through their hitting, fielding, base running, and pitching and convert that aggregate into a measure of wins above replacement. Our development largely follows <span class="citation" data-cites="Baumer2015_openWAR">(<a href="#ref-Baumer2015_openWAR" role="doc-biblioref">Baumer, Jensen, and Matthews 2015</a>)</span>, who created a transparent, open-source version of wins above replacement, a cornerstone of baseball analytics.</p>
 <!--
   July 28: 
@@ -750,7 +750,7 @@ Warning
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>If <code>get_lineup()</code> throws an error (e.g., because the batting orders for a particular game are not available), then the whole loop gets terminated. To avoid having to manually remove problematic games and re-start the loop, we will use <code>purrr:possibly()</code> to create a version of <code>get_lineup()</code> that returns <code>NULL</code> when it hits an error. We will also use <code>purrr:map</code> instead of writing an explict for loop.</p>
-<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout callout-style-default callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -1010,7 +1010,7 @@ Definition: Run Value
 <li>Sort the pitches by at-bat number and then by pitch number in ascending order</li>
 <li>Take the different between the <em>last</em> value of <code>post_bat_score</code> and <em>first</em> value of <code>bat_score</code> within each at-bat.</li>
 </ol>
-<p>Let’s try to verify this by looking at pitches from the third, fourth, and fifth at-bats of Dodgers’ 8th inning against the Padres<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+<p>Let’s try to verify this by looking at pitches from the third, fourth, and fifth at-bats of Dodgers’ 8th inning against the Padres<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>dodgers_inning <span class="sc">|&gt;</span></span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(at_bat_number <span class="sc">%in%</span> <span class="dv">61</span><span class="sc">:</span><span class="dv">63</span>) <span class="sc">|&gt;</span></span>
@@ -1107,7 +1107,7 @@ Definition: Run Value
 9            62            2     0 111       </code></pre>
 </div>
 </div>
-<p>We start by creating new columns recording the <code>Outs</code> and <code>BaseRunner</code> values of the <em>next</em> pitch using <a href="https://dplyr.tidyverse.org/reference/lead-lag.html"><code>dplyr::lead()</code></a> function. <a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>.</p>
+<p>We start by creating new columns recording the <code>Outs</code> and <code>BaseRunner</code> values of the <em>next</em> pitch using <a href="https://dplyr.tidyverse.org/reference/lead-lag.html"><code>dplyr::lead()</code></a> function. <a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>dodgers_inning <span class="sc">|&gt;</span></span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(at_bat_number <span class="sc">%in%</span> <span class="dv">60</span><span class="sc">:</span><span class="dv">62</span>) <span class="sc">|&gt;</span></span>
@@ -1354,9 +1354,10 @@ Baumer, Benjamin S., Shane T. Jensen, and Gregory J. Matthews. 2015. <span>“<s
 </div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
-<li id="fn1"><p>In fact, Ohtani went on to steal second base during the next at-bat, further increasing his team’s chancse of<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>StatCast assigns each at-bat in a game a unique number. The third, fourth, and fifth at-bats during the Dodger’s 8th inning were the 61st, 62nd, and 63rd at-bats of the game.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>The next value of a variable is undefined in the last row of a column, resulting in some <code>NA</code>’s. We’ll deal with those later on.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>This was also the first MLB game ever played in South Korea!<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>In fact, Ohtani went on to steal second base during the next at-bat, further increasing his team’s chancse of<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>StatCast assigns each at-bat in a game a unique number. The third, fourth, and fifth at-bats during the Dodger’s 8th inning were the 61st, 62nd, and 63rd at-bats of the game.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>The next value of a variable is undefined in the last row of a column, resulting in some <code>NA</code>’s. We’ll deal with those later on.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
