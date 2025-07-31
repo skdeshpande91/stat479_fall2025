@@ -29,6 +29,7 @@ We will also want to include the columns `event` and `des`, which record the eve
 ```{r}
 #| label: data-prep
 load("statcast2024.RData")
+load("runValue2024.RData")
 raw_atbat2024 <- 
   statcast2024 |>
   dplyr::group_by(game_pk, inning, inning_topbot) |> # <1> 
@@ -235,8 +236,14 @@ After all, while we may want to penalize a runner for not advancing from second 
 ### Computing baserunner advancement
 
 Unfortunately, StatCast does not compute the number of bases that each runner advances during each at-bat.
-The following code implements a function that determins the number of bases advanced by the runner on first (if any).
+The following code implements a function that determines the number of bases advanced by the runner on first (if any).
+It works by first checking whether there is anyone on 1b at the start of the at-bat.
+If so, it checks whether that player is on first, second, or third base at the end of the at-bat.
+If not, it parses the at-bat description contained in `des` and looks for a sentence containing the player's name.
+If that sentence contains the words "out" or "caught stealing", it sets the number of bases advanced to 0.
+But, if the sentnce contains the word "score", it sets the number of bases advanced to 3, since the runner scored from first.
 ```{r}
+load("player2024_lookup.RData")
 #| label: mvt-1b-function
 mvt_1b <- function(on_1b, Outs, bat_score,
                    end_on_1b, end_on_2b, end_on_3b, end_Outs, end_bat_score,
@@ -396,7 +403,7 @@ mvt_batter <- function(batter, Outs, bat_score, end_on_1b, end_on_2b, end_on_3b,
 We can now apply these functions to every row of our data frame.
 
 :::{.callout-warning}
-## Long runtime
+## Warning
 The following code takes a few minutes to run.
 :::
 
@@ -562,7 +569,7 @@ raa_1b <-
 
 We can similarly compute the run value above average created by the runners on second base and third base as well as by the batter.
 ```{r}
-#| label: compute-raa-b
+#| label: compute-raa-23b
 raa_2b <-
   baserunning |>
   dplyr::filter(!is.na(on_2b)) |>

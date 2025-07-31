@@ -375,7 +375,7 @@ window.Quarto = {
   <ul>
   <li><a href="#motivation-beth-meads-performance-at-euro2022" id="toc-motivation-beth-meads-performance-at-euro2022" class="nav-link active" data-scroll-target="#motivation-beth-meads-performance-at-euro2022">Motivation: Beth Mead’s performance at EURO2022</a></li>
   <li><a href="#working-with-soccer-event-data" id="toc-working-with-soccer-event-data" class="nav-link" data-scroll-target="#working-with-soccer-event-data">Working with soccer event data</a></li>
-  <li><a href="#an-initial-expected-goals-model" id="toc-an-initial-expected-goals-model" class="nav-link" data-scroll-target="#an-initial-expected-goals-model">An initial expected goals model</a>
+  <li><a href="#sec-init-xg" id="toc-sec-init-xg" class="nav-link" data-scroll-target="#sec-init-xg">An initial expected goals model</a>
   <ul class="collapse">
   <li><a href="#sec-addtl-features" id="toc-sec-addtl-features" class="nav-link" data-scroll-target="#sec-addtl-features">Accounting for additional features</a></li>
   </ul></li>
@@ -535,8 +535,8 @@ Navigating complex code
 </div>
 </div>
 </section>
-<section id="an-initial-expected-goals-model" class="level2">
-<h2 class="anchored" data-anchor-id="an-initial-expected-goals-model">An initial expected goals model</h2>
+<section id="sec-init-xg" class="level2">
+<h2 class="anchored" data-anchor-id="sec-init-xg">An initial expected goals model</h2>
 <p>Suppose we observe a dataset consisting of <span class="math inline">\(n\)</span> shots. For each shot <span class="math inline">\(i = 1, \ldots, n,\)</span> let <span class="math inline">\(Y_{i}\)</span> be a binary indicator of whether the shot resulted in a goal (<span class="math inline">\(Y_{i} = 1\)</span>) or not (<span class="math inline">\(Y_{i} = 0\)</span>). From the high-resolution tracking data, we can extract a potentially huge number of features about the shot at the moment of it was taken. Possible features include, but are certainly not limited to, the player taking the shot, the body part and side of the body used, the positions of the defenders and goal keepers, and contextual information like the score. Mathematically, we can collect all these features into a (potentially large) vector <span class="math inline">\(\boldsymbol{\mathbf{X}}_{i}.\)</span></p>
 <p>Expected goals (XG) models work by (i) positing an infinite super-population of shots represented by pairs <span class="math inline">\((\boldsymbol{\mathbf{X}}, Y)\)</span> of feature vector <span class="math inline">\(\boldsymbol{\mathbf{X}}\)</span> and binary outcome <span class="math inline">\(Y\)</span>; and (ii) assuming that the shots in our dataset constitute a random sample <span class="math inline">\((\boldsymbol{\mathbf{X}}_{1}, Y_{1}), \ldots, (\boldsymbol{\mathbf{X}}_{n}, Y_{n})\)</span> from that population.</p>
 <div class="callout callout-style-default callout-note no-icon callout-titled">

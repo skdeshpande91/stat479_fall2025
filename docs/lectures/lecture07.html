@@ -20,7 +20,62 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -68,6 +123,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -289,10 +373,26 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#recap-roadmap" id="toc-recap-roadmap" class="nav-link active" data-scroll-target="#recap-roadmap">Recap &amp; Roadmap</a></li>
-  <li><a href="#adjusted-run-value" id="toc-adjusted-run-value" class="nav-link" data-scroll-target="#adjusted-run-value">Adjusted Run Value</a></li>
-  <li><a href="#baserunning" id="toc-baserunning" class="nav-link" data-scroll-target="#baserunning">Baserunning</a></li>
-  <li><a href="#batting" id="toc-batting" class="nav-link" data-scroll-target="#batting">Batting</a></li>
+  <li><a href="#recap-roadmap" id="toc-recap-roadmap" class="nav-link active" data-scroll-target="#recap-roadmap">Recap &amp; Roadmap</a>
+  <ul class="collapse">
+  <li><a href="#conservation-of-runs" id="toc-conservation-of-runs" class="nav-link" data-scroll-target="#conservation-of-runs">Conservation of runs</a></li>
+  </ul></li>
+  <li><a href="#data-preparation" id="toc-data-preparation" class="nav-link" data-scroll-target="#data-preparation">Data Preparation</a>
+  <ul class="collapse">
+  <li><a href="#filling-in-missing-events" id="toc-filling-in-missing-events" class="nav-link" data-scroll-target="#filling-in-missing-events">Filling in missing events</a></li>
+  </ul></li>
+  <li><a href="#adjusted-run-values" id="toc-adjusted-run-values" class="nav-link" data-scroll-target="#adjusted-run-values">Adjusted Run Values</a></li>
+  <li><a href="#baserunning-run-values" id="toc-baserunning-run-values" class="nav-link" data-scroll-target="#baserunning-run-values">Baserunning run values</a>
+  <ul class="collapse">
+  <li><a href="#computing-baserunner-advancement" id="toc-computing-baserunner-advancement" class="nav-link" data-scroll-target="#computing-baserunner-advancement">Computing baserunner advancement</a></li>
+  <li><a href="#cumulative-baserunning-probabilities" id="toc-cumulative-baserunning-probabilities" class="nav-link" data-scroll-target="#cumulative-baserunning-probabilities">Cumulative baserunning probabilities</a></li>
+  <li><a href="#baserunning-runs-above-average" id="toc-baserunning-runs-above-average" class="nav-link" data-scroll-target="#baserunning-runs-above-average">Baserunning runs above average</a></li>
+  </ul></li>
+  <li><a href="#batting" id="toc-batting" class="nav-link" data-scroll-target="#batting">Batting</a>
+  <ul class="collapse">
+  <li><a href="#sec-rv_position" id="toc-sec-rv_position" class="nav-link" data-scroll-target="#sec-rv_position">Average run value by position</a></li>
+  </ul></li>
+  <li><a href="#looking-ahead" id="toc-looking-ahead" class="nav-link" data-scroll-target="#looking-ahead">Looking ahead</a></li>
   </ul>
 </nav>
     </div>
@@ -320,47 +420,765 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="recap-roadmap" class="level2">
 <h2 class="anchored" data-anchor-id="recap-roadmap">Recap &amp; Roadmap</h2>
+<p><a href="../lectures/lecture06.html">Last lecture</a>, we compute the run value of each at-bat in the 2024 MLB regular season. Run value is the sum of (i) the number of runs scored in the at-bat and (ii) the <em>change</em> in the number of runs the batting team is expected to score in the remainder of the half-inning. This change in expected runs is driven by the change in the combination of the number of outs and baserunner configuration. At the end of last lecture, we ranked players based on their run value totals, aggregating over all their at-bats. While the resulting rankings did appear to pass the “eye test” — both Aaron Judge and Shohei Ohtani created some of the largest run values — the metric implicitly gives batters all the credit for creating run value.</p>
+<p>Over the next two lectures, we will develop our own version of <em>wins above replacement</em>. Our development largely follows that of <span class="citation" data-cites="Baumer2015_openWAR">(<a href="#ref-Baumer2015_openWAR" role="doc-biblioref">Baumer, Jensen, and Matthews 2015</a>)</span> but with some important differences.</p>
+<section id="conservation-of-runs" class="level3">
+<h3 class="anchored" data-anchor-id="conservation-of-runs">Conservation of runs</h3>
+<p>The central idea — what <span class="citation" data-cites="Baumer2015_openWAR">(<a href="#ref-Baumer2015_openWAR" role="doc-biblioref">Baumer, Jensen, and Matthews 2015</a>)</span> call the “conservation of runs” framework — is that if the batting team gains <span class="math inline">\(\delta_{i}\)</span> units of run value during an at-bat, the fielding team gains <span class="math inline">\(-\delta_{i}\)</span> units of run value during that same at-bat. In this lecture, we will apportion <span class="math inline">\(\delta_{i}\)</span> between the batters and the baserunners involved in at-bat <span class="math inline">\(i\)</span>. <a href="../lectures/lecture08.html">Next lecture</a>, we will apportion <span class="math inline">\(-\delta_{i}\)</span> between the pitcher and fielders involved in at-bat <span class="math inline">\(i.\)</span></p>
 </section>
-<section id="adjusted-run-value" class="level2">
-<h2 class="anchored" data-anchor-id="adjusted-run-value">Adjusted Run Value</h2>
+</section>
+<section id="data-preparation" class="level2">
+<h2 class="anchored" data-anchor-id="data-preparation">Data Preparation</h2>
+<p>To divide up offensive run value, we need to cretae a data table whose rows correspond to individual at-bats. This data table must, at a minimum, contain the starting and ending outs and baserunner configurations as well as the identities of the baserunners at the start and end of the at-bat. We will also want to include the columns <code>event</code> and <code>des</code>, which record the events and a narrative description of what happened in the at-bat.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-1"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-1-1"><a href="#annotated-cell-1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"statcast2024.RData"</span>)</span>
+<span id="annotated-cell-1-2"><a href="#annotated-cell-1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"runValue2024.RData"</span>)</span>
+<span id="annotated-cell-1-3"><a href="#annotated-cell-1-3" aria-hidden="true" tabindex="-1"></a>raw_atbat2024 <span class="ot">&lt;-</span> </span>
+<span id="annotated-cell-1-4"><a href="#annotated-cell-1-4" aria-hidden="true" tabindex="-1"></a>  statcast2024 <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="1">1</button><span id="annotated-cell-1-5" class="code-annotation-target"><a href="#annotated-cell-1-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(game_pk, inning, inning_topbot) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-1-6"><a href="#annotated-cell-1-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(at_bat_number, pitch_number) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-1-7"><a href="#annotated-cell-1-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="2">2</button><span id="annotated-cell-1-8" class="code-annotation-target"><a href="#annotated-cell-1-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">next_Outs =</span> dplyr<span class="sc">::</span><span class="fu">lead</span>(Outs),</span>
+<span id="annotated-cell-1-9"><a href="#annotated-cell-1-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">next_BaseRunner =</span> dplyr<span class="sc">::</span><span class="fu">lead</span>(BaseRunner),</span>
+<span id="annotated-cell-1-10"><a href="#annotated-cell-1-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">next_on_1b =</span> dplyr<span class="sc">::</span><span class="fu">lead</span>(on_1b),</span>
+<span id="annotated-cell-1-11"><a href="#annotated-cell-1-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">next_on_2b =</span> dplyr<span class="sc">::</span><span class="fu">lead</span>(on_2b),</span>
+<span id="annotated-cell-1-12"><a href="#annotated-cell-1-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">next_on_3b =</span> dplyr<span class="sc">::</span><span class="fu">lead</span>(on_3b)) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-1-13"><a href="#annotated-cell-1-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-1-14"><a href="#annotated-cell-1-14" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(game_pk, at_bat_number) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-1-15"><a href="#annotated-cell-1-15" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(pitch_number) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-1-16"><a href="#annotated-cell-1-16" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="3">3</button><span id="annotated-cell-1-17" class="code-annotation-target"><a href="#annotated-cell-1-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">end_Outs =</span> dplyr<span class="sc">::</span><span class="fu">last</span>(next_Outs),</span>
+<span id="annotated-cell-1-18"><a href="#annotated-cell-1-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">end_BaseRunner =</span> dplyr<span class="sc">::</span><span class="fu">last</span>(next_BaseRunner), <span class="co"># </span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="4">4</button><span id="annotated-cell-1-19" class="code-annotation-target"><a href="#annotated-cell-1-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">end_on_1b =</span> dplyr<span class="sc">::</span><span class="fu">last</span>(next_on_1b),</span>
+<span id="annotated-cell-1-20"><a href="#annotated-cell-1-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">end_on_2b =</span> dplyr<span class="sc">::</span><span class="fu">last</span>(next_on_2b), </span>
+<span id="annotated-cell-1-21"><a href="#annotated-cell-1-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">end_on_3b =</span> dplyr<span class="sc">::</span><span class="fu">last</span>(next_on_3b),  </span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="5">5</button><span id="annotated-cell-1-22" class="code-annotation-target"><a href="#annotated-cell-1-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">end_events =</span> dplyr<span class="sc">::</span><span class="fu">last</span>(events)) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-1-23"><a href="#annotated-cell-1-23" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-1-24"><a href="#annotated-cell-1-24" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(pitch_number <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-1-25"><a href="#annotated-cell-1-25" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(game_date, game_pk, at_bat_number, pitch_number) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-1-26"><a href="#annotated-cell-1-26" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">end_bat_score =</span> bat_score <span class="sc">+</span> RunsScored, <span class="at">end_fld_score =</span> fld_score,</span>
+<span id="annotated-cell-1-27"><a href="#annotated-cell-1-27" aria-hidden="true" tabindex="-1"></a>         <span class="at">end_Outs =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(end_Outs), <span class="dv">3</span>, end_Outs)) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-1-28"><a href="#annotated-cell-1-28" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(game_date, game_pk, at_bat_number, inning, inning_topbot,</span>
+<span id="annotated-cell-1-29"><a href="#annotated-cell-1-29" aria-hidden="true" tabindex="-1"></a>         Outs, BaseRunner, batter, on_1b, on_2b, on_3b, bat_score, fld_score, </span>
+<span id="annotated-cell-1-30"><a href="#annotated-cell-1-30" aria-hidden="true" tabindex="-1"></a>         end_Outs, end_BaseRunner, end_on_1b, end_on_2b, end_on_3b, end_bat_score, end_fld_score,</span>
+<span id="annotated-cell-1-31"><a href="#annotated-cell-1-31" aria-hidden="true" tabindex="-1"></a>         end_events, des) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-1-32"><a href="#annotated-cell-1-32" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> runValue2024, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"game_pk"</span>, <span class="st">"at_bat_number"</span>))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-1" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="5" data-code-annotation="1">Divide by game and half-inning</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="8" data-code-annotation="2">Gets the value of several variables from the next pitch in the half-inning</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="17" data-code-annotation="3">Goes to last pitch of each at bat and gets next value of variable. That is, the starting value of the first pitch in the next at-bat.</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="19" data-code-annotation="4">For instance, this looks up who’s on first at end of the current at-bat/start of the next at-bat.</span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="5">5</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="22" data-code-annotation="5">The variable <code>events</code> tells us what happened during the plate-appearance</span>
+</dd>
+</dl>
+</div>
+</div>
+<section id="filling-in-missing-events" class="level3">
+<h3 class="anchored" data-anchor-id="filling-in-missing-events">Filling in missing events</h3>
+<p>The column <code>end_events</code> in our data table <code>raw_atbat2024</code> records what happened as a result of the at-bat. There are 308 rows with a missing entry.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(raw_atbat2024<span class="sc">$</span>end_events)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+                                     catcher_interf                    double 
+                      308                        97                      7608 
+              double_play               field_error                 field_out 
+                      336                      1093                     72233 
+          fielders_choice       fielders_choice_out                 force_out 
+                      373                       306                      3408 
+grounded_into_double_play              hit_by_pitch                  home_run 
+                     3152                      1977                      5326 
+                 sac_bunt                   sac_fly       sac_fly_double_play 
+                      446                      1222                        13 
+                   single                 strikeout     strikeout_double_play 
+                    25363                     40145                       107 
+                   triple               triple_play              truncated_pa 
+                      685                         1                       304 
+                     walk 
+                    14029 </code></pre>
+</div>
+</div>
+<p>The column <code>des</code> includes a much more detailed description of what happened during the plate appearance. A cursory look through the values of <code>des</code> corresponding to rows with missing <code>end_events</code> reveals that several of these at-bats ended with a walk, involved an automatic strike<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, or an inning-ending pick off<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>raw_atbat2024 <span class="sc">|&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(end_events <span class="sc">==</span> <span class="st">""</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">15</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Outs, end_Outs, des)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 15 × 3
+    Outs end_Outs des                                                           
+   &lt;int&gt;    &lt;dbl&gt; &lt;chr&gt;                                                         
+ 1     0        0 Mookie Betts walks.                                           
+ 2     2        2 Freddie Freeman walks.                                        
+ 3     2        3 Xander Bogaerts strikes out on automatic strike.              
+ 4     2        2 Héctor Neris intentionally walks Wyatt Langford.              
+ 5     2        2 Logan Webb intentionally walks Ha-Seong Kim.                  
+ 6     2        2 Cole Ragans intentionally walks Carlos Santana.               
+ 7     1        2 Andrew Vaughn strikes out on automatic strike.                
+ 8     2        3 Oneil Cruz strikes out on automatic strike.                   
+ 9     2        3 Pitcher Bryce Miller picks off Wilyer Abreu at on throw to sh…
+10     1        1 Yohan Ramírez intentionally walks Christian Yelich.           
+11     1        2 Alex Kirilloff strikes out on automatic strike.               
+12     1        1 Tony Kemp walks. James McCann to 2nd.                         
+13     2        3 With Anthony Rendon batting, Zach Neto picked off and caught …
+14     2        3 Miguel Sanó strikes out on automatic strike.                  
+15     2        3 With Vinnie Pasquantino batting, Bobby Witt Jr. picked off an…</code></pre>
+</div>
+</div>
+<p>The following code manually corrects the missing values for <code>end_events</code></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-4"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-4-1"><a href="#annotated-cell-4-1" aria-hidden="true" tabindex="-1"></a>atbat2024 <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-4-2"><a href="#annotated-cell-4-2" aria-hidden="true" tabindex="-1"></a>  raw_atbat2024 <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-4-3"><a href="#annotated-cell-4-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="annotated-cell-4-4"><a href="#annotated-cell-4-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">end_events =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="annotated-cell-4-5"><a href="#annotated-cell-4-5" aria-hidden="true" tabindex="-1"></a>      end_events <span class="sc">==</span> <span class="st">""</span> <span class="sc">&amp;</span> <span class="fu">grepl</span>(<span class="st">"walk"</span>, des) <span class="sc">~</span> <span class="st">"walk"</span>,</span>
+<span id="annotated-cell-4-6"><a href="#annotated-cell-4-6" aria-hidden="true" tabindex="-1"></a>      end_events <span class="sc">==</span> <span class="st">""</span> <span class="sc">&amp;</span> <span class="fu">grepl</span>(<span class="st">"strikes out"</span>, des) <span class="sc">~</span> <span class="st">"strikeout"</span>,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="1">1</button><span id="annotated-cell-4-7" class="code-annotation-target"><a href="#annotated-cell-4-7" aria-hidden="true" tabindex="-1"></a>      end_events <span class="sc">==</span> <span class="st">""</span> <span class="sc">&amp;</span> end_Outs <span class="sc">==</span> <span class="dv">3</span> <span class="sc">~</span> <span class="st">"truncated_pa"</span>,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="2">2</button><span id="annotated-cell-4-8" class="code-annotation-target"><a href="#annotated-cell-4-8" aria-hidden="true" tabindex="-1"></a>      end_events <span class="sc">==</span> <span class="st">""</span> <span class="sc">&amp;</span> <span class="fu">grepl</span>(<span class="st">"flies out"</span>, des) <span class="sc">~</span> <span class="st">"field_out"</span>,</span>
+<span id="annotated-cell-4-9"><a href="#annotated-cell-4-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">.default =</span> end_events))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-4" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="7" data-code-annotation="1">After accounting for the walks and strike outs on automatic strikes, all but one of the at-bats that still had a missing <code>end_events</code> value involved a pick-off that ended the inning</span>
+</dd>
+<dt data-target-cell="annotated-cell-4" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-4" data-code-lines="8" data-code-annotation="2">The remaining at-bat involved a fly out that was caught in foul territory.</span>
+</dd>
+</dl>
+</div>
+</div>
+</section>
+</section>
+<section id="adjusted-run-values" class="level2">
+<h2 class="anchored" data-anchor-id="adjusted-run-values">Adjusted Run Values</h2>
+<p>We want to give credit to the batter and base runners for creating value over and above what would been expected given the game state and the actual outcome of the at-bat. More precisely, recall that <span class="math inline">\(\delta_{i}\)</span> is the run value created in at-bat <span class="math inline">\(i.\)</span> We will denote the game state at the beginning of the at-bat with <span class="math inline">\(\textrm{g}_{i}\)</span> and the ending event with <span class="math inline">\(\textrm{e}_{i}.\)</span> We form the game state variable <span class="math inline">\(\textrm{g}\)</span> by concatenating the <code>Outs</code> and <code>BaseRunners</code> and separating them with a period so that <span class="math inline">\(\textrm{g} = "0.101"\)</span> corresponds to a situation with no outs and runners on first and third base.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>atbat2024 <span class="ot">&lt;-</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  atbat2024 <span class="sc">|&gt;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">GameState =</span> <span class="fu">paste</span>(Outs, BaseRunner, <span class="at">sep =</span> <span class="st">"."</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We will assume that the run value created in each at-bat beginning in state <span class="math inline">\(\textrm{g}\)</span> and ending with event <span class="math inline">\(\textrm{e}\)</span> is equal to the <em>average</em> run value created in all at-bats with the same beginning and end plus some mean-zero error. That is, for each at-bat <span class="math inline">\(i\)</span>, <span class="math display">\[
+\delta_{i} = \mathbb{E}[\delta \vert \textrm{g} = \textrm{g}_{i}, \textrm{e} = \textrm{e}_{i}] + \varepsilon_{i},
+\]</span> The average run value <span class="math inline">\(\mu:=\mathbb{E}[\delta \vert \textrm{g}, \textrm{e}]\)</span> represents the average run value created in at-bats that begin in state <span class="math inline">\(\textrm{g}\)</span> and end with the event <span class="math inline">\(\textrm{e}.\)</span></p>
+<p>It is tempting to compute the expectation <span class="math inline">\(\mathbb{E}[\delta \vert \textrm{g}, \textrm{e}]\)</span> using the “binning-and-averaging” approach we took when developing our <a href="../lectures/lecture02.html#init-xg">initial XG models back in Lecture 2</a>. Unfortunately, such a procedure is liable to yield extreme and erratic answers as the number of bins is quite large. To wit, there are 24 distinct game states (i.e., combinations of outs and base runners) and 21 different events.</p>
+<p>The 2024 dataset contains only 373 of the 504 total combinations of game state and ending event. Of the observed combinations, there is a huge disparity in the relative frequencies. Some combinations (e.g., triples with no outs and runners on second and third) occurred just once while others (e.g., striking out with no outs and nobody on) occurred close to 10,000 times.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>atbat2024 <span class="sc">|&gt;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">count</span>(Outs, BaseRunner, end_events) <span class="sc">|&gt;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(n) <span class="sc">|&gt;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, (dplyr<span class="sc">::</span><span class="fu">n</span>()<span class="sc">-</span><span class="dv">4</span>)<span class="sc">:</span>dplyr<span class="sc">::</span><span class="fu">n</span>()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 4
+    Outs BaseRunner end_events                n
+   &lt;int&gt; &lt;chr&gt;      &lt;chr&gt;                 &lt;int&gt;
+ 1     0 001        catcher_interf            1
+ 2     0 001        fielders_choice_out       1
+ 3     0 011        triple                    1
+ 4     0 101        strikeout_double_play     1
+ 5     0 101        triple_play               1
+ 6     1 000        strikeout              7490
+ 7     0 000        strikeout              9814
+ 8     2 000        field_out             11563
+ 9     1 000        field_out             14573
+10     0 000        field_out             20148</code></pre>
+</div>
+</div>
+<p>Instead of “binning and averaging”, like we did with our <a href="../lectures/lecture03.html#sec-logit">distance-based XG models in Lecture 3</a>, we will fit a statistical model. A natural starting model asserts that there are numbers <span class="math inline">\(\alpha_{0.000}, \ldots, \alpha_{2.111}\)</span> and <span class="math inline">\(\alpha_{\textrm{catcher_interf}}, \ldots, \alpha_{\textrm{walk}}\)</span> such that for all game states <span class="math inline">\(\textrm{g}\)</span> and ending events <span class="math inline">\(\textrm{e},\)</span> <span class="math display">\[
+\mathbb{E}[\delta \vert \textrm{g}, \textrm{e}] = \alpha_{\textrm{g}} + \alpha_{\textrm{e}}.
+\]</span></p>
+<p>Under the assumed model, the average run value created by hitting a single when there are two outs and no runners on is <span class="math inline">\(\alpha_{\textrm{2.000}} + \alpha_{\textrm{single}}\)</span> while the average run value created by hitting a single when there are no outs and runners on first and second is <span class="math inline">\(\alpha_{\textrm{0.110}} + \alpha_{\textrm{single}}.\)</span></p>
+<p>Because we do not know the exact values of the <span class="math inline">\(\alpha_{g}\)</span>’s and <span class="math inline">\(\alpha_{e}\)</span>’s, we need to estimate them using our data. Perhaps the simplest way is by solving a least squares minimization problem <span class="math display">\[
+\hat{\boldsymbol{\alpha}} = \textrm{argmin} \sum_{i = 1}^{n}{(\delta_{i} - \alpha_{g_{i}} - \alpha_{e_{i}})^2},
+\]</span> where <span class="math inline">\(g_{i}\)</span> and <span class="math inline">\(e_{i}\)</span> record the game state and event of at-bat <span class="math inline">\(i.\)</span></p>
+<p>Solving this problem is equivalent to fitting a linear regression model <em>without an intercept</em><a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>. We can do this in R using the <code>lm()</code> function and including <code>-1</code> in the <code>formula</code> argument<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>. In the following code, we create a temporary data frame that extracts just the run values <span class="math inline">\(\delta\)</span>, game states <span class="math inline">\(\textrm{g}\)</span>, and ending events <span class="math inline">\(\textrm{e}\)</span> from <code>atbats2024</code> and convert the game state and event variables into <code>factors</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>tmp_df <span class="ot">&lt;-</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  atbat2024 <span class="sc">|&gt;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(RunValue, GameState, end_events) <span class="sc">|&gt;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">GameState =</span> <span class="fu">factor</span>(GameState),</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">end_events =</span> <span class="fu">factor</span>(end_events))</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>state_event_fit <span class="ot">&lt;-</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lm</span>(RunValue <span class="sc">~</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> GameState <span class="sc">+</span> end_events, <span class="at">data =</span> tmp_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Using the <code>summary()</code> function, we can take a quick look at the <span class="math inline">\(\alpha\)</span>’s.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(state_event_fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = RunValue ~ -1 + GameState + end_events, data = tmp_df)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-2.65924 -0.10891  0.01957  0.08867  2.24020 
+
+Coefficients:
+                                     Estimate Std. Error t value Pr(&gt;|t|)    
+GameState0.000                       0.344318   0.024078  14.300  &lt; 2e-16 ***
+GameState0.001                       0.240733   0.027701   8.690  &lt; 2e-16 ***
+GameState0.010                       0.392981   0.024448  16.074  &lt; 2e-16 ***
+GameState0.011                       0.272952   0.026280  10.386  &lt; 2e-16 ***
+GameState0.100                       0.391419   0.024160  16.201  &lt; 2e-16 ***
+GameState0.101                       0.237505   0.025347   9.370  &lt; 2e-16 ***
+GameState0.110                       0.407975   0.024500  16.652  &lt; 2e-16 ***
+GameState0.111                       0.369993   0.025731  14.379  &lt; 2e-16 ***
+GameState1.000                       0.348466   0.024094  14.463  &lt; 2e-16 ***
+GameState1.001                       0.253997   0.024902  10.200  &lt; 2e-16 ***
+GameState1.010                       0.354195   0.024327  14.560  &lt; 2e-16 ***
+GameState1.011                       0.265455   0.025049  10.597  &lt; 2e-16 ***
+GameState1.100                       0.396792   0.024121  16.450  &lt; 2e-16 ***
+GameState1.101                       0.332078   0.024655  13.469  &lt; 2e-16 ***
+GameState1.110                       0.412645   0.024311  16.974  &lt; 2e-16 ***
+GameState1.111                       0.359217   0.024860  14.449  &lt; 2e-16 ***
+GameState2.000                       0.356264   0.024096  14.785  &lt; 2e-16 ***
+GameState2.001                       0.346744   0.024549  14.124  &lt; 2e-16 ***
+GameState2.010                       0.318496   0.024256  13.131  &lt; 2e-16 ***
+GameState2.011                       0.321323   0.024888  12.911  &lt; 2e-16 ***
+GameState2.100                       0.351540   0.024132  14.567  &lt; 2e-16 ***
+GameState2.101                       0.363065   0.024474  14.835  &lt; 2e-16 ***
+GameState2.110                       0.354515   0.024269  14.608  &lt; 2e-16 ***
+GameState2.111                       0.338946   0.024651  13.750  &lt; 2e-16 ***
+end_eventsdouble                     0.398473   0.024206  16.461  &lt; 2e-16 ***
+end_eventsdouble_play               -1.293011   0.027320 -47.328  &lt; 2e-16 ***
+end_eventsfield_error                0.097087   0.025100   3.868  0.00011 ***
+end_eventsfield_out                 -0.589994   0.024071 -24.510  &lt; 2e-16 ***
+end_eventsfielders_choice            0.342555   0.027015  12.680  &lt; 2e-16 ***
+end_eventsfielders_choice_out       -0.963020   0.027678 -34.794  &lt; 2e-16 ***
+end_eventsforce_out                 -0.713014   0.024403 -29.219  &lt; 2e-16 ***
+end_eventsgrounded_into_double_play -1.195243   0.024442 -48.901  &lt; 2e-16 ***
+end_eventshit_by_pitch              -0.001119   0.024636  -0.045  0.96376    
+end_eventshome_run                   1.043303   0.024271  42.985  &lt; 2e-16 ***
+end_eventssac_bunt                  -0.443274   0.026600 -16.664  &lt; 2e-16 ***
+end_eventssac_fly                   -0.341349   0.025120 -13.589  &lt; 2e-16 ***
+end_eventssac_fly_double_play       -0.887624   0.070048 -12.672  &lt; 2e-16 ***
+end_eventssingle                     0.115000   0.024099   4.772 1.83e-06 ***
+end_eventsstrikeout                 -0.618027   0.024083 -25.662  &lt; 2e-16 ***
+end_eventsstrikeout_double_play     -1.041349   0.033231 -31.337  &lt; 2e-16 ***
+end_eventstriple                     0.704276   0.025700  27.404  &lt; 2e-16 ***
+end_eventstriple_play               -2.133826   0.238222  -8.957  &lt; 2e-16 ***
+end_eventstruncated_pa              -0.625189   0.026806 -23.323  &lt; 2e-16 ***
+end_eventswalk                      -0.024163   0.024135  -1.001  0.31675    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.2369 on 178488 degrees of freedom
+Multiple R-squared:  0.7682,    Adjusted R-squared:  0.7682 
+F-statistic: 1.344e+04 on 44 and 178488 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p>We estimate <span class="math inline">\(\hat{\alpha}_{2.000} \approx 0.356\)</span> and <span class="math inline">\(\hat{\alpha}_{single} \approx 0.115.\)</span> So, according to our fitted model the average run value created by singling when there are two outs and no runners on is about <span class="math inline">\(0.471.\)</span></p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Statistical significance &amp; model assumptions
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>You’ll notice that <code>summary()</code> returns a lot of inferential output (e.g., standard errors, p-values). These are computed under an additional assumption that the true errors <span class="math inline">\(\varepsilon_{i}\)</span> are independent and following a mean-zero normal distribution with constant variance. Since our main interest is prediction, we’re really not interested in checking whether, say, <span class="math inline">\(\alpha_{0:010}\)</span> is statistically significantly different than zero. So, we will not check whether the usual multiple linear model assumptions nor will we attempt. If you did want to make inferential statements about our model parameters, you would need to first check that the multiple linear multiple assumptions are not grossly violated.</p>
+</div>
+</div>
+<p>Equipped with our estimated model parameters, for each at-bat <span class="math inline">\(i,\)</span> let <span class="math inline">\(\hat{\mu}_{i} = \hat{\alpha}_{\textrm{g}_{i}} + \hat{\alpha}_{\textrm{e}_{i}}\)</span> and let <span class="math inline">\(\eta_{i} = \delta_{i} - \hat{\mu}_{i}.\)</span> In terms of dividing credit between the batter and the base runner, we will follow <span class="citation" data-cites="Baumer2015_openWAR">Baumer, Jensen, and Matthews (<a href="#ref-Baumer2015_openWAR" role="doc-biblioref">2015</a>)</span> and attribute <span class="math inline">\(\hat{\mu}_{i}\)</span> to the batter’s hitting in at-bat <span class="math inline">\(i\)</span> and <span class="math inline">\(\eta_{i}\)</span> to the base running in that at-bat. We will add columns to <code>atbat2024</code> holding the values of <span class="math inline">\(\hat{\mu}\)</span> (<code>mu</code>) and <span class="math inline">\(\eta\)</span> (<code>eta</code>).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>atbat2024<span class="sc">$</span>eta <span class="ot">&lt;-</span> state_event_fit<span class="sc">$</span>residuals</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>atbat2024<span class="sc">$</span>mu <span class="ot">&lt;-</span> state_event_fit<span class="sc">$</span>fitted.values</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(atbat2024, <span class="at">file =</span> <span class="st">"atbat2024.RData"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <!--
-
-24 July: no need for park adjustment. Maybe a platoon adjustment but even that may not be necessary.
-
-  Regress onto game state: residual is adjust run value over average. How much goes to baserunner and how much to batter.
-  In this game state x event, check to see what the baserunners normally do. 
-  Whatever doesn't go to baserunner, give to batter: e.g., on a single with runner on first. Most of the time, the runner advances to second. But when they advance to 3rd or score, we want to give more weight. P(k < K) is the prob. they advance fewer than what they actually did. Do some sort of weighting. Then give everything else to the batter. Don't necessarily normalize to 1
-
-
-  Formally we write $delta_i = \alpha_{1} * \ind{1} + \cdots + \alpha_{B} * \ind{B} + \beta_{adv} * \ind{platoon-advantage} + \epsilon
-  
-  Systematically, we know that some parks are harder to score runs in than others. And when the batter and pitcher are of different handedness, there can be some differences
-  We want to remove those systematic components, which are not within the batters control. Formally
-  
-  We can fit a linear model with an intercept using `lm`: not, we're really not interested in the coefficients or doing any significant testing. we just want to adjust the values
-  We now have our residual epsilon, which captures the portion of delta *not* attributable to ballpark or platoon. How much of epsilon can be attributed to the batter and how much to the baserunner?
+In this fitted model, the intercept, which quantifies the average run value for a baseline at-bats that begin with 0 outs and no baserunners and end in a field out, is estimated to be about -0.24.
+The remaining model parameters quantify the different in average run value between that baseline at-bat and one that differs in one respect but is otherwise identical.
+For instance, the parameter for `GameState0.010` represents how much more average run value there is for at-bats that begin with 0 outs and a runner on a second and end in a field out relative to the baseline.
+Our model estimates that such at-bats have an average run value of about -0.24 + 0.05 = -0.19.
 -->
 </section>
-<section id="baserunning" class="level2">
-<h2 class="anchored" data-anchor-id="baserunning">Baserunning</h2>
-<!--
-  Baserunner should get credit only for advancement beyond what would be expected given their starting location, the number of outs, and the hitting event that occured
-    We can actually estimate this nonparametricly using our baserunning data-frame: we have the movement and can pull . We compute the average nonparametricly and 
--->
+<section id="baserunning-run-values" class="level2">
+<h2 class="anchored" data-anchor-id="baserunning-run-values">Baserunning run values</h2>
+<p>Ohtani’s second hit against the Padres on March 20, 2024 was a single with runners on first and second and no outs. While Ohtani and the runner originally on first advanced one base, the runner originally on second scored. Because this latter runner advanced more than what might have been otherwise expected, it makes sense to give him a larger share of the <span class="math inline">\(\eta_{i}\)</span> than to the first two runners, who only advanced one base on a single. Following <span class="citation" data-cites="Baumer2015_openWAR">(<a href="#ref-Baumer2015_openWAR" role="doc-biblioref">Baumer, Jensen, and Matthews 2015, sec. 3.2</a>)</span>, the amount of base running run value <span class="math inline">\(\eta_{i}\)</span> that we assign to base runner <span class="math inline">\(j\)</span> in at-bat <span class="math inline">\(i\)</span> will be proportional to <span class="math inline">\(\kappa_{ij} = \mathbb{P}(K &lt; k_{ij} \vert \textrm{e}_{i}),\)</span> where <span class="math inline">\(k_{ij}\)</span> is the number of bases actually advanced by the base runner.</p>
+<p>Essentially, <span class="math inline">\(\kappa_{ij}\)</span> is the probability that a typical base runner advanced at most the <span class="math inline">\(k_{ij}\)</span> bases advanced by base runner <span class="math inline">\(j\)</span> in at-bat <span class="math inline">\(i\)</span> following event <span class="math inline">\(\textrm{e}_{i}.\)</span> If the base runner does worse than expected (e.g., not advancing from second on a single), then <span class="math inline">\(\kappa_{ij}\)</span> will be very small. But if the base runner does better than expected (e.g., scoring from second on a single), then <span class="math inline">\(\kappa_{ij}\)</span> will be larger. When computing <span class="math inline">\(\kappa_{ij}\)</span> it is crucial that we condition on the actual ending event <span class="math inline">\(\textrm{e}_{i}.\)</span> After all, while we may want to penalize a runner for not advancing from second on a single, we definitely don’t want to penalize a runner for not advancing from second following a strike out!</p>
+<section id="computing-baserunner-advancement" class="level3">
+<h3 class="anchored" data-anchor-id="computing-baserunner-advancement">Computing baserunner advancement</h3>
+<p>Unfortunately, StatCast does not compute the number of bases that each runner advances during each at-bat. The following code implements a function that determines the number of bases advanced by the runner on first (if any). It works by first checking whether there is anyone on 1b at the start of the at-bat. If so, it checks whether that player is on first, second, or third base at the end of the at-bat. If not, it parses the at-bat description contained in <code>des</code> and looks for a sentence containing the player’s name. If that sentence contains the words “out” or “caught stealing”, it sets the number of bases advanced to 0. But, if the sentnce contains the word “score”, it sets the number of bases advanced to 3, since the runner scored from first.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-10"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-10-1"><a href="#annotated-cell-10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"player2024_lookup.RData"</span>)</span>
+<span id="annotated-cell-10-2"><a href="#annotated-cell-10-2" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: mvt-1b-function</span></span>
+<span id="annotated-cell-10-3"><a href="#annotated-cell-10-3" aria-hidden="true" tabindex="-1"></a>mvt_1b <span class="ot">&lt;-</span> <span class="cf">function</span>(on_1b, Outs, bat_score,</span>
+<span id="annotated-cell-10-4"><a href="#annotated-cell-10-4" aria-hidden="true" tabindex="-1"></a>                   end_on_1b, end_on_2b, end_on_3b, end_Outs, end_bat_score,</span>
+<span id="annotated-cell-10-5"><a href="#annotated-cell-10-5" aria-hidden="true" tabindex="-1"></a>                   des){</span>
+<span id="annotated-cell-10-6"><a href="#annotated-cell-10-6" aria-hidden="true" tabindex="-1"></a>  mvt <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="annotated-cell-10-7"><a href="#annotated-cell-10-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is.na</span>(on_1b)){</span>
+<span id="annotated-cell-10-8"><a href="#annotated-cell-10-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># there was someone on 1st base at the start of the at-bat</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="1">1</button><span id="annotated-cell-10-9" class="code-annotation-target"><a href="#annotated-cell-10-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is.na</span>(end_on_1b) <span class="sc">&amp;</span> on_1b <span class="sc">==</span> end_on_1b) mvt <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="2">2</button><span id="annotated-cell-10-10" class="code-annotation-target"><a href="#annotated-cell-10-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is.na</span>(end_on_2b) <span class="sc">&amp;</span> on_1b <span class="sc">==</span> end_on_2b) mvt <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="3">3</button><span id="annotated-cell-10-11" class="code-annotation-target"><a href="#annotated-cell-10-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is.na</span>(end_on_3b) <span class="sc">&amp;</span> on_1b <span class="sc">==</span> end_on_3b) mvt <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="annotated-cell-10-12"><a href="#annotated-cell-10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-10-13"><a href="#annotated-cell-10-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">is.na</span>(mvt)){</span>
+<span id="annotated-cell-10-14"><a href="#annotated-cell-10-14" aria-hidden="true" tabindex="-1"></a>      <span class="co"># either there are no baserunners at end of inning or</span></span>
+<span id="annotated-cell-10-15"><a href="#annotated-cell-10-15" aria-hidden="true" tabindex="-1"></a>      <span class="co"># there are baserunners but none of them started on first</span></span>
+<span id="annotated-cell-10-16"><a href="#annotated-cell-10-16" aria-hidden="true" tabindex="-1"></a>      <span class="co"># we need to parse the play</span></span>
+<span id="annotated-cell-10-17"><a href="#annotated-cell-10-17" aria-hidden="true" tabindex="-1"></a>      <span class="co"># Start by grabbing the player name</span></span>
+<span id="annotated-cell-10-18"><a href="#annotated-cell-10-18" aria-hidden="true" tabindex="-1"></a>      player_name <span class="ot">&lt;-</span> player2024_lookup<span class="sc">$</span>Name[<span class="fu">which</span>(player2024_lookup<span class="sc">$</span>key_mlbam <span class="sc">==</span> on_1b)]</span>
+<span id="annotated-cell-10-19"><a href="#annotated-cell-10-19" aria-hidden="true" tabindex="-1"></a>      <span class="co"># Start by splitting it a string</span></span>
+<span id="annotated-cell-10-20"><a href="#annotated-cell-10-20" aria-hidden="true" tabindex="-1"></a>      play_split <span class="ot">&lt;-</span> </span>
+<span id="annotated-cell-10-21"><a href="#annotated-cell-10-21" aria-hidden="true" tabindex="-1"></a>        stringr<span class="sc">::</span><span class="fu">str_split_1</span>(</span>
+<span id="annotated-cell-10-22"><a href="#annotated-cell-10-22" aria-hidden="true" tabindex="-1"></a>          <span class="at">string =</span> stringi<span class="sc">::</span><span class="fu">stri_trans_general</span>(des, <span class="st">"Latin-ASCII"</span>),</span>
+<span id="annotated-cell-10-23"><a href="#annotated-cell-10-23" aria-hidden="true" tabindex="-1"></a>          <span class="at">pattern =</span> <span class="st">"(?&lt;=[[:punct:]])</span><span class="sc">\\</span><span class="st">s(?=[A-Z])"</span>)</span>
+<span id="annotated-cell-10-24"><a href="#annotated-cell-10-24" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="annotated-cell-10-25"><a href="#annotated-cell-10-25" aria-hidden="true" tabindex="-1"></a>      check <span class="ot">&lt;-</span> <span class="fu">sapply</span>(play_split, <span class="at">FUN =</span> grepl, <span class="at">pattern =</span> player_name)</span>
+<span id="annotated-cell-10-26"><a href="#annotated-cell-10-26" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span>(<span class="fu">any</span>(check)){</span>
+<span id="annotated-cell-10-27"><a href="#annotated-cell-10-27" aria-hidden="true" tabindex="-1"></a>        <span class="co"># found something with player name in it</span></span>
+<span id="annotated-cell-10-28"><a href="#annotated-cell-10-28" aria-hidden="true" tabindex="-1"></a>        play <span class="ot">&lt;-</span> play_split[check]</span>
+<span id="annotated-cell-10-29"><a href="#annotated-cell-10-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span>( <span class="fu">any</span>(<span class="fu">grepl</span>(<span class="at">pattern =</span> <span class="st">"out"</span>, <span class="at">x =</span> play) <span class="sc">|</span> <span class="fu">grepl</span>(<span class="at">pattern =</span> <span class="st">"caught stealing"</span>, <span class="at">x =</span> play))) mvt <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="co"># player got out</span></span>
+<span id="annotated-cell-10-30"><a href="#annotated-cell-10-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span> <span class="cf">if</span>(<span class="fu">any</span>(<span class="fu">grepl</span>(<span class="at">pattern =</span> <span class="st">"score"</span>, <span class="at">x =</span> play))) mvt <span class="ot">&lt;-</span> <span class="dv">3</span> <span class="co"># player scored from 1st</span></span>
+<span id="annotated-cell-10-31"><a href="#annotated-cell-10-31" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span>{</span>
+<span id="annotated-cell-10-32"><a href="#annotated-cell-10-32" aria-hidden="true" tabindex="-1"></a>        <span class="co"># player name is not present in play description; and they're not on base</span></span>
+<span id="annotated-cell-10-33"><a href="#annotated-cell-10-33" aria-hidden="true" tabindex="-1"></a>        <span class="co"># if they got caught stealing in the middle of the at-bat this may not be recorded</span></span>
+<span id="annotated-cell-10-34"><a href="#annotated-cell-10-34" aria-hidden="true" tabindex="-1"></a>        <span class="co"># check if Outs &lt; end_Outs</span></span>
+<span id="annotated-cell-10-35"><a href="#annotated-cell-10-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span>(end_Outs <span class="sc">==</span> <span class="dv">3</span> <span class="sc">|</span> Outs <span class="sc">&lt;</span> end_Outs <span class="sc">&amp;</span> bat_score <span class="sc">==</span> end_bat_score) mvt <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="annotated-cell-10-36"><a href="#annotated-cell-10-36" aria-hidden="true" tabindex="-1"></a>      } </span>
+<span id="annotated-cell-10-37"><a href="#annotated-cell-10-37" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="annotated-cell-10-38"><a href="#annotated-cell-10-38" aria-hidden="true" tabindex="-1"></a>  } </span>
+<span id="annotated-cell-10-39"><a href="#annotated-cell-10-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(mvt)</span>
+<span id="annotated-cell-10-40"><a href="#annotated-cell-10-40" aria-hidden="true" tabindex="-1"></a>}</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-10" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-10" data-code-lines="9" data-code-annotation="1">Runner remained on first, so they advanced 0 bases</span>
+</dd>
+<dt data-target-cell="annotated-cell-10" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-10" data-code-lines="10" data-code-annotation="2">Runner advanced 1 base (first to second)</span>
+</dd>
+<dt data-target-cell="annotated-cell-10" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-10" data-code-lines="11" data-code-annotation="3">Runner advanced 2 bases (first to third)</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>We similarly define functions to track the number of bases advanced by the runners on second and third base and by the batter. For brevity, we have folded the code.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>mvt_2b <span class="ot">&lt;-</span> <span class="cf">function</span>(on_2b, Outs, bat_score,</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>                   end_on_2b, end_on_3b, end_Outs, end_bat_score,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                   des){</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  mvt <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is.na</span>(on_2b)){</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># there was someone on 2nd base at the start of the at-bat</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is.na</span>(end_on_2b) <span class="sc">&amp;</span> on_2b <span class="sc">==</span> end_on_2b) mvt <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="co"># runner remained on 2nd</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is.na</span>(end_on_3b) <span class="sc">&amp;</span> on_2b <span class="sc">==</span> end_on_3b) mvt <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="co"># runner advanced to 3rd</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">#if(end_Outs == 3) mvt &lt;- 0 # inning ended ; there may be some edge cases here</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># e.g., in last at-bat there may be a wild pitch</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># https://www.espn.com/mlb/playbyplay/_/gameId/401568474 where runner scores and then batter gets out to end the inning</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">is.na</span>(mvt)){</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>      <span class="co"># either there are no baserunners at end of inning or</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>      <span class="co"># there are baserunners but none of them started on second</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>      <span class="co"># we need to parse the play</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>      <span class="co"># Start by grabbing the player name</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>      player_name <span class="ot">&lt;-</span> player2024_lookup<span class="sc">$</span>Name[<span class="fu">which</span>(player2024_lookup<span class="sc">$</span>key_mlbam <span class="sc">==</span> on_2b)]</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>      <span class="co"># Start by splitting it a string</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>      play_split <span class="ot">&lt;-</span> </span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>        stringr<span class="sc">::</span><span class="fu">str_split_1</span>(<span class="at">string =</span> stringi<span class="sc">::</span><span class="fu">stri_trans_general</span>(des, <span class="st">"Latin-ASCII"</span>),</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>                    <span class="at">pattern =</span> <span class="st">"(?&lt;=[[:punct:]])</span><span class="sc">\\</span><span class="st">s(?=[A-Z])"</span>)</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>      check <span class="ot">&lt;-</span> <span class="fu">sapply</span>(play_split, <span class="at">FUN =</span> grepl, <span class="at">pattern =</span> player_name)</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span>(<span class="fu">any</span>(check)){</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>        <span class="co"># found something with player name in it</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>        play <span class="ot">&lt;-</span> play_split[check]</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span>( <span class="fu">any</span>(<span class="fu">grepl</span>(<span class="at">pattern =</span> <span class="st">"out"</span>, <span class="at">x =</span> play) <span class="sc">|</span> <span class="fu">grepl</span>(<span class="at">pattern =</span> <span class="st">"caught stealing"</span>, <span class="at">x =</span> play))) mvt <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="co"># player got out</span></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span> <span class="cf">if</span>(<span class="fu">any</span>(<span class="fu">grepl</span>(<span class="at">pattern =</span> <span class="st">"score"</span>, <span class="at">x =</span> play))) mvt <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="co"># player scored from 2nd</span></span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span>{</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>        <span class="co"># player name is not present in play description; and they're not on base</span></span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>        <span class="co"># if they got caught stealing in the middle of the at-bat this may not be recorded</span></span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>        <span class="co"># check if Outs &lt; end_Outs</span></span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span>(end_Outs <span class="sc">==</span> <span class="dv">3</span> <span class="sc">|</span> Outs <span class="sc">&lt;</span> end_Outs <span class="sc">&amp;</span> bat_score <span class="sc">==</span> end_bat_score) mvt <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>      } </span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>  } </span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(mvt)</span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>mvt_3b <span class="ot">&lt;-</span> <span class="cf">function</span>(on_3b, Outs, bat_score,</span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>                   end_on_3b, end_Outs, end_bat_score,</span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>                   des){</span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a>  mvt <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is.na</span>(on_3b)){</span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is.na</span>(end_on_3b) <span class="sc">&amp;</span> on_3b <span class="sc">==</span> end_on_3b) mvt <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="co"># runner remained on 3rd</span></span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">is.na</span>(mvt)){</span>
+<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a>      <span class="co"># either there are no baserunners at end of inning or</span></span>
+<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a>      <span class="co"># there are baserunners but none of them started on second</span></span>
+<span id="cb12-53"><a href="#cb12-53" aria-hidden="true" tabindex="-1"></a>      <span class="co"># we need to parse the play</span></span>
+<span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a>      <span class="co"># Start by grabbing the player name</span></span>
+<span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a>      player_name <span class="ot">&lt;-</span> player2024_lookup<span class="sc">$</span>Name[<span class="fu">which</span>(player2024_lookup<span class="sc">$</span>key_mlbam <span class="sc">==</span> on_3b)]</span>
+<span id="cb12-56"><a href="#cb12-56" aria-hidden="true" tabindex="-1"></a>      play_split <span class="ot">&lt;-</span> </span>
+<span id="cb12-57"><a href="#cb12-57" aria-hidden="true" tabindex="-1"></a>        stringr<span class="sc">::</span><span class="fu">str_split_1</span>(<span class="at">string =</span> stringi<span class="sc">::</span><span class="fu">stri_trans_general</span>(des, <span class="st">"Latin-ASCII"</span>),</span>
+<span id="cb12-58"><a href="#cb12-58" aria-hidden="true" tabindex="-1"></a>                    <span class="at">pattern =</span> <span class="st">"(?&lt;=[[:punct:]])</span><span class="sc">\\</span><span class="st">s(?=[A-Z])"</span>)</span>
+<span id="cb12-59"><a href="#cb12-59" aria-hidden="true" tabindex="-1"></a>      check <span class="ot">&lt;-</span> <span class="fu">sapply</span>(play_split, <span class="at">FUN =</span> grepl, <span class="at">pattern =</span> player_name)</span>
+<span id="cb12-60"><a href="#cb12-60" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span>(<span class="fu">any</span>(check)){</span>
+<span id="cb12-61"><a href="#cb12-61" aria-hidden="true" tabindex="-1"></a>        <span class="co"># found something with player name in it</span></span>
+<span id="cb12-62"><a href="#cb12-62" aria-hidden="true" tabindex="-1"></a>        play <span class="ot">&lt;-</span> play_split[check]</span>
+<span id="cb12-63"><a href="#cb12-63" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span>( <span class="fu">any</span>(<span class="fu">grepl</span>(<span class="at">pattern =</span> <span class="st">"out"</span>, <span class="at">x =</span> play) <span class="sc">|</span> <span class="fu">grepl</span>(<span class="at">pattern =</span> <span class="st">"caught stealing"</span>, <span class="at">x =</span> play))) mvt <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="co"># player got out</span></span>
+<span id="cb12-64"><a href="#cb12-64" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span> <span class="cf">if</span>(<span class="fu">any</span>(<span class="fu">grepl</span>(<span class="at">pattern =</span> <span class="st">"score"</span>, <span class="at">x =</span> play))) mvt <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="co"># player scored from 3rd</span></span>
+<span id="cb12-65"><a href="#cb12-65" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span>{</span>
+<span id="cb12-66"><a href="#cb12-66" aria-hidden="true" tabindex="-1"></a>        <span class="co"># player name is not present in play description; and they're not on base</span></span>
+<span id="cb12-67"><a href="#cb12-67" aria-hidden="true" tabindex="-1"></a>        <span class="co"># if they got caught stealing in the middle of the at-bat this may not be recorded</span></span>
+<span id="cb12-68"><a href="#cb12-68" aria-hidden="true" tabindex="-1"></a>        <span class="co"># check if Outs &lt; end_Outs</span></span>
+<span id="cb12-69"><a href="#cb12-69" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span>(end_Outs <span class="sc">==</span> <span class="dv">3</span> <span class="sc">|</span> Outs <span class="sc">&lt;</span> end_Outs <span class="sc">&amp;</span> bat_score <span class="sc">==</span> end_bat_score) mvt <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb12-70"><a href="#cb12-70" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb12-71"><a href="#cb12-71" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb12-72"><a href="#cb12-72" aria-hidden="true" tabindex="-1"></a>  } </span>
+<span id="cb12-73"><a href="#cb12-73" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(mvt)</span>
+<span id="cb12-74"><a href="#cb12-74" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-75"><a href="#cb12-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-76"><a href="#cb12-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-77"><a href="#cb12-77" aria-hidden="true" tabindex="-1"></a>mvt_batter <span class="ot">&lt;-</span> <span class="cf">function</span>(batter, Outs, bat_score, end_on_1b, end_on_2b, end_on_3b, end_Outs, end_bat_score, des)</span>
+<span id="cb12-78"><a href="#cb12-78" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb12-79"><a href="#cb12-79" aria-hidden="true" tabindex="-1"></a>  mvt <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb12-80"><a href="#cb12-80" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is.na</span>(end_on_1b) <span class="sc">&amp;</span> batter <span class="sc">==</span> end_on_1b) mvt <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="co"># batter advanced to 1st</span></span>
+<span id="cb12-81"><a href="#cb12-81" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span> <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is.na</span>(end_on_2b) <span class="sc">&amp;</span> batter <span class="sc">==</span> end_on_2b) mvt <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="co"># batter advanced to 2nd</span></span>
+<span id="cb12-82"><a href="#cb12-82" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span> <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is.na</span>(end_on_3b) <span class="sc">&amp;</span> batter <span class="sc">==</span> end_on_3b) mvt <span class="ot">&lt;-</span> <span class="dv">3</span> <span class="co"># batter advanced to 3rd</span></span>
+<span id="cb12-83"><a href="#cb12-83" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>{</span>
+<span id="cb12-84"><a href="#cb12-84" aria-hidden="true" tabindex="-1"></a>    <span class="co"># batter is not on base</span></span>
+<span id="cb12-85"><a href="#cb12-85" aria-hidden="true" tabindex="-1"></a>    <span class="co"># look up player name</span></span>
+<span id="cb12-86"><a href="#cb12-86" aria-hidden="true" tabindex="-1"></a>    player_name <span class="ot">&lt;-</span> player2024_lookup<span class="sc">$</span>Name[<span class="fu">which</span>(player2024_lookup<span class="sc">$</span>key_mlbam <span class="sc">==</span> batter)]</span>
+<span id="cb12-87"><a href="#cb12-87" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-88"><a href="#cb12-88" aria-hidden="true" tabindex="-1"></a>    play_split <span class="ot">&lt;-</span></span>
+<span id="cb12-89"><a href="#cb12-89" aria-hidden="true" tabindex="-1"></a>      stringr<span class="sc">::</span><span class="fu">str_split_1</span>(<span class="at">string =</span> stringi<span class="sc">::</span><span class="fu">stri_trans_general</span>(des, <span class="st">"Latin-ASCII"</span>),</span>
+<span id="cb12-90"><a href="#cb12-90" aria-hidden="true" tabindex="-1"></a>                           <span class="at">pattern =</span> <span class="st">"(?&lt;=[[:punct:]])</span><span class="sc">\\</span><span class="st">s(?=[A-Z])"</span>)</span>
+<span id="cb12-91"><a href="#cb12-91" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-92"><a href="#cb12-92" aria-hidden="true" tabindex="-1"></a>    check <span class="ot">&lt;-</span> <span class="fu">sapply</span>(play_split, <span class="at">FUN =</span> grepl, <span class="at">pattern =</span> player_name)</span>
+<span id="cb12-93"><a href="#cb12-93" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">any</span>(check)){</span>
+<span id="cb12-94"><a href="#cb12-94" aria-hidden="true" tabindex="-1"></a>      <span class="co"># found something with player name in it</span></span>
+<span id="cb12-95"><a href="#cb12-95" aria-hidden="true" tabindex="-1"></a>      play <span class="ot">&lt;-</span> play_split[check]</span>
+<span id="cb12-96"><a href="#cb12-96" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span>( <span class="fu">any</span>(<span class="fu">grepl</span>(<span class="at">pattern =</span> <span class="st">"out"</span>, <span class="at">x =</span> play))) mvt <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="co"># player got out</span></span>
+<span id="cb12-97"><a href="#cb12-97" aria-hidden="true" tabindex="-1"></a>      <span class="cf">else</span> <span class="cf">if</span>(<span class="fu">any</span>(<span class="fu">grepl</span>(<span class="at">pattern =</span> <span class="st">"score"</span>, <span class="at">x =</span> play) <span class="sc">|</span> <span class="fu">grepl</span>(<span class="at">pattern =</span> <span class="st">"home"</span>, <span class="at">x =</span> play))) mvt <span class="ot">&lt;-</span> <span class="dv">4</span> <span class="co"># batter scored</span></span>
+<span id="cb12-98"><a href="#cb12-98" aria-hidden="true" tabindex="-1"></a>      <span class="cf">else</span> <span class="cf">if</span>(end_Outs <span class="sc">==</span> <span class="dv">3</span> <span class="sc">|</span> Outs <span class="sc">&lt;</span> end_Outs <span class="sc">&amp;</span> bat_score <span class="sc">==</span> end_bat_score) mvt <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb12-99"><a href="#cb12-99" aria-hidden="true" tabindex="-1"></a>      <span class="cf">else</span> mvt <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb12-100"><a href="#cb12-100" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb12-101"><a href="#cb12-101" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb12-102"><a href="#cb12-102" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(mvt)</span>
+<span id="cb12-103"><a href="#cb12-103" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>We can now apply these functions to every row of our data frame.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The following code takes a few minutes to run.</p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>baserunning <span class="ot">&lt;-</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  atbat2024 <span class="sc">|&gt;</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rowwise</span>() <span class="sc">|&gt;</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">mvt_batter =</span> <span class="fu">mvt_batter</span>(batter, Outs, bat_score, end_on_1b, end_on_2b, end_on_3b, end_Outs, end_bat_score, des),</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">mvt_1b =</span> <span class="fu">mvt_1b</span>(on_1b, Outs, bat_score, end_on_1b, end_on_2b, end_on_3b,end_Outs, end_bat_score, des),</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">mvt_2b =</span> <span class="fu">mvt_2b</span>(on_2b, Outs, bat_score, end_on_2b, end_on_3b, end_Outs, end_bat_score, des),</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">mvt_3b =</span> <span class="fu">mvt_3b</span>(on_3b, Outs, bat_score, end_on_3b, end_Outs, end_bat_score, des)) <span class="sc">|&gt;</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="cumulative-baserunning-probabilities" class="level3">
+<h3 class="anchored" data-anchor-id="cumulative-baserunning-probabilities">Cumulative baserunning probabilities</h3>
+<p>Now that we have computed the <span class="math inline">\(k_{ij}\)</span>’s — that is, the number of bases each base runner advanced in each at-bat — we are ready to compute the cumulative base running probabilities <span class="math inline">\(\mathbb{P}(K \leq k  \vert \textrm{e}).\)</span> In the following code, we first group at-bats by the ending event and then compute the proportion of times that the baserunner advances at most <span class="math inline">\(k\)</span> bases. We also set the cumulative probability to zero for situations when there isn’t a runner on a particular base.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>br_batter_probs <span class="ot">&lt;-</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  baserunning <span class="sc">|&gt;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(end_events) <span class="sc">|&gt;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">kappa_0 =</span> <span class="fu">mean</span>(mvt_batter <span class="sc">&lt;=</span> <span class="dv">0</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">kappa_1 =</span> <span class="fu">mean</span>(mvt_batter <span class="sc">&lt;=</span> <span class="dv">1</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">kappa_2 =</span> <span class="fu">mean</span>(mvt_batter <span class="sc">&lt;=</span> <span class="dv">2</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">kappa_3 =</span> <span class="fu">mean</span>(mvt_batter <span class="sc">&lt;=</span> <span class="dv">3</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">kappa_4 =</span> <span class="fu">mean</span>(mvt_batter <span class="sc">&lt;=</span> <span class="dv">4</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">kappa_NA =</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(<span class="at">cols =</span> tidyr<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">"kappa_"</span>),</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>                      <span class="at">names_to =</span> <span class="st">"mvt_batter"</span>,</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>                      <span class="at">names_prefix =</span> <span class="st">"kappa_"</span>,</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>                      <span class="at">values_to =</span> <span class="st">"kappa_batter"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">mvt_batter =</span> <span class="fu">ifelse</span>(mvt_batter <span class="sc">==</span> <span class="st">"NA"</span>, <span class="cn">NA</span>, mvt_batter),</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">mvt_batter =</span> <span class="fu">as.numeric</span>(mvt_batter))</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>br_1b_probs <span class="ot">&lt;-</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>  baserunning <span class="sc">|&gt;</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(on_1b)) <span class="sc">|&gt;</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(end_events) <span class="sc">|&gt;</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">kappa_0 =</span> <span class="fu">mean</span>(mvt_1b <span class="sc">&lt;=</span> <span class="dv">0</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">kappa_1 =</span> <span class="fu">mean</span>(mvt_1b <span class="sc">&lt;=</span> <span class="dv">1</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">kappa_2 =</span> <span class="fu">mean</span>(mvt_1b <span class="sc">&lt;=</span> <span class="dv">2</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">kappa_3 =</span> <span class="fu">mean</span>(mvt_1b <span class="sc">&lt;=</span> <span class="dv">3</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">kappa_NA =</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(<span class="at">cols =</span> tidyr<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">"kappa_"</span>),</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>                      <span class="at">names_to =</span> <span class="st">"mvt_1b"</span>,</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>                      <span class="at">names_prefix =</span> <span class="st">"kappa_"</span>,</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>                      <span class="at">values_to =</span> <span class="st">"kappa_1b"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">mvt_1b =</span> <span class="fu">ifelse</span>(mvt_1b <span class="sc">==</span> <span class="st">"NA"</span>, <span class="cn">NA</span>, mvt_1b),</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>                <span class="at">mvt_1b =</span> <span class="fu">as.numeric</span>(mvt_1b))</span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>br_2b_probs <span class="ot">&lt;-</span></span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>  baserunning <span class="sc">|&gt;</span></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(on_2b)) <span class="sc">|&gt;</span></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(end_events) <span class="sc">|&gt;</span></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(</span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>    <span class="at">kappa_0 =</span> <span class="fu">mean</span>(mvt_2b <span class="sc">&lt;=</span> <span class="dv">0</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>    <span class="at">kappa_1 =</span> <span class="fu">mean</span>(mvt_2b <span class="sc">&lt;=</span> <span class="dv">1</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>    <span class="at">kappa_2 =</span> <span class="fu">mean</span>(mvt_2b <span class="sc">&lt;=</span> <span class="dv">2</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>    <span class="at">kappa_NA =</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(<span class="at">cols =</span> tidyr<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">"kappa_"</span>),</span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>                      <span class="at">names_to =</span> <span class="st">"mvt_2b"</span>,</span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>                      <span class="at">names_prefix =</span> <span class="st">"kappa_"</span>,</span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>                      <span class="at">values_to =</span> <span class="st">"kappa_2b"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">mvt_2b =</span> <span class="fu">ifelse</span>(mvt_2b <span class="sc">==</span> <span class="st">"NA"</span>, <span class="cn">NA</span>, mvt_2b),</span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>                <span class="at">mvt_2b =</span> <span class="fu">as.numeric</span>(mvt_2b))</span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>br_3b_probs <span class="ot">&lt;-</span></span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>  baserunning <span class="sc">|&gt;</span></span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(on_3b)) <span class="sc">|&gt;</span></span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(end_events) <span class="sc">|&gt;</span></span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(</span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a>    <span class="at">kappa_0 =</span> <span class="fu">mean</span>(mvt_3b <span class="sc">&lt;=</span> <span class="dv">0</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a>    <span class="at">kappa_1 =</span> <span class="fu">mean</span>(mvt_3b <span class="sc">&lt;=</span> <span class="dv">1</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a>    <span class="at">kappa_NA =</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(<span class="at">cols =</span> tidyr<span class="sc">::</span><span class="fu">starts_with</span>(<span class="st">"kappa_"</span>),</span>
+<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a>                      <span class="at">names_to =</span> <span class="st">"mvt_3b"</span>,</span>
+<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a>                      <span class="at">names_prefix =</span> <span class="st">"kappa_"</span>,</span>
+<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a>                      <span class="at">values_to =</span> <span class="st">"kappa_3b"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">mvt_3b =</span> <span class="fu">ifelse</span>(mvt_3b <span class="sc">==</span> <span class="st">"NA"</span>, <span class="cn">NA</span>, mvt_3b),</span>
+<span id="cb14-64"><a href="#cb14-64" aria-hidden="true" tabindex="-1"></a>                <span class="at">mvt_3b =</span> <span class="fu">as.numeric</span>(mvt_3b))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The table <code>br_1b_probs</code> contains the cumulative base running probabilities for runners who start on first base broken down by ending event. We find that in about 64.7% of singles, the runner on first advances one base or fewer while in 95.7% of singles, the runner on first advances two bases or fewer.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>br_1b_probs <span class="sc">|&gt;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(end_events <span class="sc">==</span> <span class="st">"single"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 3
+  end_events mvt_1b kappa_1b
+  &lt;chr&gt;       &lt;dbl&gt;    &lt;dbl&gt;
+1 single          0   0.0194
+2 single          1   0.647 
+3 single          2   0.957 
+4 single          3   1     
+5 single         NA   0     </code></pre>
+</div>
+</div>
+</section>
+<section id="baserunning-runs-above-average" class="level3">
+<h3 class="anchored" data-anchor-id="baserunning-runs-above-average">Baserunning runs above average</h3>
+<p>Now that we have the cumulative base running probabilities, we’re (finally) ready to compute <span class="math inline">\(\kappa_{ij}.\)</span> To do so, we will use <code>inner_join()</code>’s to add columns to our <code>baserunning</code> data table with columns for the batter and runners on first, second, and third. Note, whenever there is no baserunner on first base (i.e., <code>on_1b = NA</code>), we will set the corresponding <span class="math inline">\(\kappa\)</span> to 0. Because we want to divide all of <span class="math inline">\(\eta_{i}\)</span> amongst the base runners, we need to normalize the <span class="math inline">\(\kappa_{ij}\)</span> values to sum to 1 within each at-bat. The columns <code>norm_batter</code>, <code>norm_1b</code>, <code>norm_2b</code>, and <code>norm_3b</code> contain these normalized weights.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>baserunning <span class="ot">&lt;-</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  baserunning <span class="sc">|&gt;</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> br_batter_probs, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"end_events"</span>, <span class="st">"mvt_batter"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> br_1b_probs, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"end_events"</span>, <span class="st">"mvt_1b"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> br_2b_probs, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"end_events"</span>, <span class="st">"mvt_2b"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> br_3b_probs, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"end_events"</span>, <span class="st">"mvt_3b"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">total_kappa =</span> kappa_batter <span class="sc">+</span> kappa_1b <span class="sc">+</span> kappa_2b <span class="sc">+</span> kappa_3b,</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">norm_batter =</span> kappa_batter<span class="sc">/</span>total_kappa,</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">norm_1b =</span> kappa_1b<span class="sc">/</span>total_kappa,</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">norm_2b =</span> kappa_2b<span class="sc">/</span>total_kappa,</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">norm_3b =</span> kappa_3b<span class="sc">/</span>total_kappa)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To illustrate our calculations so far, let’s look at Ohtani’s at-bats from that game against the Padres. First, we see that Ohtani reached first base in all except his fourth at-bat. So, for these four at-bats, his <code>mvt_batter</code> value is 1.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"player2024_lookup.RData"</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>ohtani_id <span class="ot">&lt;-</span> </span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  player2024_lookup<span class="sc">$</span>key_mlbam[<span class="fu">which</span>(player2024_lookup<span class="sc">$</span>FullName <span class="sc">==</span> <span class="st">"Shohei Ohtani"</span>)]</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>baserunning <span class="sc">|&gt;</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(game_pk <span class="sc">==</span> <span class="dv">745444</span> <span class="sc">&amp;</span> batter <span class="sc">==</span> ohtani_id) <span class="sc">|&gt;</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(at_bat_number, mvt_batter, des)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 3
+  at_bat_number mvt_batter des                                                  
+          &lt;int&gt;      &lt;dbl&gt; &lt;chr&gt;                                                
+1             2          1 Shohei Ohtani grounds into a force out, shortstop Ha…
+2            18          1 Shohei Ohtani singles on a sharp line drive to right…
+3            37          1 Shohei Ohtani grounds into a force out, third basema…
+4            52          0 Shohei Ohtani grounds out softly, pitcher Wandy Pera…
+5            65          1 Shohei Ohtani singles on a line drive to left fielde…</code></pre>
+</div>
+</div>
+<p>In his second at-bat, Ohtani singled with no runners on. So, he should get credit for creating all the base running run value above average on that at-bat. In contrast, we argued earlier that when he drove in a run in his fifth at-bat, the runner who scored from second should get a bit more credit than Ohtani and the runner on first, who only advanced one base. Looking at the weights <code>norm_1b</code>, <code>norm_2b</code>, and <code>norm_batter</code> for this at-bat, we see that indeed, we’re assigning a bit more weight to the runner on second than the runner on first.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>baserunning <span class="sc">|&gt;</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(game_pk <span class="sc">==</span> <span class="dv">745444</span> <span class="sc">&amp;</span> batter <span class="sc">==</span> ohtani_id) <span class="sc">|&gt;</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(at_bat_number, mvt_1b, mvt_2b, mvt_3b, mvt_batter, norm_1b, norm_2b, norm_3b, norm_batter)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 9
+  at_bat_number mvt_1b mvt_2b mvt_3b mvt_batter norm_1b norm_2b norm_3b
+          &lt;int&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+1             2      0     NA     NA          1   0.491   0           0
+2            18     NA     NA     NA          1   0       0           0
+3            37      0     NA     NA          1   0.491   0           0
+4            52     NA     NA     NA          0   0       0           0
+5            65      1      2     NA          1   0.247   0.382       0
+# ℹ 1 more variable: norm_batter &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<p>Recall that <span class="math inline">\(\eta_{i}\)</span> represents the run value above average generated in at-bat <span class="math inline">\(i\)</span> due to base running. Whenever there is a runner on first at the start of the at-bat, the quantity <span class="math inline">\(\kappa_{i,\textrm{1b}}/\sum_{j}{\kappa_{ij}} \times \eta_{i}\)</span> reflects the run value above average generated in the at-bat due to the base running of the runner initially on first. For each player, we can aggregate these values across all at-bats in which they are on first.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>raa_1b <span class="ot">&lt;-</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  baserunning <span class="sc">|&gt;</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(on_1b)) <span class="sc">|&gt;</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA_1b =</span> kappa_1b <span class="sc">*</span> eta) <span class="sc">|&gt;</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(on_1b) <span class="sc">|&gt;</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">RAA_1b =</span> <span class="fu">sum</span>(RAA_1b)) <span class="sc">|&gt;</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> on_1b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can similarly compute the run value above average created by the runners on second base and third base as well as by the batter.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>raa_2b <span class="ot">&lt;-</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  baserunning <span class="sc">|&gt;</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(on_2b)) <span class="sc">|&gt;</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA_2b =</span> kappa_2b <span class="sc">*</span> eta) <span class="sc">|&gt;</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(on_2b) <span class="sc">|&gt;</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">RAA_2b =</span> <span class="fu">sum</span>(RAA_2b)) <span class="sc">|&gt;</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> on_2b)</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>raa_3b <span class="ot">&lt;-</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>  baserunning <span class="sc">|&gt;</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(on_3b)) <span class="sc">|&gt;</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA_3b =</span> kappa_3b <span class="sc">*</span> eta) <span class="sc">|&gt;</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(on_3b) <span class="sc">|&gt;</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">RAA_3b =</span> <span class="fu">sum</span>(RAA_3b)) <span class="sc">|&gt;</span></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> on_3b)</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>raa_batter <span class="ot">&lt;-</span></span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>  baserunning <span class="sc">|&gt;</span></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA_batter =</span> kappa_batter <span class="sc">*</span> eta) <span class="sc">|&gt;</span></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(batter) <span class="sc">|&gt;</span></span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">RAA_batter =</span> <span class="fu">sum</span>(RAA_batter)) <span class="sc">|&gt;</span></span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> batter)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Finally, we can aggregate the total run value above average that each player creates from their base running, which we can <span class="math inline">\(\textrm{RAA}^{\textrm{br}}.\)</span></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>raa_br <span class="ot">&lt;-</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  raa_batter <span class="sc">|&gt;</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_1b, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_2b, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_3b, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">replace_na</span>(<span class="fu">list</span>(<span class="at">RAA_batter =</span> <span class="dv">0</span>, <span class="at">RAA_1b =</span> <span class="dv">0</span>, <span class="at">RAA_2b =</span> <span class="dv">0</span>, <span class="at">RAA_3b =</span> <span class="dv">0</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA_br =</span> RAA_batter <span class="sc">+</span> RAA_1b <span class="sc">+</span> RAA_2b <span class="sc">+</span> RAA_3b) <span class="sc">|&gt;</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> player2024_lookup, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Name, key_mlbam, RAA_br, RAA_batter, RAA_1b, RAA_2b, RAA_3b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The player with the largest <span class="math inline">\(\textrm{RAA}^{\textrm{br}}\)</span>, Jose Ramirez, is known for his aggressive baserunning<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a></p>
+</section>
 </section>
 <section id="batting" class="level2">
 <h2 class="anchored" data-anchor-id="batting">Batting</h2>
-<!--
-eta: portion of adjusted offensive run value attributable to baserunners.
-mu = epsilon-eta attributable to the hitter
-** need to compare batter relative to other players at his position **
+<p>We now need to distribute <span class="math inline">\(\hat{\mu}_{i}\)</span> to each batter. As noted in <span class="citation" data-cites="Baumer2015_openWAR">(<a href="#ref-Baumer2015_openWAR" role="doc-biblioref">Baumer, Jensen, and Matthews 2015, sec. 3.3</a>)</span>, we need to take care to calibrate each batter’s hitting performance with the expected performance by position.</p>
+<section id="sec-rv_position" class="level3">
+<h3 class="anchored" data-anchor-id="sec-rv_position">Average run value by position</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"positions2024.RData"</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>batting <span class="ot">&lt;-</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  atbat2024 <span class="sc">|&gt;</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(batter, mu) <span class="sc">|&gt;</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> batter) <span class="sc">|&gt;</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> positions2024, <span class="at">by =</span> <span class="st">"key_mlbam"</span>)</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>avg_mu_position <span class="ot">&lt;-</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>  batting <span class="sc">|&gt;</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(position) <span class="sc">|&gt;</span></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">avg_mu =</span> <span class="fu">mean</span>(mu))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can now go through and subtract the position average from each <span class="math inline">\(\hat{\mu}_{i}\)</span> in <code>batting</code>. This represents the run value above average created by the batter’s hittign in the at-bat. In the following code, we aggregate these at-bat level run values above average for each player. We denote the total <span class="math inline">\(\textrm{RAA}^{\textrm{b}}.\)</span></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>raa_b <span class="ot">&lt;-</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  batting <span class="sc">|&gt;</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> avg_mu_position, <span class="at">by =</span> <span class="st">"position"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">mu_aa =</span> mu <span class="sc">-</span> avg_mu) <span class="sc">|&gt;</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(key_mlbam) <span class="sc">|&gt;</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">RAA_b =</span> <span class="fu">sum</span>(mu_aa)) <span class="sc">|&gt;</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> player2024_lookup, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Name, RAA_b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We find a lot of very good batters amongst the players with highest <span class="math inline">\(\textrm{RAA}^{\textrm{b}}\)</span>’s</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>raa_b <span class="sc">|&gt;</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(RAA_b)) <span class="sc">|&gt;</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 2
+   Name              RAA_b
+   &lt;chr&gt;             &lt;dbl&gt;
+ 1 Aaron Judge        84.6
+ 2 Juan Soto          64.3
+ 3 Shohei Ohtani      59.6
+ 4 Bobby Witt         59.0
+ 5 Vladimir Guerrero  45.0
+ 6 Gunnar Henderson   42.7
+ 7 Ketel Marte        41.3
+ 8 Jose Ramirez       35.9
+ 9 Brent Rooker       34.8
+10 William Contreras  33.5</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="looking-ahead" class="level2">
+<h2 class="anchored" data-anchor-id="looking-ahead">Looking ahead</h2>
+<p>We’ve distributed the run value <span class="math inline">\(\delta_{i}\)</span> created in each at-bat between the batter and base runners and computed season total runs values above average based on batting <span class="math inline">\(\textrm{RAA}^{\textrm{b}}\)</span> and base running <span class="math inline">\(\textrm{RAA}^{\textrm{br}}.\)</span> <a href="../lectures/lecture08.html">Next lecture</a>, we will distribute <span class="math inline">\(-\delta_{i}\)</span> between the pitcher and fielders involved in each at-bat. So that we don’t have to repeat our earlier calculations, we will save <code>raa_br</code> and <code>raa_b</code></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(raa_br, raa_b, <span class="at">file =</span> <span class="st">"raa_offensive2024.RData"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 
--->
 
 
 </section>
 
-</main> <!-- /main -->
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-Baumer2015_openWAR" class="csl-entry" role="listitem">
+Baumer, Benjamin S., Shane T. Jensen, and Gregory J. Matthews. 2015. <span>“<span class="nocase">openWAR</span>: An Open Source System for Evaluating Overall Player Performance in <span>Major League Baseball</span>.”</span> <em>Journal of Quantitative Analysis in Sports</em> 11 (2).
+</div>
+</div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Starting in 2023, Major League Baseball implemented a pitch timer. Batters who were not in the batter’s box and alert to the pitcher by the 8-second mark of the timer are penalized with an automatic strike. See the rules <a href="https://www.mlb.com/glossary/rules/pitch-timer">here</a>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>When this happens, Statcast usually records it as a truncated plate appearance (<code>truncated_pa</code>).<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Try proving this mathematically!<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Check out the documentation for R’s formula interface <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/formula.html">here</a>. Specifically, look at the bullet point about the <code>-</code> operations under “Details”<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>See <a href="https://www.cleveland.com/guardians/2025/04/every-90-feet-is-important-to-him-jose-ramirez-sparks-guardians-with-heads-up-base-running.html">this article</a> about his base running from earlier this year.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";

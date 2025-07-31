@@ -202,7 +202,7 @@ Scraping a single season of StatCast data can take between 30 and 45 minutes.
 I **highly** recommend scraping the data for any season only once and saving the resulting data table in an `.RData` file that can be loaded into future R sessions.
 ```{r}
 #| eval: false
-#| library(tidyverse)
+library(tidyverse)
 raw_statcast2024 <- annual_statcast_query(2024)
 save(raw_statcast2024, file = "raw_statcast2024.RData")
 ```
@@ -353,6 +353,7 @@ get_lineup <- function(game_pk){
 Now, to get the batting orders for all regular season games from 2024, we could try writing a `for` loop that iterates over all unique `game_pk` values and writes the table to a list.
 ```{r}
 #| label: naive-lineup-loop
+#| eval: false
 all_lineups <- list()
 unik_game_pk <- unique(statcast2024$game_pk)
 for(i in 1:length(unik_game_pk)){
@@ -398,6 +399,13 @@ save(lineups2024, file = "lineups2024.RData") # <3>
 
 The table `lineups2024` contains the starters and their position for all the games in our dataset.
 The following code determines the most commonly listed position for each player.
+
+```{r}
+#| label: load-lineup
+#| echo: false
+load("lineups2024.RData")
+```
+
 ```{r}
 #| label: get-common-position
 #| output: false
@@ -672,7 +680,7 @@ We can following an essentially identical strategy of (i) sorting pitches by at-
 -->
 We can repeat this code for all at-bats.
 ```{r }
-#| label: runvalue_start
+#| label: runvalue-start
 runValue2024 <-
   statcast2024 |>
   dplyr::group_by(game_pk, inning, inning_topbot) |> # <1>
@@ -764,6 +772,10 @@ Then, we can extract the rows of `statcast2024` corresponding to the first pitch
 Then we can filter this subset to only those at-bats where Ohtani was the batter.
 Finally, we can join the associated run values.
 
+```{r}
+#| label: load-lookup
+load("player2024_lookup.RData")
+```
 
 ```{r}
 #| label: ohtani-atbats
@@ -809,13 +821,6 @@ When we compare our top-10 to [FanGraph's leaderboard for RE24](https://www.fang
 But there are some differences, especially with regards to the number of plate appearances and actual RE24 values.
 For the latter, FanGraph likely used a different expected run matrix.
 And the StatCast data is not complete; for instance, it is missing 3 games in which Judge played.
-
-<!--
-```{r save_atbat}
-#| echo: false
-save(atbat2024, file = "~/Dropbox/Teaching/2025-26/stat479_f25_sports/lecture_planning/openWAR/runValues.RData")
-```
--->
 
 
 <!--
