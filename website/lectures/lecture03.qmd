@@ -58,7 +58,7 @@ simple_preds <-
   dplyr::left_join(y = xg_model2, by = c("shot.body_part.name", "shot.technique.name"))
 ```
 
-## Comparing XG models
+## Comparing XG models {#sec-model-comparison}
 
 Our first XG model conditions only on the body part used to take the shot while our second model additionally conditions on the technique.
 Consequently, the first model returns exactly the same predicted XG for a right-footed half-volley (e.g., [this Beth Mead goal](https://youtu.be/lVGiGZN2gdw?t=148) against Sweden in EURO 2022) as it does for a right-footed backheel shot (e.g., [this Alessia Russo goal](https://youtu.be/rsuLFOJCCUA?t=7) from the same game).
@@ -177,7 +177,7 @@ cat("StatsBomb LogLoss:",
 1. Since $\log(0) = -\infty,$ we often truncate very small or very large predictions when computing average log-loss
 
 
-## The training/testing paradigm
+## The training/testing paradigm {#sec-train-test}
 
 Based on the preceding calculation, it is tempting to conclude that our second, more complex model, is more accurate than the first model. 
 After all, it achieved a slightly smaller Brier score and log-loss.
@@ -309,7 +309,8 @@ On this second random split, the simpler model had better in-sample and out-of-s
 In practice, instead of relying on a single training/testing split, we often average the in- and out-of-sample losses across several different random splits.
 In the code below, we repeat the above exercise using 100 random training/testing splits.
 Notice that in our for loop, we manually set the seed in a predictable way to ensure reproducibility.
-```{r cv-simple}
+```{r}
+#| label: cv-simple
 n_sims <- 100
 train_logloss <- # <1>
   matrix(nrow = 2, ncol = n_sims,
@@ -372,7 +373,7 @@ In other words, the more complex model appears to *over-fit* the data!
 
 
 
-## Logistic Regression
+## Logistic Regression {#sec-logit}
 
 Although the model that conditions only on body-part has smaller out-of-sample loss than the model that additionally accounts for shot technique, the model is still not wholly satisfactory.
 This is because it fails to account for important *spatial* information that we intuitively believe affects goal probability.

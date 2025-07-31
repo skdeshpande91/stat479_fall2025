@@ -19,15 +19,13 @@ Our development largely follows that of [@Baumer2015_openWAR] but with some impo
 
 The central idea --- what [@Baumer2015_openWAR] call the "conservation of runs" framework --- is that if the batting team gains $\delta_{i}$ units of run value during an at-bat, the fielding team gains $-\delta_{i}$ units of run value during that same at-bat.
 In this lecture, we will apportion $\delta_{i}$ between the batters and the baserunners involved in at-bat $i$.
-[Next lecture](lecture8.qmd), we will apportion $-\delta_{i}$ between the pitcher and fielders involed in at-bat $i.$
+[Next lecture](lecture08.qmd), we will apportion $-\delta_{i}$ between the pitcher and fielders involved in at-bat $i.$
 
 ## Data Preparation
 
 To divide up offensive run value, we need to cretae a data table whose rows correspond to individual at-bats.
-This data table must, at a minimum, contain the starting and ending outs and baserunner configurations.
-We will also want to include the columns `event` and `des`, which 
-
-
+This data table must, at a minimum, contain the starting and ending outs and baserunner configurations as well as the identities of the baserunners at the start and end of the at-bat.
+We will also want to include the columns `event` and `des`, which record the events and a narrative description of what happened in the at-bat.
 ```{r}
 #| label: data-prep
 load("statcast2024.RData")
@@ -108,108 +106,139 @@ atbat2024 <-
 
 ## Adjusted Run Values
 
-We want to give credit to the batter and base runners for creating value over and above would have been expected given the game state and the actual outcome.
-Before computing this expectation, we will create a new variable recording the game state, which is defined as the combination of `Outs` and `BaseRunner`.
-Then, we'll create a temporary data table containing this game state variable, the run value, and 
+<!--
+  Baserunners should get epsilon while batters should get delta - epsilon
+-->
+
+
+
+We want to give credit to the batter and base runners for creating value over and above what would been expected given the game state and the actual outcome of the at-bat.
+
+More precisely, recall that $\delta_{i}$ is the run value created in at-bat $i.$
+We will denote the game state at the beginning of the at-bat with $\textrm{g}_{i}$ and the ending event with $\textrm{e}_{i}.$
+We form the game state variable $\textrm{g}$ by concatenating the `Outs` and `BaseRunners` and separating them with a period so that $\textrm{g} = "0.101"$ corresponds to a situation with no outs and runners on first and third base.
 
 ```{r}
-#| label: create-game-state
-tmp_df <-
-  raw_atbat2024 |>
-  dplyr::mutate(
-    gameState = paste(Outs, BaseRunner, sep = ".")
-  ) |>
-  dplyr::select(runValue, gameState, end_events)
+#| label: create-gamestate
+atbat2024 <-
+  atbat2024 |>
+  dplyr::mutate(GameState = paste(Outs, BaseRunner, sep = "."))
 ```
 
-For each at-bat $i,$ let $\delta_{i}$ be the run value created by the batting team.
-We will **assume** that each $\delta_{i}$ can be decomposed as 
+We will assume that the run value created in each at-bat beginning in state $\textrm{g}$ and ending with event $\textrm{e}$ is equal to the *average* run value created in all at-bats with the same beginning and end plus some mean-zero error.
+That is, for each at-bat $i$,
 $$
-\begin{align}
-\delta &= \alpha_{0.000}\times\mathbb{I}(\textrm{gameState}=0.000) + \alpha_{0.100} \times \mathbb{I}(\textrm{gameState}=0.100) + \cdots + \alpha_{2.111} \times \mathbb{I}(gameState = 2.111) \\
-&~~+ \alpha_{\textrm{single}}\times\mathbb{I}(\textrm{event}=\textrm{single}) + \alpha_{\textrm{}}\times \mathbb{I}(\textrm{event} = \textrm{}) \\
-&~~ + \epsilon_{i},
-\end{align}
+\delta_{i} = \mathbb{E}[\delta \vert \textrm{g} = \textrm{g}_{i}, \textrm{e} = \textrm{e}_{i}] + \varepsilon_{i},
 $$
-where $\alpha_{g} + \alpha_{e}$ represents the average run value created on at-bats beginning in game state $g$ and resulting in an event $e.$
-That is, under this assumed model, the average run value created in an at-bat beginning with two outs and no runners on that ends in a single (like Ohtani's 3rd inning at-bat against the Padres) is $\alpha_{2.000} + \alpha_{\textrm{single}}.$
+The average run value $\mu:=\mathbb{E}[\delta \vert \textrm{g}, \textrm{e}]$ represents the average run value created in at-bats that begin in state $\textrm{g}$ and end with the event $\textrm{e}.$
 
-Of course, we don't know the exact values of the $\alpha$'s in this decomposition.
-But, one way to estimate them using our data is by solving the minimiziation problem
+
+It is tempting to compute the expectation $\mathbb{E}[\delta \vert \textrm{g}, \textrm{e}]$  using the "binning-and-averaging" approach we took when developing our [initial XG models back in Lecture 2](lecture02.qmd#init-xg). 
+Unfortunately, such a procedure is liable to yield extreme and erratic answers as the number of bins is quite large.
+To wit, there are 24 distinct game states (i.e., combinations of outs and base runners) and 21 different events.
+
+The 2024 dataset contains only 373 of the 504 total combinations of game state and ending event.
+Of the observed combinations, there is a huge disparity in the relative frequencies.
+Some combinations (e.g., triples with no outs and runners on second and third) occurred just once while others (e.g., striking out with no outs and nobody on) occurred close to 10,000 times.
+
+```{r}
+#| label: count-state-events
+atbat2024 |>
+  dplyr::count(Outs, BaseRunner, end_events) |>
+  dplyr::arrange(n) |>
+  dplyr::slice(c(1:5, (dplyr::n()-4):dplyr::n()))
+```
+
+Instead of "binning and averaging", like we did with our [distance-based XG models in Lecture 3](lecture03.qmd#sec-logit), we will fit a statistical model.
+A natural starting model asserts that there are numbers $\alpha_{0.000}, \ldots, \alpha_{2.111}$ and $\alpha_{\textrm{catcher_interf}}, \ldots, \alpha_{\textrm{walk}}$ such that for all game states $\textrm{g}$ and ending events $\textrm{e},$
+$$
+\mathbb{E}[\delta \vert \textrm{g}, \textrm{e}] = \alpha_{\textrm{g}} + \alpha_{\textrm{e}}.
+$$
+
+Under the assumed model, the average run value created by hitting a single when there are two outs and no runners on is $\alpha_{\textrm{2.000}} + \alpha_{\textrm{single}}$ while the average run value created by hitting a single when there are no outs and runners on first and second is $\alpha_{\textrm{0.110}} + \alpha_{\textrm{single}}.$
+
+Because we do not know the exact values of the $\alpha_{g}$'s and $\alpha_{e}$'s, we need to estimate them using our data.
+Perhaps the simplest way is by solving a least squares minimization problem
 $$
 \hat{\boldsymbol{\alpha}} = \textrm{argmin} \sum_{i = 1}^{n}{(\delta_{i} - \alpha_{g_{i}} - \alpha_{e_{i}})^2},
 $$
 where $g_{i}$ and $e_{i}$ record the game state and event of at-bat $i.$
 
-It turns out solving this minimization problem is equivalent to fitting a linear regression model *without an intercept*.
-We can do this in R using the `lm()` function and including the phrase `-1` in the `formula` argument.
-Note that in the following code block, we first convert `gameState` and `end_events` into categorical variables.
+Solving this problem is equivalent to fitting a linear regression model *without an intercept*[^exercise].
+We can do this in R using the `lm()` function and including `-1` in the `formula` argument[^documentation].
+In the following code, we create a temporary data frame that extracts just the run values $\delta$, game states $\textrm{g}$, and ending events $\textrm{e}$ from `atbats2024` and convert the game state and event variables into `factors`.
 
 
-<!--
-To this end, we fit a *linear regression model*.
-In practice, we don't estimate the $\alpha$'s directly.
-Instead, we estimate the **differences** in average run value relative to a baseline situation.
-For simplicity, we'll set the baseline game state to be 0 outs with no runners on and baseline event to be a field out.
+[^exercise]: Try proving this mathematically!
 
-Under this re-parametrization, $\beta_{g}$ captures the change in average run value create an at-bat beginning in game state $g$ and ending in a fieldout and an at
-That is $\beta_{g} = \alpha_{g} - \alpha_{0.000}.$
-Similarly, 
--->
-
-
-
-
-
+[^documentation]: Check out the documentation for R's formula interface [here](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/formula.html). Specifically, look at the bullet point about the `-` operations under "Details"
 
 ```{r}
 #| label: adjust_delta
 tmp_df <-
   atbat2024 |>
+  dplyr::select(RunValue, GameState, end_events) |>
   dplyr::mutate(
-    GameState = paste(Outs, BaseRunner, sep = "."),
     GameState = factor(GameState),
-    end_events = factor(end_events)) |>
-  dplyr::select(RunValue, GameState, end_events)
+    end_events = factor(end_events))
 
 state_event_fit <-
-  lm(RunValue ~ GameState + end_events, data = tmp_df)
+  lm(RunValue ~ -1 + GameState + end_events, data = tmp_df)
 ```
 
-
+Using the `summary()` function, we can take a quick look at the $\alpha$'s.
 ```{r}
 summary(state_event_fit)
 ```
 
+We estimate $\hat{\alpha}_{2.000} \approx 0.356$ and $\hat{\alpha}_{single} \approx 0.115.$ 
+So, according to our fitted model the average run value created by singling when there are two outs and no runners on is about $0.471.$
 
+:::{.callout-warning icon=false}
 
-In this fitted model, the intercept, which quantifies the average run value for a baseline at-bats that begin with 0 outs and no baserunners and end in a field out, is estimated to be about -0.24.
-The remaining model parameters quantify the different in average run value between that baseline at-bat and one that differs in one respect but is otherwise identical.
-For instance, the parameter for `GameState0.010` represents how much more average run value there is for at-bats that begin with 0 outs and a runner on a second and end in a field out relative to the baseline.
-Our model estimates that such at-bats have an average run value of about -0.24 + 0.05 = -0.19.
+## Statistical significance & model assumptions
 
-After fitting our model, we can write
-$$
-\delta_{i} = \mathbf{\boldsymbol{X}}\hat{\boldsymbol{\beta}} + \eta_{i},
-$$
-where the first part $\hat{\mu}_{i} = \mathbf{\boldsymbol{X}}\hat{\boldsymbol{\beta}}$ represents the portion of $\delta_{i}$ that we might attribute to the batter and $\eta_{i}$ is what's attributable to baserunning. 
+You'll notice that `summary()` returns a lot of inferential output (e.g., standard errors, p-values).
+These are computed under an additional assumption that the true errors $\varepsilon_{i}$ are independent and following a mean-zero normal distribution with constant variance.
+Since we're not ultimately intersted in the parameters $\alpha_{\textrm{g}}$ and $\alpha_{\textrm{e}},$ we will not, at this time, check whether this is a reasonable assumption nor will we rely on any of these inferential results.
+:::
 
+Equipped with our estimated model parameters, for each at-bat $i,$ let $\hat{\mu}_{i} = \hat{\alpha}_{\textrm{g}_{i}} + \hat{\alpha}_{\textrm{e}_{i}}$ and let $\eta_{i} = \delta_{i} - \hat{\mu}_{i}.$
+In terms of dividing credit between the batter and the base runner, we will follow @Baumer2015_openWAR and attribute $\hat{\mu}_{i}$ to the batter's hitting in at-bat $i$ and $\eta_{i}$ to the base running in that at-bat.
+We will add columns to `atbat2024` holding the values of $\hat{\mu}$ (`mu`) and $\eta$ (`eta`).
 ```{r}
 #| label: add_epsilon
 atbat2024$eta <- state_event_fit$residuals
 atbat2024$mu <- state_event_fit$fitted.values
 ```
 
+<!--
+In this fitted model, the intercept, which quantifies the average run value for a baseline at-bats that begin with 0 outs and no baserunners and end in a field out, is estimated to be about -0.24.
+The remaining model parameters quantify the different in average run value between that baseline at-bat and one that differs in one respect but is otherwise identical.
+For instance, the parameter for `GameState0.010` represents how much more average run value there is for at-bats that begin with 0 outs and a runner on a second and end in a field out relative to the baseline.
+Our model estimates that such at-bats have an average run value of about -0.24 + 0.05 = -0.19.
+--> 
+
+
+
+
 ## Baserunning run values
 
-Following [@Baumer2015_openWAR Section 3.2], we will apportion $\eta_{i}$ to each baserunner (including the batter) based on how many bases they advance compared to what we might expect.
-Specifically, for each at-bat outcome (i.e., unique value of `end_events`), we let
-$$
-\kappa_{ij} = \mathbb{P}(K \leq k_{ij}),
-$$
-where $k_{ij}$ the number of bases that baserunner $j$
+Ohtani's second hit against the Padres on March 20, 2024 was a single with runners on first and second and no outs.
+While Ohtani and the runner originally on first advanced one base, the runner originally on second scored.
+Because this latter runner advanced more than what might have been otherwise expected, it makes sense to give him a larger share of the $\eta_{i}$ than to the first two runners, who only advanced one base on a single. 
+Following [@Baumer2015_openWAR Section 3.2], the amount of base running run value $\eta_{i}$ that we assign to base runner $j$ in at-bat $i$ will be proportional to $\kappa_{ij} = \mathbb{P}(K < k_{ij} \vert \textrm{e}_{i}),$ where $k_{ij}$ is the number of bases actually advanced by the base runner.
 
-The following code implements functions that determine the number of bases that the runner on first (if there was any) advanced during an at-bat.
+Essentially, $\kappa_{ij}$ is the probability that a typical base runner advanced at most the $k_{ij}$ bases advanced by base runner $j$ in at-bat $i$ following event $\textrm{e}_{i}.$
+If the base runner does worse than expected (e.g., not advancing from second on a single), then $\kappa_{ij}$ will be very small.
+But if the base runner does better than expected (e.g., scoring from second on a single), then $\kappa_{ij}$ will be larger.
+When computing $\kappa_{ij}$ it is crucial that we condition on the actual ending event $\textrm{e}_{i}.$
+After all, while we may want to penalize a runner for not advancing from second on a single, we definitely don't want to penalize a runner for not advancing from second following a strike out!
+
+### Computing baserunner advancement
+
+Unfortunately, StatCast does not compute the number of bases that each runner advances during each at-bat.
+The following code implements a function that determins the number of bases advanced by the runner on first (if any).
 ```{r}
 #| label: mvt-1b-function
 mvt_1b <- function(on_1b, Outs, bat_score,
@@ -218,14 +247,10 @@ mvt_1b <- function(on_1b, Outs, bat_score,
   mvt <- NA
   if(!is.na(on_1b)){
     # there was someone on 1st base at the start of the at-bat
-    if(!is.na(end_on_1b) & on_1b == end_on_1b) mvt <- 0 # runner remained on 1st
-    if(!is.na(end_on_2b) & on_1b == end_on_2b) mvt <- 1 # runner advanced to 2nd
-    if(!is.na(end_on_3b) & on_1b == end_on_3b) mvt <- 2 # runner advanced to 3rd
-    
-    #if(end_Outs == 3) mvt <- 0 # inning ended ; there may be some edge cases here
-    # e.g., in last at-bat there may be a wild pitch
-    # https://www.espn.com/mlb/playbyplay/_/gameId/401568474 where runner scores and then batter gets out to end the inning
-    
+    if(!is.na(end_on_1b) & on_1b == end_on_1b) mvt <- 0 # <1> 
+    if(!is.na(end_on_2b) & on_1b == end_on_2b) mvt <- 1 # <2> 
+    if(!is.na(end_on_3b) & on_1b == end_on_3b) mvt <- 2 # <3> 
+
     if(is.na(mvt)){
       # either there are no baserunners at end of inning or
       # there are baserunners but none of them started on first
@@ -234,8 +259,9 @@ mvt_1b <- function(on_1b, Outs, bat_score,
       player_name <- player2024_lookup$Name[which(player2024_lookup$key_mlbam == on_1b)]
       # Start by splitting it a string
       play_split <- 
-        stringr::str_split_1(string = stringi::stri_trans_general(des, "Latin-ASCII"),
-                    pattern = "(?<=[[:punct:]])\\s(?=[A-Z])")
+        stringr::str_split_1(
+          string = stringi::stri_trans_general(des, "Latin-ASCII"),
+          pattern = "(?<=[[:punct:]])\\s(?=[A-Z])")
       
       check <- sapply(play_split, FUN = grepl, pattern = player_name)
       if(any(check)){
@@ -253,13 +279,13 @@ mvt_1b <- function(on_1b, Outs, bat_score,
   } 
   return(mvt)
 }
-
-
 ```
+1. Runner remained on first, so they advanced 0 bases
+2. Runner advanced 1 base (first to second)
+3. Runner advanced 2 bases (first to third)
 
 We similarly define functions to track the number of bases advanced by the runners on second and third base and by the batter.
 For brevity, we have folded the code.
-So, be sure to run the code in this block when you try this yourself.
 ```{r}
 #| label: mvt-functions
 #| code-fold: true
@@ -371,7 +397,12 @@ mvt_batter <- function(batter, Outs, bat_score, end_on_1b, end_on_2b, end_on_3b,
 
 
 We can now apply these functions to every row of our data frame.
-This takes some time.
+
+:::{.callout-warning}
+## Long runtime
+The following code takes a few minutes to run.
+:::
+
 ```{r}
 baserunning <-
   atbat2024 |>
@@ -381,26 +412,14 @@ baserunning <-
     mvt_1b = mvt_1b(on_1b, Outs, bat_score, end_on_1b, end_on_2b, end_on_3b,end_Outs, end_bat_score, des),
     mvt_2b = mvt_2b(on_2b, Outs, bat_score, end_on_2b, end_on_3b, end_Outs, end_bat_score, des),
     mvt_3b = mvt_3b(on_3b, Outs, bat_score, end_on_3b, end_Outs, end_bat_score, des)) |>
-  dplyr::ungroup() |>
-  dplyr::select(batter, on_1b, on_2b, on_3b, end_events, 
-         mvt_batter, mvt_1b, mvt_2b, mvt_3b, eta)
+  dplyr::ungroup() 
 ```
 
 ### Cumulative baserunning probabilities
-<!--
-  Look at number of bases advanced on singles and strikeouts
-  We don't want to penalize runner on 1st for not advancing on a strikeout
-  And we want to give lots of credit for runner on 1st scoring off a single
-  
-  To this end, Baumer suggested computing the conditional probability that a runner advances at least K bases on each event
-  Based on our data, we 
-  
-  We will weight each $\eta_{i}$ by $\kappa_{ij}$ where. 
-  
-  So, for instance, when Ohtani singled and drove in two runs, the kappas are:
-  
--->
 
+Now that we have computed the $k_{ij}$'s --- that is, the number of bases each base runner advanced in each at-bat --- we are ready to compute the cumulative base running probabilities $\mathbb{P}(K \leq k  \vert \textrm{e}).$
+In the following code, we first group at-bats by the ending event and then compute the proportion of times that the baserunner advances at most $k$ bases.
+We also set the cumulative probability to zero for situations when there isn't a runner on a particular base.
 ```{r}
 #| label: compute_br_probs
 br_batter_probs <-
@@ -471,78 +490,168 @@ br_3b_probs <-
 ```
 
 
+The table `br_1b_probs` contains the cumulative base running probabilities for runners who start on first base broken down by ending event.
+We find that in about 64.7% of singles, the runner on first advances one base or fewer while in 95.7% of singles, the runner on first advances two bases or fewer.
+```{r}
+#| label: view-br-1b-probs
+br_1b_probs |>
+  dplyr::filter(end_events == "single")
+```
+
+
 ### Baserunning runs above average
 
-We can interpret $\epsilon_{i}$ as the run value above the average expected based on the game state and the type of hitting event.
-As noted above, this amount should be apportioned to the baserunners.
-<!--
-  Do the kappa calculation
--->
+Now that we have the cumulative base running probabilities, we're (finally) ready to compute $\kappa_{ij}.$
+To do so, we will use `inner_join()`'s to add columns to our `baserunning` data table with columns for the batter and runners on first, second, and third.
+Note, whenever there is no baserunner on first base (i.e., `on_1b = NA`), we will set the corresponding $\kappa$ to 0.
+Because we want to divide all of $\eta_{i}$ amongst the base runners, we need to normalize the $\kappa_{ij}$ values to sum to 1 within each at-bat.
+The columns `norm_batter`, `norm_1b`, `norm_2b`, and `norm_3b` contain these normalized weights.
+```{r}
+#| label: append-kappa
+baserunning <-
+  baserunning |>
+  dplyr::inner_join(y = br_batter_probs, by = c("end_events", "mvt_batter")) |>
+  dplyr::inner_join(y = br_1b_probs, by = c("end_events", "mvt_1b")) |>
+  dplyr::inner_join(y = br_2b_probs, by = c("end_events", "mvt_2b")) |>
+  dplyr::inner_join(y = br_3b_probs, by = c("end_events", "mvt_3b")) |>
+  dplyr::mutate(
+    total_kappa = kappa_batter + kappa_1b + kappa_2b + kappa_3b,
+    norm_batter = kappa_batter/total_kappa,
+    norm_1b = kappa_1b/total_kappa,
+    norm_2b = kappa_2b/total_kappa,
+    norm_3b = kappa_3b/total_kappa)
+```
+
+To illustrate our calculations so far, let's look at Ohtani's at-bats from that game against the Padres.
+First, we see that Ohtani reached first base in all except his fourth at-bat.
+So, for these four at-bats, his `mvt_batter` value is 1.
+```{r}
+#| label: ohtani-des
+load("player2024_lookup.RData")
+ohtani_id <- 
+  player2024_lookup$key_mlbam[which(player2024_lookup$FullName == "Shohei Ohtani")]
+
+baserunning |>
+  dplyr::filter(game_pk == 745444 & batter == ohtani_id) |>
+  dplyr::select(at_bat_number, mvt_batter, des)
+```
+In his second at-bat, Ohtani singled with no runners on.
+So, he should get credit for creating all the base running run value above average on that at-bat.
+In contrast, we argued earlier that when he drove in a run in his fifth at-bat, the runner who scored from second should get a bit more credit than Ohtani and the runner on first, who only advanced one base.
+Looking at the weights `norm_1b`, `norm_2b`, and `norm_batter` for this at-bat, we see that indeed, we're assigning a bit more weight to the runner on second than the runner on first.
+```{r}
+#| label: ohtani-norm
+baserunning |>
+  dplyr::filter(game_pk == 745444 & batter == ohtani_id) |>
+  dplyr::select(at_bat_number, mvt_1b, mvt_2b, mvt_3b, mvt_batter, norm_1b, norm_2b, norm_3b, norm_batter)
+```
 
 
+Recall that $\eta_{i}$ represents the run value above average generated in at-bat $i$ due to base running.
+Whenever there is a runner on first at the start of the at-bat, the quantity $\kappa_{i,\textrm{1b}}/\sum_{j}{\kappa_{ij}} \times \eta_{i}$ reflects the run value above average generated in the at-bat due to the base running of the runner initially on first.
+For each player, we can aggregate these values across all at-bats in which they are on first.
 
-<!--
+```{r}
+#| label: compute-raa1b
+raa_1b <-
+  baserunning |>
+  dplyr::filter(!is.na(on_1b)) |>
+  dplyr::mutate(RAA_1b = kappa_1b * eta) |>
+  dplyr::group_by(on_1b) |>
+  dplyr::summarise(RAA_1b = sum(RAA_1b)) |>
+  dplyr::rename(key_mlbam = on_1b)
+```
 
-24 July: no need for park adjustment. Maybe a platoon adjustment but even that may not be necessary.
+We can similarly compute the run value above average created by the runners on second base and third base as well as by the batter.
+```{r}
+#| label: compute-raa-b
+raa_2b <-
+  baserunning |>
+  dplyr::filter(!is.na(on_2b)) |>
+  dplyr::mutate(RAA_2b = kappa_2b * eta) |>
+  dplyr::group_by(on_2b) |>
+  dplyr::summarise(RAA_2b = sum(RAA_2b)) |>
+  dplyr::rename(key_mlbam = on_2b)
 
-  Regress onto game state: residual is adjust run value over average. How much goes to baserunner and how much to batter.
-  In this game state x event, check to see what the baserunners normally do. 
-  Whatever doesn't go to baserunner, give to batter: e.g., on a single with runner on first. Most of the time, the runner advances to second. But when they advance to 3rd or score, we want to give more weight. P(k < K) is the prob. they advance fewer than what they actually did. Do some sort of weighting. Then give everything else to the batter. Don't necessarily normalize to 1
+raa_3b <-
+  baserunning |>
+  dplyr::filter(!is.na(on_3b)) |>
+  dplyr::mutate(RAA_3b = kappa_3b * eta) |>
+  dplyr::group_by(on_3b) |>
+  dplyr::summarise(RAA_3b = sum(RAA_3b)) |>
+  dplyr::rename(key_mlbam = on_3b)
 
+raa_batter <-
+  baserunning |>
+  dplyr::mutate(RAA_batter = kappa_batter * eta) |>
+  dplyr::group_by(batter) |>
+  dplyr::summarise(RAA_batter = sum(RAA_batter)) |>
+  dplyr::rename(key_mlbam = batter)
+```
 
-  Formally we write $delta_i = \alpha_{1} * \ind{1} + \cdots + \alpha_{B} * \ind{B} + \beta_{adv} * \ind{platoon-advantage} + \epsilon
-  
-  Systematically, we know that some parks are harder to score runs in than others. And when the batter and pitcher are of different handedness, there can be some differences
-  We want to remove those systematic components, which are not within the batters control. Formally
-  
-  We can fit a linear model with an intercept using `lm`: not, we're really not interested in the coefficients or doing any significant testing. we just want to adjust the values
-  We now have our residual epsilon, which captures the portion of delta *not* attributable to ballpark or platoon. How much of epsilon can be attributed to the batter and how much to the baserunner?
--->
+Finally, we can aggregate the total run value above average that each player creates from their base running, which we can $\textrm{RAA}^{\textrm{br}}.$
+```{r}
+#| label: br-raa
+raa_br <-
+  raa_batter |>
+  dplyr::full_join(y = raa_1b, by = "key_mlbam") |>
+  dplyr::full_join(y = raa_2b, by = "key_mlbam") |>
+  dplyr::full_join(y = raa_3b, by = "key_mlbam") |>
+  tidyr::replace_na(list(RAA_batter = 0, RAA_1b = 0, RAA_2b = 0, RAA_3b = 0)) |>
+  dplyr::mutate(RAA_br = RAA_batter + RAA_1b + RAA_2b + RAA_3b) |>
+  dplyr::inner_join(y = player2024_lookup, by = "key_mlbam") |>
+  dplyr::select(Name, key_mlbam, RAA_br, RAA_batter, RAA_1b, RAA_2b, RAA_3b)
+```
 
+The player with the largest $\textrm{RAA}^{\textrm{br}}$, Jose Ramirez, is known for his aggressive baserunning[^ramirez]
 
-
-<!--
-  Baserunner should get credit only for advancement beyond what would be expected given their starting location, the number of outs, and the hitting event that occured
-    We can actually estimate this nonparametricly using our baserunning data-frame: we have the movement and can pull . We compute the average nonparametricly and 
--->
+[^ramirez]: See [this article](https://www.cleveland.com/guardians/2025/04/every-90-feet-is-important-to-him-jose-ramirez-sparks-guardians-with-heads-up-base-running.html) about his base running from earlier this year.
 
 ## Batting
 
 We now need to distribute $\hat{\mu}_{i}$ to each batter.
 As noted in [@Baumer2015_openWAR, Section 3.3], we need to take care to calibrate each batter's hitting performance with the expected performance by position.
 
-To get positions, we can run the following code.
-Note that it takes upwards of an hour to run.
-So, if you are reproducing this code on your own, run it once and save the results.
-
-
-Conceptually, we need to compute the average of $\hat{\mu}_{i}$'s at each position and then take the difference.
 
 ### Average run value by position {#sec-rv_position}
 ```{r}
 #| label: batting-calibration
-
-bat_df <-
+load("positions2024.RData")
+batting <-
   atbat2024 |>
   dplyr::select(batter, mu) |>
   dplyr::rename(key_mlbam = batter) |>
-  dplyr::left_join(y = positions2024, by = key_mlbam)
+  dplyr::left_join(y = positions2024, by = "key_mlbam")
 
 avg_mu_position <-
-  bat_df |>
-  dplyr::group_by()
-
+  batting |>
+  dplyr::group_by(position) |>
+  dplyr::summarise(avg_mu = mean(mu))
 ```
 
-### Introducting $\textrm{RAA}_{b}$
+We can now go through and subtract the position average from each $\hat{\mu}_{i}$ in `batting`.
+This represents the run value above average created by the batter's hittign in the at-bat.
+In the following code, we aggregate these at-bat level run values above average for each player.
+We denote the total $\textrm{RAA}^{\textrm{b}}.$
 
+```{r}
+#| label: compute_raa_b
+raa_b <-
+  batting |>
+  dplyr::left_join(y = avg_mu_position, by = "position") |>
+  dplyr::mutate(mu_aa = mu - avg_mu) |>
+  dplyr::group_by(key_mlbam) |>
+  dplyr::summarise(RAA_b = sum(mu_aa)) |>
+  dplyr::left_join(y = player2024_lookup, by = "key_mlbam") |>
+  dplyr::select(Name, RAA_b)
+```
 
-
-<!--
-eta: portion of adjusted offensive run value attributable to baserunners.
-mu = epsilon-eta attributable to the hitter
-** need to compare batter relative to other players at his position **
--->
-
+We find a lot of very good batters amongst the players with highest $\textrm{RAA}^{\textrm{b}}$'s 
+```{r}
+#| label: top-raa-b
+raa_b |>
+  dplyr::arrange(dplyr::desc(RAA_b)) |>
+  dplyr::slice_head(n=10)
+```
 
 
