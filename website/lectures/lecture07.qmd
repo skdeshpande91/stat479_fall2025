@@ -5,7 +5,7 @@ format: html
 
 ## Recap & Roadmap
 
-[Last lecture](lecture6.qmd), we compute the run value of each at-bat in the 2024 MLB regular season.
+[Last lecture](lecture06.qmd), we compute the run value of each at-bat in the 2024 MLB regular season.
 Run value is the sum of (i) the number of runs scored in the at-bat and (ii) the *change* in the number of runs the batting team is expected to score in the remainder of the half-inning.
 This change in expected runs is driven by the change in the combination of the number of outs and baserunner configuration.
 At the end of last lecture, we ranked players based on their run value totals, aggregating over all their at-bats.
@@ -70,7 +70,7 @@ raw_atbat2024 <-
 The column `end_events` in our data table `raw_atbat2024` records what happened as a result of the at-bat.
 There are `{r} sum(raw_atbat2024$end_events == "")` rows with a missing entry.
 ```{r}
-#| label: tabulate_events
+#| label: tabulate-events
 table(raw_atbat2024$end_events)
 ```
 The column `des` includes a much more detailed description of what happened during the plate appearance. 
@@ -106,14 +106,7 @@ atbat2024 <-
 
 ## Adjusted Run Values
 
-<!--
-  Baserunners should get epsilon while batters should get delta - epsilon
--->
-
-
-
 We want to give credit to the batter and base runners for creating value over and above what would been expected given the game state and the actual outcome of the at-bat.
-
 More precisely, recall that $\delta_{i}$ is the run value created in at-bat $i.$
 We will denote the game state at the beginning of the at-bat with $\textrm{g}_{i}$ and the ending event with $\textrm{e}_{i}.$
 We form the game state variable $\textrm{g}$ by concatenating the `Outs` and `BaseRunners` and separating them with a period so that $\textrm{g} = "0.101"$ corresponds to a situation with no outs and runners on first and third base.
@@ -174,7 +167,7 @@ In the following code, we create a temporary data frame that extracts just the r
 [^documentation]: Check out the documentation for R's formula interface [here](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/formula.html). Specifically, look at the bullet point about the `-` operations under "Details"
 
 ```{r}
-#| label: adjust_delta
+#| label: adjust-delta
 tmp_df <-
   atbat2024 |>
   dplyr::select(RunValue, GameState, end_events) |>
@@ -188,28 +181,32 @@ state_event_fit <-
 
 Using the `summary()` function, we can take a quick look at the $\alpha$'s.
 ```{r}
+#| label: summarize-fit
 summary(state_event_fit)
 ```
 
 We estimate $\hat{\alpha}_{2.000} \approx 0.356$ and $\hat{\alpha}_{single} \approx 0.115.$ 
 So, according to our fitted model the average run value created by singling when there are two outs and no runners on is about $0.471.$
 
-:::{.callout-warning icon=false}
+:::{.callout-warning}
 
 ## Statistical significance & model assumptions
 
 You'll notice that `summary()` returns a lot of inferential output (e.g., standard errors, p-values).
 These are computed under an additional assumption that the true errors $\varepsilon_{i}$ are independent and following a mean-zero normal distribution with constant variance.
-Since we're not ultimately intersted in the parameters $\alpha_{\textrm{g}}$ and $\alpha_{\textrm{e}},$ we will not, at this time, check whether this is a reasonable assumption nor will we rely on any of these inferential results.
+Since our main interest is prediction, we're really not interested in checking whether, say, $\alpha_{0:010}$ is statistically significantly different than zero. 
+So, we will not check whether the usual multiple linear model assumptions nor will we attempt.
+If you did want to make inferential statements about our model parameters, you would need to first check that the multiple linear multiple assumptions are not grossly violated.
 :::
 
 Equipped with our estimated model parameters, for each at-bat $i,$ let $\hat{\mu}_{i} = \hat{\alpha}_{\textrm{g}_{i}} + \hat{\alpha}_{\textrm{e}_{i}}$ and let $\eta_{i} = \delta_{i} - \hat{\mu}_{i}.$
 In terms of dividing credit between the batter and the base runner, we will follow @Baumer2015_openWAR and attribute $\hat{\mu}_{i}$ to the batter's hitting in at-bat $i$ and $\eta_{i}$ to the base running in that at-bat.
 We will add columns to `atbat2024` holding the values of $\hat{\mu}$ (`mu`) and $\eta$ (`eta`).
 ```{r}
-#| label: add_epsilon
+#| label: add-epsilon
 atbat2024$eta <- state_event_fit$residuals
 atbat2024$mu <- state_event_fit$fitted.values
+save(atbat2024, file = "atbat2024.RData")
 ```
 
 <!--
@@ -404,6 +401,7 @@ The following code takes a few minutes to run.
 :::
 
 ```{r}
+#| label: build-baserunning
 baserunning <-
   atbat2024 |>
   dplyr::rowwise() |>
@@ -421,7 +419,7 @@ Now that we have computed the $k_{ij}$'s --- that is, the number of bases each b
 In the following code, we first group at-bats by the ending event and then compute the proportion of times that the baserunner advances at most $k$ bases.
 We also set the cumulative probability to zero for situations when there isn't a runner on a particular base.
 ```{r}
-#| label: compute_br_probs
+#| label: compute-br-probs
 br_batter_probs <-
   baserunning |>
   dplyr::group_by(end_events) |>
@@ -635,7 +633,7 @@ In the following code, we aggregate these at-bat level run values above average 
 We denote the total $\textrm{RAA}^{\textrm{b}}.$
 
 ```{r}
-#| label: compute_raa_b
+#| label: compute-raa-b
 raa_b <-
   batting |>
   dplyr::left_join(y = avg_mu_position, by = "position") |>
@@ -654,4 +652,13 @@ raa_b |>
   dplyr::slice_head(n=10)
 ```
 
+## Looking ahead
 
+We've distributed the run value $\delta_{i}$ created in each at-bat between the batter and base runners and computed season total runs values above average based on batting $\textrm{RAA}^{\textrm{b}}$ and base running $\textrm{RAA}^{\textrm{br}}.$
+[Next lecture](lecture08.qmd), we will distribute $-\delta_{i}$ between the pitcher and fielders involved in each at-bat.
+So that we don't have to repeat our earlier calculations, we will save `raa_br` and `raa_b`
+
+```{r}
+#| label: save-raa-offensive
+save(raa_br, raa_b, file = "raa_offensive2024.RData")
+```
