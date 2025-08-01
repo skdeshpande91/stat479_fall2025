@@ -15,7 +15,7 @@ While the resulting rankings did appear to pass the "eye test" --- both Aaron Ju
 
 
 Over the next two lectures, we will develop our own version of *wins above replacement*.
-Our development largely follows that of [@Baumer2015_openWAR] but with some important differences.
+Our development largely follows that of @Baumer2015_openWAR but with some important differences.
 
 ### Conservation of runs 
 
@@ -620,6 +620,8 @@ We now need to distribute $\hat{\mu}_{i}$ to each batter.
 As noted in [@Baumer2015_openWAR, Section 3.3], we need to take care to calibrate each batter's hitting performance with the expected performance by position.
 
 
+<!-- Update: 1 August: since the NL instituted the DH rule, there's little need for positional adjustment. This also conserves the runs -->
+
 ### Average run value by position {#sec-rv_position}
 ```{r}
 #| label: batting-calibration
@@ -648,9 +650,10 @@ raa_b <-
   dplyr::left_join(y = avg_mu_position, by = "position") |>
   dplyr::mutate(mu_aa = mu - avg_mu) |>
   dplyr::group_by(key_mlbam) |>
-  dplyr::summarise(RAA_b = sum(mu_aa)) |>
+  dplyr::summarise(RAA_b = sum(mu)) |>
+  #dplyr::summarise(RAA_b = sum(mu_aa)) |>
   dplyr::left_join(y = player2024_lookup, by = "key_mlbam") |>
-  dplyr::select(Name, RAA_b)
+  dplyr::select(Name, key_mlbam, RAA_b)
 ```
 
 We find a lot of very good batters amongst the players with highest $\textrm{RAA}^{\textrm{b}}$'s 
