@@ -421,7 +421,7 @@ window.Quarto = {
 <section id="recap-roadmap" class="level2">
 <h2 class="anchored" data-anchor-id="recap-roadmap">Recap &amp; Roadmap</h2>
 <p><a href="../lectures/lecture06.html">Last lecture</a>, we compute the run value of each at-bat in the 2024 MLB regular season. Run value is the sum of (i) the number of runs scored in the at-bat and (ii) the <em>change</em> in the number of runs the batting team is expected to score in the remainder of the half-inning. This change in expected runs is driven by the change in the combination of the number of outs and baserunner configuration. At the end of last lecture, we ranked players based on their run value totals, aggregating over all their at-bats. While the resulting rankings did appear to pass the “eye test” — both Aaron Judge and Shohei Ohtani created some of the largest run values — the metric implicitly gives batters all the credit for creating run value.</p>
-<p>Over the next two lectures, we will develop our own version of <em>wins above replacement</em>. Our development largely follows that of <span class="citation" data-cites="Baumer2015_openWAR">(<a href="#ref-Baumer2015_openWAR" role="doc-biblioref">Baumer, Jensen, and Matthews 2015</a>)</span> but with some important differences.</p>
+<p>Over the next two lectures, we will develop our own version of <em>wins above replacement</em>. Our development largely follows that of <span class="citation" data-cites="Baumer2015_openWAR">Baumer, Jensen, and Matthews (<a href="#ref-Baumer2015_openWAR" role="doc-biblioref">2015</a>)</span> but with some important differences.</p>
 <section id="conservation-of-runs" class="level3">
 <h3 class="anchored" data-anchor-id="conservation-of-runs">Conservation of runs</h3>
 <p>The central idea — what <span class="citation" data-cites="Baumer2015_openWAR">(<a href="#ref-Baumer2015_openWAR" role="doc-biblioref">Baumer, Jensen, and Matthews 2015</a>)</span> call the “conservation of runs” framework — is that if the batting team gains <span class="math inline">\(\delta_{i}\)</span> units of run value during an at-bat, the fielding team gains <span class="math inline">\(-\delta_{i}\)</span> units of run value during that same at-bat. In this lecture, we will apportion <span class="math inline">\(\delta_{i}\)</span> between the batters and the baserunners involved in at-bat <span class="math inline">\(i\)</span>. <a href="../lectures/lecture08.html">Next lecture</a>, we will apportion <span class="math inline">\(-\delta_{i}\)</span> between the pitcher and fielders involved in at-bat <span class="math inline">\(i.\)</span></p>
@@ -1104,6 +1104,7 @@ Warning
 <section id="batting" class="level2">
 <h2 class="anchored" data-anchor-id="batting">Batting</h2>
 <p>We now need to distribute <span class="math inline">\(\hat{\mu}_{i}\)</span> to each batter. As noted in <span class="citation" data-cites="Baumer2015_openWAR">(<a href="#ref-Baumer2015_openWAR" role="doc-biblioref">Baumer, Jensen, and Matthews 2015, sec. 3.3</a>)</span>, we need to take care to calibrate each batter’s hitting performance with the expected performance by position.</p>
+<!-- Update: 1 August: since the NL instituted the DH rule, there's little need for positional adjustment. This also conserves the runs -->
 <section id="sec-rv_position" class="level3">
 <h3 class="anchored" data-anchor-id="sec-rv_position">Average run value by position</h3>
 <div class="cell">
@@ -1126,9 +1127,10 @@ Warning
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> avg_mu_position, <span class="at">by =</span> <span class="st">"position"</span>) <span class="sc">|&gt;</span></span>
 <span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">mu_aa =</span> mu <span class="sc">-</span> avg_mu) <span class="sc">|&gt;</span></span>
 <span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(key_mlbam) <span class="sc">|&gt;</span></span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">RAA_b =</span> <span class="fu">sum</span>(mu_aa)) <span class="sc">|&gt;</span></span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> player2024_lookup, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Name, RAA_b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">RAA_b =</span> <span class="fu">sum</span>(mu)) <span class="sc">|&gt;</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">#dplyr::summarise(RAA_b = sum(mu_aa)) |&gt;</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> player2024_lookup, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Name, key_mlbam, RAA_b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We find a lot of very good batters amongst the players with highest <span class="math inline">\(\textrm{RAA}^{\textrm{b}}\)</span>’s</p>
 <div class="cell">
