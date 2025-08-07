@@ -21,7 +21,7 @@ install.packages("nflfastR")
 ```
 :::
 The package contains several functions for efficiently scraping NFL data and for pre-processing the play-by-play data.
-In this lecture and in [Lecutre 10](lecture10.qmd), we will work with pre-processed play-by-play data, which we can load into our R session using the function `[nflfastR::load_pbp()](https://www.nflfastr.com/reference/load_pbp.html)`.
+In this lecture and in [Lecture 10](lecture10.qmd), we will work with pre-processed play-by-play data, which we can load into our R session using the function `[nflfastR::load_pbp()](https://www.nflfastr.com/reference/load_pbp.html)`.
 
 ```{r}
 #| label: load-pbp
@@ -47,7 +47,7 @@ Other columns record information about the team that has possession of the ball 
  Paraphrase from Section 1.1 of Yurko's paper 
 -->
 Paraphrasing @Yurko2019_nflWAR, the expected points framework uses historical data to *estimate* the average number of points eventually scored by teams in similar situations.
-Similar to what we did in [Lecture 6](lecutre06.qmd) with expected runs at the start and end of at-bats in baseball, the difference between the post-snap and pre-snap expected points is 
+Similar to what we did in [Lecture 6](lecture06.qmd) with expected runs at the start and end of at-bats in baseball, the difference between the post-snap and pre-snap expected points is 
 Generally speaking, plays that result in positive EPA are considered successful while plays resulting in negative EPA are not.
 
 @Yurko2019_nflWAR introduced an expected points model that focused on predicting the next scoring event in the half after each play.
@@ -168,7 +168,7 @@ pass2024 |> dplyr::slice_head(n = 2)
 1. The condition `!is.na(posteam)` discards those rare plays where the offensive team isn't recorded
 2. Discards plays from two-point conversions, sacks, and direct snaps
 
-[^airyards]: @Yurko2015_nflWAR defines *air yards* as "the perpendicular distance in yards from the line of scrimmage to the yard line at which the receiver was targeted or caught the bal.
+[^airyard]: @Yurko2015_nflWAR defines *air yards* as "the perpendicular distance in yards from the line of scrimmage to the yard line at which the receiver was targeted or caught the bal.
 
 
 Eventually, we will want to look up player names using the identifiers stored in `passer_player_id`.
@@ -392,7 +392,7 @@ Moreover, our initial estimate of $\sigma,$ which captures the average variabili
 And our estimate of $\sigma_{\alpha}$, which captures the average variability across passers, is much much smaller (roughly 0.1232). 
 
 We can use the function `ranef` to extract the estimates of the $u_{i}$'s and the function `coef` to extract the estimates of $\alpha_{i} = \alpha_{0} + u_{i}.$
-The function `coef` returns a named list with one element per grouping variable[^group].
+The function `coef` returns a named list with one element per grouping variable[^grouping].
 Each element of the `coef`'s output is a matrix 
 ```{r}
 #| label: display-coef
