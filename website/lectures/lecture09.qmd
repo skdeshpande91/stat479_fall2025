@@ -115,77 +115,65 @@ Interestingly, the top three offenses in terms of average EPA (the Baltimore Rav
 
 ## Predicting EPA on a new pass
 
-<!--
-  Imagine trying to make a prediction about another passing play. What is the EPA going to be on this new play?
-  Well, if I didn't tell you anything, you might use the overall grand mean
-  But what if I tell you the pass is going to be thrown by 
-  Intuitively, we might use the average.
-  
-  Let's compute the average. For reasons that will become clear, we can do this with a linear model
-  
-  
-  Ok, this was all a bit of a toy demonstration. BUT what if I give you even more information about the pass (e.g., whether it was in shotgun or not). We observe the same phenomenon: simply fitting a single-level linear model is not quite enough. We have to *shrink* those raw estimates back to the group average. THis stabilies predictions for low-sample size players
-  It's not acceptable to just throw out players under a cut-off.
--->
+The play with highest EPA in the 2024-25 season was a deep pass from Justin Herbert to L. McConkey that went 86 yards
+At the start of the play, the Chargers were at their TO DO.
+Based on **nflfastR**'s model, 
+If Justin Herbert were to throw several more passes, would we expect all of them to result in an EPA of about 8.54? 
 
 
-We can also use EPA to assess player performance.
-Intuitively, we would more highly value offensive players who tend to produce positive EPA for their team.
-As the quarterback is arguably the [most important offensive player](https://www.nfl.com/news/ranking-each-position-s-importance-from-quarterback-to-returner-0ap3000000503855), it is natural to start there.
-In particular, we will try to determine how much EPA is due to the quarterback on each passing play.
+Extending this thought experiment a bit, based on the 2024-25 regular season data, how might we predict the EPA on future passing play?
+Without any additional information about the play --- i.e., who threw the pass, how long the pass was, whether it was thrown out of the shotgun formation, etc. --- it seems reasonable to use the average EPA across all passing plays in our dataset.
+But, if we knew the identity of the passers, we might reasonably expect the average EPA across their passes would be a better predicition.
 
-We begin by first creating a data table containing only passing plays from the regular season using the column `play_type`
+To compute the league-wide and player-specific average EPAs, we first create a data table containing only the passing plays from the regular season.
+We can do this by filtering on the variables `play_type` and `season_type`.
+We see that there are about 19,000 pass plays in the regular season.
 ```{r}
 #| label: play-type
-table(pbp2024$play_type)
+table(pbp2024[,c("play_type", "season_type")])
 ```
 
-In addition to EPA, our passing play data table includes
 
-  * `passer_player_id`: the unique identifier of the passer
-  * `air_yards`: the distance travelled by the pass through the air[^airyard]
-  * `shotgun`: whether the pass was thrown out of the [shotgun formation](https://en.wikipedia.org/wiki/Shotgun_formation)
-  * `qb_hit`: whether the quarterback was hit while throwing
-  * `no_huddle`: whether the play was run [without a huddle](https://en.wikipedia.org/wiki/Hurry-up_offense)
-  * `posteam_type`: whether the home team had possession (i.e., was on offense)
-  * `pass_location`: whether the pass was thrown to the left, right, or center of the field
-  * `desc`: a narrative description of the play
-
+In addition to EPA, we also include the unique identifier of the passer (`passer_player_id`) and a narrative description of the play (`desc`).
 ```{r}
+#| label: player-only-df
+pass2024 <- 
 pass2024 <-
   pbp2024 |>
-  dplyr::filter(!is.na(posteam) & play_type == "pass" & season_type == "REG") |> #<1>
-  dplyr::filter(!grepl("TWO-POINT CONVERSION ATTEMPT", desc) & #<2>
+  dplyr::filter(play_type == "pass" & season_type == "REG") |> 
+  dplyr::filter(!grepl("TWO-POINT CONVERSION ATTEMPT", desc) & #<1>
                   !grepl("sacked", desc) &
                   !grepl("direct snap", desc, ignore.case = TRUE)) |>
-  dplyr::select(epa, passer_player_id, 
-                air_yards, 
-                posteam_type, shotgun, no_huddle, qb_hit,
-                pass_location,
-                desc)
+  dplyr::select(epa, passer_player_id, desc)
 pass2024 |> dplyr::slice_head(n = 2)
 ```
-1. The condition `!is.na(posteam)` discards those rare plays where the offensive team isn't recorded
-2. Discards plays from two-point conversions, sacks, and direct snaps
+1. For now, we will ignore 2-point conversion passing attempts. We also ignore sacks, and direct snaps, which **nflfastR** sometimes treat as passing plays
 
-[^airyard]: @Yurko2015_nflWAR defines *air yards* as "the perpendicular distance in yards from the line of scrimmage to the yard line at which the receiver was targeted or caught the bal.
+After excluding passes on two-point conversion attempts and sacks, we have data for `{r} nrow(pass2024)` passes thrown by `{r} length(unique(pass2024$passer_player_id))` players.
+Across all passes and passers, the average EPA per pass is about 0.159.
+```{r}
+#| label: pooled-epa
+mean(pass2024$epa)
+```
 
 
+### Computing player-specific EPA per pass
+
+Given the vast spread of EPAs in our dataset (roughly -12.7 to 8.5), using the league-wide average of 0.159 to predict the EPA on a future pass is a bit unsatisfactory.
+One avenue for improvement is to condition on additional information, like the identity of the passer, which is recorded in the column `passer_player_id`.
 Eventually, we will want to look up player names using the identifiers stored in `passer_player_id`.
 We can load a table containing roster information, including player identifier, name, position, and team using the function [`nflfastR::fast_scraper_roster()`]()
 ```{r}
 #| label: load-roster
-roster24 <-
+roster2024 <-
   nflfastR::fast_scraper_roster(seasons = 2024)
 ```
 
 
-
-### An initial linear model
-
 We will model the observed EPA on each passing play as a noisy observation of an underlying average EPA specific to each passer.
 So, the EPA's on passes thrown by Dak Prescott, for instance, are treated as noisy measurements of his *average* EPA. 
-We can then try to rank players by these averages.
+We can then predict the EPA on a future pass thrown by Prescott using an estimate of his per-pass EPA.
+We can further rank passers by their per-pass EPAs. 
 
 Formally, suppose that we have data for $I$ unique passers[^I] and for each passer $i = 1, \ldots, I,$ let $n_{i}$ be the total number of passes thrown by passer $i.$
 Further, for each $j = 1, \ldots, n_{i},$ let $Y_{ij}$ be the EPA on the the $j$-th pass thrown by passer $i.$
@@ -193,9 +181,7 @@ Let $\alpha_{i}$ be the underlying --- and as yet unknown --- average EPA for pa
 We model $Y_{ij} = \alpha_{i} + \epsilon_{ij}$ where the random errors $\epsilon_{ij}$ have mean zero and are assumed to be independent across passers and passes.
 [^I]: In our dataset $I=$`{r} length(unique(pass2024$passer_player_id))`.
 
-
-
-While we can certainly run this calculation by grouping plays in `pass2024` by `passer_player_id` and then computing the average EPA of the plays involving each passer, for reasons that will hopefuly become clear soon, we will estimate the $\alpha_{i}$'s by fitting a linear regression model with ordinary least squares.
+While we can certainly run this calculation by grouping plays in `pass2024` by `passer_player_id` and then computing the average EPA of the plays involving each passer, for reasons that will hopefully become clear soon, we will instead estimate the $\alpha_{i}$'s by fitting a linear regression model with ordinary least squares.
 Specifically, we will regress `epa` onto the *categorical* variable `passer_player_id`, which we will represent as a factor variable.
 As alluded to earlier in [Lecture](), when run with a single categorical predictor, function `lm()` does not directly estimate the average outcome within each level of the predictor.
 Instead, it returns the average outcome within one *reference* level of the predictor and the average *difference* in outcomes between the non-reference levels and the reference.
@@ -203,7 +189,7 @@ We will, rather arbitrarily, use Aaron Rodgers as the reference player.
 ```{r}
 #| label: set-reference
 rodgers_id <- 
-  roster24 |> 
+  roster2024 |> 
   dplyr::filter(full_name == "Aaron Rodgers") |> 
   dplyr::pull(gsis_id) #<1>
 
@@ -233,7 +219,6 @@ ols_betas[1:5] #<3>
 In our simple EPA model, the estimated intercept is exactly the average EPA on all passes thrown by Aaron Rodgers.
 ```{r}
 mean( pass2024$epa[pass2024$passer_player_id == rodgers_id])
-
 ```
 To get the average EPA on all passes thrown by a different quarterback (e.g., Dak Prescott whose id is `{r} roster24|> dplyr::filter(full_name == "Dak Prescott") |> dplyr::pull(gsis_id)`), we need to add the corresponding entry in `ols_beta` to the estimated intercept[^prove].
 
@@ -254,7 +239,7 @@ names(ols_betas) <-
 alphas <- 
   data.frame(gsis_id = names(ols_betas), ols = ols_betas) |> #<3>
   dplyr::mutate(ols = ifelse(gsis_id == rodgers_id, ols, ols + dplyr::first(ols))) |> #<4>
-  dplyr::inner_join(y = roster24 |> dplyr::select(gsis_id, full_name), by = "gsis_id")
+  dplyr::inner_join(y = roster2024 |> dplyr::select(gsis_id, full_name), by = "gsis_id")
 ```
 1. Rename first element of `ols_beta` so its name follows the same format as the names of all other elements
 2. Remove the string "passer_player_id" from all names of `ols_beta`
@@ -269,7 +254,6 @@ alphas |>
   dplyr::arrange(dplyr::desc(ols)) |>
   dplyr::slice(c(1:5, (dplyr::n()-4):dplyr::n()))
 ```
-
 ### Issues with our initial model
 
 By this point in the course, you probably already suspect what's going on: the extreme average EPA estimates are an artifact of small sample sizes.
@@ -295,7 +279,7 @@ alphas |>
 2. So that we can join the counts to `alphas`, we need to rename the column recording the player identifiers
 3. Look at the top-5 and bottom-5 rows
 
-Taking a closer look, we find that many of the players with extreme average EPA values have thrown very few passes.
+As anticipated, the passers with the top- and bottom-5 per-pass EPAs all threw 1 or 2 passes. 
 For instance, AJ Cole is a punter who threw a single pass that ultimately gained 34 yards and resulted in a very large EPA of around 4.33.
 ```{r}
 #| label: aj-cole
@@ -304,10 +288,7 @@ pass2024 |>
   dplyr::select(desc, epa)
 ```
 
-
-
-We can additionally visualize the issue
-
+Plotting each player's average EPA against the number of pass attempts reveals that there is a lot of (resp. very little) variation in EPA-per-pass amongst passers who threw a very small (resp. very large) number of passes.
 ```{r}
 #| label: avg-plot
 #| fig-width: 6.5
@@ -326,29 +307,58 @@ plot(alphas$n, alphas$ols,
 abline(h = mean(pass2024$epa), col = oi_colors[3])
 ```
 
+
 ### Towards partial pooling
 
-We can clarify the issue with by thinking predictively.
-Specifically, what if tried to forecast the EPA on a new pass (e.g., a pass thrown in the first play-off game during wild card weekend)?
+Let's return to the problem of forecasting EPA on a single new pass based solely on the identity of the passer.
+One option is to ignore the passer identity and just use the overall mean of about 0.159.
+Doing so completely ignores differences between passers, which is fairly unreasonable given the large gaps in talent between NFL quarterbacks.
+At the other extreme, we could use the player-specific average EPA estimates. 
+While this approach acknowledges differences between players, it can sometimes lead to very extreme estimates.
+Neither option seems particularly compelling.
 
-Because non-quarter backs throw, we need a way to make a principled prediction.
+As with most things, an ideal solution lies somewhere bewteen the two extremes.
+For players who threw a large number of passes, we may be more comfortable using the their average EPA value since we are more *certain* about its value[^avg].
+But for players who threw a very small number of passes, it's probably less risky to assume that they'll perform closer to the league-average rather than to rely on their potentially very noisy average EPA estimate[^cole].
+And for players who threw a moderate number of passes, we might prefer a value somewhere between the league-wide average and the player-specific estimate.
+[^avg]: Mathematically, we know that the average of 100 independent samples from some population has much more variance than the average of 10,000 independent samples from the same population.
 
-One option would be to simply report the grand mean across all passes and passers.
-This simple forecast completely ignores
+[^cole]: Indeed, if AJ Cole, who is a punter, were to throw many more passes, do we really think he'd consistently add around 4 expected points? 
 
-At the other extreme,
-
-As with most things, an optimal solution likely lies in the middle. 
-For passers who threw very few passes, we might want to report a forecast that's closer to the grand mean $\overline{Y},$ eschewing the potentially extreme $\hat{\alpha}_{i}$'s[^cole].
-But, for passers who threw a large number of passes, we might be more inclined to use their more precise $\hat{\alpha}_{i}$.
-One crude way to build up these forecasts is by creating a weighted average $w_{i} \times \hat{\alpha}_{i} + (1 - w_{i}) \times \overline{Y}$ where the weight $w_{i}$ is based on the number of passes and how far $\hat{\alpha}_{i}$ is from the grand mean. 
-
-
-[^cole]: Indeed, if AJ Cole, who is a punter, threw more passes, do we really think he'll consistently gain around 4 expected points? 
-
-
+Formally, we can form such predictions with a weighted average: letting $\overline{y}$ be the overall league-wide average, we can predict the EPA on a new pass thrown by player $i$ using the quantity
+$$
+w_{i}\times \hat{\alpha}_{i} + (1 - w_{i}) \times \overline{y},
+$$
+where the weight $w_{i}$ depends on the number of passes thrown by player $i$ and how far $\hat{\alpha}_{i}$ differs from $\overline{y}.$
 
 <!--
+##
+
+We can also use EPA to assess player performance.
+Intuitively, we would more highly value offensive players who tend to produce positive EPA for their team.
+As the quarterback is arguably the [most important offensive player](https://www.nfl.com/news/ranking-each-position-s-importance-from-quarterback-to-returner-0ap3000000503855), it is natural to start there.
+In particular, we will try to determine how much EPA is due to the quarterback on each passing play.
+
+We begin by first creating a data table containing only passing plays from the regular season using the column `play_type`
+```{r}
+#| label: play-type
+table(pbp2024$play_type)
+```
+
+
+
+
+
+
+
+
+### An initial linear model
+
+
+
+
+
+
   Think about trying to forecast the EPA on another future pass.
   
   One option would be to use the overall grand mean $\overline{Y}$ of the observed averages.
@@ -358,15 +368,13 @@ One crude way to build up these forecasts is by creating a weighted average $w_{
   Intuitively, we might try to use $\hat{\alpha}_{i}.$
   Is this a reasonable estimate? A much more reasonable approach would involve "adjusting" the initial estimate so that players with very few pass attempts 
 -->
-
-Beyond the small sample size issue, our initial analysis failed to account for addition
-
 ##  Multi-level models
 
 
-Like in our initial analysis, we will model the observed EPA's as noisy measurements of some underlying player-specific parameter.
+*Multi-level models* provide a prinipled way to compute such weights *automatically*. 
+Like in our initial analysis, our first multilevel will model the observed EPA's as noisy measurements of some underlying player-specific parameter.
 However, we make an additional model assumption: that the $\alpha_{i}$'s are themselves normally distributed around some grand mean $\alpha_{0}$ with standard deviation $\sigma_{\alpha}.$
-We can specify our model in *two-levels*
+We can specify our model in *two-levels*.
 
 $$
 \begin{align}
@@ -408,7 +416,7 @@ We will append our multi-leve estimates to our data table `alpha`
 ```{r}
 lmer_alpha <- #<1>
   data.frame( 
-    lmer_alpha = tmp[["passer_player_id"]][,1], #<2>
+    lmer = tmp[["passer_player_id"]][,1], #<2>
     gsis_id = rownames(tmp[["passer_player_id"]])) #<3>
 
 alphas <-
@@ -443,7 +451,7 @@ plot(alphas$n, alphas$ols,
      ylab = "Avg. EPA per pass",
      main = "EPA per pass",
      pch = 16, cex = 0.5, col = oi_colors[1])
-points(alphas$n, alphas$lmer_alpha, pch = 15, col = oi_colors[2], cex = 0.5)
+points(alphas$n, alphas$lmer, pch = 15, col = oi_colors[2], cex = 0.5)
 abline(h = mean(pass2024$epa), col = oi_colors[3])
 ```
 We see that our multilevel estimates for players who threw very few passes are are aggressively shrunk towards to the overall grand-mean.
@@ -475,7 +483,33 @@ If a player is very skilled, we would expect the outcome to be high.
 ## Adjusting for additional covariates
 
 Up to this point, we've worked with a rather toy problem, predicting EPA given only the identity of the passer.
-But what if we include additional information like the number of air yards (a proxy for the length of the pass), the pass location, and the other covariates contained in `pass2024`?
+But what if we include additional information about the pass (e.g., whether it was throw by the home or away team, whether it was thrown out of the shotgun formation, etc.)? 
+Do we still run into the small sample size issues when determining how much EPA an individual player adds, after accounting for this other information?
+
+To see, we re-build our data table `pass2024` but now include: 
+  * `air_yards`: the distance traveled by the pass through the air[^airyard]
+  * `shotgun`: whether the pass was thrown out of the [shotgun formation](https://en.wikipedia.org/wiki/Shotgun_formation)
+  * `qb_hit`: whether the quarterback was hit while throwing
+  * `no_huddle`: whether the play was run [without a huddle](https://en.wikipedia.org/wiki/Hurry-up_offense)
+  * `posteam_type`: whether the home team had possession (i.e., was on offense)
+  * `pass_location`: whether the pass was thrown to the left, right, or center of the field
+
+```{r}
+pass2024 <-
+  pbp2024 |>
+  dplyr::filter(play_type == "pass" & season_type == "REG") |> 
+  dplyr::filter(!grepl("TWO-POINT CONVERSION ATTEMPT", desc) &
+                  !grepl("sacked", desc) &
+                  !grepl("direct snap", desc, ignore.case = TRUE)) |>
+  dplyr::select(epa, passer_player_id, 
+                air_yards, 
+                posteam_type, shotgun, no_huddle, qb_hit,
+                pass_location,
+                desc)
+pass2024 |> dplyr::slice_head(n = 2)
+```
+
+[^airyard]: @Yurko2015_nflWAR defines *air yards* as "the perpendicular distance in yards from the line of scrimmage to the yard line at which the receiver was targeted or caught the ball.
 
 We can elaborate our initial models
 $$
@@ -502,7 +536,7 @@ names(ols_betas_full) <-
 alphas_full <- 
   data.frame(gsis_id = names(ols_betas_full), ols = ols_betas_full) |> 
   dplyr::mutate(ols = ifelse(gsis_id == rodgers_id, ols, ols + dplyr::first(ols))) |> 
-  dplyr::inner_join(y = roster24 |> dplyr::select(gsis_id, full_name), by = "gsis_id") |>
+  dplyr::inner_join(y = roster2024 |> dplyr::select(gsis_id, full_name), by = "gsis_id") |>
   dplyr::inner_join(y = n_passes, by = "gsis_id")
 
 alphas_full |>
