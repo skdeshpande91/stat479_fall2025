@@ -500,8 +500,8 @@ Installing <strong>glmnet</strong>
 </div>
 </div>
 </div>
-<p>We can now fit a ridge regression model with the cross-validated choice of <span class="math inline">\(\lambda\)</span> using data from all our stints. Since we do Because we do not need to run cross-validation again, we use the function <code>glmnet</code> instead of <code>cv.glmnet</code>.</p>
-<p>In the following code, we actually fit a ridge regression model using <em>all</em> values of <span class="math inline">\(\lambda\)</span> from the grid constructed by <code>cv.glmnet()</code>. This is because the function <code>glmnet</code> can behave a little strangely when only one value of <span class="math inline">\(\lambda\)</span> is specified[^docwarning]. Then, we pull out the estimated coefficients corresponding to the optimal <span class="math inline">\(\lambda\)</span> value.</p>
+<p>We can now fit a ridge regression model with the cross-validated choice of <span class="math inline">\(\lambda\)</span> using data from all our stints. Because we do not need to run cross-validation again, we use the function <code>glmnet</code> instead of <code>cv.glmnet</code>.</p>
+<p>In the following code, we actually fit a ridge regression model using <em>all</em> values of <span class="math inline">\(\lambda\)</span> from the grid constructed by <code>cv.glmnet()</code>. This is because the function <code>glmnet</code> can behave a little strangely when only one value of <span class="math inline">\(\lambda\)</span> is specified<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>. Then, we pull out the estimated coefficients corresponding to the optimal <span class="math inline">\(\lambda\)</span> value.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="annotated-cell-3"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="1">1</button><span id="annotated-cell-3-1" class="code-annotation-target"><a href="#annotated-cell-3-1" aria-hidden="true" tabindex="-1"></a>lambda_index <span class="ot">&lt;-</span> <span class="fu">which</span>(cv_fit<span class="sc">$</span>lambda <span class="sc">==</span> lambda_min)</span>
 <span id="annotated-cell-3-2"><a href="#annotated-cell-3-2" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span></span>
@@ -558,7 +558,7 @@ Installing <strong>glmnet</strong>
 </div>
 </div>
 <p>Recall that in our regularized adjusted plus/minus model, the individual <span class="math inline">\(\alpha_{j}\)</span>’s correspond to a somewhat absurd counter-factual. Specifically, <span class="math inline">\(\alpha_{j}\)</span> represents the amount by which a team’s point differential per 100 possession increases if they go from playing 4-on-5 to playing 5-on-5 with player <span class="math inline">\(j\)</span> on the court. Differences of the form <span class="math inline">\(\alpha_{j} - \alpha_{j'}\)</span> are much more useful than the single <span class="math inline">\(\alpha_{j}\)</span> values. By replacing player <span class="math inline">\(j'\)</span> with player <span class="math inline">\(j,\)</span> a team can expect to score <span class="math inline">\(\alpha_{j} - \alpha_{j'}\)</span> more points per 100 possessions.</p>
-<p>For instance, by replacing Luka Dončić with Anthony Davis, teams are expected to score an additional -3.41 points per possession<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>.</p>
+<p>For instance, by replacing Luka Dončić with Anthony Davis, teams are expected to score an additional -3.41 points per possession<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>luka_rapm <span class="ot">&lt;-</span> rapm <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(Name <span class="sc">==</span> <span class="st">"Luka Doncic"</span>) <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">pull</span>(rapm)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>ad_rapm <span class="ot">&lt;-</span> rapm <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(Name <span class="sc">==</span> <span class="st">"Anthony Davis"</span>) <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">pull</span>(rapm)</span>
@@ -794,7 +794,8 @@ Important
 <ol>
 <li id="fn1"><p>In practice, <span class="math inline">\(\lambda\)</span> is often determined using the data. See <a href="#sec-lambda-cv" class="quarto-xref">Section&nbsp;2.1</a>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>See Section 6.2 of <em>An Introduction to Statistical Learning</em> for a good review of ridge regression.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>Fire Nico.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>In fact, the <code>glmnet()</code> documentation explicitly warns users from running with only a single value of <span class="math inline">\(\lambda.\)</span><a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Fire Nico.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

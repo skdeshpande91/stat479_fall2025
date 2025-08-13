@@ -143,14 +143,13 @@ plot(cv_fit) #<7>
 
 
 We can now fit a ridge regression model with the cross-validated choice of $\lambda$ using data from all our stints.
-Since we do 
 Because we do not need to run cross-validation again, we use the function `glmnet` instead of `cv.glmnet`.
 
 In the following code, we actually fit a ridge regression model using *all* values of $\lambda$ from the grid constructed by `cv.glmnet()`.
 This is because the function `glmnet` can behave a little strangely when only one value of $\lambda$ is specified[^docwarning].
 Then, we pull out the estimated coefficients corresponding to the optimal $\lambda$ value.
 
-[^warning]: In fact, the `glmnet()` documentation explicitly warns users from running with only a single value of $\lambda.$
+[^docwarning]: In fact, the `glmnet()` documentation explicitly warns users from running with only a single value of $\lambda.$
 
 ```{r}
 #| label: get-alpha

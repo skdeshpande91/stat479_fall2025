@@ -55,7 +55,27 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -1142,7 +1162,7 @@ Y_{i} = \boldsymbol{\mathbf{z}}_{i}^{\top}\boldsymbol{\alpha} + \epsilon_{i}.
 </section>
 <section id="weighted-adjusted-plusminus" class="level3">
 <h3 class="anchored" data-anchor-id="weighted-adjusted-plusminus">Weighted adjusted plus/minus</h3>
-<p>Although APM takes into account the quality of the teammates and opponents with whom each player plays, it fails to account fully for the <em>context</em> in which players play. Quoting <span class="citation" data-cites="DeshpandeJensen2016">(<a href="#ref-DeshpandeJensen2016" role="doc-biblioref"><strong>DeshpandeJensen2016?</strong></a>)</span>, as a result, metrics like APM &gt; “can artificially can artificially inflate the importance of performance in low-leverage situations, when the outcome of the game is essentially decided, while simultaneously deflating the importance of high-leverage performance, when the final outcome is still in question. For instance, point diﬀerential-based metrics model the home team’s lead dropping from 5 points to 0 points in the last minute of the first half in exactly the same way that they model the home team’s lead dropping from 30 points to 25 points in the last minute of the second half.</p>
+<p>Although APM takes into account the quality of the teammates and opponents with whom each player plays, it fails to account fully for the <em>context</em> in which players play. Quoting <span class="citation" data-cites="DeshpandeJensen2016">Deshpande and Jensen (<a href="#ref-DeshpandeJensen2016" role="doc-biblioref">2016</a>)</span>, as a result, metrics like APM &gt; “can artificially can artificially inflate the importance of performance in low-leverage situations, when the outcome of the game is essentially decided, while simultaneously deflating the importance of high-leverage performance, when the final outcome is still in question. For instance, point diﬀerential-based metrics model the home team’s lead dropping from 5 points to 0 points in the last minute of the first half in exactly the same way that they model the home team’s lead dropping from 30 points to 25 points in the last minute of the second half.</p>
 <p>To overcome this limitation, we might try to down-weight low-leverage stints and up-weight high-leverage stints. For instance, we might assign a weight <span class="math inline">\(w_{i}\)</span> to stint <span class="math inline">\(i\)</span> where * <span class="math inline">\(w_{i} = 1\)</span> if, at the start of stint <span class="math inline">\(i,\)</span> the teams are within 10 points of each other * <span class="math inline">\(w_{i} = 0\)</span> if, at the start of the stint <span class="math inline">\(i,\)</span> the difference in scores exceed 30 points * <span class="math inline">\(w_{i} = 1 - (\textrm{StartDiff} - 10)/20\)</span>: if, at the start of stint <span class="math inline">\(i,\)</span> the difference in scores is between 10 and 30 points. This weight smoothly interpolates between 0 (when the difference is 30) and 1 (when the difference is 10).</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="annotated-cell-17"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-17-1"><a href="#annotated-cell-17-1" aria-hidden="true" tabindex="-1"></a>wapm_df <span class="ot">&lt;-</span></span>
@@ -1247,10 +1267,15 @@ Y_{i} = \boldsymbol{\mathbf{z}}_{i}^{\top}\boldsymbol{\alpha} + \epsilon_{i}.
 </ol>
 
 
+
 </section>
 
 
-<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-DeshpandeJensen2016" class="csl-entry" role="listitem">
+Deshpande, Sameer K., and Shane T. Jensen. 2016. <span>“Estimating an <span>NBA</span> Player’s Impact on His Team’s Chances of Winning.”</span> <em>Journal of Quantitative Analysis in Sports</em> 12 (2): 51–72.
+</div>
+</div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
 <li id="fn1"><p>It is the game in which Luka Dončić <del>embarassed</del> hit a step-back 3 pointer over Rudy Goert to win the game (<a href="https://www.nba.com/stats/events?CFID=&amp;CFPARAMS=&amp;GameEventID=682&amp;GameID=0042300312&amp;Season=2023-24&amp;flag=1&amp;title=Doncic%2025%27%203PT%20Step%20Back%20Jump%20Shot%20(32%20PTS)">link</a>).<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
