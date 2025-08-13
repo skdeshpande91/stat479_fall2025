@@ -561,7 +561,7 @@ Conditional Expectations
 <div class="cell-output cell-output-stdout">
 <pre><code>
       Head  Left Foot      Other Right Foot 
-       920       1280         27       2560 </code></pre>
+       769       1024         23       2059 </code></pre>
 </div>
 </div>
 <p>For this analysis, we will focus on fitting XG models using data from shots taken with a player’s feet or head.</p>
@@ -603,9 +603,9 @@ Conditional Expectations
 <pre><code># A tibble: 3 × 3
   shot.body_part.name   XG1     n
   &lt;chr&gt;               &lt;dbl&gt; &lt;int&gt;
-1 Head                0.112   920
-2 Left Foot           0.114  1280
-3 Right Foot          0.111  2560</code></pre>
+1 Head                0.112   769
+2 Left Foot           0.113  1024
+3 Right Foot          0.102  2059</code></pre>
 </div>
 </div>
 <div class="callout callout-style-default callout-warning callout-titled">
@@ -656,9 +656,9 @@ Generalizing our model results
 <pre><code># A tibble: 3 × 5
   OpposingTeam    minute shot.body_part.name     Y   XG1
   &lt;chr&gt;            &lt;int&gt; &lt;chr&gt;               &lt;dbl&gt; &lt;dbl&gt;
-1 Austria Women's     15 Right Foot              1 0.111
-2 Norway Women's      37 Left Foot               1 0.114
-3 Sweden Women's      33 Right Foot              1 0.111</code></pre>
+1 Austria Women's     15 Right Foot              1 0.102
+2 Norway Women's      37 Left Foot               1 0.113
+3 Sweden Women's      33 Right Foot              1 0.102</code></pre>
 </div>
 </div>
 <p>According to our first model, these impressiveness of these goals is pretty similar: our model put the respective chances of each shot resulting in a goal at about 10%, 11%, and 10%. But, watching the videos a bit more closely, this conclusion is <strong>not</strong> especially satisfying: Mead scored the first goal in a one-on-one situation but had to shoot through several defenders on the second and third goal. The discrepancy between our qualitative comparisons and our quantitative modeling results stems from the fact that we only conditioned on the body part and did not account for the other ways that the shots are different. In other words, our initial XG model is much too coarse to quantify the differences between the three chances that we believe are important.</p>
@@ -670,9 +670,9 @@ Generalizing our model results
 <div class="cell-output cell-output-stdout">
 <pre><code>
      Backheel Diving Header   Half Volley           Lob        Normal 
-           35            10           648            28          3720 
+           25            10           529            15          3015 
 Overhead Kick        Volley 
-           17           302 </code></pre>
+           14           244 </code></pre>
 </div>
 </div>
 <p>By conditioning on both body part and technique, we can begin to build a more refined XG model. The code to do this is almost identical to the code used in our first model. The only difference is that we now group by two variables <code>shot.body_part.name</code> and <code>shot.technique_name</code>. Because we are grouping by two variables, specify the argument <code>.groups="drop"</code> argument when calling <code>summarize</code>; this prevents a (mostly innocuous) warning message<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>. We additionally append our new XG estimates to the table containing all of Mead’s shots.</p>
@@ -695,9 +695,9 @@ Overhead Kick        Volley
 <pre><code># A tibble: 3 × 6
   OpposingTeam    minute shot.body_part.name shot.technique.name     Y    XG2
   &lt;chr&gt;            &lt;int&gt; &lt;chr&gt;               &lt;chr&gt;               &lt;dbl&gt;  &lt;dbl&gt;
-1 Austria Women's     15 Right Foot          Lob                     1 0.208 
+1 Austria Women's     15 Right Foot          Lob                     1 0.333 
 2 Norway Women's      37 Left Foot           Normal                  1 0.121 
-3 Sweden Women's      33 Right Foot          Half Volley             1 0.0892</code></pre>
+3 Sweden Women's      33 Right Foot          Half Volley             1 0.0801</code></pre>
 </div>
 </div>
 </section>
@@ -714,16 +714,16 @@ Overhead Kick        Volley
 <pre><code># A tibble: 10 × 4
    shot.body_part.name shot.technique.name    XG2     n
    &lt;chr&gt;               &lt;chr&gt;                &lt;dbl&gt; &lt;int&gt;
- 1 Right Foot          Lob                 0.208     24
- 2 Left Foot           Volley              0.163     98
- 3 Left Foot           Normal              0.121    947
- 4 Right Foot          Normal              0.121   1863
- 5 Head                Normal              0.113    910
- 6 Right Foot          Volley              0.0637   204
+ 1 Right Foot          Lob                 0.333     12
+ 2 Left Foot           Volley              0.162     74
+ 3 Right Foot          Backheel            0.136     22
+ 4 Left Foot           Normal              0.121    750
+ 5 Head                Normal              0.113    759
+ 6 Right Foot          Volley              0.0412   170
  7 Head                Diving Header       0         10
- 8 Left Foot           Backheel            0          6
- 9 Left Foot           Lob                 0          4
-10 Left Foot           Overhead Kick       0          3</code></pre>
+ 8 Left Foot           Backheel            0          3
+ 9 Left Foot           Lob                 0          3
+10 Left Foot           Overhead Kick       0          2</code></pre>
 </div>
 </div>
 <p>Because none of the 3 left-footed lobs in our dataset led to goals, our model estimates <span class="math inline">\(\textrm{XG}(\text{left-footed lob})\)</span> as 0. Similarly, the rather large <span class="math inline">\(\textrm{XG}(\text{right-footed lob})\)</span> of 33% is based on only 12 shots. Attempting to condition on even more variables would result in estimates based on even smaller sample sizes<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>.</p>

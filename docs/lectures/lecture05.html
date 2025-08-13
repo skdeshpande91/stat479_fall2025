@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -68,6 +103,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -289,10 +353,19 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#recap-and-overview" id="toc-recap-and-overview" class="nav-link active" data-scroll-target="#recap-and-overview">Recap and Overview</a></li>
-  <li><a href="#ridge-regression" id="toc-ridge-regression" class="nav-link" data-scroll-target="#ridge-regression">Ridge Regression</a></li>
-  <li><a href="#predictive-comparison" id="toc-predictive-comparison" class="nav-link" data-scroll-target="#predictive-comparison">Predictive Comparison</a></li>
-  <li><a href="#weighted-rapm" id="toc-weighted-rapm" class="nav-link" data-scroll-target="#weighted-rapm">Weighted RAPM</a></li>
+  <li><a href="#recap-and-overview" id="toc-recap-and-overview" class="nav-link active" data-scroll-target="#recap-and-overview">Recap and Overview</a>
+  <ul class="collapse">
+  <li><a href="#sec-notation-review" id="toc-sec-notation-review" class="nav-link" data-scroll-target="#sec-notation-review">Review of notation</a></li>
+  </ul></li>
+  <li><a href="#sec-ridge" id="toc-sec-ridge" class="nav-link" data-scroll-target="#sec-ridge">Ridge Regression</a>
+  <ul class="collapse">
+  <li><a href="#sec-lambda-cv" id="toc-sec-lambda-cv" class="nav-link" data-scroll-target="#sec-lambda-cv">Picking <span class="math inline">\(\lambda\)</span> with cross-validation</a></li>
+  </ul></li>
+  <li><a href="#regularized-adjusted-plusminus" id="toc-regularized-adjusted-plusminus" class="nav-link" data-scroll-target="#regularized-adjusted-plusminus">Regularized adjusted plus/minus</a></li>
+  <li><a href="#uncertainty-quantification-with-the-bootstrap" id="toc-uncertainty-quantification-with-the-bootstrap" class="nav-link" data-scroll-target="#uncertainty-quantification-with-the-bootstrap">Uncertainty Quantification with the Bootstrap</a>
+  <ul class="collapse">
+  <li><a href="#bootstrap-intervals-for-ranks" id="toc-bootstrap-intervals-for-ranks" class="nav-link" data-scroll-target="#bootstrap-intervals-for-ranks">Bootstrap intervals for ranks</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -320,26 +393,410 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="recap-and-overview" class="level2">
 <h2 class="anchored" data-anchor-id="recap-and-overview">Recap and Overview</h2>
+<section id="sec-notation-review" class="level3">
+<h3 class="anchored" data-anchor-id="sec-notation-review">Review of notation</h3>
+<p>We begin by reviewing the notation and set-up from <a href="../lectures/lecture04.html#sec-apm-intro">Lecture 4</a>. First, let <span class="math inline">\(n\)</span> denote the number of stints and <span class="math inline">\(p\)</span> the total number of players. For each stint <span class="math inline">\(i = 1, \ldots, n\)</span> and player <span class="math inline">\(j = 1, \ldots, p,\)</span> let <span class="math inline">\(x_{ij}\)</span> be the signed on-court indicator for player <span class="math inline">\(j\)</span> during stint <span class="math inline">\(i.\)</span> That is, <span class="math inline">\(x_{ij} = 1\)</span> (resp. <span class="math inline">\(x_{ij} = -1)\)</span> if player <span class="math inline">\(j\)</span> is on the court and playing at home (resp. on the road) during stint <span class="math inline">\(i\)</span> and <span class="math inline">\(x_{ij} = 0\)</span> if player <span class="math inline">\(j\)</span> is not on the court during stint <span class="math inline">\(i.\)</span> We can arrange theseindicators into a large <span class="math inline">\(n \times p\)</span> matrix <span class="math inline">\(\boldsymbol{\mathbf{X}}\)</span> whose rows (resp. columns) correspond to stints (resp. players). Finally, let <span class="math inline">\(Y_{i}\)</span> be the point differential per 100 possessions observed during shift <span class="math inline">\(i.\)</span></p>
+<p>The original APM model introduced a single number <span class="math inline">\(\alpha_{j}\)</span> for each player <span class="math inline">\(j = 1, \ldots, p,\)</span> and modeled <span class="math display">\[
+\begin{align}
+Y_{i} &amp;= \alpha_{0} + \alpha_{h_{1}(i)} + \alpha_{h_{2}(i)} + \alpha_{h_{3}(i)} + \alpha_{h_{4}(i)} + \alpha_{h_{5}(i)} \\
+~&amp;~~~~~~~~~~- \alpha_{a_{1}(i)} - \alpha_{a_{2}(i)} - \alpha_{a_{3}(i)} - \alpha_{a_{4}(i)} - \alpha_{a_{5}(i)} + \epsilon_{i},
+\end{align}
+\]</span> where <span class="math inline">\(h_{1}(i), \ldots, h_{5}(i)\)</span> and <span class="math inline">\(a_{1}(i), \ldots, a_{5}(i)\)</span> are, respectively, the indices of the homes and away team players on the court during stint <span class="math inline">\(i\)</span>; <span class="math inline">\(\alpha_{0}\)</span> captures the average home court advantage in terms of point-differential per 100 possessions across all teams; and the <span class="math inline">\(\epsilon_{i}\)</span>’s are independent random errors drawn from a distribution with mean zero.</p>
+<p>In <a href="../lectures/lecture04.html#sec-apm-intro">Lecture 4</a>, we formed the <span class="math inline">\(n \times (p+1)\)</span> matrix <span class="math inline">\(\boldsymbol{\mathbf{Z}}\)</span> be the <span class="math inline">\(n \times (p+1)\)</span> matrix by appending a column of 1’s to the matrix <span class="math inline">\(\boldsymbol{\mathbf{X}}\)</span> and let <span class="math inline">\(\boldsymbol{\alpha} = (\alpha_{0}, \alpha_{1}, \ldots, \alpha_{p})^{\top}\)</span> be the vector of length <span class="math inline">\(p+1\)</span> containing the home court advantage <span class="math inline">\(\alpha_{0}\)</span> and all the player-specific parameters <span class="math inline">\(\alpha_{j}.\)</span> Letting <span class="math inline">\(\boldsymbol{\mathbf{z}}_{i}\)</span> be the <span class="math inline">\(i\)</span>-th row of <span class="math inline">\(\boldsymbol{\mathbf{Z}},\)</span> we can write the APM model in a more compact form. <span class="math display">\[
+Y_{i} = \boldsymbol{\mathbf{z}}_{i}^{\top}\boldsymbol{\alpha} + \epsilon_{i}.
+\]</span></p>
+<p>At the <a href="../lectures/lecture04.html#sec-looking-ahead">end of Lecture 4</a>, we saved a copy of the full matrix <span class="math inline">\(\boldsymbol{\mathbf{X}}\)</span> (which we called <code>X_full</code>) of signed on-court indicators, a vector of point differentials per 100 possessions <span class="math inline">\(\boldsymbol{Y}\)</span> (<code>Y</code>), and a look-up table containing player id numbers and names. We load those objects into our environment.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"lecture04_05_data.RData"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
-<section id="ridge-regression" class="level2">
-<h2 class="anchored" data-anchor-id="ridge-regression">Ridge Regression</h2>
 </section>
-<section id="predictive-comparison" class="level2">
-<h2 class="anchored" data-anchor-id="predictive-comparison">Predictive Comparison</h2>
+<section id="sec-ridge" class="level2">
+<h2 class="anchored" data-anchor-id="sec-ridge">Ridge Regression</h2>
+<p>Unfortunately, a unique least squares estimator of <span class="math inline">\(\boldsymbol{\alpha}\)</span> does not exist. This is because the matrix <span class="math inline">\(\boldsymbol{\mathbf{Z}}^{\top}\boldsymbol{\mathbf{Z}}\)</span> does not have a unique inverse[^rankdeficient]. Instead, there are infinitely many different vector <span class="math inline">\(\boldsymbol{\alpha}\)</span> that minimize the quantity <span class="math display">\[
+\sum_{i = 1}^{n}{(Y_{i} - \boldsymbol{\mathbf{z}}_{i}^{\top}\boldsymbol{\alpha})^{2}},
+\]</span> Complicating matters further, the data do not provide any guidance from picking between these minimizers as they all yield the same sum of squared errors. The original developers of adjusted plus/minus overcame this issue by (i) specifying a group of baseline-level players; (ii)</p>
+<p>Rather than minimize the sum of the squared errors, we will instead try to minimize the quantity <span class="math display">\[
+\sum_{i = 1}^{n}{(Y_{i} - \boldsymbol{\mathbf{z}}_{i}^{\top}\boldsymbol{\alpha})^{2}} + \lambda \times \sum_{j = 0}^{p}{\alpha_{j}^{2}},
+\]</span> where <span class="math inline">\(\lambda &gt; 0\)</span> is a fixed number<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+<p>The first term is the familiar sum of squared errors <span class="math inline">\(\sum{(Y_{i} - \boldsymbol{\mathbf{z}}_{i}^{\top}\boldsymbol{\alpha})^{2}}.\)</span> The second term <span class="math inline">\(\sum_{j}{\alpha_{j}^{2}}\)</span> is known as the <em>shrinkage penalty</em> because it is small whenever all the <span class="math inline">\(\alpha_{j}\)</span>’s are close to zero (i.e., when they are <em>shrunk</em> towards zero). Minimizing the <em>penalized sum of squares</em> trades off finding <span class="math inline">\(\alpha_{j}\)</span>’s that best fit the data (i.e., minimize the squared error) and finding <span class="math inline">\(\alpha_{j}\)</span>’s that are not too far away from zero. When <span class="math inline">\(\lambda\)</span> is very close to zero, the shrinkage penalty tends to exert little influence but as <span class="math inline">\(\lambda \rightarrow \infty,\)</span> the penalty dominates and the minimizer converges to the vector of all zeros. Consequently, it is imperative that we select a good value of <span class="math inline">\(\lambda.\)</span></p>
+<p>Before discussing how we set the tuning parameter <span class="math inline">\(\lambda\)</span> in practice, it is worth pointing out that for every <span class="math inline">\(\lambda &gt; 0,\)</span> a unique solution to the penalized sum of squares problems exists and is available in closed-form: <span class="math display">\[
+\hat{\boldsymbol{\alpha}}(\lambda) = \left(\boldsymbol{\mathbf{Z}}^{\top}\boldsymbol{\mathbf{Z}} + \lambda I \right)^{-1}\boldsymbol{\mathbf{Z}}^{\top}\boldsymbol{\mathbf{Y}},
+\]</span> Looking at this formula, we notice that the expression is very nearly identical to the general formula for ordinary least squares. The only difference is that we’ve added <span class="math inline">\(\lambda\)</span> to the diagonals of <span class="math inline">\(\boldsymbol{\mathbf{Z}}^{\top}\boldsymbol{\mathbf{Z}}\)</span>, which guarantees that the matrix <span class="math inline">\(\boldsymbol{\mathbf{Z}}^{\top}\boldsymbol{\mathbf{Z}} + \lambda I\)</span> has a unique inverse. This technique of adding a small perturbation to <span class="math inline">\(\boldsymbol{\mathbf{Z}}^{\top}\boldsymbol{\mathbf{Z}}\)</span> in the least squares formula — which is equivalent to solving the penalized sum of squares problem — is known as <a href="https://en.wikipedia.org/wiki/Ridge_regression">ridge regression</a>.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+<section id="sec-lambda-cv" class="level3">
+<h3 class="anchored" data-anchor-id="sec-lambda-cv">Picking <span class="math inline">\(\lambda\)</span> with cross-validation</h3>
+<p>In practice, we typically pick a value of <span class="math inline">\(\lambda\)</span> using cross-validation The basic idea is to select the value of <span class="math inline">\(\lambda\)</span> that results in the smallest out-of-sample prediction error. Since we don’t have any out-of-sample data, we will instead approximate it using the technique from <a href="../lectures/lecture03.html#sec-test-train">Lecture 3</a> in which we repeatedly held out a subset of the data when training our model and then assessed the error on the held-out data. This process is known as “cross-validation.”</p>
+<p>More specifically, we begin by specifying a large grid of potential <span class="math inline">\(\lambda\)</span> values. Then, for each <span class="math inline">\(\lambda\)</span> in the grid, we repeatedly iterate through the following steps. 1. Form a random training/testing split 2. Fit a ridge regression model with the current value of <span class="math inline">\(\lambda\)</span> using only the training subset to obtain an estimate <span class="math inline">\(\hat{\boldsymbol{\alpha}}(\lambda)\)</span> 3. Compute the average of the squared errors <span class="math inline">\(\left(Y_{i} - \boldsymbol{\mathbf{z}}_{i}^{\top}\hat{\boldsymbol{\alpha}}(\lambda) \right)\)</span> in the testing subset. After iterating through these steps many times for a single <span class="math inline">\(\lambda,\)</span> we compute the average out-of-sample errors (across the different training/testing splits) before moving onto the next <span class="math inline">\(\lambda\)</span> value in the grid.</p>
+<p>At the end of this process, we have an estimate for the out-of-sample mean square error for every <span class="math inline">\(\lambda\)</span> and can pick the <span class="math inline">\(\lambda\)</span> that yields the smallest one. Then, we can fit a ridge regression model using <em>all</em> of the data to obtain our final solution.</p>
 </section>
-<section id="weighted-rapm" class="level2">
-<h2 class="anchored" data-anchor-id="weighted-rapm">Weighted RAPM</h2>
-<!--
-  Downweight stints that are unlikely to really tell us anything about skill; link to the CP3 to cut the lead to 42
-  Can also include multiple years, downweighting
-
-  Mathematically, this amounts to adding weights and introducing the matrix notation.
--->
+</section>
+<section id="regularized-adjusted-plusminus" class="level2">
+<h2 class="anchored" data-anchor-id="regularized-adjusted-plusminus">Regularized adjusted plus/minus</h2>
+<p>To recap, by fitting a ridge regression model instead of an ordinary linear model, we are able to estimate an adjusted plus/minus value <em>for all players</em>, thereby avoiding having to specify an arbitrary baseline-level. Although this is conceptually easy, finding a suitable <span class="math inline">\(\lambda\)</span> via cross-validation is quite an involved process. Luckily for us, the function <a href="https://glmnet.stanford.edu/reference/cv.glmnet.html"><code>cv.glmnet()</code></a> from the <a href="https://glmnet.stanford.edu/articles/glmnet.html"><strong>glmnet</strong> package</a> automates the process (including specifying the initial grid).</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Installing <strong>glmnet</strong>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>If you have not already installed <strong>glmnet</strong>, you can do so using</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"glmnet"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+<p>The following code shows how to perform the cross-validation, plots the cross-validation error for each value of <span class="math inline">\(\lambda\)</span>, and selects the <span class="math inline">\(\lambda\)</span> with smallest error. It also</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="annotated-cell-2"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1">1</button><span id="annotated-cell-2-1" class="code-annotation-target"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">479</span>)</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="2">2</button><span id="annotated-cell-2-2" class="code-annotation-target"><a href="#annotated-cell-2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(glmnet)</span>
+<span id="annotated-cell-2-3"><a href="#annotated-cell-2-3" aria-hidden="true" tabindex="-1"></a>cv_fit <span class="ot">&lt;-</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="3">3</button><span id="annotated-cell-2-4" class="code-annotation-target"><a href="#annotated-cell-2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cv.glmnet</span>(<span class="at">x =</span> X_full, <span class="at">y =</span> Y,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="4">4</button><span id="annotated-cell-2-5" class="code-annotation-target"><a href="#annotated-cell-2-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">alpha =</span> <span class="dv">0</span>,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="5">5</button><span id="annotated-cell-2-6" class="code-annotation-target"><a href="#annotated-cell-2-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">standardize =</span> <span class="cn">FALSE</span>)</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="6">6</button><span id="annotated-cell-2-7" class="code-annotation-target"><a href="#annotated-cell-2-7" aria-hidden="true" tabindex="-1"></a>lambda_min <span class="ot">&lt;-</span> cv_fit<span class="sc">$</span>lambda.min</span>
+<span id="annotated-cell-2-8"><a href="#annotated-cell-2-8" aria-hidden="true" tabindex="-1"></a></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="7">7</button><span id="annotated-cell-2-9" class="code-annotation-target"><a href="#annotated-cell-2-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(cv_fit)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="1" data-code-annotation="1">Because cross-validation involves forming random training/testing splits, setting the randomization seed ensures our results are reproducible.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="2" data-code-annotation="2">Load the <strong>glmnet</strong> package into our R environment</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="4" data-code-annotation="3">Unlike <code>lm</code>, <strong>glmnet</strong> functions do not use a formula argument. Instead, you must manually pass the design matrix (without intercept) and output vector.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="5" data-code-annotation="4">The argument <code>alpha = 0</code> tells <strong>glmnet</strong> to use a squared error penalty.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="5">5</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="6" data-code-annotation="5">It is <strong>extremely important</strong> to set <code>standardize = FALSE</code>. If you don’t, you end up over-shrinking the APM estimates of players with lots of playing time and under-shrinking APM estimates for players with little playing time</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="6">6</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="7" data-code-annotation="6">Extracts the value of <span class="math inline">\(\lambda\)</span> with smallest out-of-sample error</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="7">7</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="9" data-code-annotation="7">Plots the out-of-sample error as a function of <span class="math inline">\(\lambda.\)</span></span>
+</dd>
+</dl>
+</div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="lecture05_files/figure-html/fit-rapm-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We can now fit a ridge regression model with the cross-validated choice of <span class="math inline">\(\lambda\)</span> using data from all our stints. Since we do Because we do not need to run cross-validation again, we use the function <code>glmnet</code> instead of <code>cv.glmnet</code>.</p>
+<p>In the following code, we actually fit a ridge regression model using <em>all</em> values of <span class="math inline">\(\lambda\)</span> from the grid constructed by <code>cv.glmnet()</code>. This is because the function <code>glmnet</code> can behave a little strangely when only one value of <span class="math inline">\(\lambda\)</span> is specified[^docwarning]. Then, we pull out the estimated coefficients corresponding to the optimal <span class="math inline">\(\lambda\)</span> value.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-3"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="1">1</button><span id="annotated-cell-3-1" class="code-annotation-target"><a href="#annotated-cell-3-1" aria-hidden="true" tabindex="-1"></a>lambda_index <span class="ot">&lt;-</span> <span class="fu">which</span>(cv_fit<span class="sc">$</span>lambda <span class="sc">==</span> lambda_min)</span>
+<span id="annotated-cell-3-2"><a href="#annotated-cell-3-2" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-3-3"><a href="#annotated-cell-3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glmnet</span>(<span class="at">x =</span> X_full, <span class="at">y =</span> Y,</span>
+<span id="annotated-cell-3-4"><a href="#annotated-cell-3-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">alpha =</span> <span class="dv">0</span>,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="2">2</button><span id="annotated-cell-3-5" class="code-annotation-target"><a href="#annotated-cell-3-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">lambda =</span> cv_fit<span class="sc">$</span>lambda,</span>
+<span id="annotated-cell-3-6"><a href="#annotated-cell-3-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">standardize =</span> <span class="cn">FALSE</span>)</span>
+<span id="annotated-cell-3-7"><a href="#annotated-cell-3-7" aria-hidden="true" tabindex="-1"></a></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="3">3</button><span id="annotated-cell-3-8" class="code-annotation-target"><a href="#annotated-cell-3-8" aria-hidden="true" tabindex="-1"></a>alpha_hat <span class="ot">&lt;-</span> fit<span class="sc">$</span>beta[,lambda_index]</span>
+<span id="annotated-cell-3-9"><a href="#annotated-cell-3-9" aria-hidden="true" tabindex="-1"></a></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="4">4</button><span id="annotated-cell-3-10" class="code-annotation-target"><a href="#annotated-cell-3-10" aria-hidden="true" tabindex="-1"></a>rapm <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-3-11"><a href="#annotated-cell-3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="annotated-cell-3-12"><a href="#annotated-cell-3-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">id =</span> <span class="fu">names</span>(alpha_hat),</span>
+<span id="annotated-cell-3-13"><a href="#annotated-cell-3-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">rapm =</span> alpha_hat) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-3-14"><a href="#annotated-cell-3-14" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> player_table <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(id,Name), <span class="at">by =</span> <span class="st">"id"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-3" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="1" data-code-annotation="1">Determines where in the grid of <span class="math inline">\(\lambda\)</span> values specified by <code>cv_glmnet()</code> the optimal one lies.</span>
+</dd>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="5" data-code-annotation="2">Solves the ridge regression problem at all values of <span class="math inline">\(\lambda\)</span> along the grid specified by the initial <code>cv_glmnet()</code> fit.</span>
+</dd>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="8" data-code-annotation="3"><code>glmnet()</code> returns a matrix of parameter estimates where the columns correspond to the different <span class="math inline">\(\lambda\)</span> values. Here, we pull out the estimates for the optimal <span class="math inline">\(\lambda\)</span>, which was the second value provided.</span>
+</dd>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="10" data-code-annotation="4">Like we did in Lecture 3, we create a data frame with every players’ regularized adjusted plus/minus value and name</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>We recognize many super-star-level players (e.g., Gilgeous-Alexander, Dončić, Jokić, Giannis) among those with the highest <em>regularized</em> adjusted plus/minus values.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>rapm <span class="sc">|&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(rapm)) <span class="sc">|&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        id     rapm                    Name
+1  1628983 3.602143 Shai Gilgeous-Alexander
+2  1627827 3.472249     Dorian Finney-Smith
+3  1630596 3.415232             Evan Mobley
+4  1629029 3.352736             Luka Doncic
+5   202699 3.183716           Tobias Harris
+6   203999 2.846327            Nikola Jokic
+7  1631128 2.829463         Christian Braun
+8  1628384 2.813794              OG Anunoby
+9   203507 2.646488   Giannis Antetokounmpo
+10 1626157 2.641075      Karl-Anthony Towns</code></pre>
+</div>
+</div>
+<p>Recall that in our regularized adjusted plus/minus model, the individual <span class="math inline">\(\alpha_{j}\)</span>’s correspond to a somewhat absurd counter-factual. Specifically, <span class="math inline">\(\alpha_{j}\)</span> represents the amount by which a team’s point differential per 100 possession increases if they go from playing 4-on-5 to playing 5-on-5 with player <span class="math inline">\(j\)</span> on the court. Differences of the form <span class="math inline">\(\alpha_{j} - \alpha_{j'}\)</span> are much more useful than the single <span class="math inline">\(\alpha_{j}\)</span> values. By replacing player <span class="math inline">\(j'\)</span> with player <span class="math inline">\(j,\)</span> a team can expect to score <span class="math inline">\(\alpha_{j} - \alpha_{j'}\)</span> more points per 100 possessions.</p>
+<p>For instance, by replacing Luka Dončić with Anthony Davis, teams are expected to score an additional -3.41 points per possession<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>luka_rapm <span class="ot">&lt;-</span> rapm <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(Name <span class="sc">==</span> <span class="st">"Luka Doncic"</span>) <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">pull</span>(rapm)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>ad_rapm <span class="ot">&lt;-</span> rapm <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(Name <span class="sc">==</span> <span class="st">"Anthony Davis"</span>) <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">pull</span>(rapm)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>ad_rapm <span class="sc">-</span> luka_rapm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -3.417006</code></pre>
+</div>
+</div>
+</section>
+<section id="uncertainty-quantification-with-the-bootstrap" class="level2">
+<h2 class="anchored" data-anchor-id="uncertainty-quantification-with-the-bootstrap">Uncertainty Quantification with the Bootstrap</h2>
+<p>So far, we have only focused on obtaining point estimates. what is the range of our uncertainty about the relative impact of players.</p>
+<p>The <strong>bootstrap</strong> is an elegant way to quantify uncertainty about the output particular statistical method. At a high-level, the bootstrap works by repeatedly sampling observations from the original dataset and applying the method to the re-sampled dataset. In the context of our RAPM analysis, we will repeat the following steps many, many times (e.g., <span class="math inline">\(B = 100\)</span> times):</p>
+<ol type="1">
+<li>Randomly draw a sample of <span class="math inline">\(n\)</span> stints <strong>with replacement</strong></li>
+<li>Using the random re-sample, compute an estimate of the RAPM parameters <span class="math inline">\(\hat{\boldsymbol{\alpha}}(\hat{\lambda})\)</span> by fitting a ridge regression model with the optimal <span class="math inline">\(\lambda\)</span> found by our initial cross-validation.</li>
+<li>Save the estimates in an array</li>
+</ol>
+<p>Running this procedure, we obtain <span class="math inline">\(B\)</span> different estimates <span class="math inline">\(\hat{\boldsymbol{\alpha}}(\lambda)^{(1)}, \ldots, \hat{\boldsymbol{\alpha}}(\lambda)^{(B)}\)</span> where <span class="math inline">\(\hat{\boldsymbol{\alpha}}(\lambda)^{(b)}\)</span> is the estimate obtained during the <span class="math inline">\(b\)</span>-th time through the loop. Importantly, each bootstrap estimate of the whole vector <span class="math inline">\(\boldsymbol{\alpha}\)</span> yields a bootstrap estimate of the constrast <span class="math inline">\(\alpha_{j} - \alpha_{j'}.\)</span> By examining the</p>
+<p>As a concrete illustration, the following code computes 100 bootstrap estimates of the RAPM parameter vector. It saves the bootstrap estimates of <span class="math inline">\(\boldsymbol{\alpha}\)</span> in a large matrix whose rows correspond to bootstrap samples and whose columns correspond to players.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>##Warning The following code takes several minutes to run!</p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-6"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="1">1</button><span id="annotated-cell-6-1" class="code-annotation-target"><a href="#annotated-cell-6-1" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> <span class="dv">500</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="2">2</button><span id="annotated-cell-6-2" class="code-annotation-target"><a href="#annotated-cell-6-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(X_full)</span>
+<span id="annotated-cell-6-3"><a href="#annotated-cell-6-3" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ncol</span>(X_full)</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="3">3</button><span id="annotated-cell-6-4" class="code-annotation-target"><a href="#annotated-cell-6-4" aria-hidden="true" tabindex="-1"></a>player_names <span class="ot">&lt;-</span> <span class="fu">colnames</span>(X_full)</span>
+<span id="annotated-cell-6-5"><a href="#annotated-cell-6-5" aria-hidden="true" tabindex="-1"></a>boot_rapm <span class="ot">&lt;-</span> </span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="4">4</button><span id="annotated-cell-6-6" class="code-annotation-target"><a href="#annotated-cell-6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">matrix</span>(<span class="at">nrow =</span> B, <span class="at">ncol =</span> p,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="5">5</button><span id="annotated-cell-6-7" class="code-annotation-target"><a href="#annotated-cell-6-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="fu">c</span>(), player_names))</span>
+<span id="annotated-cell-6-8"><a href="#annotated-cell-6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-9"><a href="#annotated-cell-6-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(b <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>B){</span>
+<span id="annotated-cell-6-10"><a href="#annotated-cell-6-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(b <span class="sc">%%</span> <span class="dv">10</span> <span class="sc">==</span> <span class="dv">0</span>) <span class="fu">cat</span>(b, <span class="st">" "</span>)</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="6">6</button><span id="annotated-cell-6-11" class="code-annotation-target"><a href="#annotated-cell-6-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">479</span><span class="sc">+</span>b)</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="7">7</button><span id="annotated-cell-6-12" class="code-annotation-target"><a href="#annotated-cell-6-12" aria-hidden="true" tabindex="-1"></a>  boot_index <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span>n, <span class="at">size =</span> n, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="annotated-cell-6-13"><a href="#annotated-cell-6-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="annotated-cell-6-14"><a href="#annotated-cell-6-14" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> </span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="8">8</button><span id="annotated-cell-6-15" class="code-annotation-target"><a href="#annotated-cell-6-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">glmnet</span>(<span class="at">x =</span> X_full[boot_index,], <span class="at">y =</span> Y[boot_index],</span>
+<span id="annotated-cell-6-16"><a href="#annotated-cell-6-16" aria-hidden="true" tabindex="-1"></a>           <span class="at">alpha =</span> <span class="dv">0</span>,</span>
+<span id="annotated-cell-6-17"><a href="#annotated-cell-6-17" aria-hidden="true" tabindex="-1"></a>           <span class="at">lambda =</span> cv_fit<span class="sc">$</span>lambda,</span>
+<span id="annotated-cell-6-18"><a href="#annotated-cell-6-18" aria-hidden="true" tabindex="-1"></a>           <span class="at">standardize =</span> <span class="cn">FALSE</span>)</span>
+<span id="annotated-cell-6-19"><a href="#annotated-cell-6-19" aria-hidden="true" tabindex="-1"></a>  tmp_alpha <span class="ot">&lt;-</span> fit<span class="sc">$</span>beta[,lambda_index]</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="9">9</button><span id="annotated-cell-6-20" class="code-annotation-target"><a href="#annotated-cell-6-20" aria-hidden="true" tabindex="-1"></a>  boot_rapm[b, <span class="fu">names</span>(tmp_alpha)] <span class="ot">&lt;-</span> tmp_alpha</span>
+<span id="annotated-cell-6-21"><a href="#annotated-cell-6-21" aria-hidden="true" tabindex="-1"></a>}</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-6" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="1" data-code-annotation="1">Set number of bootstrap iterations</span>
+</dd>
+<dt data-target-cell="annotated-cell-6" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="2" data-code-annotation="2">Get the number of stints and players</span>
+</dd>
+<dt data-target-cell="annotated-cell-6" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="4" data-code-annotation="3">Get the list of player id’s, which are also the column names of <code>X_full</code></span>
+</dd>
+<dt data-target-cell="annotated-cell-6" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="6" data-code-annotation="4">Build a <span class="math inline">\(B \times p\)</span> matrix to store bootstrap estimates of <span class="math inline">\(\boldsymbol{\alpha}.\)</span></span>
+</dd>
+<dt data-target-cell="annotated-cell-6" data-target-annotation="5">5</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="7" data-code-annotation="5">Use the players’ IDs as column names for <code>boot_rapm</code></span>
+</dd>
+<dt data-target-cell="annotated-cell-6" data-target-annotation="6">6</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="11" data-code-annotation="6">We set the seed for reproducibility. But we need to vary the seed with every bootstrap re-sample. Otherwise, we’d be drawing the exact same sample every time!</span>
+</dd>
+<dt data-target-cell="annotated-cell-6" data-target-annotation="7">7</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="12" data-code-annotation="7">This is a list of row-indices for our re-sampled stints.</span>
+</dd>
+<dt data-target-cell="annotated-cell-6" data-target-annotation="8">8</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="15" data-code-annotation="8">Takes advantage of R’s indexing capabilities to create our re-sampled design matrix and outcome vector</span>
+</dd>
+<dt data-target-cell="annotated-cell-6" data-target-annotation="9">9</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="20" data-code-annotation="9">Saves the bootstrap estimate of <span class="math inline">\(\boldsymbol{\alpha}\)</span> in the <span class="math inline">\(b\)</span>-th row of <code>boot_ramp</code></span>
+</dd>
+</dl>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>10  20  30  40  50  60  70  80  90  100  110  120  130  140  150  160  170  180  190  200  210  220  230  240  250  260  270  280  290  300  310  320  330  340  350  360  370  380  390  400  410  420  430  440  450  460  470  480  490  500  </code></pre>
+</div>
+</div>
+<p>We can now compute the difference between Dončić’s and Davis’ estimated RAPM values for every bootstrap estimate. We find that the overwhelming majority of these samples are negative, suggesting that that we can be virtually certain that a team is expected to score score <em>fewer</em> points per 100 possessions by replacing Dončić by Davis.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="annotated-cell-7"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="1">1</button><span id="annotated-cell-7-1" class="code-annotation-target"><a href="#annotated-cell-7-1" aria-hidden="true" tabindex="-1"></a>doncic_id <span class="ot">&lt;-</span> player_table <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(Name <span class="sc">==</span> <span class="st">"Luka Doncic"</span>) <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">pull</span>(id)</span>
+<span id="annotated-cell-7-2"><a href="#annotated-cell-7-2" aria-hidden="true" tabindex="-1"></a>davis_id <span class="ot">&lt;-</span> player_table <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(Name <span class="sc">==</span> <span class="st">"Anthony Davis"</span>) <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">pull</span>(id) </span>
+<span id="annotated-cell-7-3"><a href="#annotated-cell-7-3" aria-hidden="true" tabindex="-1"></a></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="2">2</button><span id="annotated-cell-7-4" class="code-annotation-target"><a href="#annotated-cell-7-4" aria-hidden="true" tabindex="-1"></a>boot_diff <span class="ot">&lt;-</span> boot_rapm[,davis_id] <span class="sc">-</span> boot_rapm[,doncic_id]</span>
+<span id="annotated-cell-7-5"><a href="#annotated-cell-7-5" aria-hidden="true" tabindex="-1"></a></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="3">3</button><span id="annotated-cell-7-6" class="code-annotation-target"><a href="#annotated-cell-7-6" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(boot_diff,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="4">4</button><span id="annotated-cell-7-7" class="code-annotation-target"><a href="#annotated-cell-7-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">breaks =</span> <span class="dv">20</span>,</span>
+<span id="annotated-cell-7-8"><a href="#annotated-cell-7-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Bootstrap Distribution of Davis-Doncic"</span>, </span>
+<span id="annotated-cell-7-9"><a href="#annotated-cell-7-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Difference"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-7" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="1" data-code-annotation="1">Get Dončić’s and Davis’ ids</span>
+</dd>
+<dt data-target-cell="annotated-cell-7" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="4" data-code-annotation="2">Get the vectors of Dončić’s and Davis’ bootstrapped RAPM values by extracting the relevant columns from <code>boot_rapm</code> and compute the difference</span>
+</dd>
+<dt data-target-cell="annotated-cell-7" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="6" data-code-annotation="3">Make a histogram of the bootstrapped differences between Davis’ and Dončić’s RAPM values</span>
+</dd>
+<dt data-target-cell="annotated-cell-7" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="7" data-code-annotation="4">Set the number of bins in the histogram to 20</span>
+</dd>
+</dl>
+</div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="lecture05_files/figure-html/bootstrap-diff-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We can form an uncertainty interval using the sample quantiles of the bootstrapped differences between Davis’ and Dončić’s RAPM values.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-8"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="1">1</button><span id="annotated-cell-8-1" class="code-annotation-target"><a href="#annotated-cell-8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(boot_diff, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-8" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-8" data-code-lines="1" data-code-annotation="1">A 95% uncertainty interval can be formed using the 2.5% and 97.5% quantiles of the bootstrapped estimates</span>
+</dd>
+</dl>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      2.5%      97.5% 
+-6.3776674 -0.4839716 </code></pre>
+</div>
+</div>
+<p>We conclude with 95% confidence that by replacing Dončić by Davis, the Mavericks are expected to score between 0.48 and 6.3 <em>fewer</em> points per 100 possessions.</p>
+<section id="bootstrap-intervals-for-ranks" class="level3">
+<h3 class="anchored" data-anchor-id="bootstrap-intervals-for-ranks">Bootstrap intervals for ranks</h3>
+<p>Recall that in our original analysis, Shai Gilgeous-Alexander had the highest RAPM value. How certain should we be about his overall ranking?</p>
+<p>Just like we computed the difference between Dončić’s and Davis’ RAPM estimates for every bootstrap re-sample, we can compute the <em>rank</em> of SGA’s RAPM estimate in every bootstrap sample. Then, we can look at the bootstrap distribution of these ranks to get an idea about the uncertainty in the rank.</p>
+<p>The <code>rank()</code> function returns the sample ranks of the values in vector. For instance,</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="dv">3</span>, <span class="fl">2.5</span>, <span class="sc">-</span><span class="dv">2</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rank</span>(x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 5 2 4 3 1</code></pre>
+</div>
+</div>
+<p>Notice that the smallest value in <code>x</code> (-2) is ranked 1 and the largest value in <code>x</code> (100) is ranked 5. This demonstrates that <code>rank()</code> assigns ranks in increasing order. If we wanted the largest value to be ranked 1, the second largest ranked 2, etc., then we need to call <code>rank</code> on the negative values:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rank</span>(<span class="sc">-</span>x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1 4 2 3 5</code></pre>
+</div>
+</div>
+<p>The following code confirms that SGA ranked first in terms of the original RAPM estimate.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>rapm <span class="ot">&lt;-</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  rapm <span class="sc">|&gt;</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">rank_rapm =</span> <span class="fu">rank</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> rapm))</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>rapm <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(Name <span class="sc">==</span> <span class="st">"Shai Gilgeous-Alexander"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       id     rapm                    Name rank_rapm
+1 1628983 3.602143 Shai Gilgeous-Alexander         1</code></pre>
+</div>
+</div>
+<p>To quantify the uncertainty in SGA’s RAPM ranking, we need to rank the values within every bootstrap estimate of <span class="math inline">\(\boldsymbol{\alpha}.\)</span> In other words, we need to rank the values within every row of <code>boot_rapm</code>. We can do this using the <code>apply()</code> function. For our purposes, <code>apply()</code> runs a function (specified using the <code>FUN</code> argument) on every row or column of a two-dimensional array. To run the function along every row, one specifies the argument <code>MAR = 1</code> and to run the function along every column, one specifies the argument <code>MAR = 2</code>. Notice that the output has <span class="math inline">\(p\)</span> rows (one for every player) and <span class="math inline">\(B\)</span> columns (one for every bootstrap iteration).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>boot_rank <span class="ot">&lt;-</span> </span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">apply</span>(<span class="sc">-</span><span class="dv">1</span><span class="sc">*</span>boot_rapm, <span class="at">MARGIN =</span> <span class="dv">1</span>, <span class="at">FUN =</span> rank)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(boot_rank)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 569 500</code></pre>
+</div>
+</div>
+<p>To get the bootstrap distribution of SGA’s ranking, we need to extract the values from the corresponding row of <code>boot_rank</code>. In the following code, we first look up SGA’s player ID and then get the values from the row of <code>boot_rank</code> that is named with SGA’s ID.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>sga_id <span class="ot">&lt;-</span> </span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  player_table <span class="sc">|&gt;</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(Name <span class="sc">==</span> <span class="st">"Shai Gilgeous-Alexander"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(id)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>sga_ranks <span class="ot">&lt;-</span> boot_rank[sga_id,]</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(sga_ranks)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>sga_ranks
+  1   2   3   4   5   6   7   8   9  10  11  12  13  14  16  17  18  19  20  21 
+ 58  59  46  55  36  21  19  12  17  17  13  10   8  12   8   5   2   9   6   5 
+ 22  23  24  25  26  27  28  29  30  31  32  33  34  36  37  38  39  40  41  44 
+  4   5   4   5   5   2   2   4   5   2   2   5   4   3   2   1   2   1   1   2 
+ 45  47  48  51  52  56  57  66  70  84  85  86  91 105 106 176 
+  5   1   1   1   1   2   1   1   1   1   1   1   1   1   1   1 </code></pre>
+</div>
+</div>
+<p>It turns out that SGA had the highest RAPM value in just 58 of our 500 bootstrap samples and the second-highest RAPM value in 59 of our bootstrap samples. We can form a 95% bootstrap uncertainty interval around his overall ranking by computing the sample quantiles of these rankings.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(sga_ranks, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  2.5%  97.5% 
+ 1.000 51.525 </code></pre>
+</div>
+</div>
+<p>Our analysis reveals quite a bit of uncertainty about SGA’s overall rank in terms of RAPM!</p>
 
 
 </section>
+</section>
 
-</main> <!-- /main -->
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>In practice, <span class="math inline">\(\lambda\)</span> is often determined using the data. See <a href="#sec-lambda-cv" class="quarto-xref">Section&nbsp;2.1</a>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>See Section 6.2 of <em>An Introduction to Statistical Learning</em> for a good review of ridge regression.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Fire Nico.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";

@@ -384,7 +384,7 @@ window.Quarto = {
   </ul></li>
   <li><a href="#predicting-epa-on-a-new-pass" id="toc-predicting-epa-on-a-new-pass" class="nav-link" data-scroll-target="#predicting-epa-on-a-new-pass">Predicting EPA on a new pass</a>
   <ul class="collapse">
-  <li><a href="#an-initial-linear-model" id="toc-an-initial-linear-model" class="nav-link" data-scroll-target="#an-initial-linear-model">An initial linear model</a></li>
+  <li><a href="#computing-player-specific-epa-per-pass" id="toc-computing-player-specific-epa-per-pass" class="nav-link" data-scroll-target="#computing-player-specific-epa-per-pass">Computing player-specific EPA per pass</a></li>
   <li><a href="#issues-with-our-initial-model" id="toc-issues-with-our-initial-model" class="nav-link" data-scroll-target="#issues-with-our-initial-model">Issues with our initial model</a></li>
   <li><a href="#towards-partial-pooling" id="toc-towards-partial-pooling" class="nav-link" data-scroll-target="#towards-partial-pooling">Towards partial pooling</a></li>
   </ul></li>
@@ -540,135 +540,113 @@ Definition: Expected Points
 </section>
 <section id="predicting-epa-on-a-new-pass" class="level2">
 <h2 class="anchored" data-anchor-id="predicting-epa-on-a-new-pass">Predicting EPA on a new pass</h2>
-<!--
-  Imagine trying to make a prediction about another passing play. What is the EPA going to be on this new play?
-  Well, if I didn't tell you anything, you might use the overall grand mean
-  But what if I tell you the pass is going to be thrown by 
-  Intuitively, we might use the average.
-  
-  Let's compute the average. For reasons that will become clear, we can do this with a linear model
-  
-  
-  Ok, this was all a bit of a toy demonstration. BUT what if I give you even more information about the pass (e.g., whether it was in shotgun or not). We observe the same phenomenon: simply fitting a single-level linear model is not quite enough. We have to *shrink* those raw estimates back to the group average. THis stabilies predictions for low-sample size players
-  It's not acceptable to just throw out players under a cut-off.
--->
-<p>We can also use EPA to assess player performance. Intuitively, we would more highly value offensive players who tend to produce positive EPA for their team. As the quarterback is arguably the <a href="https://www.nfl.com/news/ranking-each-position-s-importance-from-quarterback-to-returner-0ap3000000503855">most important offensive player</a>, it is natural to start there. In particular, we will try to determine how much EPA is due to the quarterback on each passing play.</p>
-<p>We begin by first creating a data table containing only passing plays from the regular season using the column <code>play_type</code></p>
+<p>The play with highest EPA in the 2024-25 season was a deep pass from Justin Herbert to L. McConkey that went 86 yards At the start of the play, the Chargers were at their TO DO. Based on <strong>nflfastR</strong>’s model, If Justin Herbert were to throw several more passes, would we expect all of them to result in an EPA of about 8.54?</p>
+<p>Extending this thought experiment a bit, based on the 2024-25 regular season data, how might we predict the EPA on future passing play? Without any additional information about the play — i.e., who threw the pass, how long the pass was, whether it was thrown out of the shotgun formation, etc. — it seems reasonable to use the average EPA across all passing plays in our dataset. But, if we knew the identity of the passers, we might reasonably expect the average EPA across their passes would be a better predicition.</p>
+<p>To compute the league-wide and player-specific average EPAs, we first create a data table containing only the passing plays from the regular season. We can do this by filtering on the variables <code>play_type</code> and <code>season_type</code>. We see that there are about 19,000 pass plays in the regular season.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(pbp2024<span class="sc">$</span>play_type)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(pbp2024[,<span class="fu">c</span>(<span class="st">"play_type"</span>, <span class="st">"season_type"</span>)])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>
-extra_point  field_goal     kickoff     no_play        pass        punt 
-       1302        1166        2949        4934       20006        2119 
-   qb_kneel    qb_spike         run 
-        437          75       15044 </code></pre>
+<pre><code>             season_type
+play_type      POST   REG
+  extra_point    61  1241
+  field_goal     51  1115
+  kickoff       146  2803
+  no_play       205  4729
+  pass          853 19153
+  punt           73  2046
+  qb_kneel       32   405
+  qb_spike        4    71
+  run           726 14318</code></pre>
 </div>
 </div>
-<p>In addition to EPA, our passing play data table includes</p>
-<ul>
-<li><code>passer_player_id</code>: the unique identifier of the passer</li>
-<li><code>air_yards</code>: the distance travelled by the pass through the air<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></li>
-<li><code>shotgun</code>: whether the pass was thrown out of the <a href="https://en.wikipedia.org/wiki/Shotgun_formation">shotgun formation</a></li>
-<li><code>qb_hit</code>: whether the quarterback was hit while throwing</li>
-<li><code>no_huddle</code>: whether the play was run <a href="https://en.wikipedia.org/wiki/Hurry-up_offense">without a huddle</a></li>
-<li><code>posteam_type</code>: whether the home team had possession (i.e., was on offense)</li>
-<li><code>pass_location</code>: whether the pass was thrown to the left, right, or center of the field</li>
-<li><code>desc</code>: a narrative description of the play</li>
-</ul>
+<p>In addition to EPA, we also include the unique identifier of the passer (<code>passer_player_id</code>) and a narrative description of the play (<code>desc</code>).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="annotated-cell-4"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-4-1"><a href="#annotated-cell-4-1" aria-hidden="true" tabindex="-1"></a>pass2024 <span class="ot">&lt;-</span></span>
-<span id="annotated-cell-4-2"><a href="#annotated-cell-4-2" aria-hidden="true" tabindex="-1"></a>  pbp2024 <span class="sc">|&gt;</span></span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="1">1</button><span id="annotated-cell-4-3" class="code-annotation-target"><a href="#annotated-cell-4-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(posteam) <span class="sc">&amp;</span> play_type <span class="sc">==</span> <span class="st">"pass"</span> <span class="sc">&amp;</span> season_type <span class="sc">==</span> <span class="st">"REG"</span>) <span class="sc">|&gt;</span></span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="2">2</button><span id="annotated-cell-4-4" class="code-annotation-target"><a href="#annotated-cell-4-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"TWO-POINT CONVERSION ATTEMPT"</span>, desc) <span class="sc">&amp;</span></span>
-<span id="annotated-cell-4-5"><a href="#annotated-cell-4-5" aria-hidden="true" tabindex="-1"></a>                  <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"sacked"</span>, desc) <span class="sc">&amp;</span></span>
-<span id="annotated-cell-4-6"><a href="#annotated-cell-4-6" aria-hidden="true" tabindex="-1"></a>                  <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"direct snap"</span>, desc, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-4-7"><a href="#annotated-cell-4-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(epa, passer_player_id, </span>
-<span id="annotated-cell-4-8"><a href="#annotated-cell-4-8" aria-hidden="true" tabindex="-1"></a>                air_yards, </span>
-<span id="annotated-cell-4-9"><a href="#annotated-cell-4-9" aria-hidden="true" tabindex="-1"></a>                posteam_type, shotgun, no_huddle, qb_hit,</span>
-<span id="annotated-cell-4-10"><a href="#annotated-cell-4-10" aria-hidden="true" tabindex="-1"></a>                pass_location,</span>
-<span id="annotated-cell-4-11"><a href="#annotated-cell-4-11" aria-hidden="true" tabindex="-1"></a>                desc)</span>
-<span id="annotated-cell-4-12"><a href="#annotated-cell-4-12" aria-hidden="true" tabindex="-1"></a>pass2024 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">2</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-4"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-4-1"><a href="#annotated-cell-4-1" aria-hidden="true" tabindex="-1"></a>pass2024 <span class="ot">&lt;-</span> </span>
+<span id="annotated-cell-4-2"><a href="#annotated-cell-4-2" aria-hidden="true" tabindex="-1"></a>pass2024 <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-4-3"><a href="#annotated-cell-4-3" aria-hidden="true" tabindex="-1"></a>  pbp2024 <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-4-4"><a href="#annotated-cell-4-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(play_type <span class="sc">==</span> <span class="st">"pass"</span> <span class="sc">&amp;</span> season_type <span class="sc">==</span> <span class="st">"REG"</span>) <span class="sc">|&gt;</span> </span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-4" data-target-annotation="1">1</button><span id="annotated-cell-4-5" class="code-annotation-target"><a href="#annotated-cell-4-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"TWO-POINT CONVERSION ATTEMPT"</span>, desc) <span class="sc">&amp;</span></span>
+<span id="annotated-cell-4-6"><a href="#annotated-cell-4-6" aria-hidden="true" tabindex="-1"></a>                  <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"sacked"</span>, desc) <span class="sc">&amp;</span></span>
+<span id="annotated-cell-4-7"><a href="#annotated-cell-4-7" aria-hidden="true" tabindex="-1"></a>                  <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"direct snap"</span>, desc, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-4-8"><a href="#annotated-cell-4-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(epa, passer_player_id, desc)</span>
+<span id="annotated-cell-4-9"><a href="#annotated-cell-4-9" aria-hidden="true" tabindex="-1"></a>pass2024 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">2</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-hidden code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-4" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-4" data-code-lines="3" data-code-annotation="1">The condition <code>!is.na(posteam)</code> discards those rare plays where the offensive team isn’t recorded</span>
-</dd>
-<dt data-target-cell="annotated-cell-4" data-target-annotation="2">2</dt>
-<dd>
-<span data-code-cell="annotated-cell-4" data-code-lines="4" data-code-annotation="2">Discards plays from two-point conversions, sacks, and direct snaps</span>
+<span data-code-cell="annotated-cell-4" data-code-lines="5" data-code-annotation="1">For now, we will ignore 2-point conversion passing attempts. We also ignore sacks, and direct snaps, which <strong>nflfastR</strong> sometimes treat as passing plays</span>
 </dd>
 </dl>
 </div>
-<div class="cell-output cell-output-stderr">
-<pre><code>── nflverse play by play data ──────────────────────────────────────────────────</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>ℹ Data updated: 2025-04-30 02:39:06 EDT</code></pre>
-</div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 2 × 9
-    epa passer_player_id air_yards posteam_type shotgun no_huddle qb_hit
-  &lt;dbl&gt; &lt;chr&gt;                &lt;dbl&gt; &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;  &lt;dbl&gt;
-1 2.03  00-0035228              -3 away               0         0      0
-2 0.754 00-0035228               2 away               1         0      0
-# ℹ 2 more variables: pass_location &lt;chr&gt;, desc &lt;chr&gt;</code></pre>
+<pre><code># A tibble: 2 × 3
+    epa passer_player_id desc                                                   
+  &lt;dbl&gt; &lt;chr&gt;            &lt;chr&gt;                                                  
+1 2.03  00-0035228       (14:27) 1-K.Murray pass short left to 6-J.Conner to BU…
+2 0.754 00-0035228       (13:43) (Shotgun) 1-K.Murray pass short middle to 6-J.…</code></pre>
 </div>
 </div>
-<p>Eventually, we will want to look up player names using the identifiers stored in <code>passer_player_id</code>. We can load a table containing roster information, including player identifier, name, position, and team using the function <a href=""><code>nflfastR::fast_scraper_roster()</code></a></p>
+<p>After excluding passes on two-point conversion attempts and sacks, we have data for 17723 passes thrown by 101 players. Across all passes and passers, the average EPA per pass is about 0.159.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>roster24 <span class="ot">&lt;-</span></span>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(pass2024<span class="sc">$</span>epa)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.1589677</code></pre>
+</div>
+</div>
+<section id="computing-player-specific-epa-per-pass" class="level3">
+<h3 class="anchored" data-anchor-id="computing-player-specific-epa-per-pass">Computing player-specific EPA per pass</h3>
+<p>Given the vast spread of EPAs in our dataset (roughly -12.7 to 8.5), using the league-wide average of 0.159 to predict the EPA on a future pass is a bit unsatisfactory. One avenue for improvement is to condition on additional information, like the identity of the passer, which is recorded in the column <code>passer_player_id</code>. Eventually, we will want to look up player names using the identifiers stored in <code>passer_player_id</code>. We can load a table containing roster information, including player identifier, name, position, and team using the function <a href=""><code>nflfastR::fast_scraper_roster()</code></a></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>roster2024 <span class="ot">&lt;-</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  nflfastR<span class="sc">::</span><span class="fu">fast_scraper_roster</span>(<span class="at">seasons =</span> <span class="dv">2024</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<section id="an-initial-linear-model" class="level3">
-<h3 class="anchored" data-anchor-id="an-initial-linear-model">An initial linear model</h3>
-<p>We will model the observed EPA on each passing play as a noisy observation of an underlying average EPA specific to each passer. So, the EPA’s on passes thrown by Dak Prescott, for instance, are treated as noisy measurements of his <em>average</em> EPA. We can then try to rank players by these averages.</p>
+<p>We will model the observed EPA on each passing play as a noisy observation of an underlying average EPA specific to each passer. So, the EPA’s on passes thrown by Dak Prescott, for instance, are treated as noisy measurements of his <em>average</em> EPA. We can then predict the EPA on a future pass thrown by Prescott using an estimate of his per-pass EPA. We can further rank passers by their per-pass EPAs.</p>
 <p>Formally, suppose that we have data for <span class="math inline">\(I\)</span> unique passers[^I] and for each passer <span class="math inline">\(i = 1, \ldots, I,\)</span> let <span class="math inline">\(n_{i}\)</span> be the total number of passes thrown by passer <span class="math inline">\(i.\)</span> Further, for each <span class="math inline">\(j = 1, \ldots, n_{i},\)</span> let <span class="math inline">\(Y_{ij}\)</span> be the EPA on the the <span class="math inline">\(j\)</span>-th pass thrown by passer <span class="math inline">\(i.\)</span> Let <span class="math inline">\(\alpha_{i}\)</span> be the underlying — and as yet unknown — average EPA for passer <span class="math inline">\(i.\)</span> We model <span class="math inline">\(Y_{ij} = \alpha_{i} + \epsilon_{ij}\)</span> where the random errors <span class="math inline">\(\epsilon_{ij}\)</span> have mean zero and are assumed to be independent across passers and passes. [^I]: In our dataset $I=$101.</p>
-<p>While we can certainly run this calculation by grouping plays in <code>pass2024</code> by <code>passer_player_id</code> and then computing the average EPA of the plays involving each passer, for reasons that will hopefuly become clear soon, we will estimate the <span class="math inline">\(\alpha_{i}\)</span>’s by fitting a linear regression model with ordinary least squares. Specifically, we will regress <code>epa</code> onto the <em>categorical</em> variable <code>passer_player_id</code>, which we will represent as a factor variable. As alluded to earlier in <a href="">Lecture</a>, when run with a single categorical predictor, function <code>lm()</code> does not directly estimate the average outcome within each level of the predictor. Instead, it returns the average outcome within one <em>reference</em> level of the predictor and the average <em>difference</em> in outcomes between the non-reference levels and the reference. We will, rather arbitrarily, use Aaron Rodgers as the reference player.</p>
+<p>While we can certainly run this calculation by grouping plays in <code>pass2024</code> by <code>passer_player_id</code> and then computing the average EPA of the plays involving each passer, for reasons that will hopefully become clear soon, we will instead estimate the <span class="math inline">\(\alpha_{i}\)</span>’s by fitting a linear regression model with ordinary least squares. Specifically, we will regress <code>epa</code> onto the <em>categorical</em> variable <code>passer_player_id</code>, which we will represent as a factor variable. As alluded to earlier in <a href="">Lecture</a>, when run with a single categorical predictor, function <code>lm()</code> does not directly estimate the average outcome within each level of the predictor. Instead, it returns the average outcome within one <em>reference</em> level of the predictor and the average <em>difference</em> in outcomes between the non-reference levels and the reference. We will, rather arbitrarily, use Aaron Rodgers as the reference player.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="annotated-cell-6"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-6-1"><a href="#annotated-cell-6-1" aria-hidden="true" tabindex="-1"></a>rodgers_id <span class="ot">&lt;-</span> </span>
-<span id="annotated-cell-6-2"><a href="#annotated-cell-6-2" aria-hidden="true" tabindex="-1"></a>  roster24 <span class="sc">|&gt;</span> </span>
-<span id="annotated-cell-6-3"><a href="#annotated-cell-6-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(full_name <span class="sc">==</span> <span class="st">"Aaron Rodgers"</span>) <span class="sc">|&gt;</span> </span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="1">1</button><span id="annotated-cell-6-4" class="code-annotation-target"><a href="#annotated-cell-6-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(gsis_id)</span>
-<span id="annotated-cell-6-5"><a href="#annotated-cell-6-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-6-6"><a href="#annotated-cell-6-6" aria-hidden="true" tabindex="-1"></a>pass2024 <span class="ot">&lt;-</span></span>
-<span id="annotated-cell-6-7"><a href="#annotated-cell-6-7" aria-hidden="true" tabindex="-1"></a>  pass2024 <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-6-8"><a href="#annotated-cell-6-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="annotated-cell-6-9"><a href="#annotated-cell-6-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">passer_player_id =</span> <span class="fu">factor</span>(passer_player_id),</span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="2">2</button><span id="annotated-cell-6-10" class="code-annotation-target"><a href="#annotated-cell-6-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">passer_player_id =</span> <span class="fu">relevel</span>(passer_player_id, <span class="at">ref =</span> rodgers_id))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-7"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-7-1"><a href="#annotated-cell-7-1" aria-hidden="true" tabindex="-1"></a>rodgers_id <span class="ot">&lt;-</span> </span>
+<span id="annotated-cell-7-2"><a href="#annotated-cell-7-2" aria-hidden="true" tabindex="-1"></a>  roster2024 <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-7-3"><a href="#annotated-cell-7-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(full_name <span class="sc">==</span> <span class="st">"Aaron Rodgers"</span>) <span class="sc">|&gt;</span> </span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="1">1</button><span id="annotated-cell-7-4" class="code-annotation-target"><a href="#annotated-cell-7-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(gsis_id)</span>
+<span id="annotated-cell-7-5"><a href="#annotated-cell-7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-6"><a href="#annotated-cell-7-6" aria-hidden="true" tabindex="-1"></a>pass2024 <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-7-7"><a href="#annotated-cell-7-7" aria-hidden="true" tabindex="-1"></a>  pass2024 <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-7-8"><a href="#annotated-cell-7-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="annotated-cell-7-9"><a href="#annotated-cell-7-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">passer_player_id =</span> <span class="fu">factor</span>(passer_player_id),</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="2">2</button><span id="annotated-cell-7-10" class="code-annotation-target"><a href="#annotated-cell-7-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">passer_player_id =</span> <span class="fu">relevel</span>(passer_player_id, <span class="at">ref =</span> rodgers_id))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-hidden code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-6" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-7" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-6" data-code-lines="4" data-code-annotation="1">Pull out Aaron Rodgers’ id number</span>
+<span data-code-cell="annotated-cell-7" data-code-lines="4" data-code-annotation="1">Pull out Aaron Rodgers’ id number</span>
 </dd>
-<dt data-target-cell="annotated-cell-6" data-target-annotation="2">2</dt>
+<dt data-target-cell="annotated-cell-7" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-cell="annotated-cell-6" data-code-lines="10" data-code-annotation="2">Set the reference level to Rodgers</span>
+<span data-code-cell="annotated-cell-7" data-code-lines="10" data-code-annotation="2">Set the reference level to Rodgers</span>
 </dd>
 </dl>
 </div>
 </div>
 <p>We can now fit our linear model and collect the estimated parameters in the vector <code>ols_betas</code>. Notice that the names of all but the first element of <code>ols_betas</code> contain the string “passer_player_id” and a player identifier.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="annotated-cell-7"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-7-1"><a href="#annotated-cell-7-1" aria-hidden="true" tabindex="-1"></a>ols_fit <span class="ot">&lt;-</span></span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="1">1</button><span id="annotated-cell-7-2" class="code-annotation-target"><a href="#annotated-cell-7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lm</span>(<span class="at">formula =</span> epa <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> passer_player_id,</span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="2">2</button><span id="annotated-cell-7-3" class="code-annotation-target"><a href="#annotated-cell-7-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">data =</span> pass2024)</span>
-<span id="annotated-cell-7-4"><a href="#annotated-cell-7-4" aria-hidden="true" tabindex="-1"></a>ols_betas <span class="ot">&lt;-</span> <span class="fu">coefficients</span>(ols_fit)</span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="3">3</button><span id="annotated-cell-7-5" class="code-annotation-target"><a href="#annotated-cell-7-5" aria-hidden="true" tabindex="-1"></a>ols_betas[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-8"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-8-1"><a href="#annotated-cell-8-1" aria-hidden="true" tabindex="-1"></a>ols_fit <span class="ot">&lt;-</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="1">1</button><span id="annotated-cell-8-2" class="code-annotation-target"><a href="#annotated-cell-8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lm</span>(<span class="at">formula =</span> epa <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> passer_player_id,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="2">2</button><span id="annotated-cell-8-3" class="code-annotation-target"><a href="#annotated-cell-8-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">data =</span> pass2024)</span>
+<span id="annotated-cell-8-4"><a href="#annotated-cell-8-4" aria-hidden="true" tabindex="-1"></a>ols_betas <span class="ot">&lt;-</span> <span class="fu">coefficients</span>(ols_fit)</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="3">3</button><span id="annotated-cell-8-5" class="code-annotation-target"><a href="#annotated-cell-8-5" aria-hidden="true" tabindex="-1"></a>ols_betas[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-hidden code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-7" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-8" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-7" data-code-lines="2" data-code-annotation="1">The <code>1+</code> is not strictly necessary (since R usually includes an intercept by default).</span>
+<span data-code-cell="annotated-cell-8" data-code-lines="2" data-code-annotation="1">The <code>1+</code> is not strictly necessary (since R usually includes an intercept by default).</span>
 </dd>
-<dt data-target-cell="annotated-cell-7" data-target-annotation="2">2</dt>
+<dt data-target-cell="annotated-cell-8" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-cell="annotated-cell-7" data-code-lines="3" data-code-annotation="2">Because the <code>formula</code> argument only involves <code>epa</code> and <code>passer_player_id</code>, none of the other variables in <code>pass2024</code> are included as outcomes or predictors in the model</span>
+<span data-code-cell="annotated-cell-8" data-code-lines="3" data-code-annotation="2">Because the <code>formula</code> argument only involves <code>epa</code> and <code>passer_player_id</code>, none of the other variables in <code>pass2024</code> are included as outcomes or predictors in the model</span>
 </dd>
-<dt data-target-cell="annotated-cell-7" data-target-annotation="3">3</dt>
+<dt data-target-cell="annotated-cell-8" data-target-annotation="3">3</dt>
 <dd>
-<span data-code-cell="annotated-cell-7" data-code-lines="5" data-code-annotation="3">Print out a handful of parameter estimates</span>
+<span data-code-cell="annotated-cell-8" data-code-lines="5" data-code-annotation="3">Print out a handful of parameter estimates</span>
 </dd>
 </dl>
 </div>
@@ -688,7 +666,7 @@ passer_player_id00-0027973
 <pre><code>[1] 0.1130334</code></pre>
 </div>
 </div>
-<p>To get the average EPA on all passes thrown by a different quarterback (e.g., Dak Prescott whose id is 00-0033077), we need to add the corresponding entry in <code>ols_beta</code> to the estimated intercept<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.</p>
+<p>To get the average EPA on all passes thrown by a different quarterback (e.g., Dak Prescott whose id is 00-0033077), we need to add the corresponding entry in <code>ols_beta</code> to the estimated intercept<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(pass2024<span class="sc">$</span>epa[pass2024<span class="sc">$</span>passer_player_id <span class="sc">==</span> <span class="st">"00-0033077"</span>]) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -702,30 +680,30 @@ passer_player_id00-0027973
 </div>
 <p>We will repeat this calculation for each of the 101 unique passers in our data set and build a table <code>alphas</code> with columns containing the player’s identifier, name, and average EPA on passing plays. In the following code, we strip out the string “passer_player_id” from the names of <code>ols_beta</code>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="annotated-cell-11"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="1">1</button><span id="annotated-cell-11-1" class="code-annotation-target"><a href="#annotated-cell-11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(ols_betas)[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"passser_player_id"</span>, rodgers_id)</span>
-<span id="annotated-cell-11-2"><a href="#annotated-cell-11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(ols_betas) <span class="ot">&lt;-</span> </span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="2">2</button><span id="annotated-cell-11-3" class="code-annotation-target"><a href="#annotated-cell-11-3" aria-hidden="true" tabindex="-1"></a>  stringr<span class="sc">::</span><span class="fu">str_remove</span>(<span class="at">string =</span> <span class="fu">names</span>(ols_betas), <span class="at">pattern =</span> <span class="st">"passer_player_id"</span>)</span>
-<span id="annotated-cell-11-4"><a href="#annotated-cell-11-4" aria-hidden="true" tabindex="-1"></a>alphas <span class="ot">&lt;-</span> </span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="3">3</button><span id="annotated-cell-11-5" class="code-annotation-target"><a href="#annotated-cell-11-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">gsis_id =</span> <span class="fu">names</span>(ols_betas), <span class="at">ols =</span> ols_betas) <span class="sc">|&gt;</span></span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="4">4</button><span id="annotated-cell-11-6" class="code-annotation-target"><a href="#annotated-cell-11-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">ols =</span> <span class="fu">ifelse</span>(gsis_id <span class="sc">==</span> rodgers_id, ols, ols <span class="sc">+</span> dplyr<span class="sc">::</span><span class="fu">first</span>(ols))) <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-11-7"><a href="#annotated-cell-11-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> roster24 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(gsis_id, full_name), <span class="at">by =</span> <span class="st">"gsis_id"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-12"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-12" data-target-annotation="1">1</button><span id="annotated-cell-12-1" class="code-annotation-target"><a href="#annotated-cell-12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(ols_betas)[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"passser_player_id"</span>, rodgers_id)</span>
+<span id="annotated-cell-12-2"><a href="#annotated-cell-12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(ols_betas) <span class="ot">&lt;-</span> </span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-12" data-target-annotation="2">2</button><span id="annotated-cell-12-3" class="code-annotation-target"><a href="#annotated-cell-12-3" aria-hidden="true" tabindex="-1"></a>  stringr<span class="sc">::</span><span class="fu">str_remove</span>(<span class="at">string =</span> <span class="fu">names</span>(ols_betas), <span class="at">pattern =</span> <span class="st">"passer_player_id"</span>)</span>
+<span id="annotated-cell-12-4"><a href="#annotated-cell-12-4" aria-hidden="true" tabindex="-1"></a>alphas <span class="ot">&lt;-</span> </span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-12" data-target-annotation="3">3</button><span id="annotated-cell-12-5" class="code-annotation-target"><a href="#annotated-cell-12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">gsis_id =</span> <span class="fu">names</span>(ols_betas), <span class="at">ols =</span> ols_betas) <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-12" data-target-annotation="4">4</button><span id="annotated-cell-12-6" class="code-annotation-target"><a href="#annotated-cell-12-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">ols =</span> <span class="fu">ifelse</span>(gsis_id <span class="sc">==</span> rodgers_id, ols, ols <span class="sc">+</span> dplyr<span class="sc">::</span><span class="fu">first</span>(ols))) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-12-7"><a href="#annotated-cell-12-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> roster2024 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(gsis_id, full_name), <span class="at">by =</span> <span class="st">"gsis_id"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-hidden code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-11" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-12" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-11" data-code-lines="1" data-code-annotation="1">Rename first element of <code>ols_beta</code> so its name follows the same format as the names of all other elements</span>
+<span data-code-cell="annotated-cell-12" data-code-lines="1" data-code-annotation="1">Rename first element of <code>ols_beta</code> so its name follows the same format as the names of all other elements</span>
 </dd>
-<dt data-target-cell="annotated-cell-11" data-target-annotation="2">2</dt>
+<dt data-target-cell="annotated-cell-12" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-cell="annotated-cell-11" data-code-lines="3" data-code-annotation="2">Remove the string “passer_player_id” from all names of <code>ols_beta</code></span>
+<span data-code-cell="annotated-cell-12" data-code-lines="3" data-code-annotation="2">Remove the string “passer_player_id” from all names of <code>ols_beta</code></span>
 </dd>
-<dt data-target-cell="annotated-cell-11" data-target-annotation="3">3</dt>
+<dt data-target-cell="annotated-cell-12" data-target-annotation="3">3</dt>
 <dd>
-<span data-code-cell="annotated-cell-11" data-code-lines="5" data-code-annotation="3">Facilitate a later join with <code>roster24</code>, which records player identifiers as <code>gsis_id</code></span>
+<span data-code-cell="annotated-cell-12" data-code-lines="5" data-code-annotation="3">Facilitate a later join with <code>roster2024</code>, which records player identifiers as <code>gsis_id</code></span>
 </dd>
-<dt data-target-cell="annotated-cell-11" data-target-annotation="4">4</dt>
+<dt data-target-cell="annotated-cell-12" data-target-annotation="4">4</dt>
 <dd>
-<span data-code-cell="annotated-cell-11" data-code-lines="6" data-code-annotation="4">Since the first row of <code>alphas</code> corresponds to Aaron Rodgers, we need to add the first element in the column <code>ols</code> to all other elements in the column.</span>
+<span data-code-cell="annotated-cell-12" data-code-lines="6" data-code-annotation="4">Since the first row of <code>alphas</code> corresponds to Aaron Rodgers, we need to add the first element in the column <code>ols</code> to all other elements in the column.</span>
 </dd>
 </dl>
 </div>
@@ -754,32 +732,32 @@ passer_player_id00-0027973
 <h3 class="anchored" data-anchor-id="issues-with-our-initial-model">Issues with our initial model</h3>
 <p>By this point in the course, you probably already suspect what’s going on: the extreme average EPA estimates are an artifact of small sample sizes. To verify that this is so, we’ll add a column to <code>alphas</code> recording the number of passes thrown by each player.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="annotated-cell-13"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-13-1"><a href="#annotated-cell-13-1" aria-hidden="true" tabindex="-1"></a>n_passes <span class="ot">&lt;-</span></span>
-<span id="annotated-cell-13-2"><a href="#annotated-cell-13-2" aria-hidden="true" tabindex="-1"></a>  pass2024 <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-13-3"><a href="#annotated-cell-13-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(passer_player_id) <span class="sc">|&gt;</span> </span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-13" data-target-annotation="1">1</button><span id="annotated-cell-13-4" class="code-annotation-target"><a href="#annotated-cell-13-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">n =</span> dplyr<span class="sc">::</span><span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-13" data-target-annotation="2">2</button><span id="annotated-cell-13-5" class="code-annotation-target"><a href="#annotated-cell-13-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">gsis_id =</span> passer_player_id)</span>
-<span id="annotated-cell-13-6"><a href="#annotated-cell-13-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-13-7"><a href="#annotated-cell-13-7" aria-hidden="true" tabindex="-1"></a>alphas <span class="ot">&lt;-</span></span>
-<span id="annotated-cell-13-8"><a href="#annotated-cell-13-8" aria-hidden="true" tabindex="-1"></a>  alphas <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-13-9"><a href="#annotated-cell-13-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> n_passes, <span class="at">by =</span> <span class="st">"gsis_id"</span>)</span>
-<span id="annotated-cell-13-10"><a href="#annotated-cell-13-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-13-11"><a href="#annotated-cell-13-11" aria-hidden="true" tabindex="-1"></a>alphas <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-13-12"><a href="#annotated-cell-13-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(ols)) <span class="sc">|&gt;</span></span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-13" data-target-annotation="3">3</button><span id="annotated-cell-13-13" class="code-annotation-target"><a href="#annotated-cell-13-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, (dplyr<span class="sc">::</span><span class="fu">n</span>()<span class="sc">-</span><span class="dv">4</span>)<span class="sc">:</span>dplyr<span class="sc">::</span><span class="fu">n</span>()))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-14"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-14-1"><a href="#annotated-cell-14-1" aria-hidden="true" tabindex="-1"></a>n_passes <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-14-2"><a href="#annotated-cell-14-2" aria-hidden="true" tabindex="-1"></a>  pass2024 <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-14-3"><a href="#annotated-cell-14-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(passer_player_id) <span class="sc">|&gt;</span> </span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="1">1</button><span id="annotated-cell-14-4" class="code-annotation-target"><a href="#annotated-cell-14-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">n =</span> dplyr<span class="sc">::</span><span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="2">2</button><span id="annotated-cell-14-5" class="code-annotation-target"><a href="#annotated-cell-14-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">gsis_id =</span> passer_player_id)</span>
+<span id="annotated-cell-14-6"><a href="#annotated-cell-14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-7"><a href="#annotated-cell-14-7" aria-hidden="true" tabindex="-1"></a>alphas <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-14-8"><a href="#annotated-cell-14-8" aria-hidden="true" tabindex="-1"></a>  alphas <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-14-9"><a href="#annotated-cell-14-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> n_passes, <span class="at">by =</span> <span class="st">"gsis_id"</span>)</span>
+<span id="annotated-cell-14-10"><a href="#annotated-cell-14-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-11"><a href="#annotated-cell-14-11" aria-hidden="true" tabindex="-1"></a>alphas <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-14-12"><a href="#annotated-cell-14-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(ols)) <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="3">3</button><span id="annotated-cell-14-13" class="code-annotation-target"><a href="#annotated-cell-14-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, (dplyr<span class="sc">::</span><span class="fu">n</span>()<span class="sc">-</span><span class="dv">4</span>)<span class="sc">:</span>dplyr<span class="sc">::</span><span class="fu">n</span>()))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-hidden code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-13" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-14" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-13" data-code-lines="4" data-code-annotation="1">Counts the number of passes thrown by each player in our dataset</span>
+<span data-code-cell="annotated-cell-14" data-code-lines="4" data-code-annotation="1">Counts the number of passes thrown by each player in our dataset</span>
 </dd>
-<dt data-target-cell="annotated-cell-13" data-target-annotation="2">2</dt>
+<dt data-target-cell="annotated-cell-14" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-cell="annotated-cell-13" data-code-lines="5" data-code-annotation="2">So that we can join the counts to <code>alphas</code>, we need to rename the column recording the player identifiers</span>
+<span data-code-cell="annotated-cell-14" data-code-lines="5" data-code-annotation="2">So that we can join the counts to <code>alphas</code>, we need to rename the column recording the player identifiers</span>
 </dd>
-<dt data-target-cell="annotated-cell-13" data-target-annotation="3">3</dt>
+<dt data-target-cell="annotated-cell-14" data-target-annotation="3">3</dt>
 <dd>
-<span data-code-cell="annotated-cell-13" data-code-lines="13" data-code-annotation="3">Look at the top-5 and bottom-5 rows</span>
+<span data-code-cell="annotated-cell-14" data-code-lines="13" data-code-annotation="3">Look at the top-5 and bottom-5 rows</span>
 </dd>
 </dl>
 </div>
@@ -797,7 +775,7 @@ passer_player_id00-0027973
 10 00-0030279 -5.911163     Keenan Allen 1</code></pre>
 </div>
 </div>
-<p>Taking a closer look, we find that many of the players with extreme average EPA values have thrown very few passes. For instance, AJ Cole is a punter who threw a single pass that ultimately gained 34 yards and resulted in a very large EPA of around 4.33.</p>
+<p>As anticipated, the passers with the top- and bottom-5 per-pass EPAs all threw 1 or 2 passes. For instance, AJ Cole is a punter who threw a single pass that ultimately gained 34 yards and resulted in a very large EPA of around 4.33.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>pass2024 <span class="sc">|&gt;</span></span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(passer_player_id <span class="sc">==</span> <span class="st">"00-0035190"</span>) <span class="sc">|&gt;</span></span>
@@ -815,7 +793,7 @@ passer_player_id00-0027973
 1 (8:33) (Punt formation) 6-A.Cole pass short right to 5-D.Deablo to DEN …  4.33</code></pre>
 </div>
 </div>
-<p>We can additionally visualize the issue</p>
+<p>Plotting each player’s average EPA against the number of pass attempts reveals that there is a lot of (resp. very little) variation in EPA-per-pass amongst passers who threw a very small (resp. very large) number of passes.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>oi_colors <span class="ot">&lt;-</span> </span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">palette.colors</span>(<span class="at">palette =</span> <span class="st">"Okabe-Ito"</span>)</span>
@@ -838,27 +816,16 @@ passer_player_id00-0027973
 </section>
 <section id="towards-partial-pooling" class="level3">
 <h3 class="anchored" data-anchor-id="towards-partial-pooling">Towards partial pooling</h3>
-<p>We can clarify the issue with by thinking predictively. Specifically, what if tried to forecast the EPA on a new pass (e.g., a pass thrown in the first play-off game during wild card weekend)?</p>
-<p>Because non-quarter backs throw, we need a way to make a principled prediction.</p>
-<p>One option would be to simply report the grand mean across all passes and passers. This simple forecast completely ignores</p>
-<p>At the other extreme,</p>
-<p>As with most things, an optimal solution likely lies in the middle. For passers who threw very few passes, we might want to report a forecast that’s closer to the grand mean <span class="math inline">\(\overline{Y},\)</span> eschewing the potentially extreme <span class="math inline">\(\hat{\alpha}_{i}\)</span>’s<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>. But, for passers who threw a large number of passes, we might be more inclined to use their more precise <span class="math inline">\(\hat{\alpha}_{i}\)</span>. One crude way to build up these forecasts is by creating a weighted average <span class="math inline">\(w_{i} \times \hat{\alpha}_{i} + (1 - w_{i}) \times \overline{Y}\)</span> where the weight <span class="math inline">\(w_{i}\)</span> is based on the number of passes and how far <span class="math inline">\(\hat{\alpha}_{i}\)</span> is from the grand mean.</p>
-<!--
-  Think about trying to forecast the EPA on another future pass.
-  
-  One option would be to use the overall grand mean $\overline{Y}$ of the observed averages.
-  This is problematic 
-  Alternatively, we might try to use the indi
-  
-  Intuitively, we might try to use $\hat{\alpha}_{i}.$
-  Is this a reasonable estimate? A much more reasonable approach would involve "adjusting" the initial estimate so that players with very few pass attempts 
--->
-<p>Beyond the small sample size issue, our initial analysis failed to account for addition</p>
+<p>Let’s return to the problem of forecasting EPA on a single new pass based solely on the identity of the passer. One option is to ignore the passer identity and just use the overall mean of about 0.159. Doing so completely ignores differences between passers, which is fairly unreasonable given the large gaps in talent between NFL quarterbacks. At the other extreme, we could use the player-specific average EPA estimates. While this approach acknowledges differences between players, it can sometimes lead to very extreme estimates. Neither option seems particularly compelling.</p>
+<p>As with most things, an ideal solution lies somewhere bewteen the two extremes. For players who threw a large number of passes, we may be more comfortable using the their average EPA value since we are more <em>certain</em> about its value[^avg]. But for players who threw a very small number of passes, it’s probably less risky to assume that they’ll perform closer to the league-average rather than to rely on their potentially very noisy average EPA estimate<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>. And for players who threw a moderate number of passes, we might prefer a value somewhere between the league-wide average and the player-specific estimate. [^avg]: Mathematically, we know that the average of 100 independent samples from some population has much more variance than the average of 10,000 independent samples from the same population.</p>
+<p>Formally, we can form such predictions with a weighted average: letting <span class="math inline">\(\overline{y}\)</span> be the overall league-wide average, we can predict the EPA on a new pass thrown by player <span class="math inline">\(i\)</span> using the quantity <span class="math display">\[
+w_{i}\times \hat{\alpha}_{i} + (1 - w_{i}) \times \overline{y},
+\]</span> where the weight <span class="math inline">\(w_{i}\)</span> depends on the number of passes thrown by player <span class="math inline">\(i\)</span> and how far <span class="math inline">\(\hat{\alpha}_{i}\)</span> differs from <span class="math inline">\(\overline{y}.\)</span></p>
 </section>
 </section>
 <section id="multi-level-models" class="level2">
 <h2 class="anchored" data-anchor-id="multi-level-models">Multi-level models</h2>
-<p>Like in our initial analysis, we will model the observed EPA’s as noisy measurements of some underlying player-specific parameter. However, we make an additional model assumption: that the <span class="math inline">\(\alpha_{i}\)</span>’s are themselves normally distributed around some grand mean <span class="math inline">\(\alpha_{0}\)</span> with standard deviation <span class="math inline">\(\sigma_{\alpha}.\)</span> We can specify our model in <em>two-levels</em></p>
+<p><em>Multi-level models</em> provide a prinipled way to compute such weights <em>automatically</em>. Like in our initial analysis, our first multilevel will model the observed EPA’s as noisy measurements of some underlying player-specific parameter. However, we make an additional model assumption: that the <span class="math inline">\(\alpha_{i}\)</span>’s are themselves normally distributed around some grand mean <span class="math inline">\(\alpha_{0}\)</span> with standard deviation <span class="math inline">\(\sigma_{\alpha}.\)</span> We can specify our model in <em>two-levels</em>.</p>
 <p><span class="math display">\[
 \begin{align}
 \textrm{Level 1}:\quad  Y_{ij} &amp;= \alpha_{i} + \epsilon_{ij} \\
@@ -897,15 +864,15 @@ Fixed effects:
 </div>
 </div>
 <p>In particular, we estimate the grand average EPA across all passes and all passers to be <span class="math inline">\(\hat{\alpha}_{0} \approx 0.130.\)</span> Moreover, our initial estimate of <span class="math inline">\(\sigma,\)</span> which captures the average variability of EPA that we’d see across passes thrown by a single player, is about 1.523 And our estimate of <span class="math inline">\(\sigma_{\alpha}\)</span>, which captures the average variability across passers, is much much smaller (roughly 0.1232).</p>
-<p>We can use the function <code>ranef</code> to extract the estimates of the <span class="math inline">\(u_{i}\)</span>’s and the function <code>coef</code> to extract the estimates of <span class="math inline">\(\alpha_{i} = \alpha_{0} + u_{i}.\)</span> The function <code>coef</code> returns a named list with one element per grouping variable<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>. Each element of the <code>coef</code>’s output is a matrix</p>
+<p>We can use the function <code>ranef</code> to extract the estimates of the <span class="math inline">\(u_{i}\)</span>’s and the function <code>coef</code> to extract the estimates of <span class="math inline">\(\alpha_{i} = \alpha_{0} + u_{i}.\)</span> The function <code>coef</code> returns a named list with one element per grouping variable<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>. Each element of the <code>coef</code>’s output is a matrix</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="annotated-cell-18"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-18-1"><a href="#annotated-cell-18-1" aria-hidden="true" tabindex="-1"></a>tmp <span class="ot">&lt;-</span> <span class="fu">coef</span>(multilevel_fit)</span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-18" data-target-annotation="1">1</button><span id="annotated-cell-18-2" class="code-annotation-target"><a href="#annotated-cell-18-2" aria-hidden="true" tabindex="-1"></a>tmp[[<span class="st">"passer_player_id"</span>]] <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">5</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-19"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-19-1"><a href="#annotated-cell-19-1" aria-hidden="true" tabindex="-1"></a>tmp <span class="ot">&lt;-</span> <span class="fu">coef</span>(multilevel_fit)</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-19" data-target-annotation="1">1</button><span id="annotated-cell-19-2" class="code-annotation-target"><a href="#annotated-cell-19-2" aria-hidden="true" tabindex="-1"></a>tmp[[<span class="st">"passer_player_id"</span>]] <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">5</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-hidden code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-18" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-19" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-18" data-code-lines="2" data-code-annotation="1">For brevity, we only display the first 5 rows</span>
+<span data-code-cell="annotated-cell-19" data-code-lines="2" data-code-annotation="1">For brevity, we only display the first 5 rows</span>
 </dd>
 </dl>
 </div>
@@ -920,27 +887,27 @@ Fixed effects:
 </div>
 <p>We will append our multi-leve estimates to our data table <code>alpha</code></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="annotated-cell-19"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-19" data-target-annotation="1">1</button><span id="annotated-cell-19-1" class="code-annotation-target"><a href="#annotated-cell-19-1" aria-hidden="true" tabindex="-1"></a>lmer_alpha <span class="ot">&lt;-</span></span>
-<span id="annotated-cell-19-2"><a href="#annotated-cell-19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>( </span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-19" data-target-annotation="2">2</button><span id="annotated-cell-19-3" class="code-annotation-target"><a href="#annotated-cell-19-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">lmer_alpha =</span> tmp[[<span class="st">"passer_player_id"</span>]][,<span class="dv">1</span>],</span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-19" data-target-annotation="3">3</button><span id="annotated-cell-19-4" class="code-annotation-target"><a href="#annotated-cell-19-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">gsis_id =</span> <span class="fu">rownames</span>(tmp[[<span class="st">"passer_player_id"</span>]]))</span>
-<span id="annotated-cell-19-5"><a href="#annotated-cell-19-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-19-6"><a href="#annotated-cell-19-6" aria-hidden="true" tabindex="-1"></a>alphas <span class="ot">&lt;-</span></span>
-<span id="annotated-cell-19-7"><a href="#annotated-cell-19-7" aria-hidden="true" tabindex="-1"></a>  alphas <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-19-8"><a href="#annotated-cell-19-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> lmer_alpha, <span class="at">by =</span> <span class="st">"gsis_id"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-20"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-20" data-target-annotation="1">1</button><span id="annotated-cell-20-1" class="code-annotation-target"><a href="#annotated-cell-20-1" aria-hidden="true" tabindex="-1"></a>lmer_alpha <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-20-2"><a href="#annotated-cell-20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>( </span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-20" data-target-annotation="2">2</button><span id="annotated-cell-20-3" class="code-annotation-target"><a href="#annotated-cell-20-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">lmer =</span> tmp[[<span class="st">"passer_player_id"</span>]][,<span class="dv">1</span>],</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-20" data-target-annotation="3">3</button><span id="annotated-cell-20-4" class="code-annotation-target"><a href="#annotated-cell-20-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">gsis_id =</span> <span class="fu">rownames</span>(tmp[[<span class="st">"passer_player_id"</span>]]))</span>
+<span id="annotated-cell-20-5"><a href="#annotated-cell-20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-20-6"><a href="#annotated-cell-20-6" aria-hidden="true" tabindex="-1"></a>alphas <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-20-7"><a href="#annotated-cell-20-7" aria-hidden="true" tabindex="-1"></a>  alphas <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-20-8"><a href="#annotated-cell-20-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> lmer_alpha, <span class="at">by =</span> <span class="st">"gsis_id"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-hidden code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-19" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-20" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-19" data-code-lines="1" data-code-annotation="1">We’ll create a data frame with columns containing the player identifier and their corresponding parameter estimate</span>
+<span data-code-cell="annotated-cell-20" data-code-lines="1" data-code-annotation="1">We’ll create a data frame with columns containing the player identifier and their corresponding parameter estimate</span>
 </dd>
-<dt data-target-cell="annotated-cell-19" data-target-annotation="2">2</dt>
+<dt data-target-cell="annotated-cell-20" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-cell="annotated-cell-19" data-code-lines="3" data-code-annotation="2">In this case, the output of <code>coef</code> is a matrix with 1 column whose row names are just the levels of the grouping variable</span>
+<span data-code-cell="annotated-cell-20" data-code-lines="3" data-code-annotation="2">In this case, the output of <code>coef</code> is a matrix with 1 column whose row names are just the levels of the grouping variable</span>
 </dd>
-<dt data-target-cell="annotated-cell-19" data-target-annotation="3">3</dt>
+<dt data-target-cell="annotated-cell-20" data-target-annotation="3">3</dt>
 <dd>
-<span data-code-cell="annotated-cell-19" data-code-lines="4" data-code-annotation="3">For our eventual join, we will store the player’s identifier as <code>gsis_id</code></span>
+<span data-code-cell="annotated-cell-20" data-code-lines="4" data-code-annotation="3">For our eventual join, we will store the player’s identifier as <code>gsis_id</code></span>
 </dd>
 </dl>
 </div>
@@ -961,7 +928,7 @@ Fixed effects:
 <span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"Avg. EPA per pass"</span>,</span>
 <span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"EPA per pass"</span>,</span>
 <span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">cex =</span> <span class="fl">0.5</span>, <span class="at">col =</span> oi_colors[<span class="dv">1</span>])</span>
-<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(alphas<span class="sc">$</span>n, alphas<span class="sc">$</span>lmer_alpha, <span class="at">pch =</span> <span class="dv">15</span>, <span class="at">col =</span> oi_colors[<span class="dv">2</span>], <span class="at">cex =</span> <span class="fl">0.5</span>)</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(alphas<span class="sc">$</span>n, alphas<span class="sc">$</span>lmer, <span class="at">pch =</span> <span class="dv">15</span>, <span class="at">col =</span> oi_colors[<span class="dv">2</span>], <span class="at">cex =</span> <span class="fl">0.5</span>)</span>
 <span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="fu">mean</span>(pass2024<span class="sc">$</span>epa), <span class="at">col =</span> oi_colors[<span class="dv">3</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -996,30 +963,53 @@ If a player is very skilled, we would expect the outcome to be high.
 </section>
 <section id="adjusting-for-additional-covariates" class="level2">
 <h2 class="anchored" data-anchor-id="adjusting-for-additional-covariates">Adjusting for additional covariates</h2>
-<p>Up to this point, we’ve worked with a rather toy problem, predicting EPA given only the identity of the passer. But what if we include additional information like the number of air yards (a proxy for the length of the pass), the pass location, and the other covariates contained in <code>pass2024</code>?</p>
+<p>Up to this point, we’ve worked with a rather toy problem, predicting EPA given only the identity of the passer. But what if we include additional information about the pass (e.g., whether it was throw by the home or away team, whether it was thrown out of the shotgun formation, etc.)? Do we still run into the small sample size issues when determining how much EPA an individual player adds, after accounting for this other information?</p>
+<p>To see, we re-build our data table <code>pass2024</code> but now include: * <code>air_yards</code>: the distance traveled by the pass through the air<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> * <code>shotgun</code>: whether the pass was thrown out of the <a href="https://en.wikipedia.org/wiki/Shotgun_formation">shotgun formation</a> * <code>qb_hit</code>: whether the quarterback was hit while throwing * <code>no_huddle</code>: whether the play was run <a href="https://en.wikipedia.org/wiki/Hurry-up_offense">without a huddle</a> * <code>posteam_type</code>: whether the home team had possession (i.e., was on offense) * <code>pass_location</code>: whether the pass was thrown to the left, right, or center of the field</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>pass2024 <span class="ot">&lt;-</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  pbp2024 <span class="sc">|&gt;</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(play_type <span class="sc">==</span> <span class="st">"pass"</span> <span class="sc">&amp;</span> season_type <span class="sc">==</span> <span class="st">"REG"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"TWO-POINT CONVERSION ATTEMPT"</span>, desc) <span class="sc">&amp;</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>                  <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"sacked"</span>, desc) <span class="sc">&amp;</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>                  <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"direct snap"</span>, desc, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(epa, passer_player_id, </span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>                air_yards, </span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>                posteam_type, shotgun, no_huddle, qb_hit,</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>                pass_location,</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>                desc)</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>pass2024 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 9
+    epa passer_player_id air_yards posteam_type shotgun no_huddle qb_hit
+  &lt;dbl&gt; &lt;chr&gt;                &lt;dbl&gt; &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;  &lt;dbl&gt;
+1 2.03  00-0035228              -3 away               0         0      0
+2 0.754 00-0035228               2 away               1         0      0
+# ℹ 2 more variables: pass_location &lt;chr&gt;, desc &lt;chr&gt;</code></pre>
+</div>
+</div>
 <p>We can elaborate our initial models <span class="math display">\[
 Y_{ij} = \alpha_{i} + x * \beta
 \]</span></p>
 <p>Adjusting for pass-level covariates, we can obtain least squares estimates of player spe Under this model, <span class="math inline">\(\alpha_{i}\)</span> represents the additional bit of EPA that can be attributed to the passer over and above what can be explained by the</p>
 <p>First, we first a single-level model, which does not attempt to introduce any shrinkage. We find that even after accounting for covariates, the estimates for passers with low samples sizes are fairly extreme.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>ols_fit_full <span class="ot">&lt;-</span> </span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lm</span>(epa <span class="sc">~</span> passer_player_id <span class="sc">+</span> air_yards <span class="sc">+</span> posteam_type <span class="sc">+</span> shotgun <span class="sc">+</span></span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>       no_huddle <span class="sc">+</span> qb_hit <span class="sc">+</span> pass_location, <span class="at">data =</span> pass2024)</span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>ols_betas_full <span class="ot">&lt;-</span> <span class="fu">coefficients</span>(ols_fit_full)</span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(ols_betas_full)[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"passser_player_id"</span>, rodgers_id) </span>
-<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(ols_betas_full) <span class="ot">&lt;-</span> </span>
-<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>  stringr<span class="sc">::</span><span class="fu">str_remove</span>(<span class="at">string =</span> <span class="fu">names</span>(ols_betas_full), <span class="at">pattern =</span> <span class="st">"passer_player_id"</span>) </span>
-<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>alphas_full <span class="ot">&lt;-</span> </span>
-<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">gsis_id =</span> <span class="fu">names</span>(ols_betas_full), <span class="at">ols =</span> ols_betas_full) <span class="sc">|&gt;</span> </span>
-<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">ols =</span> <span class="fu">ifelse</span>(gsis_id <span class="sc">==</span> rodgers_id, ols, ols <span class="sc">+</span> dplyr<span class="sc">::</span><span class="fu">first</span>(ols))) <span class="sc">|&gt;</span> </span>
-<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> roster24 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(gsis_id, full_name), <span class="at">by =</span> <span class="st">"gsis_id"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> n_passes, <span class="at">by =</span> <span class="st">"gsis_id"</span>)</span>
-<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>alphas_full <span class="sc">|&gt;</span></span>
-<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(ols)) <span class="sc">|&gt;</span></span>
-<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, (dplyr<span class="sc">::</span><span class="fu">n</span>()<span class="sc">-</span><span class="dv">4</span>)<span class="sc">:</span>dplyr<span class="sc">::</span><span class="fu">n</span>())) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>ols_fit_full <span class="ot">&lt;-</span> </span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lm</span>(epa <span class="sc">~</span> passer_player_id <span class="sc">+</span> air_yards <span class="sc">+</span> posteam_type <span class="sc">+</span> shotgun <span class="sc">+</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>       no_huddle <span class="sc">+</span> qb_hit <span class="sc">+</span> pass_location, <span class="at">data =</span> pass2024)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>ols_betas_full <span class="ot">&lt;-</span> <span class="fu">coefficients</span>(ols_fit_full)</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(ols_betas_full)[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"passser_player_id"</span>, rodgers_id) </span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(ols_betas_full) <span class="ot">&lt;-</span> </span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>  stringr<span class="sc">::</span><span class="fu">str_remove</span>(<span class="at">string =</span> <span class="fu">names</span>(ols_betas_full), <span class="at">pattern =</span> <span class="st">"passer_player_id"</span>) </span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>alphas_full <span class="ot">&lt;-</span> </span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">gsis_id =</span> <span class="fu">names</span>(ols_betas_full), <span class="at">ols =</span> ols_betas_full) <span class="sc">|&gt;</span> </span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">ols =</span> <span class="fu">ifelse</span>(gsis_id <span class="sc">==</span> rodgers_id, ols, ols <span class="sc">+</span> dplyr<span class="sc">::</span><span class="fu">first</span>(ols))) <span class="sc">|&gt;</span> </span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> roster2024 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(gsis_id, full_name), <span class="at">by =</span> <span class="st">"gsis_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> n_passes, <span class="at">by =</span> <span class="st">"gsis_id"</span>)</span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>alphas_full <span class="sc">|&gt;</span></span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(ols)) <span class="sc">|&gt;</span></span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, (dplyr<span class="sc">::</span><span class="fu">n</span>()<span class="sc">-</span><span class="dv">4</span>)<span class="sc">:</span>dplyr<span class="sc">::</span><span class="fu">n</span>())) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      gsis_id       ols        full_name n
 1  00-0035190  4.337161          AJ Cole 1
@@ -1036,23 +1026,23 @@ Y_{ij} = \alpha_{i} + x * \beta
 </div>
 <p>We can similarly fit a more elaborate multi-level model in which <span class="math inline">\(\alpha_{i} \sim N(\alpha_{0}, \sigma^{2}_{\alpha}).\)</span></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="annotated-cell-22"><pre class="sourceCode r code-annotation-code code-with-copy"><code class="sourceCode r"><span id="annotated-cell-22-1"><a href="#annotated-cell-22-1" aria-hidden="true" tabindex="-1"></a>ml_fit_full <span class="ot">&lt;-</span></span>
-<span id="annotated-cell-22-2"><a href="#annotated-cell-22-2" aria-hidden="true" tabindex="-1"></a>  lme4<span class="sc">::</span><span class="fu">lmer</span>(<span class="at">formula =</span> epa <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>passer_player_id) <span class="sc">+</span> </span>
-<span id="annotated-cell-22-3"><a href="#annotated-cell-22-3" aria-hidden="true" tabindex="-1"></a>               air_yards <span class="sc">+</span> posteam_type <span class="sc">+</span> shotgun <span class="sc">+</span></span>
-<span id="annotated-cell-22-4"><a href="#annotated-cell-22-4" aria-hidden="true" tabindex="-1"></a>               no_huddle <span class="sc">+</span> qb_hit <span class="sc">+</span> pass_location, <span class="at">data =</span> pass2024)</span>
-<span id="annotated-cell-22-5"><a href="#annotated-cell-22-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-22-6"><a href="#annotated-cell-22-6" aria-hidden="true" tabindex="-1"></a>tmp <span class="ot">&lt;-</span> <span class="fu">coef</span>(ml_fit_full)</span>
-<span id="annotated-cell-22-7"><a href="#annotated-cell-22-7" aria-hidden="true" tabindex="-1"></a>lmer_alpha_full <span class="ot">&lt;-</span></span>
-<span id="annotated-cell-22-8"><a href="#annotated-cell-22-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>( </span>
-<span id="annotated-cell-22-9"><a href="#annotated-cell-22-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">lmer =</span> tmp[[<span class="st">"passer_player_id"</span>]][,<span class="dv">1</span>],</span>
-<span id="annotated-cell-22-10"><a href="#annotated-cell-22-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">gsis_id =</span> <span class="fu">rownames</span>(tmp[[<span class="st">"passer_player_id"</span>]]))</span>
-<span id="annotated-cell-22-11"><a href="#annotated-cell-22-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-22-12"><a href="#annotated-cell-22-12" aria-hidden="true" tabindex="-1"></a>alphas_full <span class="ot">&lt;-</span></span>
-<span id="annotated-cell-22-13"><a href="#annotated-cell-22-13" aria-hidden="true" tabindex="-1"></a>  alphas_full <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-22-14"><a href="#annotated-cell-22-14" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> lmer_alpha_full, <span class="at">by =</span> <span class="st">"gsis_id"</span>)</span>
-<span id="annotated-cell-22-15"><a href="#annotated-cell-22-15" aria-hidden="true" tabindex="-1"></a>alphas_full <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-22-16"><a href="#annotated-cell-22-16" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(lmer)) <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-22-17"><a href="#annotated-cell-22-17" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, (dplyr<span class="sc">::</span><span class="fu">n</span>()<span class="sc">-</span><span class="dv">4</span>)<span class="sc">:</span>dplyr<span class="sc">::</span><span class="fu">n</span>())) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-24"><pre class="sourceCode r code-annotation-code code-with-copy"><code class="sourceCode r"><span id="annotated-cell-24-1"><a href="#annotated-cell-24-1" aria-hidden="true" tabindex="-1"></a>ml_fit_full <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-24-2"><a href="#annotated-cell-24-2" aria-hidden="true" tabindex="-1"></a>  lme4<span class="sc">::</span><span class="fu">lmer</span>(<span class="at">formula =</span> epa <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>passer_player_id) <span class="sc">+</span> </span>
+<span id="annotated-cell-24-3"><a href="#annotated-cell-24-3" aria-hidden="true" tabindex="-1"></a>               air_yards <span class="sc">+</span> posteam_type <span class="sc">+</span> shotgun <span class="sc">+</span></span>
+<span id="annotated-cell-24-4"><a href="#annotated-cell-24-4" aria-hidden="true" tabindex="-1"></a>               no_huddle <span class="sc">+</span> qb_hit <span class="sc">+</span> pass_location, <span class="at">data =</span> pass2024)</span>
+<span id="annotated-cell-24-5"><a href="#annotated-cell-24-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-24-6"><a href="#annotated-cell-24-6" aria-hidden="true" tabindex="-1"></a>tmp <span class="ot">&lt;-</span> <span class="fu">coef</span>(ml_fit_full)</span>
+<span id="annotated-cell-24-7"><a href="#annotated-cell-24-7" aria-hidden="true" tabindex="-1"></a>lmer_alpha_full <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-24-8"><a href="#annotated-cell-24-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>( </span>
+<span id="annotated-cell-24-9"><a href="#annotated-cell-24-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">lmer =</span> tmp[[<span class="st">"passer_player_id"</span>]][,<span class="dv">1</span>],</span>
+<span id="annotated-cell-24-10"><a href="#annotated-cell-24-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">gsis_id =</span> <span class="fu">rownames</span>(tmp[[<span class="st">"passer_player_id"</span>]]))</span>
+<span id="annotated-cell-24-11"><a href="#annotated-cell-24-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-24-12"><a href="#annotated-cell-24-12" aria-hidden="true" tabindex="-1"></a>alphas_full <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-24-13"><a href="#annotated-cell-24-13" aria-hidden="true" tabindex="-1"></a>  alphas_full <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-24-14"><a href="#annotated-cell-24-14" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> lmer_alpha_full, <span class="at">by =</span> <span class="st">"gsis_id"</span>)</span>
+<span id="annotated-cell-24-15"><a href="#annotated-cell-24-15" aria-hidden="true" tabindex="-1"></a>alphas_full <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-24-16"><a href="#annotated-cell-24-16" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(lmer)) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-24-17"><a href="#annotated-cell-24-17" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, (dplyr<span class="sc">::</span><span class="fu">n</span>()<span class="sc">-</span><span class="dv">4</span>)<span class="sc">:</span>dplyr<span class="sc">::</span><span class="fu">n</span>())) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      gsis_id         ols                full_name   n        lmer
 1  00-0034796  0.41854702            Lamar Jackson 469  0.34052597
@@ -1087,10 +1077,10 @@ Yurko, Ronald, Samuel Ventura, and Maksim Horowitz. 2019. <span>“<span class="
 </div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
-<li id="fn1"><p><span class="citation" data-cites="Yurko2015_nflWAR">(<a href="#ref-Yurko2015_nflWAR" role="doc-biblioref"><strong>Yurko2015_nflWAR?</strong></a>)</span> defines <em>air yards</em> as “the perpendicular distance in yards from the line of scrimmage to the yard line at which the receiver was targeted or caught the bal.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>You can prove that computing group-level averages is mathematically equivalent to fitting a linear regression model with a single categorical predictor encoding group membership. Try doing this yourself or come by office hours if you’d like to see the derivation.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>Indeed, if AJ Cole, who is a punter, threw more passes, do we really think he’ll consistently gain around 4 expected points?<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn4"><p>For now, we are only using one grouping variable. But later in <a href="../lectures/lecture10.html">Lecture 10</a>, we will have multiple grouping variables.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>You can prove that computing group-level averages is mathematically equivalent to fitting a linear regression model with a single categorical predictor encoding group membership. Try doing this yourself or come by office hours if you’d like to see the derivation.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Indeed, if AJ Cole, who is a punter, were to throw many more passes, do we really think he’d consistently add around 4 expected points?<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>For now, we are only using one grouping variable. But later in <a href="../lectures/lecture10.html">Lecture 10</a>, we will have multiple grouping variables.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p><span class="citation" data-cites="Yurko2015_nflWAR">(<a href="#ref-Yurko2015_nflWAR" role="doc-biblioref"><strong>Yurko2015_nflWAR?</strong></a>)</span> defines <em>air yards</em> as “the perpendicular distance in yards from the line of scrimmage to the yard line at which the receiver was targeted or caught the ball.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

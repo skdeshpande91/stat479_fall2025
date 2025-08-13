@@ -220,7 +220,7 @@ In our simple EPA model, the estimated intercept is exactly the average EPA on a
 ```{r}
 mean( pass2024$epa[pass2024$passer_player_id == rodgers_id])
 ```
-To get the average EPA on all passes thrown by a different quarterback (e.g., Dak Prescott whose id is `{r} roster24|> dplyr::filter(full_name == "Dak Prescott") |> dplyr::pull(gsis_id)`), we need to add the corresponding entry in `ols_beta` to the estimated intercept[^prove].
+To get the average EPA on all passes thrown by a different quarterback (e.g., Dak Prescott whose id is `{r} roster2024|> dplyr::filter(full_name == "Dak Prescott") |> dplyr::pull(gsis_id)`), we need to add the corresponding entry in `ols_beta` to the estimated intercept[^prove].
 
 [^prove]: You can prove that computing group-level averages is mathematically equivalent to fitting a linear regression model with a single categorical predictor encoding group membership. Try doing this yourself or come by office hours if you'd like to see the derivation. 
 
@@ -243,7 +243,7 @@ alphas <-
 ```
 1. Rename first element of `ols_beta` so its name follows the same format as the names of all other elements
 2. Remove the string "passer_player_id" from all names of `ols_beta`
-3. Facilitate a later join with `roster24`, which records player identifiers as `gsis_id`
+3. Facilitate a later join with `roster2024`, which records player identifiers as `gsis_id`
 4. Since the first row of `alphas` corresponds to Aaron Rodgers, we need to add the first element in the column `ols` to all other elements in the column. 
 
 Somewhat surprisingly, the top- and bottom-five passers based on average EPA per play are not quarterbacks but include kickers.
@@ -331,43 +331,6 @@ w_{i}\times \hat{\alpha}_{i} + (1 - w_{i}) \times \overline{y},
 $$
 where the weight $w_{i}$ depends on the number of passes thrown by player $i$ and how far $\hat{\alpha}_{i}$ differs from $\overline{y}.$
 
-<!--
-##
-
-We can also use EPA to assess player performance.
-Intuitively, we would more highly value offensive players who tend to produce positive EPA for their team.
-As the quarterback is arguably the [most important offensive player](https://www.nfl.com/news/ranking-each-position-s-importance-from-quarterback-to-returner-0ap3000000503855), it is natural to start there.
-In particular, we will try to determine how much EPA is due to the quarterback on each passing play.
-
-We begin by first creating a data table containing only passing plays from the regular season using the column `play_type`
-```{r}
-#| label: play-type
-table(pbp2024$play_type)
-```
-
-
-
-
-
-
-
-
-### An initial linear model
-
-
-
-
-
-
-  Think about trying to forecast the EPA on another future pass.
-  
-  One option would be to use the overall grand mean $\overline{Y}$ of the observed averages.
-  This is problematic 
-  Alternatively, we might try to use the indi
-  
-  Intuitively, we might try to use $\hat{\alpha}_{i}.$
-  Is this a reasonable estimate? A much more reasonable approach would involve "adjusting" the initial estimate so that players with very few pass attempts 
--->
 ##  Multi-level models
 
 
@@ -509,7 +472,7 @@ pass2024 <-
 pass2024 |> dplyr::slice_head(n = 2)
 ```
 
-[^airyard]: @Yurko2015_nflWAR defines *air yards* as "the perpendicular distance in yards from the line of scrimmage to the yard line at which the receiver was targeted or caught the ball.
+[^airyard]: @Yurko2019_nflWAR defines *air yards* as "the perpendicular distance in yards from the line of scrimmage to the yard line at which the receiver was targeted or caught the ball.
 
 We can elaborate our initial models
 $$
