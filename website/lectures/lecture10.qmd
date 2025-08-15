@@ -6,77 +6,1028 @@ execute:
 ---
 
 
-## Recap & Overview
+## Overview
 
-[In Lecture 9](lecture09.qmd).
+In [Lecture 9](lecture09.qmd#sec-intro), we looked at two touchdowns from the 2024-25 NFL season:
 
+  * A 86-yard touchdown by Ladd McConckey on a pass from Justin Herbert ([video link](https://www.youtube.com/watch?v=Hu9flYe2VrA))
+  * A 64-yard touchdown by Kavontae Turpin on a pass from Cooper Rush ([video link](https://www.youtube.com/watch?v=U0Zp_is-X18))
+  
+The McConckey touchdown was thrown on a 3rd and 26 from the Charger's 14 yard line.
+From that position, teams are expected to score about -1.54 points; that is, starting from that positions, teams, on average, give up points rather than score them.
+Over the course of the play, the Chargers offense generated around 8.54 points of EPA.
+The Turpin touchdown, on the other hand, was thrown on a 3rd and 10 from the Cowboys' 36 yard line, a position from which teams score about 0.77 on average.
+The Cowboys offense generated about 6.23 points of EPA during that play.
+How much of the created EPA on these plays should be credited to the quarterbacks and how much should be credited to the receivers?
+Which players
 
-Let's look at the two touchdown plays
-
-How much credit should be assign to the quarterback and how much credit should we assign to the receiver?
-In both cases, the receiver
-
-Effectively, we can treat a single passing play in two phases.
-Thus `epa_air` is the change in EP between the start of the play and the moment the ball is caught and `epa_yac` is the change in EP between the moment the ball is caught and 
-
-So, on the two passing plays from before[^id], we have
-
-
-
-[^id]: I manually search for the `play_id` and `game_id` for these plays.
-
-As we saw with our baseball analysis, it is not completely reasonable to give the quarterback all the credit for `epa_air` and the receiver all the credit for `epa_yac`.
-
+In this lecture, we will use multilevel modeling to answer these questions.
+We separately model EPA on passing and running plays. 
+For passing plays, we will decompose the EPA into two parts, the expected points gained while the pass is in the air and the expected points gained on the ground after the catch (if the pass was caught).
+Each of our multilevel models will include random intercepts for players nested by their position (e.g., passer and receiver in the passing EPA models) and will also adjust for several important fixed effects. 
+From these models, we will determine how many more expected points per play each player adds relative to the league average.
+Finally, like we did in [Lecture 8](lecture08.qmd), we will translate these expected points added to the win scale and conclude with a version of wins above replacement for offensive players in football.
+Our development closely follows the nflWAR model introduced by @Yurko2019_nflWAR but makes some simplifications.
 
 <!--
+Briefly, we will model EPA using random player intercepts, which account for the fact that players are generally nested within different positions, while simultaneously adjusting for several important fixed effects.
+We will then convert these random intercepts, which represent, in some sense, the average per-play EPA generated for each player, into an estimate of the number of expected points added by each player.
+Finally, like we did in 
 
-  Start with a single play: how do we give credit? obviously, the quarterback made the pass, the receiver caught
-  
-  Is the running back's contribution more or less valuable than the 
-  
-  Over the next two lectures, we will
-  
-  
-  Like with our other sports, we will first estimate the value of different game states. Whereas in baseball this was defined using the number of outs and baserunners, in football it is primarily based on the yardline, yards to gain (i.e., down & distance) and other contextual factors.
-  
-  Then, we will look at how much the expected value changes over the course of a single play.
-  
-  Before allocating credit, we need to introduce a new type of model, which can properly account for the complicated dependence structure and avoid small sample size issues.
 
-  We have so far looked at apportioning credit: 
+At a high-level, we will decompose the EPA on passing plays into two parts, the expected points generated through the air and the expected points generated on the ground after the catch (if the pass was caught), and fit separate multilevel models for both parts.
+We will also fit two separate multilevel models of EPA on rushing plays, one for non-quarterbacks and one for quarterbacks.
 -->
 
-Last lecture, we introduce two-level models.
 
-Our plan will be to compute the player's average effect (their "individual points added (iPA)") for three different types of offensive production: rushing players, passing plays (air yards), and passing plays (yards after catch)
+## Data Preparation {#sec-data-prep}
 
-## Passing Model 1: Air yards
+We will restrict our analysis to plays from the 2024-25 regular season and exclude all post-season/play-off games.
+Later, in @sec-replacement, we will define replacement-level players on a position-by-position basis.
+So that we can look up player positions, we will re-load the roster information using `nflfastR::fast_scraper_roster()`.
+```{r}
+#| label: load-pbp-roster
+#| warning: false
+#| message: false
+#| output: false
+pbp2024 <-
+  nflfastR::load_pbp(season = 2024) |>
+  dplyr::filter(season_type == "REG") 
+roster2024 <-
+  nflfastR::fast_scraper_roster(seasons = 2024) |>
+  dplyr::filter(!is.na(gsis_id))
+```
+
+### Passing plays 
+We will extract information about all passing plays from `pbp2024` into a data table called `pass2024`. 
+```{r}
+#| label: build-pass2024
+pass2024 <-
+  pbp2024 |>
+  dplyr::filter(
+    play_type == "pass" &
+    !is.na(posteam) & 
+    !grepl("TWO-POINT CONVERSION ATTEMPT", desc) & #<1>
+    !grepl("sack", desc)  ) |> #<2>
+  dplyr::filter(passer_player_id != receiver_player_id) |> #<3>
+  dplyr::select(
+    passer_player_id,
+    receiver_player_id,
+    posteam, defteam,
+    air_yards, shotgun, 
+    qb_hit, no_huddle,
+    posteam_type, 
+    pass_location,
+    yards_after_catch,
+    epa, air_epa, yac_epa, complete_pass, desc) |>
+  dplyr::mutate(gsis_id = receiver_player_id) |> #<4>
+  dplyr::left_join(y = roster2024 |> dplyr::select(gsis_id, position), by = "gsis_id") |> #<5>
+  dplyr::rename(receiver_position = position) |> #<6>
+  dplyr::select(-gsis_id) #<7>
+```
+1. Remove pass attempts on two-point conversions
+2. **nflfastR** classifies sacks as passing plays. For the purposes of building a version of WAR for the NFL, we will treat sacks as running plays, similar to @Yurko2019_nflWar.
+3. Remove [plays like this](https://www.youtube.com/shorts/roJrUCFDrFA) where the passer catches their own pass (usually off a deflection). 
+4. Copy receiver ID into a temporary column, which will be used append receiver position with a join.
+5. Append receiver position.
+6. Rename the column containing receiver position.
+7. Remove the temporary column holding the receiver ID
+
+In addition to the identity of the passer (`passer_player_id`) and intended receiver (`receiver_player_id`), the data table contains the following columns:
+  * `posteam`: the identity of the team in possession of the ball
+  * `defteam`: the identity of the team on defense
+  * `air_yards`: the distance traveled by the pass through the air[^airyard]
+  * `shotgun`: whether the pass was thrown out of the [shotgun formation](https://en.wikipedia.org/wiki/Shotgun_formation)
+  * `qb_hit`: whether the quarterback was hit while throwing
+  * `no_huddle`: whether the play was run [without a huddle](https://en.wikipedia.org/wiki/Hurry-up_offense)
+  * `posteam_type`: whether the home team had possession (i.e., was on offense)
+  * `pass_location`: whether the pass was thrown to the left, right, or center of the field
+  * `yards_after_catch`: for completions, how many yards did the receiver gain after catching the pass
+  * `epa`: the expected points added on the play
+  * `air_epa` and `yac_epa`: the expected points added through the air and running after the catch (for completed passes)
+  * `complete_pass`: whether the pass was completed
+  * `receiver_position`: the position of the actual receiver on completed passes and the intended receiver on incomplete passes
+
+For every passing play, **nflfastR** computes two different EPA values.
+The first, `air_epa` is the expected points added through the air and `yac_epa` is the expected points added after the catch.
+For completed passes, computing `air_epa` and `yac_epa` is relatively straightforward: as soon as the pass is caught, imagine stopping the play and computing the expected points based on the resulting game state.
+Then, the difference between this intermediate EP and the starting EP of the original play is `air_epa` and the difference between the final EP and this intermediate EP is `yac_epa`.
+Computing `air_epa` and `yac_epa` for incomplete passes is trickier and involves computing the difference in expected points between the final state, initial state, and an intermediate state that would result had the pass been caught.
+
+### Rushing data {#sec-rushing-data}
+
+Success in the run game depends not only on the skill of the individual runner to run through the [space created by his teammates](https://youtu.be/hrlrYzCioiI?t=208) and [evade defenders](https://youtu.be/hrlrYzCioiI?t=66) but also on the ability of his teammates (usually linemen) to [create space near the line](https://youtu.be/hrlrYzCioiI?t=122) and to [make blocks down the field](https://www.youtube.com/watch?v=f_z8E6E3iYo).
+Unfortunately, publicly available NFL play-by-play does not record the identities of all 22 players on the field nor does it include information about play (i.e., whether the play involved a pulling guard).
+It does, however, contain two variables, `run_location`, and `run_gap` that provide some context about the play.
+
+We start by building a data table containing all rushing plays.
+As noted above, we will treat sacks as rushing plays.
+```{r}
+#| label: build-rush2024
+
+rush2024 <-
+  pbp2024 |>
+  dplyr::filter(
+    !grepl("TWO-POINT CONVERSION ATTEMPT", desc)) |>
+  dplyr::filter(
+    !grepl("No play", desc, ignore.case = TRUE)) |> #<1>
+  dplyr::filter(
+    play_type == "run" |
+    grepl("sack", desc, ignore.case = TRUE)) |>
+  dplyr::select(
+    game_id, play_id,
+    posteam, defteam, 
+    passer_player_id, #<2>
+    rusher_player_id,
+    posteam_type,
+    shotgun, no_huddle,
+    run_location, run_gap, 
+    epa, desc) 
+```
+1. Remove the plays that are whistled dead or involve penalties like roughing the passer or are otherwise classified as "No Play"
+2. On sacks, the quarterback is sometimes not classified as a runner but as passer
+ 
+
+The data table `rush2024` contains several of the same variables `pass2024` including the identities of the offensive and defensive teams, the EPA, and the indicators `shotgun`, `no_huddle`, and `posteam_type`.
+It also includes the ID for the runner and their listed position and two variables, `run_location` and `run_gap`, that contain some contextual information about the run. 
+Unfortunately, there are a lot of missing values of `rusher_player_id`, all of which correspond to sacks.
+```{r}
+#| label: missing-id
+sum(is.na(rush2024$rusher_player_id))
+sum(grepl("sack", rush2024$desc, ignore.case = TRUE) & is.na(rush2024$rusher_player_id))
+```
+
+
+#### Dealing with sacks
+
+**nflfastR** treats sacks as passing plays and not running plays.
+However, because the ball is not thrown during a sack, there is no well-defined `air_epa` or `yac_epa`.
+We instead follow the example of @Yurko2019_nflWAR and treat sacks as running plays.
+Unfortunately, for the vast majority of sacks, the `rusher_player_id` variable is not available.
+```{r}
+sacks <-
+  rush2024 |>
+  dplyr::filter(grepl("sack", desc, ignore.case = TRUE))
+mean(is.na(sacks$rusher_player_id))
+```
+Instead, the id of the player who was sacked --- whom we wish to treat as the rusher in our models --- is saved as `passer_player_id`.
+We first verify that all sacks with a missing `rusher_player_id` do not also have a missing `passer_player_id`
+```{r}
+#| label: verify-rusher-passer-sacks
+sum(is.na(sacks$rusher_player_id)) #<1>
+sum(!is.na(sacks$passer_player_id) & is.na(sacks$rusher_player_id)) #<2>
+```
+1. Number of sacks for which we are missing the `rusher_player_id`
+2. Number of sacks for which are missing the `rusher_player_id` but are **not** missing the `passer_player_id`
+
+
+The following code overwrites the missing `rusher_player_id` values on sacks and then appends the rusher's position.
+```{r}
+rush2024 <-
+  rush2024 |>
+  dplyr::mutate(
+    rusher_player_id = 
+      dplyr::case_when(
+        is.na(rusher_player_id) & grepl("sack", desc, ignore.case = TRUE) ~ passer_player_id,
+        .default = rusher_player_id)) |>
+  dplyr::mutate(gsis_id = rusher_player_id) |>
+  dplyr::left_join(y = roster2024 |> dplyr::select(gsis_id, position), by = "gsis_id") |>
+  dplyr::rename(rusher_position = position) |>
+  dplyr::select(-gsis_id)
+
+```
+
+
+#### Run context {#sec-run-context}
+
+The data table `rush2024` contains two variables that describe the run play.
+The first, `run_location`, records whether the run was towards the left, right or middle of the offensive line.
+To describe `run_gap`, we need to introduce a little bit of additional notation.
+Every offensive play in American football begins with 5 offensive players (the "linemen") on the line of scrimmage.
+The center is responsible for snapping the ball to the quarterback --- thereby starting the play --- and is positioned in the middle of the line.
+Next to the center are the two guards and next to the guards are the two tackles.
+The spaces between the linemen are known as "gaps" and are conventionally labelled with letters: "A" gap between the center and guard; "B" gap between guard and tackle, and "C" gap outside the tackle.
+Sometimes, but not always, a tight end lines up next to one or both of the tackles. 
+When that happens, the space between the tackle and end is labelled "C" gap and the space outside the tight end is known as "D" gap.
+
+Although the naming convention is very prevalent within football (i.e, amongs coaches and players), the NFL play-by-play data does not use this convention. 
+Instead, the variable `run_gap` takes the value `guard` for runs through the "B" gap, `tackle` for runs through the "C" gap, and `end` for runs through the "D" gap.
+For runs through the "B", "C", or "D" gap, the variable `run_location` takes on the value "left" or "right", to indicate which side of the line 
+But for runs through the "A" gap, `run_gap` is NA and `run_location` is equal to "middle".
+```{r}
+#| label: run-gap-location
+table(rush2024[,c("run_gap", "run_location")], useNA = 'always')
+```
+We will combine these two variables into a composite variable `run_context`.
+For runs where both `run_gap` and `run_location` are not `NA`, we will concatenate the three variables (e.g., `"left end"` or `"right tackle"`).
+For runs through the "A" gap (when `run_location == "middle"` and `run_gap` is `NA`), we will set the contextual variable to be `"middle"`.
+It turns out that the remaining 1447 running plays with missing `run_location` and `run_gap` involve a sack or fumble (and sometimes both!)
+```{r}
+tmp <-  #<1>
+  rush2024 |> #<1>
+  dplyr::filter(is.na(run_gap) & is.na(run_location)) #<1>
+
+all( #<2>
+  grepl("sack", tmp$desc, ignore.case = TRUE) | #<3
+    grepl("fumble", tmp$desc, ignore.case = TRUE) ) #<3>
+```
+1. Pull out all the plays missing both `run_gap` and `run_location`.
+2. `all` returns `TRUE` if **all** elements in a logical vector are true
+3. Check whether the strings "sack" or "fumble" appears in the play description.
+
+For these plays, we will set `run_context == "other"`.
+We further combine `run_context` with the identity of the offensive team (i.e., `posteam`) to create what @Yurko2019_nflWAR describe as a "proxy for the offensive linemen or blockers involved in a rushing attempt."
+```{r}
+#| label: run-context
+rush2024 <-
+  rush2024 |>
+  dplyr::mutate(
+    run_context = dplyr::case_when(
+      run_location == "middle" ~ paste(posteam, "middle", sep = "_"),
+      is.na(run_location) & is.na(run_gap) ~ paste(posteam, "other", sep = "_"),
+      .default = paste(posteam, run_gap, run_location, sep = "_")))
+```
+
+### Accounting for team strengths
+
+Recall one of the main [drawbacks of plus/minus](lecture04.qmd#sec-pm-issues) was its inability to account for the quality of the player's teammates.
+When trying to construct a version of WAR for offensive players in the NFL, we need to make sure that we do not overly reward players who happen to play for good teams or overly penalize players who play on bad offenses.
+In our multilevel models, we will quantify each offense' running and passing strength using the average EPA on rushing and passing plays.
+
+```{r}
+#| label: get-strength
+
+pass_strength <-
+  pass2024 |>
+  dplyr::group_by(posteam) |>
+  dplyr::summarise(pass_strength = mean(epa,na.rm = TRUE))
+rush_strength <-
+  rush2024 |>
+  dplyr::group_by(posteam) |>
+  dplyr::summarise(rush_strength = mean(epa, na.rm = TRUE))
+
+
+pass2024 <-
+  pass2024 |>
+  dplyr::inner_join(pass_strength, by = "posteam") |>
+  dplyr::inner_join(rush_strength, by = "posteam")
+
+rush2024 <-
+  rush2024 |>
+  dplyr::inner_join(pass_strength, by = "posteam") |>
+  dplyr::inner_join(rush_strength, by = "posteam")
+```
+
+
+## Passing Models {#sec-passing-models}
+
+
+### Constructing composition outcomes
+We're now ready to determine how much individual players contribute to their team's overall EPA on passing plays.
+While it is tempting to fit separate multilevel models to predict the values in the `air_epa` and `yac_epa`, we need to be a bit more careful in how we deal with incomplete passes.
+Specifically, on an incomplete pass, there is necessarily no run after the catch and any change in EP is driven entirely by what happens while the ball is in the air.
+To account for this, we will define two composite outcomes that are based on `air_epa`, `yac_epa`, and `epa`.
+
+Formally, say that there are $n$ passing plays and for passing play $i,$ let $\Delta_{i}$ be the observed EPA on the play.
+Let $\delta_{i,\textrm{air}}$ and $\delta_{i,\textrm{yac}}$ be the values of `air_epa` and `yac_epa` provided by **nflfastR**.
+We will decompose $\Delta_{i} = \Delta_{i,\textrm{air}} + \Delta_{i,\textrm{yac}}$ where
+$$
+\Delta_{i, \textrm{air}} = 
+\begin{cases}
+\delta_{i, \textrm{air}} & \textrm{if the pass is caught} \\
+\Delta_{i} & \textrm{if the pass is incomplete,}
+\end{cases}
+$$
+and
+$$
+\Delta_{i, \textrm{yac}} = 
+\begin{cases}
+\delta_{i, \textrm{yac}} & \textrm{if the pass is caught} \\
+0 & \textrm{if the pass is incomplete.}
+\end{cases}
+$$
+The following code creates columns for these composite outcomes and also converts categorical predictors like defensive team and receiver position into factor variables.
+```{r}
+#| label: define-composite-outcomes
+
+pass2024 <-
+  pass2024 |>
+  dplyr::mutate(
+    Delta_air = ifelse(complete_pass == 1, air_epa, epa),
+    Delta_yac = ifelse(complete_pass == 1, yac_epa, 0),
+    passer_player_id = factor(passer_player_id),
+    receiver_player_id = factor(receiver_player_id),
+    posteam = factor(posteam),
+    defteam = factor(defteam),
+    pass_location = factor(pass_location),
+    receiver_position = factor(receiver_position))
+```
+
+
+### Modeling $\Delta_{\textrm{air}}$ {#sec-air-model}
+
+Our first multilevel model, fitted to data from all passing plays, includes separate random intercepts for the passers, receivers, and defenses.
+It also accounts for the fixed effects of 
+  * `air_yards`: the distance traveled by the pass through the air
+  * `shotgun`: whether the pass was thrown out of the [shotgun formation](https://en.wikipedia.org/wiki/Shotgun_formation)
+  * `qb_hit`: whether the quarterback was hit while throwing
+  * `no_huddle`: whether the play was run [without a huddle](https://en.wikipedia.org/wiki/Hurry-up_offense)
+  * `posteam_type`: whether the home team had possession (i.e., was on offense)
+  * `pass_location`: whether the pass was thrown to the left, right, or center of the field
+  * `receiver_position`: the position of the intended receiver
+  * `rush_strength`: the average EPA per rush attempt for the offense
+
+Before writing down our model, we introduce some more notation. 
+Formally, suppose that there are $n_{q}$ passers[^qb], $n_{c}$ receivers[^rec], and $n_{D}$ defenses.
+For passing play $i,$ let $q[i], c[i],$ and $d[i]$ denote the identity of the passer, receiver, and defense involved in the play and let $\boldsymbol{\mathbf{x}}_{i}$ be the vector of fixed effect covariates (i.e., the ones listed above).
+
+[^qb]: Because the vast majority of passes are thrown by **q**uarterbacks, we'll index passers with "q".
+
+[^rec]: Because "r" could refer to either receiver or runner, we'll index receivers with "c" for pass **c**atchers.
+
+We model
+$$
+\begin{align}
+\Delta_{i, \textrm{air}} &= Q_{q[i]} + C_{c[i]} + D_{d[i]} + \boldsymbol{\mathbf{x}}_{i}^{\top}\boldsymbol{\beta} + \epsilon_{i} \quad \text{for all passes}\ i = 1, \ldots, n \\
+Q_{q} &\sim N(\mu_{Q}, \sigma^{2}_{Q}) \quad \textrm{for all passers}\ q = 1, \ldots, n_{Q} \\
+C_{c} &\sim N(\mu_{C}, \sigma^{2}_{C}) \quad \textrm{for all pass catchers}\ c = 1, \ldots, n_{C},  \\
+D_{d} &\sim N(\mu_{D}, \sigma^{2}_{D}) \quad \textrm{for all defenseive teams}\ d = 1, \ldots n_{D}.
+\end{align}
+$$
+
+We can fit this model with `lme4::lmer()` using similar notation as was used in [Lecture 9](lecture09.qmd).
+Just like in that lecture, we can read off lots of important information and parameter estimates from the model summary.
+For instance, there is much more variability in the receiver effects than the passer or defense effects.
+```{r}
+#| label: fit-air-model
+library(lme4)
+
+air_model <-
+  lmer(Delta_air ~ 1 + (1|passer_player_id) + (1 | receiver_player_id) + (1 | defteam ) #<1>
+       + air_yards + shotgun + qb_hit + no_huddle + posteam_type + pass_location + receiver_position + rush_strength, #<2>
+       data = pass2024)
+summary(air_model)
+```
+1. We want random intercepts for the passer, receiver, and defensive team
+2. Specify the fixed effects
+
+For each passer $q,$ $Q_{q}$ is a *latent*[^latent] quantity measuring how many expected points passer $q$ adds through the air, after you account for the fixed effects and also the quality of the intended receiver and the defense.
+The quantity $\mu_{Q}$ represents the global average of these latent quantities.
+Similarly, $C_{c}$ is the latent measurement of how many expected points receiver $c$ adds while the pass is in the air[^route] after accounting for the fixed effects and the quality of the passer and of the opposing defense.
+And $D_{d}$ is the latent measurement of how many expected points are added for the *offensive* team by defensive team $d$ while the pass is in the air.
+Since EPA is signed so that positive values are considered good for the offense, large *negative* values of $D_{d}$ are treated as good for the defense.
+In our model, the random intercepts $Q_{q}, C_{c},$ and $D_{d}$ are all modeled as noisy deviations away from league-wise averages $\mu_{Q}, \mu_{C},$ and $\mu_{D}.$
+
+[^route]: E.g., via his route running.
+
+Unfortunately, we cannot estimate $\mu_{Q}, \mu_{C},$ and $\mu_{D}$ because these parameters are not **identified**.
+Without going into too many technical details[^take310], there are infinitely many settings of the values of these three parameters that yield exactly the same fit to the data.
+Because we cannot estimate $\mu_{Q}, \mu_{C},$ and $\mu_{D},$ we are unable to obtain estimates for the random intercepts $Q_{q}, C_{c},$ and $D_{d}$ like we did in [Lecture 9](lecture09.qmd).
+We are, however, able to estimate the deviations $Q_{q} - \mu_{Q},$ $C_{c} - \mu_{C},$ and $D_{d} - \mu_{D}.$
+For each passer $q$, the quantity $Q_{q} - \mu_{Q}$ measures many more expected points per play passer $q$ adds through the air *than the league average*.
+Following @Yurko2019_nflWAR, we will refer to this number as passer $q$'s individual points added over average or $\textrm{IPA}^{(Q)}_{\textrm{air},q}$[^ipa-notation].
+We can similarly define $\textrm{IPA}^{(C)}_{\textrm{air}, c}$ for receivers. 
+For each defense $d,$ let $D_{d} - \mu_{D}$ is the number of points per passing play over league average given up by the defensive team while the bar is in the air.
+We will denote this quantity by $\textrm{TPA}^{(D)}_{\textrm{air},d},$ with negative $\textrm{TPA}$ values corresponding to better defenses. 
+
+[^ipa-notation]: The superscript $^{(Q)}$ is there to remind us that this is for passers (i.e., quarterbacks) and the subscript $\textrm{air}$ reminds us that the IPA values are derived from our model for EPA through the air.
+
+[^latent]: That is, unobservable.
+
+[^take310]: If you have taken STAT 310 or 312, the issue is that the [likelihood]() function depends on these parameters only through their sum $\mu_{Q} + \mu_{C} + \mu_{D}.$ So, the data alone cannot distinguish configurations of these parameters that yield the same sum. For instance, setting $\mu_{Q} = \mu_{C} = \mu_{D} = 0$ yields exactly the same fit to the data $\mu_{Q} = 5, \mu_{C} = -5, \mu_{D} = 0.$ One way to get around this inject prior information and fit a hierarchical Bayesian model, but that is beyond the scope of this course.
 
 
 
-## Passing Model 2: Yards after Catch
+We can extract the IPA and TPA values using the function `ranef()`.
+```{r}
+#| label: get-air-ipas
+tmp_air <- ranef(air_model) #<1>
+
+air_passer_effects <-
+  data.frame(
+    gsis_id = rownames(tmp_air[["passer_player_id"]]), #<2>
+    ipa_air_pass = tmp_air[["passer_player_id"]][,1])
+air_receiver_effects <-
+  data.frame(
+    gsis_id = rownames(tmp_air[["receiver_player_id"]]),
+    ipa_air_rec = tmp_air[["receiver_player_id"]][,1])
+air_defense_effects <-
+  data.frame(
+    Team = rownames(tmp_air[["defteam"]]),
+    tpa_air_def = tmp_air[["defteam"]][,1])
+```
+1. Extract the passer, receiver, and defensive random intercepts in a large list
+2. Because we will eventually append player names by `inner_join()`'ing with `roster2024`, we'll record the passer IDs in a column called `gsis_id`.
+
+Taking a quick look at the top-10 (resp. bottom-10) IPA passer values, we see a number of highly regarded (resp. heavily criticized) quarterbacks.
+```{r}
+air_passer_effects |>
+  dplyr::inner_join(y = roster2024 |> dplyr::select(gsis_id, full_name), by = "gsis_id") |>
+  dplyr::select(full_name, ipa_air_pass) |>
+  dplyr::arrange(dplyr::desc(ipa_air_pass)) |>
+  dplyr::slice(c(1:5, (dplyr::n()-4):dplyr::n()))
+```
+
+### Modeling $\Delta_{\textrm{yac}}$ {#sec-yac-model}
+
+By fitting a similar multilevel model to predict the $\Delta_{i, \textrm{yac}}$'s, we can estimate how much each passer, receiver, and defense contributes to EPA during the part of a passing play following a catch.
+Because these contributions can, by definition, only be made following a completed pass, we fit this model using only the data from completed pass[^yurkomistake].
+
+[^yurkomistake]: In the original nflWAR paper [@Yurko2019_nflWAR], they set $\Delta_{\textrm{air},i} =\Delta_{\textrm{yac},i} = \Delta_{i}$ on incomplete passes and fit the YAC EPA model using data from both complete and incomplete passes. This effectively "double counts" contributions of offensive players. 
+
+
+```{r}
+#| label: fit-yac-model
+
+completions <-
+  pass2024 |>
+  dplyr::filter(complete_pass==1)
+
+yac_model <-
+  lmer(Delta_yac ~ 1 + (1|passer_player_id) + (1 | receiver_player_id) + (1 | defteam ) 
+       + air_yards + shotgun + qb_hit + no_huddle + posteam_type + pass_location + receiver_position + rush_strength, 
+       data = completions)
+```
+
+While fitting the model, `lmer` printed a message saying that the fit was singular.
+The manual page for `isSingular`, which the message instructs us to visit, contains lots of information about singular models.
+Briefly, when fitting complicated multilevel models with lots of random effects, it can sometimes be the case that some of the "between" group variances are estimated to be exactly zero.
+Quoting from the manual
+> While singular models are statistically well-defined ... there are real concerns that (1) singular fits correspond to overfitted models that may have poor power; (2) chances of numerical problems or mis-convergence are higher for singular models ... ; (3) standard inferential procedures such as Wald statistics and likelihood ratio tests may be inappropriate.
+
+Taking a look at the model summary, we see that the passer-to-passer variation has been set to zero.
+```{r}
+#| label: summarize-yac-model
+summary(yac_model)
+```
+We can further confirm that this is the case by checking whether all the estimated deviation between each passer's random intercept and the global mean across all passers (i.e., all $\textrm{IPA}^{(Q)}_{\textrm{yac},q})$'s) are equal to zero.
+```{r}
+#| label: yac-passer-ipa
+all(ranef(yac_model)[["passer_player_id"]][,1] == 0) #<1>
+```
+1. Checks whether all of the passer IPA values are equal to 0.
+
+This phenomenon makes some intuitive sense: once the catch is made, there is very little for the passer, who is typically several yards away, to contribute.
+The [manual entry for `isSingular`](https://rdrr.io/cran/lme4/man/isSingular.html) goes on to say that "There is not yet consensus about how to deal with singularity, or more generally to choose which random-effects specifications (from a range of choices of varying complexity to use)"[^bayes] and suggests that one option is to "avoid fitting overly complex models in the first place."
+So, at this point we have a choice: either we move forward with our model or we re-fit it without the passer random intercepts.
+
+Recall that we ultimately plan to aggregate the IPA from air yards, YAC, and rushing for all offensive players.
+If we move forward with our existing model, the YAC IPA values for passers are already set to zero.
+But if we re-fit the model, we will have to manually set these values to zero.
+To avoid this extra step, we'll continue to use our current[^homework].
+
+[^homework]: But you should check whether our downstream results change if we estimate the YAC IPA values for receivers using a reduced model that excludes the passer random intercept!
+
+
+[^bayes]: Personally, I disagree with the statement. A very natural way around this issue is to use a Bayesian hierarchical model. In fact, I'd go further and say that multilevel models of the type fitted by `lmer()` are just impoverished versions of Bayesian hierarchical models. But Bayesian models are regrettably outside the scope of the course and non-Bayesian multilevel models are very widely used so you have to learn a little about them. 
+
+```{r}
+#| label: yac-ipa
+tmp_yac <- ranef(yac_model)
+
+yac_passer_effects <-
+  data.frame(
+    gsis_id = rownames(tmp_yac[["passer_player_id"]]), 
+    ipa_yac_pass = tmp_yac[["passer_player_id"]][,1])
+yac_receiver_effects <-
+  data.frame(
+    gsis_id = rownames(tmp_yac[["receiver_player_id"]]),
+    ipa_yac_rec = tmp_yac[["receiver_player_id"]][,1])
+yac_defense_effects <-
+  data.frame(
+    Team = rownames(tmp_yac[["defteam"]]),
+    tpa_yac_def = tmp_yac[["defteam"]][,1])
+
+```
+
+Among the receivers with the largest $\textrm{IPA}_{\textrm{YAC}, c}^{(C)}$ values, we see players like Ja'Marr Chase, Khalil Shakir, and Brock Bowers who [led the league in yards after the catch during the 2024 regular season](https://www.espn.com/nfl/stats/player/_/stat/receiving/table/receiving/sort/receivingYardsAfterCatch/dir/desc).
+```{r}
+#| label: top-yac-iap
+yac_receiver_effects |>
+  dplyr::inner_join(y = roster2024 |> dplyr::select(gsis_id, full_name), by = "gsis_id") |>
+  dplyr::arrange(dplyr::desc(ipa_yac_rec)) |>
+  dplyr::slice_head(n = 10) |>
+  dplyr::select(full_name, ipa_yac_rec)
+```
+
 
 ## Rushing Model
 
-We now turn to running plays
+As @Yurko2019_nflWAR notes, we cannot distinguish between designed quarterback runs from scrambles on broken plays using publicly available play-by-play data.
+So, we will fit two separate models of EPA for running plays, one for all quarterback runs (i.e., `rusher_position=="QB"`) and one for all non-quarterback runs (i.e., `rusher_position != "QB"`).
+Before creating separate data tables for the two types of running plays, we convert several categorical covariates to factors.
+```{r}
+#| label: convert-rush-categorical
+rush2024 <-
+  rush2024 |>
+  dplyr::mutate(
+    rusher_player_id = factor(rusher_player_id),
+    posteam = factor(posteam),
+    defteam = factor(defteam),
+    posteam_type = factor(posteam_type),
+    rusher_position == factor(rusher_position),
+    run_context = factor(run_context))
+
+qb_runs <-
+  rush2024 |>
+  dplyr::filter(rusher_position == "QB")
+
+nonqb_runs <-
+  rush2024 |>
+  dplyr::filter(rusher_position != "QB")
+```
+
+We now fit multilevel models to predict the EPA on running plays for both QB-runs and non-QB-runs.
+Like with our other models, we extract the number of expected points per play each player adds over the league average via their running.
+```{r}
+#| label: fit-run-models
+
+qbrun_fit <-
+  lmer(epa ~ 1 + (1 | rusher_player_id) + (1 | defteam) +
+         shotgun + no_huddle + posteam_type + pass_strength, #<1>
+       data = qb_runs)
+nonqb_run_fit <-
+  lmer(epa ~ 1 + (1 | rusher_player_id) + (1 | defteam) +  
+         shotgun + no_huddle + posteam_type + rusher_position + run_context + pass_strength, #<2>
+       data = nonqb_runs)
+
+
+tmp_qbrun <- ranef(qb_run_fit)
+qbrun_effects <-
+  data.frame(
+    gsis_id = rownames(tmp_qbrun[["rusher_player_id"]]), 
+    ipa_qbrun = tmp_qbrun[["rusher_player_id"]][,1])
+
+tmp_run <- ranef(nonqb_run_fit) 
+run_effects <-
+  data.frame(
+    gsis_id = rownames(tmp_run[["rusher_player_id"]]),
+    ipa_run = tmp_run[["rusher_player_id"]][,1])
+```
+1. For the quarterback run model, there is no need to include `rusher_position` since every rusher in the dataset plays the same position. We also exclude `run_context` since many of the observations in this data table are not designed runs.
+2. For the non-quarterback run model, we adjust for the runner's position and the run context
+
+Taking a look at the top non-QB IPA values, we see several highly-regarded running backs
+```{r}
+#| label: top-run-ipa
+
+run_effects |>
+  dplyr::left_join(y = roster2024 |> dplyr::select(gsis_id, full_name), by = "gsis_id") |>
+  dplyr::select(full_name, ipa_run) |>
+  dplyr::arrange(dplyr::desc(ipa_run)) |>
+  dplyr::slice_head(n = 10)
+```
+
+## Total Individual Points Added Above Average {#sec-ipaa}
+
+For each offensive player, we have estimates for the number of expected points they add **per play** through the air, after the catch, and through their running.
 
 
 
-## Individual Points Above Average & Replacement Level
+By multiplying each player's IPA by the number of times they attempted the corresponding play, we can compute each player's *individual points added above average* or IPAA for every type of play.
 
-### Computing a player's iPAA
-<!--
-  QB: k_{p,pass} is number of pass attempts, k_{p,rush} is sum of rush attempts, scrambles, and sacks
-  For non-QB; k_{p,pass} number of targets, p_{p,rush} is number of rush attempts
+For instance, let's start with quarterbacks and how they generate EPA through the air on passing plays.
+Our modeling suggests that Joe Burrow created 42 more points of EP for his team through the air than a league-average quarterback would have.
+Burrow's IPAA of 42 points through the air is substantially larger than the next best quarterbacks (Darnlod and Jackson).
+Recall from @sec-yac-model that every passer has an IPA of zero based on their contributions after the catch is made.
+```{r}
+#| label: pass-ipaa
 
-Summing over all three components gives player p's individual points added above average, iPAA_{p}
--->
+passer_ipaa <-
+  pass2024 |>
+  dplyr::group_by(passer_player_id) |> #<1>
+  dplyr::summarise(n_pass = dplyr::n()) |> #<1>
+  dplyr::rename(gsis_id = passer_player_id) |> #<2>
+  dplyr::left_join(air_passer_effects, by = "gsis_id") |> #<3>
+  dplyr::left_join(yac_passer_effects, by = "gsis_id") |> #<4>
+  dplyr::mutate(
+    ipaa_air_pass = ipa_air_pass * n_pass,
+    ipaa_yac_pass = ipa_yac_pass * n_pass) |>
+  dplyr::left_join(y = roster2024 |> dplyr::select(gsis_id, full_name, position), by = "gsis_id")
 
-### Position-specific replacement levels
+passer_ipaa |>
+  dplyr::select(full_name, n_pass, ipaa_air_pass, ipaa_yac_pass) |>
+  dplyr::arrange(dplyr::desc(ipaa_air_pass)) |>
+  dplyr::slice_head(n = 10)
+```
+1. Compute the number of passing attempts for each passer
+2. Rename the column with passer ID so that we can append their IPA values
+3. Append the IPA values for all passers
+4. Compute the IPAA by multiplying number of attempts by IPA
 
+We can repeat these calculations for receivers on passing plays
+```{r}
+#| label: rec-ipaa
+receiver_ipaa <-
+  pass2024 |>
+  dplyr::group_by(receiver_player_id) |>
+  dplyr::summarise(n_rec = dplyr::n()) |> 
+  dplyr::rename(gsis_id = receiver_player_id) |> 
+  dplyr::left_join(air_receiver_effects, by = "gsis_id") |> 
+  dplyr::left_join(yac_receiver_effects, by = "gsis_id") |>
+  dplyr::mutate(
+   ipaa_air_rec = ipa_air_rec * n_rec,
+   ipaa_yac_rec = ipa_yac_rec * n_rec) |>
+  dplyr::left_join(y = roster2024 |> dplyr::select(gsis_id, full_name, position), by = "gsis_id")
+```
+
+Here are the top 10 IPAA values for receivers based on their contributions while the ball is in the air:
+```{r}
+#| label: sort-ipaa-rec-air
+receiver_ipaa |>
+  dplyr::select(full_name, n_rec, ipaa_air_rec, ipaa_yac_rec) |>
+  dplyr::arrange(dplyr::desc(ipaa_air_rec)) |>
+  dplyr::slice_head(n = 10)
+```
+And here are the top 10 IPAA values for receivers based on their contributions following a catch:
+```{r}
+#| label: sort-ipaa-rec-yac
+receiver_ipaa |>
+  dplyr::select(full_name, n_rec, ipaa_air_rec, ipaa_yac_rec) |>
+  dplyr::arrange(dplyr::desc(ipaa_yac_rec)) |>
+  dplyr::slice_head(n = 10)
+```
+It is particularly interesting to note that there are several receivers whose contributions while the ball in the air are worse than league average but who are better than league average once they catch the ball. 
+
+We repeat this calculation for the IPA values arising from yards after the catch and for both types of running play.
+```{r}
+#| label: ipaa-run
+
+qbrun_ipaa <-
+  qb_runs |>
+  dplyr::group_by(rusher_player_id) |>
+  dplyr::summarise(n_qbrun = dplyr::n()) |>
+  dplyr::rename(gsis_id = rusher_player_id) |>
+  dplyr::left_join(y = qbrun_effects, by = "gsis_id") |>
+  dplyr::mutate(ipaa_qbrun = n_qbrun * ipa_qbrun) |>
+  dplyr::left_join(y = roster2024 |> dplyr::select(gsis_id, full_name, position), by = "gsis_id")
+
+run_ipaa <-
+  nonqb_runs |>
+  dplyr::group_by(rusher_player_id) |>
+  dplyr::summarise(n_run = dplyr::n()) |>
+  dplyr::rename(gsis_id = rusher_player_id) |>
+  dplyr::left_join(y = run_effects, by = "gsis_id") |>
+  dplyr::mutate(ipaa_run = n_run * ipa_run) |>
+  dplyr::left_join(y = roster2024 |> dplyr::select(gsis_id, full_name, position), by = "gsis_id")
+
+
+run_ipaa |>
+  dplyr::select(full_name, ipaa_run) |>
+  dplyr::arrange(dplyr::desc(ipaa_run)) |>
+  dplyr::slice_head(n = 10)
+```
+
+
+
+### Position-specific replacement levels for non-quarterbacks
+
+Although the IPAA values are interesting and informative, they represent a comparion between players and a nebulously defined average.
+Recall that IPAA is just a scaled version of IPA, which we defined to be the difference between the player-specific random intercept and a global mean parameter in our multilevel model.
+That mean does not represent the average of all observed players in the league.
+Instead, it captures the average intercept across a theoretical, infinite super-population of players from which we assume the set of observed players is sampled.
+So, it is not strictly correct to say that IPA measures a player's expected contribution over and above a league-average player's contribution on a per-play basis.
+
+To facilitate comparisons that are easier to interpret, we now translate the IPAA values into measures of a player's contribution relative to a replacement-level player.
+As discussed in the context of baseball, there are myriad ways to define what replacement level.
+Like we did in [Lecture 8](lecture08.qmd), we take a roster-based approach and define different replacement levels for different combinations of position and our EPA models.
+Noting that most NFL teams carry 3 running backs (RBs), 4 wide receivers (WRs), and 2 tight ends (TE), we define replacement levels based o on the following thresholds:
+
+  * WRs on passing plays: The top $32 \times 4 = 128$ WRs sorted by *receiving attempts* (i.e., `n_rec` in `pass_ipaa`) are non-replacement-level; everyone else is replacement-level
+  * TEs on passing plays: The top $32 \times 2 = 64$ TEs sorted by *receiving attempts* are non-replacement-level; everyone else is replacement-level
+  * RBs on passing plays: The top $32 \times 3 = 96$ RBs sorted by *receiving attempts* are non-replacement-level; everyone else is replacement-level
+  * WR/TEs on running plays: The top $32 \times 1 = 32$ WR and TEs sorted by *rushing attempts* are non-replacement-level; everyone else is replacement-level
+  * RBs on running plays: The top $32 \times 3 = 96$ RBs sorted by *rusing attempts* are non-replacement-level; everyone else is replacement-level.
+
+These definitions allow for the possibility that a RB may be non-replacement-level based on his running but is at or below replacement-level when it comes to receiving.
+Like we did in [Lecture 8](lecture08.qmd), for every player we can compare his IPAA to the IPAA that a replacement level player would achieve if given the same number of attempts.
+To compute this "shadow" IPAA, we will multiply the number of attempts by the average IPA value across all corresponding replacement-level players.
+
+The following code computes the receiving attempt thresholds for each position on passing plays.
+It then computes the replacement-level IPA
+```{r}
+#| label: replacement-pass-wr
+
+wr_pass_threshold <- 
+  receiver_ipaa |>
+  dplyr::filter(position == "WR") |>
+  dplyr::arrange(desc(n_rec)) |>
+  dplyr::slice(128) |> #<1>
+  dplyr::pull(n_rec)
+
+te_pass_threshold <-
+  receiver_ipaa |>
+  dplyr::filter(position == "TE") |>
+  dplyr::arrange(desc(n_rec)) |>
+  dplyr::slice(64) |> #<1>
+  dplyr::pull(n_rec)
+
+rb_pass_threshold <-
+  receiver_ipaa |>
+  dplyr::filter(position == "RB") |>
+  dplyr::arrange(desc(n_rec)) |>
+  dplyr::slice(32) |> #<1>
+  dplyr::pull(n_rec)
+```
+1. Players with fewer passing plays these value will be considered replacement-level at their position
+
+We add columns to `receiver_ipaa` indicating whether each player is considered to be replacement-level at his position or not.
+```{r}
+#| label: add-repl-column-pass
+receiver_ipaa <-
+  receiver_ipaa |>
+  dplyr::mutate(
+    repl_wr = dplyr::case_when(
+      position == "WR" & n_rec < wr_pass_threshold ~ 1,
+      position == "WR" & n_rec >= wr_pass_threshold ~ 0,
+      position != "WR" ~ NA),
+    repl_te = dplyr::case_when(
+      position == "TE" & n_rec < te_pass_threshold ~ 1,
+      position == "TE" & n_rec >= te_pass_threshold ~ 0,
+      position != "TE" ~ NA),
+    repl_rb = dplyr::case_when(
+      position == "RB" & n_rec < rb_pass_threshold ~ 1,
+      position == "RB" & n_rec >= rb_pass_threshold ~ 0,
+      position != "RB" ~ NA))
+```
+
+We now average the IPA across all replacement-level players at each position in both phases of a passing play
+```{r}
+#| label: repl-pass-ipa
+repl_wr_ipa_air <- 
+  receiver_ipaa |>
+  dplyr::filter(repl_wr == 1) |>
+  dplyr::pull(ipa_air_rec) |>
+  mean(na.rm = TRUE)
+repl_wr_ipa_yac <-
+  receiver_ipaa |>
+  dplyr::filter(repl_wr == 1) |>
+  dplyr::pull(ipa_yac_rec) |>
+  mean(na.rm = TRUE)
+
+repl_te_ipa_air <- 
+  receiver_ipaa |>
+  dplyr::filter(repl_te == 1) |>
+  dplyr::pull(ipa_air_rec) |>
+  mean(na.rm=TRUE)
+repl_te_ipa_yac <-
+  receiver_ipaa |>
+  dplyr::filter(repl_te == 1) |>
+  dplyr::pull(ipa_yac_rec) |>
+  mean(na.rm = TRUE)
+
+repl_rb_ipa_air <- 
+  receiver_ipaa |>
+  dplyr::filter(repl_rb == 1) |>
+  dplyr::pull(ipa_air_rec) |>
+  mean(na.rm = TRUE)
+repl_rb_ipa_yac <-
+  receiver_ipaa |>
+  dplyr::filter(repl_rb == 1) |>
+  dplyr::pull(ipa_yac_rec) |>
+  mean(na.rm = TRUE)
+```
+
+Finally, we compute the difference between every player's actual IPAA and their replacement-level shadow IPAA value, to obtain their individual points added over replacement (or IPAR)
+```{r}
+#| label: compute-ipar-rec
+receiver_ipar <-
+  receiver_ipaa |>
+  dplyr::filter(position %in% c("WR","RB", "TE")) |>
+  dplyr::mutate(
+    shadow_air_rec = dplyr::case_when(
+      position == "WR" ~ n_rec * repl_wr_ipa_air,
+      position == "TE" ~ n_rec * repl_te_ipa_air,
+      position == "RB" ~ n_rec * repl_rb_ipa_air),
+    shadow_yac_rec = dplyr::case_when(
+      position == "WR" ~ n_rec * repl_wr_ipa_yac,
+      position == "TE" ~ n_rec * repl_te_ipa_yac,
+      position == "RB" ~ n_rec * repl_rb_ipa_yac),
+    ipar_air_rec = ipaa_air_rec - shadow_air_rec,
+    ipar_yac_rec = ipaa_yac_rec - shadow_yac_rec)
+```
+
+
+We perform similar calculations to compute the IPAR value from running plays for each non-QB player
+```{r}
+#| label: compute-ipar-run
+#| code-fold: true
+
+wrte_run_threshold <-
+  run_ipaa |>
+  dplyr::filter(position %in% c("WR", "TE")) |>
+  dplyr::arrange(desc(n_run)) |>
+  dplyr::slice(32) |>
+  dplyr::pull(n_run)
+
+rb_run_threshold <-
+  run_ipaa |>
+  dplyr::filter(position == "RB") |>
+  dplyr::arrange(desc(n_run)) |>
+  dplyr::slice(96) |>
+  dplyr::pull(n_run)
+
+
+run_ipaa <-
+  run_ipaa |>
+  dplyr::mutate(
+    repl_wrte = dplyr::case_when(
+      position %in% c("WR", "TE") & n_run < wrte_run_threshold ~ 1,
+      position %in% c("WR", "TE") & n_run >= wrte_run_threshold ~ 0,
+      !position %in% c("WR", "TE") ~ NA),
+    repl_rb = dplyr::case_when(
+      position == "RB" & n_run < rb_run_threshold ~ 1,
+      position == "RB" & n_run >= rb_run_threshold ~ 0,
+      position != "RB" ~ NA))
+
+
+
+repl_wrte_ipa_run <- 
+  run_ipaa |>
+  dplyr::filter(repl_wrte == 1) |>
+  dplyr::pull(ipa_run) |>
+  mean(na.rm = TRUE)
+repl_rb_ipa_run <-
+  run_ipaa |>
+  dplyr::filter(repl_rb == 1) |>
+  dplyr::pull(ipa_run) |>
+  mean(na.rm = TRUE)
+
+
+run_ipar <-
+  run_ipaa |>
+  dplyr::filter(position %in% c("WR", "RB", "TE")) |>
+   dplyr::mutate(
+    shadow_run = dplyr::case_when(
+      position %in% c("WR", "TE") ~ n_run * repl_wrte_ipa_run,
+      position == "RB" ~ n_run * repl_rb_ipa_run),
+    ipar_run = ipaa_run - shadow_run)
+```
+
+
+### Computing IPAR for QB's {#sec-qb-ipar}
+
+We defined replacement-levels for running backs, wide receivers, and tight ends based on typical patterns of roster construction.
+Due to the unique nature of the quarterback position --- virtually *every* offensive play involves runs through the quarterbac --- we need to define "replacement" level somewhat differently.
+One option would be to create a group of 32 non-replacement quarterbacks by identifying the quarterback one each team who were involved in the most passing and rushing attempts.
+While simple to impelement, this implicitly assumes that every NFL team has at least one non-replacement quarterback.
+Instead, we sort quarterbacks by the total number of passing and rushing plays in which they were involved and designate the top-32 to be non-replacement level.
+
+```{r}
+qb_ipaa <-
+  passer_ipaa |>
+  dplyr::filter(position == "QB") |>
+  dplyr::select(gsis_id, full_name, n_pass, ipa_air_pass, ipaa_air_pass) |>
+  dplyr::left_join(y = qbrun_ipaa |> dplyr::select(gsis_id, n_qbrun, ipa_qbrun, ipaa_qbrun), by = "gsis_id") |>
+  dplyr::mutate(n_plays = n_pass + n_qbrun)
+
+qb_threshold <-
+  qb_ipaa |>
+  dplyr::arrange(dplyr::desc(n_plays)) |>
+  dplyr::slice(32) |>
+  dplyr::pull(n_plays)
+
+qb_ipaa <-
+  qb_ipaa |>
+  dplyr::mutate(repl_qb = ifelse(n_plays < qb_threshold, 1, 0))
+
+repl_qb_ipa_air <-
+  qb_ipaa |>
+  dplyr::filter(repl_qb == 1) |>
+  dplyr::pull(ipa_air_pass) |>
+  mean(na.rm = TRUE)
+
+repl_qb_ipa_qbrun <-
+  qb_ipaa |>
+  dplyr::filter(repl_qb == 1) |>
+  dplyr::pull(ipa_qbrun) |>
+  mean(na.rm = TRUE)
+
+qb_ipar <-
+  qb_ipaa |>
+  dplyr::mutate(
+    shadow_air = n_pass * repl_qb_ipa_air,
+    shadow_qbrun = n_qbrun * repl_qb_ipa_qbrun,
+    ipar_air_pass = ipaa_air_pass - shadow_air,
+    ipar_qbrun = ipaa_qbrun - shadow_qbrun)
+```
 
 
 ## From points to wins
+
+The IPAR values are on the scale of point differential.
+Figure shows point differential plotted against wins.
+If we fit a line to these data --- that is, if we find some $\alpha$ and $\beta$ such that $\textrm{Wins} \approx \alpha + \beta \times \textrm{PtsDiff}$  --- then we can multiply the IPAR values by the estimated slope to convert from the point differential scale to the win scale.
+
+To get this, we load the schedules for the last 10 seasons using the function `load_schedules()` from the **nflreadr** package
+
+<!--
+  1. Load all the schedules
+  2. For each game, determine who the winner (if result > 0, it's the home team, if result < 0, it's the losing team)
+  3. Get score differential for winning team and losing team (-1 * results)
+
+-->
+
+
+```{r}
+#| label: load-schedules
+
+schedules <-
+  nflreadr::load_schedules(seasons = 2015:2024) |> #<1>
+  dplyr::filter(game_type == "REG") |>
+  dplyr::select(season, away_team, home_team, home_score, away_score, result) |>
+  dplyr::mutate(winning_team = ifelse(result > 0, home_team, away_team),
+                losing_team = ifelse(result < 0, home_team, away_team),
+                winning_ptsdiff = ifelse(winning_team == home_team, result, -1*result),
+                losing_ptsdiff = ifelse(losing_team == home_team, result, -1*result))
+
+win_diff <-
+  schedules |>
+  dplyr::group_by(season, winning_team) |>
+  dplyr::summarise(wins = dplyr::n(), win_diff = sum(winning_ptsdiff), .groups = 'drop') |>
+  dplyr::rename(team = winning_team)
+
+loss_diff <-
+  schedules |>
+  dplyr::group_by(season, losing_team) |>
+  dplyr::summarise(loss = dplyr::n(), loss_diff = sum(losing_ptsdiff), .groups = 'drop') |>
+  dplyr::rename(team = losing_team)
+
+records <-
+  win_diff |>
+  dplyr::full_join(y = loss_diff, by = c("season", "team")) |>
+  dplyr::mutate(scoring_differential = win_diff + loss_diff)
+
+```
+
+
+Plotting wins against total scoring differential, we see an obvious increasing trend
+```{r}
+#| label: wins-score-plot
+#| fig-width: 6
+#| fig-asp: 0.5625
+#| fig-align: center
+
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+plot(records$scoring_differential,
+     records$wins,
+     xlab = "Total scoring margin",
+     ylab = "Wins",
+     main = "Wins vs Score Differential",
+     pch = 16, cex = 0.5)
+```
+
+We fit a linear to these data
+```{r}
+#| label: fit-line
+
+win_score_fit <-
+  lm(wins~scoring_differential, data = records)
+beta <- coefficients(win_score_fit)[2]
+beta
+```
+We see that every additional point scored is associated with about an increase of about 0.02 wins, on average.
+
+We can now multiply each IPAR value by this factor to determine how wins each player contributes above replacement in different phases of the game.
+
+```{r}
+#| label: war
+
+all_skill_players <-
+  unique(c(run_ipar$gsis_id, receiver_ipar$gsis_id))
+
+skill_war <-
+  data.frame(gsis_id = all_players) |>
+  dplyr::left_join(y = roster2024 |> dplyr::select(gsis_id, full_name, position, team), by = "gsis_id") |>
+  dplyr::left_join(y = run_ipar |> dplyr::select(gsis_id, n_run, ipar_run), by = "gsis_id") |>
+  dplyr::left_join(y = receiver_ipar |> dplyr::select(gsis_id, n_rec, ipar_air_rec, ipar_yac_rec), by = "gsis_id") |>
+  tidyr::replace_na(list(ipar_run=0, ipar_air_rec=0, ipar_yac_rec=0)) |>
+  dplyr::mutate(
+    war_air_rec = ipar_air_rec * beta,
+    war_yac_rec = ipar_yac_rec * beta,
+    war_run = ipar_run * beta,
+    war = war_air_rec + war_yac_rec + war_run)
+
+qb_war <-
+  qb_ipar |>
+  dplyr::select(gsis_id, full_name, n_pass, n_qbrun, ipar_air_pass, ipar_qbrun) |>
+  dplyr::left_join(y = roster2024 |> dplyr::select(gsis_id, team, position), by = "gsis_id") |>
+  tidyr::replace_na(list(ipar_air_pass=0, ipar_qbrun=0)) |>
+  dplyr::mutate(
+    war_air_pass = ipar_air_pass * beta,
+    war_qbrun = ipar_qbrun * beta,
+    war = war_air_pass + war_qbrun)
+
+war <-
+  data.frame(gsis_id = all_players) |>
+  dplyr::left_join(y = roster2024 |> dplyr::select(gsis_id, full_name, position, team), by = "gsis_id") |>
+  dplyr::left_join(y = run_ipar |> dplyr::select(gsis_id, n_run, ipar_run), by = "gsis_id") |>
+  dplyr::left_join(y = receiver_ipar |> dplyr::select(gsis_id, n_rec, ipar_air_rec, ipar_yac_rec), by = "gsis_id") |>
+  dplyr::left_join(y = qb_ipar |> dplyr::select(gsis_id, n_pass, n_qbrun, ipar_air_pass, ipar_qbrun), by = "gsis_id")
+
+
+```
+
 
 <!--
   For each team, let us regress the number of wins onto the score differential

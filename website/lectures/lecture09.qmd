@@ -10,7 +10,7 @@ execute:
 Which of the two touchdown plays is more impressive?
 
   * The 86-yard touchdown pass from Justin Herbert to Ladd McConckey ([video link](https://www.youtube.com/watch?v=Hu9flYe2VrA))
-  * The 64-yard touchdown pass from Cooper Rush to Kavonte Turpin ([video link](https://www.youtube.com/watch?v=U0Zp_is-X18))
+  * The 64-yard touchdown pass from Cooper Rush to KaVontae Turpin ([video link](https://www.youtube.com/watch?v=U0Zp_is-X18))
   
 While these two plays share many similarities --- they were both thrown on 3rd down, out of the shotgun formation with no running back, against the Houston Texans, when the team on offense was trailing, and resulted in a score --- there are some big differences: Herbert and the Chargers needed 26 yards to gain a first down while the Cowboys need only 10; Herber threw his pass from a collapsing pocket while Rush threw with essentially no pressure; McConckey broke at least one tackle after catching the pass.
 Based on these qualitative differences, we might view the first touchdown pass as more impressive.
@@ -434,6 +434,10 @@ First, we find the estimate of the overall grand mean EPA per play in the "Fixed
 The "Random effects" section reports our estimates $\hat{\sigma} \approx 1.526$ and $\hat{\sigma}_{\alpha} = 0.123$ of, respectively, the variability in EPA that we'd expect to see between passes thrown by the same player and the variability in latent EPA per pass across the different passers. 
 The fact that $\hat{\sigma}_{\alpha}$ is so much smaller than $\hat{\sigma}$ suggests that most of the variability in observed passing play EPA is driven more by noise than differences in latent player ability. 
 
+
+<!--
+  In a sense, $u_{i}$ represents how much more the 
+-->
 We can use the function `ranef` to extract the estimates of the $u_{i}$'s , the function `fixef` to extract the estimate of $\alpha_{0},$ and the function `coef` to extract the estimates of $\alpha_{i} = \alpha_{0} + u_{i}.$
 The function `coef` returns a named list with one element per grouping variable[^grouping].
 Each element of the `coef`'s output is a data frame with named rows 
@@ -510,6 +514,7 @@ To see, we re-build our data table `pass2024` but now include:
   * `pass_location`: whether the pass was thrown to the left, right, or center of the field
 
 ```{r}
+#| label: build-pass2024
 pass2024 <-
   pbp2024 |>
   dplyr::filter(play_type == "pass" & season_type == "REG") |> 
