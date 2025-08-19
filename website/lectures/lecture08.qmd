@@ -241,6 +241,7 @@ In the figure below, we plot all batted ball locations and overlay all the grid 
 #| fig-width: 6
 #| fig-height: 6
 #| fig-align: center
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
 plot(bip$x, bip$y, 
      xlim = c(-300, 300), ylim = c(-100, 500),
      pch = 16, cex = 0.2, 
@@ -368,7 +369,7 @@ points(x = 0, y = 90*sqrt(2), pch = 16, cex = 0.8, col = "white")
 8. The expression `rgb(colorRamp(col_list, bias=1)(grid_probs_bin$out_prob)/255)` maps the fitted probability to a color in `col_list` using linear interpolation. Here 0% maps to dark blue and 100% maps to dark red.
 9. Suppresses the border of the rectangle
 
-### Generalized additive models
+### Generalized additive models {#sec-out-gam}
 
 Our naively estimated out probabilities leave much to be desired.
 For one thing, there are lots of "gaps" in the fitted surface where our initial model can't make a prediction.
@@ -464,7 +465,6 @@ The main difference is the term `s()`, which is used to signal to `gam()` or `ba
 In our case, because we wish to smooth over both `x` and `y`, we will include the terms `s(x,y)`
 
 :::{.callout-important}
-
 ## Warning
 Fitting our out probability model takes a few minutes
 :::

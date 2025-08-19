@@ -36,8 +36,8 @@ annual_statcast_query <- function(season) {
                   ~{number_rows <- 
                     tibble::tibble(week = .x, 
                                    number_rows = length(payload_df[[.x]]$game_date))
-                  }) %>%
-    dplyr::filter(number_rows > 0) %>%
+                  }) |>
+    dplyr::filter(number_rows > 0) |>
     dplyr::pull(week)
   
   payload_df_reduced <- payload_df[number_rows]
@@ -49,30 +49,30 @@ annual_statcast_query <- function(season) {
                    "fielder_4", "fielder_5", "fielder_6", "fielder_7",
                    "fielder_8", "fielder_9")
                df <- 
-                 purrr::pluck(payload_df_reduced, .x) %>%
-                 dplyr::mutate_at(.vars = cols_to_transform, as.numeric) %>%
+                 purrr::pluck(payload_df_reduced, .x) |>
+                 dplyr::mutate_at(.vars = cols_to_transform, as.numeric) |>
                  dplyr::mutate_at(.vars = cols_to_transform, function(x) {ifelse(is.na(x), 999999999, x)})
                character_columns <- 
-                 data_base_column_types %>%
-                 dplyr::filter(class == "character") %>%
+                 data_base_column_types |>
+                 dplyr::filter(class == "character") |>
                  dplyr::pull(variable)
                numeric_columns <- 
-                 data_base_column_types %>%
-                 dplyr::filter(class == "numeric") %>%
+                 data_base_column_types |>
+                 dplyr::filter(class == "numeric") |>
                  dplyr::pull(variable)
                integer_columns <- 
-                 data_base_column_types %>%
-                 dplyr::filter(class == "integer") %>%
+                 data_base_column_types |>
+                 dplyr::filter(class == "integer") |>
                  dplyr::pull(variable)
                df <- 
-                 df %>%
-                 dplyr::mutate_if(names(df) %in% character_columns, as.character) %>%
-                 dplyr::mutate_if(names(df) %in% numeric_columns, as.numeric) %>%
+                 df |>
+                 dplyr::mutate_if(names(df) %in% character_columns, as.character) |>
+                 dplyr::mutate_if(names(df) %in% numeric_columns, as.numeric) |>
                  dplyr::mutate_if(names(df) %in% integer_columns, as.integer)
                return(df)
                })
   
-  combined <- payload_df_reduced_formatted %>%
+  combined <- payload_df_reduced_formatted |>
     dplyr::bind_rows()
   
   return(combined)

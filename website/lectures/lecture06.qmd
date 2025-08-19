@@ -98,7 +98,7 @@ We can make much more nuanced comparisons by thinking carefully about what we **
 Statcast at 10: https://www.nytimes.com/athletic/5627303/2024/07/10/mlb-statcast-10-year-anniversary/
 -->
 
-### Accessing StatCast Data
+### Accessing StatCast Data{#sec-statcast-query}
 Major League Baseball hosts a public-facing web interface for accessing StatCast data.
 Using that interface, users can pull up data for individual players or about all pitches of a certain type.
 Powering this website is an application programming interface (API), which allows software applications to connect to the underlying StatCast database.
@@ -112,11 +112,28 @@ The code below defines a new scraper, which we will use in the course.
 An R script containing this code is available at [this link](https://github.com/skdeshpande91/stat479_fall2025/blob/main/scripts/annual_statcast_query.R).
 At a high level, the scraping function pulls data from StatCast on a week-by-week basis. 
 
+
+:::{.callout-tip icon=false}
+## Installing **baseballr**
+
+We will use the development version of **baseballr**, which can be installed using the code
+```{r}
+#| label: install-baseballr
+#| eval: false
+devtools::install_github(repo = "BillPetti/baseballr")
+```
+:::
+
+
 ```{r}
 #| label:  annual-statcast-query-def
 #| code-fold: true
 #| code-summary: "Show the code"
 #| eval: false
+## Code modified from Bill Petti's original annual Statcast scraper:
+# https://billpetti.github.io/2021-04-02-build-statcast-database-rstats-version-3.0/
+# Main change is in the column names of the fielders
+
 annual_statcast_query <- function(season) {
   
   data_base_column_types <- 
@@ -132,7 +149,7 @@ annual_statcast_query <- function(season) {
                    end_date = dates + 3)
   
   safe_savant <- 
-    purrr::safely(scrape_statcast_savant)
+    purrr::safely(baseballr::scrape_statcast_savant)
   
   payload <- 
     purrr::map(.x = seq_along(date_grid$start_date),
@@ -142,7 +159,7 @@ annual_statcast_query <- function(season) {
                                end_date = date_grid$end_date[.x], 
                                type = 'pitcher')
                  return(payload)
-                 })
+               })
   
   payload_df <- purrr::map(payload, 'result')
   
@@ -151,8 +168,8 @@ annual_statcast_query <- function(season) {
                   ~{number_rows <- 
                     tibble::tibble(week = .x, 
                                    number_rows = length(payload_df[[.x]]$game_date))
-                  }) |>
-    dplyr::filter(number_rows > 0) |>
+                  }) %>%
+    dplyr::filter(number_rows > 0) %>%
     dplyr::pull(week)
   
   payload_df_reduced <- payload_df[number_rows]
@@ -164,30 +181,30 @@ annual_statcast_query <- function(season) {
                    "fielder_4", "fielder_5", "fielder_6", "fielder_7",
                    "fielder_8", "fielder_9")
                df <- 
-                 purrr::pluck(payload_df_reduced, .x) |>
-                 dplyr::mutate_at(.vars = cols_to_transform, as.numeric) |>
+                 purrr::pluck(payload_df_reduced, .x) %>%
+                 dplyr::mutate_at(.vars = cols_to_transform, as.numeric) %>%
                  dplyr::mutate_at(.vars = cols_to_transform, function(x) {ifelse(is.na(x), 999999999, x)})
                character_columns <- 
-                 data_base_column_types |>
-                 dplyr::filter(class == "character") |>
+                 data_base_column_types %>%
+                 dplyr::filter(class == "character") %>%
                  dplyr::pull(variable)
                numeric_columns <- 
-                 data_base_column_types |>
-                 dplyr::filter(class == "numeric") |>
+                 data_base_column_types %>%
+                 dplyr::filter(class == "numeric") %>%
                  dplyr::pull(variable)
                integer_columns <- 
-                 data_base_column_types |>
-                 dplyr::filter(class == "integer") |>
+                 data_base_column_types %>%
+                 dplyr::filter(class == "integer") %>%
                  dplyr::pull(variable)
                df <- 
-                 df |>
-                 dplyr::mutate_if(names(df) %in% character_columns, as.character) |>
-                 dplyr::mutate_if(names(df) %in% numeric_columns, as.numeric) |>
+                 df %>%
+                 dplyr::mutate_if(names(df) %in% character_columns, as.character) %>%
+                 dplyr::mutate_if(names(df) %in% numeric_columns, as.numeric) %>%
                  dplyr::mutate_if(names(df) %in% integer_columns, as.integer)
                return(df)
                })
   
-  combined <- payload_df_reduced_formatted |>
+  combined <- payload_df_reduced_formatted %>%
     dplyr::bind_rows()
   
   return(combined)
@@ -426,7 +443,7 @@ save(positions2024, file = "positions2024.RData")
 2. After we call `dplyr::summarise()`, the resulting data table is still grouped by `batter`. So, when we call `dplyr::slice_max()` it looks at all the rows corresponding to each player and extracts the one with highest count. This is how we determine the most commonly listed position.
 
 
-## Expected Runs
+## Expected Runs {#sec-expected-runs}
 
 :::{.callout-note icon=false}
 
@@ -445,7 +462,7 @@ For instance, say that the home team is trailing by 1 runs in the bottom of the 
 If the batter hits a home run, the at-bat is recorded as resulting in only two runs (the tying run from second and the winning run from first).
 But the exact same scenario would result in 3 runs in an earlier inning. 
 
-#### Computing runs scored in the half-inning
+#### Computing runs scored in the half-inning {#sec-compute-runs-scored}
 Suppose that in a given at-bat $a$ that there are $n_{a}$ pitches.
 Within at-bat $a,$ for each $i = 1, \ldots, n_{a},$ let $R_{i,a}$ be the number of runs scored in the half-inning after that pitch (including any runs scored as a result of pitch $i$).
 So $R_{1,a}$ is the number of runs scored in the half-inning after the first pitch, $R_{2,a}$ is the number of runs scored subsequent to the second pitch, etc. 
@@ -474,7 +491,7 @@ rbind(bat_score = dodgers_inning$bat_score, post_bat_score = dodgers_inning$post
 ```
 Cross-referencing the table above with the [play-by-play data](https://www.espn.com/mlb/playbyplay/_/gameId/401568469), we see that the Dodgers score their second run after the 14th pitch of the half-inning (on a Enrique Hernández sacrifice fly); their third run on the very next pitch (Gavin Lux grounding into a fielder's choice); and their fourth and fifth runs on consecutive pitches (on singles by Mookie Betts and Shohei Ohtani).
 
-![Dodgers-Padres Play-by-Play](figures/lecture3_dodgers_pbp.png){width=50% fig-align="center"}
+![Dodgers-Padres Play-by-Play](figures/lecture3_dodgers_pbp.png){fig-align="center"}
 
 We can verify this by looking at the variable `des`, which stores a narrative description about what happened during the at-bat. 
 ```{r}
@@ -551,7 +568,7 @@ As a result of Ohtani's single, he changed the game state to `Outs = 2` and `Bas
 So, although his at-bat did not directly result in a run scoring, Ohtani *increased* his team's run expectancy by about 0.12 runs.
 
 
-## Run value
+## Run value {#sec-run-value}
 
 While expected runs is a really useful metric, for the purposes of allocating credit, we need to account not only for what we expect to happen but also what actually happened as a result of each at-bat.
 
