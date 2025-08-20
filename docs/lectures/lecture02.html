@@ -95,6 +95,9 @@ div.csl-indent {
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-10c2ad7cdbdc86dea93900442ad0167d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -416,7 +419,7 @@ window.Quarto = {
 <div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: flex-start;">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="figures/mead_austria.png" class="img-fluid figure-img"></p>
+<p><a href="figures/mead_austria.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Mead shot against Austria link"><img src="figures/mead_austria.png" class="img-fluid figure-img"></a></p>
 <figcaption>Mead shot against Austria <a href="https://youtu.be/lVGiGZN2gdw?t=1">link</a></figcaption>
 </figure>
 </div>
@@ -424,7 +427,7 @@ window.Quarto = {
 <div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: flex-start;">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="figures/mead_norway.png" class="img-fluid figure-img"></p>
+<p><a href="figures/mead_norway.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Mead shot against Norway link"><img src="figures/mead_norway.png" class="img-fluid figure-img"></a></p>
 <figcaption>Mead shot against Norway <a href="https://youtu.be/lVGiGZN2gdw?t=57">link</a></figcaption>
 </figure>
 </div>
@@ -432,7 +435,7 @@ window.Quarto = {
 <div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: flex-start;">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="figures/mead_sweden.png" class="img-fluid figure-img"></p>
+<p><a href="figures/mead_sweden.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Mead shot against Sweden link"><img src="figures/mead_sweden.png" class="img-fluid figure-img"></a></p>
 <figcaption>Mead shot against Sweden <a href="https://youtu.be/lVGiGZN2gdw?t=148">link</a></figcaption>
 </figure>
 </div>
@@ -454,7 +457,11 @@ Figure&nbsp;1
 <p>StatsBomb organizes its free data by competition/tournament. The screenshot below shows a table of all the available competitions. We can load this table into our R environment using the function <code>StatsBombR::FreeCompetitions()</code></p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="figures/statsbomb_freecomps.png" class="img-fluid figure-img" style="width:50.0%"></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="figures/statsbomb_freecomps.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Screenshot of the competitions covered in the public data"><img src="figures/statsbomb_freecomps.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:50.0%" alt="Screenshot of the competitions covered in the public data"></a></p>
+</figure>
+</div>
 <figcaption>Screenshot of the competitions covered in the public data</figcaption>
 </figure>
 </div>
@@ -1266,6 +1273,38 @@ Lindley, Dennis. 1985. <em>Making Decisions</em>. Wiley.
   });
   </script>
 </div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
 
 
 

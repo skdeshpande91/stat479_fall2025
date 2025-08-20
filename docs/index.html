@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -40,6 +75,9 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap-10c2ad7cdbdc86dea93900442ad0167d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -195,6 +233,11 @@ ul.task-list li input[type="checkbox"] {
    
   <ul>
   <li><a href="#course-information" id="toc-course-information" class="nav-link active" data-scroll-target="#course-information">Course information</a></li>
+  <li><a href="#requisites-preparation" id="toc-requisites-preparation" class="nav-link" data-scroll-target="#requisites-preparation">Requisites &amp; Preparation</a>
+  <ul class="collapse">
+  <li><a href="#installing-r-rstudio" id="toc-installing-r-rstudio" class="nav-link" data-scroll-target="#installing-r-rstudio">Installing R &amp; RStudio</a></li>
+  <li><a href="#required-packages" id="toc-required-packages" class="nav-link" data-scroll-target="#required-packages">Required Packages</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -221,7 +264,20 @@ ul.task-list li input[type="checkbox"] {
 
 
 <p>Welcome to STAT 479 (Special Topics in Statistics)! This iteration of the course will focus on sports analytics.</p>
-<p>Lectures notes, instructions for the course project, and additional tutorials and exercises will be posted to this website. So, please bookmark this page and check it regularly throughout the course.</p>
+<p>All course material including lecture slides, code to reproduce the analyses discussed in lecture, and information about the projects will be posted on this website. So, please bookmark this page and check it regularly throughout the course. We will use Canvas for course announcement, assignment submission, and grading. The Canvas course page is accessible via <a href="">this link</a>. We will also use Piazza for specific discussions about course content (e.g., sharing additional information/resources related to material discussed in lecture; answering questions about data, method, and code; etc.) and more general discussions about sports analytics (e.g., sharing job postings, open data competition opportunities, popular press articles, and other analyses you might find online etc.) The Piazza page is accessible via <a href="">this link</a>.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Access to Canvas and Piazza
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The Canvas and Piazza sites associated with this course are limited to students enrolled in the course and the course teaching staff. Although they can freely access the course notes and code, auditors, UW–Madison students not currently enrolled in the course, and anyone not affiliated with UW–Madison will not have access to Canvas and Piazza sites. Requests to access these sites will be ignored.</p>
+</div>
+</div>
 <section id="course-information" class="level2">
 <h2 class="anchored" data-anchor-id="course-information">Course information</h2>
 <p><strong>Description</strong>: Illustrates the use of statistical modeling and data science techniques to derive actionable insights from sports data. Emphasizes not only technical calculation of advanced metrics but also on written and oral communication to other data scientists and to non-technical audience. Topics may include: deriving team rankings from paired competitions; measuring an individual player’s contribution to their team’s overall success; assessing player performance and team strategy in terms of expected outcomes; forecasting the impact of new rule changes using simulation; and creating new metrics using high-resolution player tracking data.</p>
@@ -233,12 +289,97 @@ ul.task-list li input[type="checkbox"] {
 <li>Build a personal portfolio of sports data analyses</li>
 </ol>
 <p><strong>Location &amp; Schedule:</strong> Tuesdays &amp; Thursdays, 11:00am-12:15pm, 1524 Morgridge Hall</p>
-<p><strong>Instructor &amp; Office Hours:</strong> <a href="https://skdeshpande91.github.io">Sameer Deshpande</a> (sameer.deshpande@wisc.edu). Office Hours TBA.</p>
+<p><strong>Instructor &amp; Office Hours:</strong> <a href="https://skdeshpande91.github.io">Sameer Deshpande</a> (sameer.deshpande@wisc.edu). Instructor office hours will take place at:</p>
+<ul>
+<li>Mondays (beginning 9/8/25) from 11:00am to 12:00pm in Morgridge Hall 5586</li>
+<li>Wednesdays (beginning 9/3/25) from 4:00pm to 5:00pm in Morgridge Hall 5586</li>
+<li>Fridays (beginning 9/5/25) from 3:00pm to 4:30pm in Morgridge Hall 3610</li>
+</ul>
+<p>The Monday and Wednesday office hours are designed for one-on-one or small group meetings with the instructor. For instance, if you have specific, personal concerns about the course, try to come during Monday and Wednesday office hours or make an appointment with the instructor. Friday office hours are designed for collaborative work: they can be an opportunity for multiple project groups to bounce ideas off each other, to re-run analyses shown in class together, etc.</p>
+<p>** Teaching Assistant &amp; Office Hours:** Zhexuan Liu (zhexuan.liu2@wisc.edu). Office hours</p>
+</section>
+<section id="requisites-preparation" class="level2">
+<h2 class="anchored" data-anchor-id="requisites-preparation">Requisites &amp; Preparation</h2>
+<p>This course will make <strong>extensive</strong> use of the <a href="https://www.r-project.org">R programming language</a> through the <a href="https://posit.co/download/rstudio-desktop/">RStudio</a> integrated development environment (IDE). Because the formal pre-requisites for this course are STAT 333 or 340, you are expected to have previous experience using the R programming language.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>I will assume <em>fluency</em> with basic R functionality (e.g., assignment, writing and executing scripts, saving data objects, setting environments, installing and loading packages), data manipulation with <strong>dplyr</strong> and other <strong>tidyverse</strong> packages, and visualization using either base R graphics or <strong>ggplot2</strong>. I will additionally assume some familiarity with fitting statistical models in R and interpreting their output (e.g., using <code>lm</code> and <code>glm</code>).</p>
+<p>If you do not meet the formal course prerequisites and/or have not used R in a previous course, this is <strong>not</strong> the right course for you.</p>
+</div>
+</div>
+<section id="installing-r-rstudio" class="level3">
+<h3 class="anchored" data-anchor-id="installing-r-rstudio">Installing R &amp; RStudio</h3>
+<p>While you are expected to have used R in previous courses (see warning), I <strong>strongly</strong> recommend installing the latest version of both R and RStudio at the beginning of the course. As of the time of this writing, that is R version 4.5.1 and RStudio version 2025.05.</p>
+<p>You can download a version of R specific to for your operating system from <a href="https://cloud.r-project.org">this website</a>. After install R, you should download and re-install RStudio from <a href="https://posit.co/download/rstudio-desktop/">this website</a>.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Whenever you update your version of R, you need to re-install the packages; this is a perennial source of <a href="https://bsky.app/profile/benbushong.com/post/3lbqnkbazgh2e">frustration</a> for many R users] and <a href="https://bsky.app/profile/hadley.nz/post/3lnlrbqv7qs2i">some good-natured humor</a> from others<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+</div>
+</div>
+</section>
+<section id="required-packages" class="level3">
+<h3 class="anchored" data-anchor-id="required-packages">Required Packages</h3>
+<p>Throughout the course, we will make extensive use of several packages in the <strong>tidyverse</strong>, primarily for data loading, pre-processing, and manipulation. We will also make extensive use of the packages <strong>glmnet</strong>, <strong>lme4</strong>, and <strong>ranger</strong>for model fitting. As the course progresses, we will introduce and install new package as required. For the most part, these packages will be specific to a particular sport. Every package that we will use in this class is available through either (i) the Comprehensive R Archive Network (CRAN) or (ii) a public GitHub repository maintained by the packager developer. We typically install CRAN packages using the <code>install.packages()</code> command. To install packages hosted on GitHub, we will use the [<code>install_github()](https://devtools.r-lib.org/reference/remote-reexports.html)</code> function in the <a href="https://devtools.r-lib.org/index.html"><strong>devtools</strong></a> package, which is itself available on CRAN.</p>
+<p>For visualizations, we will try to use colorblind-friendly palettes<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> as much as possible. The package <a href="https://cran.r-project.org/web/packages/colorBlindness/vignettes/colorBlindness.html"><strong>colorBlindness</strong></a> contains several palettes for diverging and qualitative data. We will use the <code>Blue2DarkRed18Steps</code> palette from <strong>colorBlindness</strong> for making heatmaps (e.g., <a href="./lectures/lecture08.html#fig-out-gam">this one</a>)</p>
+<p>Prior to <a href="./lectures/lecture02.html">Lecture 2</a>, please make sure you install the required packages.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="fu">c</span>(<span class="st">"devtools"</span>, <span class="st">"tidyverse"</span>, <span class="st">"glmnet"</span>, <span class="st">"lme4"</span>, <span class="st">"ranger"</span>, <span class="st">"colorBlindness"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>I am also personally partial to the palette developed by <a href="https://jfly.uni-koeln.de/color/">Okabe &amp; Ito</a>, which is available using the <code>palette.colors()</code> function. We will use this palette</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="annotated-cell-2"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-2-1"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a>oi_colors <span class="ot">&lt;-</span> </span>
+<span id="annotated-cell-2-2"><a href="#annotated-cell-2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">palette.colors</span>(<span class="at">palette =</span> <span class="st">"Okabe-Ito"</span>)</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1">1</button><span id="annotated-cell-2-3" class="code-annotation-target"><a href="#annotated-cell-2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>), <span class="at">mgp =</span> <span class="fu">c</span>(<span class="fl">1.8</span>, <span class="fl">0.5</span>, <span class="dv">0</span>))</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="2">2</button><span id="annotated-cell-2-4" class="code-annotation-target"><a href="#annotated-cell-2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>, <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">cex =</span> <span class="dv">4</span>, <span class="at">col =</span> oi_colors)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="3" data-code-annotation="1">The <code>mar</code> argument reserves 3 margin lines for the bottom and left sides of the plot, 2 for the top, and 1 for the right. The <code>mgp</code> argument specifies how the axis title, label, and lines are placed.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="4" data-code-annotation="2">Plots large, filled circles with the palette colors</span>
+</dd>
+</dl>
+</div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="index_files/figure-html/oi-colors-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="index_files/figure-html/oi-colors-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="480"></a></p>
+</figure>
+</div>
+</div>
+</div>
 
 
 </section>
+</section>
 
-</main> <!-- /main -->
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Even Hadley Wickham, who leads the tidyverse team at Posit, <a href="https://bsky.app/profile/hadley.nz/post/3lnmafh3ljs2y">manually re-installs</a> packages after every update<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>See <a href="https://sronpersonalpages.nl/~pault/">these notes by Paul Tol</a> for a lot of useful information about colorblindness and how different palettes are perceived by different people.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
@@ -678,6 +819,38 @@ ul.task-list li input[type="checkbox"] {
   });
   </script>
 </div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
 
 
 

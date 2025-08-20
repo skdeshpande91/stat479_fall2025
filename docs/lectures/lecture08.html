@@ -95,6 +95,9 @@ div.csl-indent {
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-10c2ad7cdbdc86dea93900442ad0167d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -436,7 +439,7 @@ window.Quarto = {
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="lecture08_files/figure-html/plot-hc-coordinates-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
+<p><a href="lecture08_files/figure-html/plot-hc-coordinates-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="lecture08_files/figure-html/plot-hc-coordinates-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></a></p>
 </figure>
 </div>
 </div>
@@ -452,7 +455,7 @@ window.Quarto = {
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="lecture08_files/figure-html/plot-3-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
+<p><a href="lecture08_files/figure-html/plot-3-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="lecture08_files/figure-html/plot-3-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></a></p>
 </figure>
 </div>
 </div>
@@ -507,7 +510,7 @@ x &amp;= 2.5 \times (\texttt{hc\_x} - 125.42) &amp; y &amp;= 2.5 \times (198.27 
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="lecture08_files/figure-html/plot-new-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
+<p><a href="lecture08_files/figure-html/plot-new-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="lecture08_files/figure-html/plot-new-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></a></p>
 </figure>
 </div>
 </div>
@@ -661,7 +664,7 @@ FALSE  TRUE
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="lecture08_files/figure-html/plot-grid-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
+<p><a href="lecture08_files/figure-html/plot-grid-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4"><img src="lecture08_files/figure-html/plot-grid-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></a></p>
 </figure>
 </div>
 </div>
@@ -685,7 +688,7 @@ FALSE  TRUE
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="lecture08_files/figure-html/restrict-grid-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
+<p><a href="lecture08_files/figure-html/restrict-grid-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5"><img src="lecture08_files/figure-html/restrict-grid-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></a></p>
 </figure>
 </div>
 </div>
@@ -808,7 +811,7 @@ FALSE  TRUE
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="lecture08_files/figure-html/plot-bin-probs-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
+<p><a href="lecture08_files/figure-html/plot-bin-probs-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6"><img src="lecture08_files/figure-html/plot-bin-probs-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></a></p>
 </figure>
 </div>
 </div>
@@ -885,7 +888,7 @@ FALSE  TRUE
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="lecture08_files/figure-html/logistic-fit-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
+<p><a href="lecture08_files/figure-html/logistic-fit-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7"><img src="lecture08_files/figure-html/logistic-fit-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></a></p>
 </figure>
 </div>
 </div>
@@ -907,55 +910,57 @@ Warning
 <p>Fitting our out probability model takes a few minutes</p>
 </div>
 </div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mgcv)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>gam_fit <span class="ot">&lt;-</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bam</span>(<span class="at">formula =</span> Out <span class="sc">~</span> <span class="fu">s</span>(x,y), </span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link=</span><span class="st">"logit"</span>), <span class="at">data =</span> bip)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>After fitting our GAM, we can visualized the estimated out probabilities.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mgcv)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: nlme</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>This is mgcv 1.9-1. For overview type 'help("mgcv-package")'.</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>gam_fit <span class="ot">&lt;-</span></span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bam</span>(<span class="at">formula =</span> Out <span class="sc">~</span> <span class="fu">s</span>(x,y), </span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link=</span><span class="st">"logit"</span>), <span class="at">data =</span> bip)</span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>grid_gam_preds <span class="ot">&lt;-</span> </span>
-<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict</span>(<span class="at">object =</span> gam_fit,</span>
-<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>          <span class="at">newdata =</span> grid, <span class="at">type =</span> <span class="st">"response"</span>)</span>
-<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>grid_gam_cols <span class="ot">&lt;-</span>   </span>
-<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rgb</span>(<span class="fu">colorRamp</span>(col_list,<span class="at">bias=</span><span class="dv">1</span>)(grid_gam_preds)<span class="sc">/</span><span class="dv">255</span>) </span>
-<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">1</span>), <span class="at">mgp =</span> <span class="fu">c</span>(<span class="fl">1.8</span>, <span class="fl">0.5</span>, <span class="dv">0</span>))</span>
-<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="dv">1</span>, <span class="at">type =</span> <span class="st">"n"</span>, </span>
-<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">300</span>, <span class="dv">300</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">100</span>, <span class="dv">500</span>), </span>
-<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>     <span class="at">xaxt =</span> <span class="st">"n"</span>, <span class="at">yaxt =</span> <span class="st">"n"</span>, <span class="at">bty =</span> <span class="st">"n"</span>, </span>
-<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"GAM out probabilities"</span>, <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">ylab =</span> <span class="st">""</span>)</span>
-<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(grid_probs_bin)){</span>
-<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rect</span>(<span class="at">xleft =</span> grid_probs_bin<span class="sc">$</span>x[i] <span class="sc">-</span> grid_sep<span class="sc">/</span><span class="dv">2</span>, </span>
-<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a>       <span class="at">ybot =</span> grid_probs_bin<span class="sc">$</span>y[i] <span class="sc">-</span> grid_sep<span class="sc">/</span><span class="dv">2</span>,</span>
-<span id="cb31-20"><a href="#cb31-20" aria-hidden="true" tabindex="-1"></a>       <span class="at">xright =</span> grid_probs_bin<span class="sc">$</span>x[i] <span class="sc">+</span> grid_sep<span class="sc">/</span><span class="dv">2</span>,</span>
-<span id="cb31-21"><a href="#cb31-21" aria-hidden="true" tabindex="-1"></a>       <span class="at">ytop =</span> grid_probs_bin<span class="sc">$</span>y[i] <span class="sc">+</span> grid_sep<span class="sc">/</span><span class="dv">2</span>,</span>
-<span id="cb31-22"><a href="#cb31-22" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">adjustcolor</span>(grid_gam_cols[i], <span class="at">alpha.f =</span> <span class="fl">0.5</span>),</span>
-<span id="cb31-23"><a href="#cb31-23" aria-hidden="true" tabindex="-1"></a>       <span class="at">border =</span> <span class="cn">NA</span>)</span>
-<span id="cb31-24"><a href="#cb31-24" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb31-25"><a href="#cb31-25" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a =</span> <span class="dv">0</span>, <span class="at">b =</span> <span class="dv">1</span>, <span class="at">col =</span> oi_colors[<span class="dv">5</span>], <span class="at">lwd =</span> <span class="dv">2</span>) </span>
-<span id="cb31-26"><a href="#cb31-26" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a =</span> <span class="dv">0</span>, <span class="at">b =</span> <span class="sc">-</span><span class="dv">1</span>, <span class="at">col =</span> oi_colors[<span class="dv">5</span>], <span class="at">lwd =</span> <span class="dv">2</span>)</span>
-<span id="cb31-27"><a href="#cb31-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-28"><a href="#cb31-28" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">90</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">2</span>)), <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">90</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">2</span>)), <span class="at">col =</span> <span class="st">"white"</span>, <span class="at">lwd =</span> <span class="dv">3</span>) </span>
-<span id="cb31-29"><a href="#cb31-29" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="sc">-</span><span class="dv">90</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">2</span>)), <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">90</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">2</span>)), <span class="at">col =</span> <span class="st">"white"</span>, <span class="at">lwd =</span> <span class="dv">3</span>)</span>
-<span id="cb31-30"><a href="#cb31-30" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="dv">90</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">2</span>), <span class="dv">0</span>), <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">90</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">2</span>), <span class="dv">90</span><span class="sc">*</span><span class="fu">sqrt</span>(<span class="dv">2</span>)), <span class="at">col =</span> <span class="st">"white"</span>, <span class="at">lwd =</span> <span class="dv">3</span>)</span>
-<span id="cb31-31"><a href="#cb31-31" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">90</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">2</span>), <span class="dv">0</span>), <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">90</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">2</span>), <span class="dv">90</span><span class="sc">*</span><span class="fu">sqrt</span>(<span class="dv">2</span>)), <span class="at">col =</span> <span class="st">"white"</span>, <span class="at">lwd =</span> <span class="dv">3</span>)</span>
-<span id="cb31-32"><a href="#cb31-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-33"><a href="#cb31-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-34"><a href="#cb31-34" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="dv">0</span>, <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">cex =</span> <span class="fl">0.8</span>, <span class="at">col =</span> <span class="st">"white"</span>)</span>
-<span id="cb31-35"><a href="#cb31-35" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="at">x =</span> <span class="dv">90</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">2</span>), <span class="at">y =</span> <span class="dv">90</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">2</span>), <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">cex =</span> <span class="fl">0.8</span>, <span class="at">col =</span> <span class="st">"white"</span>)</span>
-<span id="cb31-36"><a href="#cb31-36" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="at">x =</span> <span class="sc">-</span><span class="dv">90</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">2</span>), <span class="at">y =</span> <span class="dv">90</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">2</span>), <span class="at">pch =</span> <span class="dv">16</span>,<span class="at">cex =</span> <span class="fl">0.8</span>, <span class="at">col =</span> <span class="st">"white"</span>)</span>
-<span id="cb31-37"><a href="#cb31-37" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="dv">90</span><span class="sc">*</span><span class="fu">sqrt</span>(<span class="dv">2</span>), <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">cex =</span> <span class="fl">0.8</span>, <span class="at">col =</span> <span class="st">"white"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>grid_gam_preds <span class="ot">&lt;-</span> </span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict</span>(<span class="at">object =</span> gam_fit,</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">newdata =</span> grid, <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>grid_gam_cols <span class="ot">&lt;-</span>   </span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rgb</span>(<span class="fu">colorRamp</span>(col_list,<span class="at">bias=</span><span class="dv">1</span>)(grid_gam_preds)<span class="sc">/</span><span class="dv">255</span>) </span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">1</span>), <span class="at">mgp =</span> <span class="fu">c</span>(<span class="fl">1.8</span>, <span class="fl">0.5</span>, <span class="dv">0</span>))</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="dv">1</span>, <span class="at">type =</span> <span class="st">"n"</span>, </span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">300</span>, <span class="dv">300</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">100</span>, <span class="dv">500</span>), </span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>     <span class="at">xaxt =</span> <span class="st">"n"</span>, <span class="at">yaxt =</span> <span class="st">"n"</span>, <span class="at">bty =</span> <span class="st">"n"</span>, </span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"GAM out probabilities"</span>, <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">ylab =</span> <span class="st">""</span>)</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(grid_probs_bin)){</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rect</span>(<span class="at">xleft =</span> grid_probs_bin<span class="sc">$</span>x[i] <span class="sc">-</span> grid_sep<span class="sc">/</span><span class="dv">2</span>, </span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>       <span class="at">ybot =</span> grid_probs_bin<span class="sc">$</span>y[i] <span class="sc">-</span> grid_sep<span class="sc">/</span><span class="dv">2</span>,</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>       <span class="at">xright =</span> grid_probs_bin<span class="sc">$</span>x[i] <span class="sc">+</span> grid_sep<span class="sc">/</span><span class="dv">2</span>,</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>       <span class="at">ytop =</span> grid_probs_bin<span class="sc">$</span>y[i] <span class="sc">+</span> grid_sep<span class="sc">/</span><span class="dv">2</span>,</span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">adjustcolor</span>(grid_gam_cols[i], <span class="at">alpha.f =</span> <span class="fl">0.5</span>),</span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>       <span class="at">border =</span> <span class="cn">NA</span>)</span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a =</span> <span class="dv">0</span>, <span class="at">b =</span> <span class="dv">1</span>, <span class="at">col =</span> oi_colors[<span class="dv">5</span>], <span class="at">lwd =</span> <span class="dv">2</span>) </span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a =</span> <span class="dv">0</span>, <span class="at">b =</span> <span class="sc">-</span><span class="dv">1</span>, <span class="at">col =</span> oi_colors[<span class="dv">5</span>], <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">90</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">2</span>)), <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">90</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">2</span>)), <span class="at">col =</span> <span class="st">"white"</span>, <span class="at">lwd =</span> <span class="dv">3</span>) </span>
+<span id="cb29-26"><a href="#cb29-26" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="sc">-</span><span class="dv">90</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">2</span>)), <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">90</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">2</span>)), <span class="at">col =</span> <span class="st">"white"</span>, <span class="at">lwd =</span> <span class="dv">3</span>)</span>
+<span id="cb29-27"><a href="#cb29-27" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="dv">90</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">2</span>), <span class="dv">0</span>), <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">90</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">2</span>), <span class="dv">90</span><span class="sc">*</span><span class="fu">sqrt</span>(<span class="dv">2</span>)), <span class="at">col =</span> <span class="st">"white"</span>, <span class="at">lwd =</span> <span class="dv">3</span>)</span>
+<span id="cb29-28"><a href="#cb29-28" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">90</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">2</span>), <span class="dv">0</span>), <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">90</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">2</span>), <span class="dv">90</span><span class="sc">*</span><span class="fu">sqrt</span>(<span class="dv">2</span>)), <span class="at">col =</span> <span class="st">"white"</span>, <span class="at">lwd =</span> <span class="dv">3</span>)</span>
+<span id="cb29-29"><a href="#cb29-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-30"><a href="#cb29-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-31"><a href="#cb29-31" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="dv">0</span>, <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">cex =</span> <span class="fl">0.8</span>, <span class="at">col =</span> <span class="st">"white"</span>)</span>
+<span id="cb29-32"><a href="#cb29-32" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="at">x =</span> <span class="dv">90</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">2</span>), <span class="at">y =</span> <span class="dv">90</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">2</span>), <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">cex =</span> <span class="fl">0.8</span>, <span class="at">col =</span> <span class="st">"white"</span>)</span>
+<span id="cb29-33"><a href="#cb29-33" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="at">x =</span> <span class="sc">-</span><span class="dv">90</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">2</span>), <span class="at">y =</span> <span class="dv">90</span><span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">2</span>), <span class="at">pch =</span> <span class="dv">16</span>,<span class="at">cex =</span> <span class="fl">0.8</span>, <span class="at">col =</span> <span class="st">"white"</span>)</span>
+<span id="cb29-34"><a href="#cb29-34" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="dv">90</span><span class="sc">*</span><span class="fu">sqrt</span>(<span class="dv">2</span>), <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">cex =</span> <span class="fl">0.8</span>, <span class="at">col =</span> <span class="st">"white"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="lecture08_files/figure-html/fit-gam-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
+<div id="fig-out-gam" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" width="576">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-out-gam-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="lecture08_files/figure-html/fig-out-gam-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8" title="Figure&nbsp;1: "><img src="lecture08_files/figure-html/fig-out-gam-1.png" id="fig-out-gam" class="img-fluid quarto-figure quarto-figure-center anchored figure-img" width="576"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-out-gam-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1
+</figcaption>
 </figure>
 </div>
 </div>
@@ -1002,7 +1007,7 @@ Warning
 </div>
 <p>Even after manually setting <span class="math inline">\(\hat{p}_{i} = 0\)</span> on the at-bats that didn’t end with the ball in play, there are still some <code>NA</code> values in the column <code>p_out</code>. On further inspection, it looks like these were at-bats in which the ball was put in play but are missing hit locations.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(def_atbat2024<span class="sc">$</span>end_events[<span class="fu">is.na</span>(def_atbat2024<span class="sc">$</span>p_out)])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(def_atbat2024<span class="sc">$</span>end_events[<span class="fu">is.na</span>(def_atbat2024<span class="sc">$</span>p_out)])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
                    double                 field_out grounded_into_double_play 
@@ -1010,24 +1015,24 @@ Warning
                    single                    triple 
                         4                         1 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(def_atbat2024<span class="sc">$</span>x[<span class="fu">is.na</span>(def_atbat2024<span class="sc">$</span>p_out)]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(def_atbat2024<span class="sc">$</span>x[<span class="fu">is.na</span>(def_atbat2024<span class="sc">$</span>p_out)]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 13</code></pre>
 </div>
 </div>
 <p>We will remove these rows from our calculations</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>def_atbat2024 <span class="ot">&lt;-</span></span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(p_out))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>def_atbat2024 <span class="ot">&lt;-</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(p_out))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We can now finally compute <span class="math inline">\(\delta^{(f)}_{i}\)</span> and <span class="math inline">\(\delta^{(p)}_{i}\)</span> for each at-bat.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>def_atbat2024 <span class="ot">&lt;-</span></span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">delta_p =</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p_out) <span class="sc">*</span> RunValue,</span>
-<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">delta_f =</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> p_out <span class="sc">*</span> RunValue)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>def_atbat2024 <span class="ot">&lt;-</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">delta_p =</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p_out) <span class="sc">*</span> RunValue,</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">delta_f =</span> <span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> p_out <span class="sc">*</span> RunValue)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>
@@ -1157,98 +1162,98 @@ Warning
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>def_atbat2024 <span class="ot">&lt;-</span></span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
-<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_out_1 =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
-<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>      end_events <span class="sc">==</span> <span class="st">"home_run"</span> <span class="sc">~</span> <span class="dv">0</span>, </span>
-<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>      end_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"S"</span>, <span class="st">"B"</span>) <span class="sc">~</span> <span class="cn">NA</span>,</span>
-<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is.na</span>(x) <span class="sc">|</span> <span class="fu">is.na</span>(y) <span class="sc">~</span> <span class="cn">NA</span>,</span>
-<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sqrt</span>( (x <span class="sc">-</span> mid_x[<span class="dv">1</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> (y <span class="sc">-</span> mid_y[<span class="dv">1</span>])<span class="sc">^</span><span class="dv">2</span>) <span class="sc">&gt;=</span> <span class="dv">150</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
-<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">.default =</span> p_out_1),</span>
-<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_out_2 =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
-<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>      end_events <span class="sc">==</span> <span class="st">"home_run"</span> <span class="sc">~</span> <span class="dv">0</span>, </span>
-<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>      end_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"S"</span>, <span class="st">"B"</span>) <span class="sc">~</span> <span class="cn">NA</span>,</span>
-<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is.na</span>(x) <span class="sc">|</span> <span class="fu">is.na</span>(y) <span class="sc">~</span> <span class="cn">NA</span>,</span>
-<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sqrt</span>( (x <span class="sc">-</span> mid_x[<span class="dv">2</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> (y <span class="sc">-</span> mid_y[<span class="dv">2</span>])<span class="sc">^</span><span class="dv">2</span>) <span class="sc">&gt;=</span> <span class="dv">150</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
-<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">.default =</span> p_out_2),</span>
-<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_out_3 =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
-<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a>      end_events <span class="sc">==</span> <span class="st">"home_run"</span> <span class="sc">~</span> <span class="dv">0</span>, </span>
-<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a>      end_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"S"</span>, <span class="st">"B"</span>) <span class="sc">~</span> <span class="cn">NA</span>,</span>
-<span id="cb39-19"><a href="#cb39-19" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is.na</span>(x) <span class="sc">|</span> <span class="fu">is.na</span>(y) <span class="sc">~</span> <span class="cn">NA</span>,</span>
-<span id="cb39-20"><a href="#cb39-20" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sqrt</span>( (x <span class="sc">-</span> mid_x[<span class="dv">3</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> (y <span class="sc">-</span> mid_y[<span class="dv">3</span>])<span class="sc">^</span><span class="dv">2</span>) <span class="sc">&gt;=</span> <span class="dv">150</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
-<span id="cb39-21"><a href="#cb39-21" aria-hidden="true" tabindex="-1"></a>      <span class="at">.default =</span> p_out_3),</span>
-<span id="cb39-22"><a href="#cb39-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_out_4 =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
-<span id="cb39-23"><a href="#cb39-23" aria-hidden="true" tabindex="-1"></a>      end_events <span class="sc">==</span> <span class="st">"home_run"</span> <span class="sc">~</span> <span class="dv">0</span>, </span>
-<span id="cb39-24"><a href="#cb39-24" aria-hidden="true" tabindex="-1"></a>      end_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"S"</span>, <span class="st">"B"</span>) <span class="sc">~</span> <span class="cn">NA</span>,</span>
-<span id="cb39-25"><a href="#cb39-25" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is.na</span>(x) <span class="sc">|</span> <span class="fu">is.na</span>(y) <span class="sc">~</span> <span class="cn">NA</span>,</span>
-<span id="cb39-26"><a href="#cb39-26" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sqrt</span>( (x <span class="sc">-</span> mid_x[<span class="dv">4</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> (y <span class="sc">-</span> mid_y[<span class="dv">4</span>])<span class="sc">^</span><span class="dv">2</span>) <span class="sc">&gt;=</span> <span class="dv">150</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
-<span id="cb39-27"><a href="#cb39-27" aria-hidden="true" tabindex="-1"></a>      <span class="at">.default =</span> p_out_4),</span>
-<span id="cb39-28"><a href="#cb39-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_out_5 =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
-<span id="cb39-29"><a href="#cb39-29" aria-hidden="true" tabindex="-1"></a>      end_events <span class="sc">==</span> <span class="st">"home_run"</span> <span class="sc">~</span> <span class="dv">0</span>, </span>
-<span id="cb39-30"><a href="#cb39-30" aria-hidden="true" tabindex="-1"></a>      end_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"S"</span>, <span class="st">"B"</span>) <span class="sc">~</span> <span class="cn">NA</span>,</span>
-<span id="cb39-31"><a href="#cb39-31" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is.na</span>(x) <span class="sc">|</span> <span class="fu">is.na</span>(y) <span class="sc">~</span> <span class="cn">NA</span>,</span>
-<span id="cb39-32"><a href="#cb39-32" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sqrt</span>( (x <span class="sc">-</span> mid_x[<span class="dv">5</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> (y <span class="sc">-</span> mid_y[<span class="dv">5</span>])<span class="sc">^</span><span class="dv">2</span>) <span class="sc">&gt;=</span> <span class="dv">150</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
-<span id="cb39-33"><a href="#cb39-33" aria-hidden="true" tabindex="-1"></a>      <span class="at">.default =</span> p_out_5),</span>
-<span id="cb39-34"><a href="#cb39-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_out_6 =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
-<span id="cb39-35"><a href="#cb39-35" aria-hidden="true" tabindex="-1"></a>      end_events <span class="sc">==</span> <span class="st">"home_run"</span> <span class="sc">~</span> <span class="dv">0</span>, </span>
-<span id="cb39-36"><a href="#cb39-36" aria-hidden="true" tabindex="-1"></a>      end_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"S"</span>, <span class="st">"B"</span>) <span class="sc">~</span> <span class="cn">NA</span>,</span>
-<span id="cb39-37"><a href="#cb39-37" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is.na</span>(x) <span class="sc">|</span> <span class="fu">is.na</span>(y) <span class="sc">~</span> <span class="cn">NA</span>,</span>
-<span id="cb39-38"><a href="#cb39-38" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sqrt</span>( (x <span class="sc">-</span> mid_x[<span class="dv">6</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> (y <span class="sc">-</span> mid_y[<span class="dv">6</span>])<span class="sc">^</span><span class="dv">2</span>) <span class="sc">&gt;=</span> <span class="dv">150</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
-<span id="cb39-39"><a href="#cb39-39" aria-hidden="true" tabindex="-1"></a>      <span class="at">.default =</span> p_out_6),</span>
-<span id="cb39-40"><a href="#cb39-40" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_out_7 =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
-<span id="cb39-41"><a href="#cb39-41" aria-hidden="true" tabindex="-1"></a>      end_events <span class="sc">==</span> <span class="st">"home_run"</span> <span class="sc">~</span> <span class="dv">0</span>, </span>
-<span id="cb39-42"><a href="#cb39-42" aria-hidden="true" tabindex="-1"></a>      end_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"S"</span>, <span class="st">"B"</span>) <span class="sc">~</span> <span class="cn">NA</span>,</span>
-<span id="cb39-43"><a href="#cb39-43" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is.na</span>(x) <span class="sc">|</span> <span class="fu">is.na</span>(y) <span class="sc">~</span> <span class="cn">NA</span>,</span>
-<span id="cb39-44"><a href="#cb39-44" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sqrt</span>( (x <span class="sc">-</span> mid_x[<span class="dv">7</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> (y <span class="sc">-</span> mid_y[<span class="dv">7</span>])<span class="sc">^</span><span class="dv">2</span>) <span class="sc">&gt;=</span> <span class="dv">150</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
-<span id="cb39-45"><a href="#cb39-45" aria-hidden="true" tabindex="-1"></a>      <span class="at">.default =</span> p_out_7),</span>
-<span id="cb39-46"><a href="#cb39-46" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_out_8 =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
-<span id="cb39-47"><a href="#cb39-47" aria-hidden="true" tabindex="-1"></a>      end_events <span class="sc">==</span> <span class="st">"home_run"</span> <span class="sc">~</span> <span class="dv">0</span>, </span>
-<span id="cb39-48"><a href="#cb39-48" aria-hidden="true" tabindex="-1"></a>      end_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"S"</span>, <span class="st">"B"</span>) <span class="sc">~</span> <span class="cn">NA</span>,</span>
-<span id="cb39-49"><a href="#cb39-49" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is.na</span>(x) <span class="sc">|</span> <span class="fu">is.na</span>(y) <span class="sc">~</span> <span class="cn">NA</span>,</span>
-<span id="cb39-50"><a href="#cb39-50" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sqrt</span>( (x <span class="sc">-</span> mid_x[<span class="dv">8</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> (y <span class="sc">-</span> mid_y[<span class="dv">8</span>])<span class="sc">^</span><span class="dv">2</span>) <span class="sc">&gt;=</span> <span class="dv">150</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
-<span id="cb39-51"><a href="#cb39-51" aria-hidden="true" tabindex="-1"></a>      <span class="at">.default =</span> p_out_8),</span>
-<span id="cb39-52"><a href="#cb39-52" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_out_9 =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
-<span id="cb39-53"><a href="#cb39-53" aria-hidden="true" tabindex="-1"></a>      end_events <span class="sc">==</span> <span class="st">"home_run"</span> <span class="sc">~</span> <span class="dv">0</span>, </span>
-<span id="cb39-54"><a href="#cb39-54" aria-hidden="true" tabindex="-1"></a>      end_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"S"</span>, <span class="st">"B"</span>) <span class="sc">~</span> <span class="cn">NA</span>,</span>
-<span id="cb39-55"><a href="#cb39-55" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is.na</span>(x) <span class="sc">|</span> <span class="fu">is.na</span>(y) <span class="sc">~</span> <span class="cn">NA</span>,</span>
-<span id="cb39-56"><a href="#cb39-56" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sqrt</span>( (x <span class="sc">-</span> mid_x[<span class="dv">9</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> (y <span class="sc">-</span> mid_y[<span class="dv">9</span>])<span class="sc">^</span><span class="dv">2</span>) <span class="sc">&gt;=</span> <span class="dv">150</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
-<span id="cb39-57"><a href="#cb39-57" aria-hidden="true" tabindex="-1"></a>      <span class="at">.default =</span> p_out_9))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>def_atbat2024 <span class="ot">&lt;-</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_out_1 =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>      end_events <span class="sc">==</span> <span class="st">"home_run"</span> <span class="sc">~</span> <span class="dv">0</span>, </span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>      end_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"S"</span>, <span class="st">"B"</span>) <span class="sc">~</span> <span class="cn">NA</span>,</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is.na</span>(x) <span class="sc">|</span> <span class="fu">is.na</span>(y) <span class="sc">~</span> <span class="cn">NA</span>,</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sqrt</span>( (x <span class="sc">-</span> mid_x[<span class="dv">1</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> (y <span class="sc">-</span> mid_y[<span class="dv">1</span>])<span class="sc">^</span><span class="dv">2</span>) <span class="sc">&gt;=</span> <span class="dv">150</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">.default =</span> p_out_1),</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_out_2 =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>      end_events <span class="sc">==</span> <span class="st">"home_run"</span> <span class="sc">~</span> <span class="dv">0</span>, </span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>      end_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"S"</span>, <span class="st">"B"</span>) <span class="sc">~</span> <span class="cn">NA</span>,</span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is.na</span>(x) <span class="sc">|</span> <span class="fu">is.na</span>(y) <span class="sc">~</span> <span class="cn">NA</span>,</span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sqrt</span>( (x <span class="sc">-</span> mid_x[<span class="dv">2</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> (y <span class="sc">-</span> mid_y[<span class="dv">2</span>])<span class="sc">^</span><span class="dv">2</span>) <span class="sc">&gt;=</span> <span class="dv">150</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">.default =</span> p_out_2),</span>
+<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_out_3 =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a>      end_events <span class="sc">==</span> <span class="st">"home_run"</span> <span class="sc">~</span> <span class="dv">0</span>, </span>
+<span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a>      end_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"S"</span>, <span class="st">"B"</span>) <span class="sc">~</span> <span class="cn">NA</span>,</span>
+<span id="cb37-19"><a href="#cb37-19" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is.na</span>(x) <span class="sc">|</span> <span class="fu">is.na</span>(y) <span class="sc">~</span> <span class="cn">NA</span>,</span>
+<span id="cb37-20"><a href="#cb37-20" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sqrt</span>( (x <span class="sc">-</span> mid_x[<span class="dv">3</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> (y <span class="sc">-</span> mid_y[<span class="dv">3</span>])<span class="sc">^</span><span class="dv">2</span>) <span class="sc">&gt;=</span> <span class="dv">150</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb37-21"><a href="#cb37-21" aria-hidden="true" tabindex="-1"></a>      <span class="at">.default =</span> p_out_3),</span>
+<span id="cb37-22"><a href="#cb37-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_out_4 =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb37-23"><a href="#cb37-23" aria-hidden="true" tabindex="-1"></a>      end_events <span class="sc">==</span> <span class="st">"home_run"</span> <span class="sc">~</span> <span class="dv">0</span>, </span>
+<span id="cb37-24"><a href="#cb37-24" aria-hidden="true" tabindex="-1"></a>      end_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"S"</span>, <span class="st">"B"</span>) <span class="sc">~</span> <span class="cn">NA</span>,</span>
+<span id="cb37-25"><a href="#cb37-25" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is.na</span>(x) <span class="sc">|</span> <span class="fu">is.na</span>(y) <span class="sc">~</span> <span class="cn">NA</span>,</span>
+<span id="cb37-26"><a href="#cb37-26" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sqrt</span>( (x <span class="sc">-</span> mid_x[<span class="dv">4</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> (y <span class="sc">-</span> mid_y[<span class="dv">4</span>])<span class="sc">^</span><span class="dv">2</span>) <span class="sc">&gt;=</span> <span class="dv">150</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb37-27"><a href="#cb37-27" aria-hidden="true" tabindex="-1"></a>      <span class="at">.default =</span> p_out_4),</span>
+<span id="cb37-28"><a href="#cb37-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_out_5 =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb37-29"><a href="#cb37-29" aria-hidden="true" tabindex="-1"></a>      end_events <span class="sc">==</span> <span class="st">"home_run"</span> <span class="sc">~</span> <span class="dv">0</span>, </span>
+<span id="cb37-30"><a href="#cb37-30" aria-hidden="true" tabindex="-1"></a>      end_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"S"</span>, <span class="st">"B"</span>) <span class="sc">~</span> <span class="cn">NA</span>,</span>
+<span id="cb37-31"><a href="#cb37-31" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is.na</span>(x) <span class="sc">|</span> <span class="fu">is.na</span>(y) <span class="sc">~</span> <span class="cn">NA</span>,</span>
+<span id="cb37-32"><a href="#cb37-32" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sqrt</span>( (x <span class="sc">-</span> mid_x[<span class="dv">5</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> (y <span class="sc">-</span> mid_y[<span class="dv">5</span>])<span class="sc">^</span><span class="dv">2</span>) <span class="sc">&gt;=</span> <span class="dv">150</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb37-33"><a href="#cb37-33" aria-hidden="true" tabindex="-1"></a>      <span class="at">.default =</span> p_out_5),</span>
+<span id="cb37-34"><a href="#cb37-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_out_6 =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb37-35"><a href="#cb37-35" aria-hidden="true" tabindex="-1"></a>      end_events <span class="sc">==</span> <span class="st">"home_run"</span> <span class="sc">~</span> <span class="dv">0</span>, </span>
+<span id="cb37-36"><a href="#cb37-36" aria-hidden="true" tabindex="-1"></a>      end_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"S"</span>, <span class="st">"B"</span>) <span class="sc">~</span> <span class="cn">NA</span>,</span>
+<span id="cb37-37"><a href="#cb37-37" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is.na</span>(x) <span class="sc">|</span> <span class="fu">is.na</span>(y) <span class="sc">~</span> <span class="cn">NA</span>,</span>
+<span id="cb37-38"><a href="#cb37-38" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sqrt</span>( (x <span class="sc">-</span> mid_x[<span class="dv">6</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> (y <span class="sc">-</span> mid_y[<span class="dv">6</span>])<span class="sc">^</span><span class="dv">2</span>) <span class="sc">&gt;=</span> <span class="dv">150</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb37-39"><a href="#cb37-39" aria-hidden="true" tabindex="-1"></a>      <span class="at">.default =</span> p_out_6),</span>
+<span id="cb37-40"><a href="#cb37-40" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_out_7 =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb37-41"><a href="#cb37-41" aria-hidden="true" tabindex="-1"></a>      end_events <span class="sc">==</span> <span class="st">"home_run"</span> <span class="sc">~</span> <span class="dv">0</span>, </span>
+<span id="cb37-42"><a href="#cb37-42" aria-hidden="true" tabindex="-1"></a>      end_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"S"</span>, <span class="st">"B"</span>) <span class="sc">~</span> <span class="cn">NA</span>,</span>
+<span id="cb37-43"><a href="#cb37-43" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is.na</span>(x) <span class="sc">|</span> <span class="fu">is.na</span>(y) <span class="sc">~</span> <span class="cn">NA</span>,</span>
+<span id="cb37-44"><a href="#cb37-44" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sqrt</span>( (x <span class="sc">-</span> mid_x[<span class="dv">7</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> (y <span class="sc">-</span> mid_y[<span class="dv">7</span>])<span class="sc">^</span><span class="dv">2</span>) <span class="sc">&gt;=</span> <span class="dv">150</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb37-45"><a href="#cb37-45" aria-hidden="true" tabindex="-1"></a>      <span class="at">.default =</span> p_out_7),</span>
+<span id="cb37-46"><a href="#cb37-46" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_out_8 =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb37-47"><a href="#cb37-47" aria-hidden="true" tabindex="-1"></a>      end_events <span class="sc">==</span> <span class="st">"home_run"</span> <span class="sc">~</span> <span class="dv">0</span>, </span>
+<span id="cb37-48"><a href="#cb37-48" aria-hidden="true" tabindex="-1"></a>      end_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"S"</span>, <span class="st">"B"</span>) <span class="sc">~</span> <span class="cn">NA</span>,</span>
+<span id="cb37-49"><a href="#cb37-49" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is.na</span>(x) <span class="sc">|</span> <span class="fu">is.na</span>(y) <span class="sc">~</span> <span class="cn">NA</span>,</span>
+<span id="cb37-50"><a href="#cb37-50" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sqrt</span>( (x <span class="sc">-</span> mid_x[<span class="dv">8</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> (y <span class="sc">-</span> mid_y[<span class="dv">8</span>])<span class="sc">^</span><span class="dv">2</span>) <span class="sc">&gt;=</span> <span class="dv">150</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb37-51"><a href="#cb37-51" aria-hidden="true" tabindex="-1"></a>      <span class="at">.default =</span> p_out_8),</span>
+<span id="cb37-52"><a href="#cb37-52" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_out_9 =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb37-53"><a href="#cb37-53" aria-hidden="true" tabindex="-1"></a>      end_events <span class="sc">==</span> <span class="st">"home_run"</span> <span class="sc">~</span> <span class="dv">0</span>, </span>
+<span id="cb37-54"><a href="#cb37-54" aria-hidden="true" tabindex="-1"></a>      end_type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"S"</span>, <span class="st">"B"</span>) <span class="sc">~</span> <span class="cn">NA</span>,</span>
+<span id="cb37-55"><a href="#cb37-55" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is.na</span>(x) <span class="sc">|</span> <span class="fu">is.na</span>(y) <span class="sc">~</span> <span class="cn">NA</span>,</span>
+<span id="cb37-56"><a href="#cb37-56" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sqrt</span>( (x <span class="sc">-</span> mid_x[<span class="dv">9</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> (y <span class="sc">-</span> mid_y[<span class="dv">9</span>])<span class="sc">^</span><span class="dv">2</span>) <span class="sc">&gt;=</span> <span class="dv">150</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb37-57"><a href="#cb37-57" aria-hidden="true" tabindex="-1"></a>      <span class="at">.default =</span> p_out_9))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>We now normalize the <span class="math inline">\(\hat{p}_{i,\ell}\)</span> values to get the weights <span class="math inline">\(w_{i,\ell}\)</span> measuring the responsibility of each fielder for making an out in the at-bat.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>def_atbat2024 <span class="ot">&lt;-</span></span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">total_weight =</span> p_out_1 <span class="sc">+</span> p_out_2 <span class="sc">+</span> p_out_3 <span class="sc">+</span></span>
-<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>      p_out_4 <span class="sc">+</span> p_out_5 <span class="sc">+</span> p_out_6 <span class="sc">+</span></span>
-<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>      p_out_7 <span class="sc">+</span> p_out_8 <span class="sc">+</span> p_out_9,</span>
-<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">w1 =</span> p_out_1<span class="sc">/</span>total_weight,</span>
-<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">w2 =</span> p_out_2<span class="sc">/</span>total_weight,</span>
-<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">w3 =</span> p_out_3<span class="sc">/</span>total_weight,</span>
-<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">w4 =</span> p_out_4<span class="sc">/</span>total_weight,</span>
-<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">w5 =</span> p_out_5<span class="sc">/</span>total_weight,</span>
-<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">w6 =</span> p_out_6<span class="sc">/</span>total_weight,</span>
-<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">w7 =</span> p_out_7<span class="sc">/</span>total_weight,</span>
-<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">w8 =</span> p_out_8<span class="sc">/</span>total_weight,</span>
-<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">w9 =</span> p_out_9<span class="sc">/</span>total_weight)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>def_atbat2024 <span class="ot">&lt;-</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">total_weight =</span> p_out_1 <span class="sc">+</span> p_out_2 <span class="sc">+</span> p_out_3 <span class="sc">+</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>      p_out_4 <span class="sc">+</span> p_out_5 <span class="sc">+</span> p_out_6 <span class="sc">+</span></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>      p_out_7 <span class="sc">+</span> p_out_8 <span class="sc">+</span> p_out_9,</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">w1 =</span> p_out_1<span class="sc">/</span>total_weight,</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">w2 =</span> p_out_2<span class="sc">/</span>total_weight,</span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">w3 =</span> p_out_3<span class="sc">/</span>total_weight,</span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">w4 =</span> p_out_4<span class="sc">/</span>total_weight,</span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">w5 =</span> p_out_5<span class="sc">/</span>total_weight,</span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">w6 =</span> p_out_6<span class="sc">/</span>total_weight,</span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">w7 =</span> p_out_7<span class="sc">/</span>total_weight,</span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">w8 =</span> p_out_8<span class="sc">/</span>total_weight,</span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">w9 =</span> p_out_9<span class="sc">/</span>total_weight)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now, for each fielding position, we can compute <span class="math inline">\(w_{i,\ell} \times \delta^{(f)}_{i}\)</span> and aggregate these values across players at that position to compute <span class="math inline">\(\textrm{RAA}_{\ell}^{(f)},\)</span> which quantifies the total run value created by the player through their fielding at position <span class="math inline">\(\ell.\)</span> Negative values of <span class="math inline">\(\textrm{RAA}_{\ell}^{(f)}\)</span> suggest that the player’s fielding at position <span class="math inline">\(\ell\)</span> netted <em>positive</em> run value for the batting team, thereby negatively impacthing his own team.</p>
 <p>Here is the calculation for first basemen (fielding position number <span class="math inline">\(\ell = 3\)</span>). Taking a looking at the largest <span class="math inline">\(\textrm{RAA}_{\ell}^{f}\)</span> values, we see several recent <a href="https://en.wikipedia.org/wiki/Gold_Glove_Award">Golden Glove</a> winners who are known for their fielding prowess (Santana, Walker, Goldschmidt, Olson, Guerrero).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>raa_f3 <span class="ot">&lt;-</span></span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA_f3 =</span> delta_f <span class="sc">*</span> w3) <span class="sc">|&gt;</span></span>
-<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(fielder_3) <span class="sc">|&gt;</span></span>
-<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">RAA_f3 =</span> <span class="fu">sum</span>(RAA_f3, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> fielder_3)</span>
-<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>raa_f3 <span class="sc">|&gt;</span></span>
-<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> player2024_lookup, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Name, RAA_f3) <span class="sc">|&gt;</span></span>
-<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(RAA_f3)) <span class="sc">|&gt;</span></span>
-<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>raa_f3 <span class="ot">&lt;-</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA_f3 =</span> delta_f <span class="sc">*</span> w3) <span class="sc">|&gt;</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(fielder_3) <span class="sc">|&gt;</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">RAA_f3 =</span> <span class="fu">sum</span>(RAA_f3, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> fielder_3)</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>raa_f3 <span class="sc">|&gt;</span></span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> player2024_lookup, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Name, RAA_f3) <span class="sc">|&gt;</span></span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(RAA_f3)) <span class="sc">|&gt;</span></span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 10 × 2
    Name              RAA_f3
@@ -1267,99 +1272,99 @@ Warning
 </div>
 <p>The following code repeats this calculation for all fielding positions.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>raa_f1 <span class="ot">&lt;-</span></span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
-<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA_f1 =</span> delta_f <span class="sc">*</span> w1) <span class="sc">|&gt;</span></span>
-<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(pitcher) <span class="sc">|&gt;</span></span>
-<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">RAA_f1 =</span> <span class="fu">sum</span>(RAA_f1, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> pitcher) <span class="sc">|&gt;</span></span>
-<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(key_mlbam, RAA_f1)</span>
-<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>raa_f2 <span class="ot">&lt;-</span></span>
-<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
-<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA_f2 =</span> delta_f <span class="sc">*</span> w2) <span class="sc">|&gt;</span></span>
-<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(fielder_2) <span class="sc">|&gt;</span></span>
-<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">RAA_f2 =</span> <span class="fu">sum</span>(RAA_f2, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> fielder_2) <span class="sc">|&gt;</span></span>
-<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(key_mlbam, RAA_f2)</span>
-<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a>raa_f3 <span class="ot">&lt;-</span></span>
-<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
-<span id="cb43-19"><a href="#cb43-19" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA_f3 =</span> delta_f <span class="sc">*</span> w3) <span class="sc">|&gt;</span></span>
-<span id="cb43-20"><a href="#cb43-20" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(fielder_3) <span class="sc">|&gt;</span></span>
-<span id="cb43-21"><a href="#cb43-21" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">RAA_f3 =</span> <span class="fu">sum</span>(RAA_f3, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb43-22"><a href="#cb43-22" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> fielder_3) <span class="sc">|&gt;</span></span>
-<span id="cb43-23"><a href="#cb43-23" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(key_mlbam, RAA_f3)</span>
-<span id="cb43-24"><a href="#cb43-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-25"><a href="#cb43-25" aria-hidden="true" tabindex="-1"></a>raa_f4 <span class="ot">&lt;-</span></span>
-<span id="cb43-26"><a href="#cb43-26" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
-<span id="cb43-27"><a href="#cb43-27" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA_f4 =</span> delta_f <span class="sc">*</span> w4) <span class="sc">|&gt;</span></span>
-<span id="cb43-28"><a href="#cb43-28" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(fielder_4) <span class="sc">|&gt;</span></span>
-<span id="cb43-29"><a href="#cb43-29" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">RAA_f4 =</span> <span class="fu">sum</span>(RAA_f4, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb43-30"><a href="#cb43-30" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> fielder_4) <span class="sc">|&gt;</span></span>
-<span id="cb43-31"><a href="#cb43-31" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(key_mlbam, RAA_f4)</span>
-<span id="cb43-32"><a href="#cb43-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-33"><a href="#cb43-33" aria-hidden="true" tabindex="-1"></a>raa_f5 <span class="ot">&lt;-</span></span>
-<span id="cb43-34"><a href="#cb43-34" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
-<span id="cb43-35"><a href="#cb43-35" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA_f5 =</span> delta_f <span class="sc">*</span> w5) <span class="sc">|&gt;</span></span>
-<span id="cb43-36"><a href="#cb43-36" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(fielder_5) <span class="sc">|&gt;</span></span>
-<span id="cb43-37"><a href="#cb43-37" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">RAA_f5 =</span> <span class="fu">sum</span>(RAA_f5, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb43-38"><a href="#cb43-38" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> fielder_5) <span class="sc">|&gt;</span></span>
-<span id="cb43-39"><a href="#cb43-39" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(key_mlbam, RAA_f5)</span>
-<span id="cb43-40"><a href="#cb43-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-41"><a href="#cb43-41" aria-hidden="true" tabindex="-1"></a>raa_f6 <span class="ot">&lt;-</span></span>
-<span id="cb43-42"><a href="#cb43-42" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
-<span id="cb43-43"><a href="#cb43-43" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA_f6 =</span> delta_f <span class="sc">*</span> w6) <span class="sc">|&gt;</span></span>
-<span id="cb43-44"><a href="#cb43-44" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(fielder_6) <span class="sc">|&gt;</span></span>
-<span id="cb43-45"><a href="#cb43-45" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">RAA_f6 =</span> <span class="fu">sum</span>(RAA_f6, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb43-46"><a href="#cb43-46" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> fielder_6) <span class="sc">|&gt;</span></span>
-<span id="cb43-47"><a href="#cb43-47" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(key_mlbam, RAA_f6)</span>
-<span id="cb43-48"><a href="#cb43-48" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-49"><a href="#cb43-49" aria-hidden="true" tabindex="-1"></a>raa_f7 <span class="ot">&lt;-</span></span>
-<span id="cb43-50"><a href="#cb43-50" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
-<span id="cb43-51"><a href="#cb43-51" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA_f7 =</span> delta_f <span class="sc">*</span> w7) <span class="sc">|&gt;</span></span>
-<span id="cb43-52"><a href="#cb43-52" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(fielder_7) <span class="sc">|&gt;</span></span>
-<span id="cb43-53"><a href="#cb43-53" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">RAA_f7 =</span> <span class="fu">sum</span>(RAA_f7, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb43-54"><a href="#cb43-54" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> fielder_7) <span class="sc">|&gt;</span></span>
-<span id="cb43-55"><a href="#cb43-55" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(key_mlbam, RAA_f7)</span>
-<span id="cb43-56"><a href="#cb43-56" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-57"><a href="#cb43-57" aria-hidden="true" tabindex="-1"></a>raa_f8 <span class="ot">&lt;-</span></span>
-<span id="cb43-58"><a href="#cb43-58" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
-<span id="cb43-59"><a href="#cb43-59" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA_f8 =</span> delta_f <span class="sc">*</span> w8) <span class="sc">|&gt;</span></span>
-<span id="cb43-60"><a href="#cb43-60" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(fielder_8) <span class="sc">|&gt;</span></span>
-<span id="cb43-61"><a href="#cb43-61" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">RAA_f8 =</span> <span class="fu">sum</span>(RAA_f8, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb43-62"><a href="#cb43-62" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> fielder_8) <span class="sc">|&gt;</span></span>
-<span id="cb43-63"><a href="#cb43-63" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(key_mlbam, RAA_f8)</span>
-<span id="cb43-64"><a href="#cb43-64" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-65"><a href="#cb43-65" aria-hidden="true" tabindex="-1"></a>raa_f9 <span class="ot">&lt;-</span></span>
-<span id="cb43-66"><a href="#cb43-66" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
-<span id="cb43-67"><a href="#cb43-67" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA_f9 =</span> delta_f <span class="sc">*</span> w9) <span class="sc">|&gt;</span></span>
-<span id="cb43-68"><a href="#cb43-68" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(fielder_9) <span class="sc">|&gt;</span></span>
-<span id="cb43-69"><a href="#cb43-69" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">RAA_f9 =</span> <span class="fu">sum</span>(RAA_f9, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb43-70"><a href="#cb43-70" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> fielder_9) <span class="sc">|&gt;</span></span>
-<span id="cb43-71"><a href="#cb43-71" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(key_mlbam, RAA_f9)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>raa_f1 <span class="ot">&lt;-</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA_f1 =</span> delta_f <span class="sc">*</span> w1) <span class="sc">|&gt;</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(pitcher) <span class="sc">|&gt;</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">RAA_f1 =</span> <span class="fu">sum</span>(RAA_f1, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> pitcher) <span class="sc">|&gt;</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(key_mlbam, RAA_f1)</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>raa_f2 <span class="ot">&lt;-</span></span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA_f2 =</span> delta_f <span class="sc">*</span> w2) <span class="sc">|&gt;</span></span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(fielder_2) <span class="sc">|&gt;</span></span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">RAA_f2 =</span> <span class="fu">sum</span>(RAA_f2, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> fielder_2) <span class="sc">|&gt;</span></span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(key_mlbam, RAA_f2)</span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a>raa_f3 <span class="ot">&lt;-</span></span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
+<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA_f3 =</span> delta_f <span class="sc">*</span> w3) <span class="sc">|&gt;</span></span>
+<span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(fielder_3) <span class="sc">|&gt;</span></span>
+<span id="cb41-21"><a href="#cb41-21" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">RAA_f3 =</span> <span class="fu">sum</span>(RAA_f3, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb41-22"><a href="#cb41-22" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> fielder_3) <span class="sc">|&gt;</span></span>
+<span id="cb41-23"><a href="#cb41-23" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(key_mlbam, RAA_f3)</span>
+<span id="cb41-24"><a href="#cb41-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-25"><a href="#cb41-25" aria-hidden="true" tabindex="-1"></a>raa_f4 <span class="ot">&lt;-</span></span>
+<span id="cb41-26"><a href="#cb41-26" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
+<span id="cb41-27"><a href="#cb41-27" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA_f4 =</span> delta_f <span class="sc">*</span> w4) <span class="sc">|&gt;</span></span>
+<span id="cb41-28"><a href="#cb41-28" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(fielder_4) <span class="sc">|&gt;</span></span>
+<span id="cb41-29"><a href="#cb41-29" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">RAA_f4 =</span> <span class="fu">sum</span>(RAA_f4, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb41-30"><a href="#cb41-30" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> fielder_4) <span class="sc">|&gt;</span></span>
+<span id="cb41-31"><a href="#cb41-31" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(key_mlbam, RAA_f4)</span>
+<span id="cb41-32"><a href="#cb41-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-33"><a href="#cb41-33" aria-hidden="true" tabindex="-1"></a>raa_f5 <span class="ot">&lt;-</span></span>
+<span id="cb41-34"><a href="#cb41-34" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
+<span id="cb41-35"><a href="#cb41-35" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA_f5 =</span> delta_f <span class="sc">*</span> w5) <span class="sc">|&gt;</span></span>
+<span id="cb41-36"><a href="#cb41-36" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(fielder_5) <span class="sc">|&gt;</span></span>
+<span id="cb41-37"><a href="#cb41-37" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">RAA_f5 =</span> <span class="fu">sum</span>(RAA_f5, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb41-38"><a href="#cb41-38" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> fielder_5) <span class="sc">|&gt;</span></span>
+<span id="cb41-39"><a href="#cb41-39" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(key_mlbam, RAA_f5)</span>
+<span id="cb41-40"><a href="#cb41-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-41"><a href="#cb41-41" aria-hidden="true" tabindex="-1"></a>raa_f6 <span class="ot">&lt;-</span></span>
+<span id="cb41-42"><a href="#cb41-42" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
+<span id="cb41-43"><a href="#cb41-43" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA_f6 =</span> delta_f <span class="sc">*</span> w6) <span class="sc">|&gt;</span></span>
+<span id="cb41-44"><a href="#cb41-44" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(fielder_6) <span class="sc">|&gt;</span></span>
+<span id="cb41-45"><a href="#cb41-45" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">RAA_f6 =</span> <span class="fu">sum</span>(RAA_f6, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb41-46"><a href="#cb41-46" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> fielder_6) <span class="sc">|&gt;</span></span>
+<span id="cb41-47"><a href="#cb41-47" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(key_mlbam, RAA_f6)</span>
+<span id="cb41-48"><a href="#cb41-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-49"><a href="#cb41-49" aria-hidden="true" tabindex="-1"></a>raa_f7 <span class="ot">&lt;-</span></span>
+<span id="cb41-50"><a href="#cb41-50" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
+<span id="cb41-51"><a href="#cb41-51" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA_f7 =</span> delta_f <span class="sc">*</span> w7) <span class="sc">|&gt;</span></span>
+<span id="cb41-52"><a href="#cb41-52" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(fielder_7) <span class="sc">|&gt;</span></span>
+<span id="cb41-53"><a href="#cb41-53" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">RAA_f7 =</span> <span class="fu">sum</span>(RAA_f7, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb41-54"><a href="#cb41-54" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> fielder_7) <span class="sc">|&gt;</span></span>
+<span id="cb41-55"><a href="#cb41-55" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(key_mlbam, RAA_f7)</span>
+<span id="cb41-56"><a href="#cb41-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-57"><a href="#cb41-57" aria-hidden="true" tabindex="-1"></a>raa_f8 <span class="ot">&lt;-</span></span>
+<span id="cb41-58"><a href="#cb41-58" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
+<span id="cb41-59"><a href="#cb41-59" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA_f8 =</span> delta_f <span class="sc">*</span> w8) <span class="sc">|&gt;</span></span>
+<span id="cb41-60"><a href="#cb41-60" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(fielder_8) <span class="sc">|&gt;</span></span>
+<span id="cb41-61"><a href="#cb41-61" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">RAA_f8 =</span> <span class="fu">sum</span>(RAA_f8, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb41-62"><a href="#cb41-62" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> fielder_8) <span class="sc">|&gt;</span></span>
+<span id="cb41-63"><a href="#cb41-63" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(key_mlbam, RAA_f8)</span>
+<span id="cb41-64"><a href="#cb41-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-65"><a href="#cb41-65" aria-hidden="true" tabindex="-1"></a>raa_f9 <span class="ot">&lt;-</span></span>
+<span id="cb41-66"><a href="#cb41-66" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
+<span id="cb41-67"><a href="#cb41-67" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA_f9 =</span> delta_f <span class="sc">*</span> w9) <span class="sc">|&gt;</span></span>
+<span id="cb41-68"><a href="#cb41-68" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(fielder_9) <span class="sc">|&gt;</span></span>
+<span id="cb41-69"><a href="#cb41-69" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">RAA_f9 =</span> <span class="fu">sum</span>(RAA_f9, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb41-70"><a href="#cb41-70" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> fielder_9) <span class="sc">|&gt;</span></span>
+<span id="cb41-71"><a href="#cb41-71" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(key_mlbam, RAA_f9)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Like we did when computing <span class="math inline">\(\textrm{RAA}^{(br)}\)</span> in <a href="../lectures/lecture07.html">Lecture 7</a>, we will concatenate <code>raa_f1</code>, …, <code>raa_f9</code> and sum every players total contributions across all fielding positions.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>raa_f <span class="ot">&lt;-</span></span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  raa_f1 <span class="sc">|&gt;</span></span>
-<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_f2, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_f3, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_f4, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_f5, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_f6, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_f7, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_f8, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_f9, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">replace_na</span>(</span>
-<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">list</span>(<span class="at">RAA_f1=</span><span class="dv">0</span>, <span class="at">RAA_f2=</span><span class="dv">0</span>, <span class="at">RAA_f3=</span><span class="dv">0</span>, <span class="at">RAA_f4=</span><span class="dv">0</span>, </span>
-<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">RAA_f5=</span><span class="dv">0</span>, <span class="at">RAA_f6 =</span> <span class="dv">0</span>, <span class="at">RAA_f7=</span><span class="dv">0</span>, <span class="at">RAA_f8 =</span> <span class="dv">0</span>, <span class="at">RAA_f9=</span><span class="dv">0</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">RAA_f =</span> RAA_f1 <span class="sc">+</span> RAA_f2 <span class="sc">+</span> RAA_f3 <span class="sc">+</span> RAA_f4 <span class="sc">+</span> </span>
-<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a>      RAA_f5 <span class="sc">+</span> RAA_f6 <span class="sc">+</span> RAA_f7 <span class="sc">+</span> RAA_f8 <span class="sc">+</span> RAA_f9) <span class="sc">|&gt;</span></span>
-<span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> player2024_lookup, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb44-18"><a href="#cb44-18" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Name, key_mlbam, RAA_f, RAA_f1, RAA_f2, RAA_f3, RAA_f4, RAA_f5,</span>
-<span id="cb44-19"><a href="#cb44-19" aria-hidden="true" tabindex="-1"></a>                RAA_f6, RAA_f7, RAA_f8, RAA_f9)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>raa_f <span class="ot">&lt;-</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  raa_f1 <span class="sc">|&gt;</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_f2, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_f3, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_f4, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_f5, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_f6, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_f7, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_f8, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_f9, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">replace_na</span>(</span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">list</span>(<span class="at">RAA_f1=</span><span class="dv">0</span>, <span class="at">RAA_f2=</span><span class="dv">0</span>, <span class="at">RAA_f3=</span><span class="dv">0</span>, <span class="at">RAA_f4=</span><span class="dv">0</span>, </span>
+<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">RAA_f5=</span><span class="dv">0</span>, <span class="at">RAA_f6 =</span> <span class="dv">0</span>, <span class="at">RAA_f7=</span><span class="dv">0</span>, <span class="at">RAA_f8 =</span> <span class="dv">0</span>, <span class="at">RAA_f9=</span><span class="dv">0</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">RAA_f =</span> RAA_f1 <span class="sc">+</span> RAA_f2 <span class="sc">+</span> RAA_f3 <span class="sc">+</span> RAA_f4 <span class="sc">+</span> </span>
+<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a>      RAA_f5 <span class="sc">+</span> RAA_f6 <span class="sc">+</span> RAA_f7 <span class="sc">+</span> RAA_f8 <span class="sc">+</span> RAA_f9) <span class="sc">|&gt;</span></span>
+<span id="cb42-17"><a href="#cb42-17" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> player2024_lookup, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb42-18"><a href="#cb42-18" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Name, key_mlbam, RAA_f, RAA_f1, RAA_f2, RAA_f3, RAA_f4, RAA_f5,</span>
+<span id="cb42-19"><a href="#cb42-19" aria-hidden="true" tabindex="-1"></a>                RAA_f6, RAA_f7, RAA_f8, RAA_f9)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <!--
   1. Fit a GAM for probability an out occurs on BIP i: p_i
@@ -1373,20 +1378,20 @@ Warning
 <h2 class="anchored" data-anchor-id="pitching-run-values">Pitching run values</h2>
 <p>Recall that <span class="math inline">\(\delta_{i}^{(p)}\)</span> is the amount of run value created by the pitcher in at-bat <span class="math inline">\(i.\)</span> Summing this value across all at-bats involving each pitcher, we obtain each pitchers <span class="math inline">\(\textrm{RAA}^{(p)}.\)</span></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>raa_p <span class="ot">&lt;-</span></span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
-<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(pitcher, delta_p) <span class="sc">|&gt;</span></span>
-<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(pitcher) <span class="sc">|&gt;</span></span>
-<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">RAA_p =</span> <span class="fu">sum</span>(delta_p, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> pitcher) <span class="sc">|&gt;</span></span>
-<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> player2024_lookup, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Name, key_mlbam, RAA_p)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>raa_p <span class="ot">&lt;-</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(pitcher, delta_p) <span class="sc">|&gt;</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(pitcher) <span class="sc">|&gt;</span></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">RAA_p =</span> <span class="fu">sum</span>(delta_p, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> pitcher) <span class="sc">|&gt;</span></span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> player2024_lookup, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Name, key_mlbam, RAA_p)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We see that the two 2024 <a href="https://en.wikipedia.org/wiki/Cy_Young_Award">Cy Young Award</a> winners<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>, Tarik Skubal and Chris Sale, have the highest <span class="math inline">\(\textrm{RAA}^{(p)}\)</span> values.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>raa_p <span class="sc">|&gt;</span></span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(RAA_p)) <span class="sc">|&gt;</span></span>
-<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>raa_p <span class="sc">|&gt;</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(RAA_p)) <span class="sc">|&gt;</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 10 × 3
    Name            key_mlbam RAA_p
@@ -1405,24 +1410,24 @@ Warning
 </div>
 <p>We will save both <code>raa_f</code> and <code>raa_p</code> for later use</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(raa_f, raa_p, <span class="at">file =</span> <span class="st">"raa_defensive2024.RData"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(raa_f, raa_p, <span class="at">file =</span> <span class="st">"raa_defensive2024.RData"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="replacement-level" class="level2">
 <h2 class="anchored" data-anchor-id="replacement-level">Replacement Level</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"raa_offensive2024.RData"</span>)</span>
-<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>raa <span class="ot">&lt;-</span></span>
-<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>  raa_b <span class="sc">|&gt;</span></span>
-<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>Name) <span class="sc">|&gt;</span></span>
-<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_br <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>Name), <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_p <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>Name), <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_f <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>Name), <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">replace_na</span>(<span class="fu">list</span>(<span class="at">RAA_b =</span> <span class="dv">0</span>, <span class="at">RAA_br =</span> <span class="dv">0</span>, <span class="at">RAA_f =</span> <span class="dv">0</span>, <span class="at">RAA_p =</span> <span class="dv">0</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA =</span> RAA_b <span class="sc">+</span> RAA_br <span class="sc">+</span> RAA_f <span class="sc">+</span> RAA_p) <span class="sc">|&gt;</span></span>
-<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> player2024_lookup <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(key_mlbam, Name), <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Name, key_mlbam, RAA, RAA_b, RAA_br, RAA_f, RAA_p)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"raa_offensive2024.RData"</span>)</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>raa <span class="ot">&lt;-</span></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>  raa_b <span class="sc">|&gt;</span></span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>Name) <span class="sc">|&gt;</span></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_br <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>Name), <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_p <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>Name), <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_f <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>Name), <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">replace_na</span>(<span class="fu">list</span>(<span class="at">RAA_b =</span> <span class="dv">0</span>, <span class="at">RAA_br =</span> <span class="dv">0</span>, <span class="at">RAA_f =</span> <span class="dv">0</span>, <span class="at">RAA_p =</span> <span class="dv">0</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA =</span> RAA_b <span class="sc">+</span> RAA_br <span class="sc">+</span> RAA_f <span class="sc">+</span> RAA_p) <span class="sc">|&gt;</span></span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> player2024_lookup <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(key_mlbam, Name), <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Name, key_mlbam, RAA, RAA_b, RAA_br, RAA_f, RAA_p)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><span class="math inline">\(RAA\)</span> is a comprehensive measure of a player’s performance that accounts not only for the actual runs scored (or given up) due to his contributions but also the changes in the expected runs that can be attributed to his play. We constructed <span class="math inline">\(RAA\)</span> so that larger numbers indicate better performance. While the absolute <span class="math inline">\(RAA\)</span> values are useful on their own, they become even more useful — and interpretable — when calibrated to measure performance <em>relative</em> to a baseline player. As argued by <span class="citation" data-cites="Baumer2015_openWAR">Baumer, Jensen, and Matthews (<a href="#ref-Baumer2015_openWAR" role="doc-biblioref">2015</a>)</span>, although comparing an individual players <span class="math inline">\(RAA\)</span> to the league-average value is intuitive, average players are themselves quite valuable. Further, it is not reasonable to expect a team to be able to replace any player with a league average one. Thus, it is more useful to compare each player’s performance relative to a replacement-level player.</p>
 <p>As discussed in class (and also in Section 3.8 of <span class="citation" data-cites="Baumer2015_openWAR">Baumer, Jensen, and Matthews (<a href="#ref-Baumer2015_openWAR" role="doc-biblioref">2015</a>)</span>), existing definitions of replacement level are fairly arbitrary. For instance, back in 2010, <a href="https://library.fangraphs.com/misc/war/replacement-level/">FanGraphs</a> asserted that a team of players making the minimum MLB salary would win 29.7% of its games (so between 48 and 49 games). Similar definitions have been adopted by other sites like Baseball Propsectus and Baseball Reference. Unfortunately, there is little empirical justification for this number.</p>
@@ -1532,17 +1537,17 @@ Cut-off for pitchers: 204 </code></pre>
 </div>
 <p>We see that the replacement-level RAA per-at-bat is 0 for position players and -0.02 for pitchers. Multiplying the the replacement-level per-at-bat RAA values by the number of plate appearances faced by each non-replacement-level player gives us an estimate of how each player’s replacement-level “shadow” would perform. Finally, using the heuristic of 10 runs per win, dividing the difference between the actual RAA and the RAA for the replacement-level shadow yields our wins above replacement for position players.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>position_war <span class="ot">&lt;-</span></span>
-<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  raa <span class="sc">|&gt;</span></span>
-<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span>key_mlbam <span class="sc">%in%</span> repl_position_players) <span class="sc">|&gt;</span></span>
-<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> position_pa, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Name, key_mlbam, RAA, n) <span class="sc">|&gt;</span></span>
-<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">shadowRAA =</span> n <span class="sc">*</span> repl_avg_pos) <span class="sc">|&gt;</span></span>
-<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">WAR =</span> (RAA <span class="sc">-</span> shadowRAA)<span class="sc">/</span><span class="dv">10</span>)</span>
-<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>position_war <span class="sc">|&gt;</span></span>
-<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(WAR)) <span class="sc">|&gt;</span></span>
-<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>position_war <span class="ot">&lt;-</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  raa <span class="sc">|&gt;</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span>key_mlbam <span class="sc">%in%</span> repl_position_players) <span class="sc">|&gt;</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> position_pa, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Name, key_mlbam, RAA, n) <span class="sc">|&gt;</span></span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">shadowRAA =</span> n <span class="sc">*</span> repl_avg_pos) <span class="sc">|&gt;</span></span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">WAR =</span> (RAA <span class="sc">-</span> shadowRAA)<span class="sc">/</span><span class="dv">10</span>)</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>position_war <span class="sc">|&gt;</span></span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(WAR)) <span class="sc">|&gt;</span></span>
+<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 10 × 6
    Name              key_mlbam   RAA     n shadowRAA   WAR
@@ -1561,17 +1566,17 @@ Cut-off for pitchers: 204 </code></pre>
 </div>
 <p>We can run a similar calculation for pitchers.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>pitch_war <span class="ot">&lt;-</span></span>
-<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  raa <span class="sc">|&gt;</span></span>
-<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span>key_mlbam <span class="sc">%in%</span> repl_pitchers) <span class="sc">|&gt;</span></span>
-<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> pitcher_pa, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Name, key_mlbam, RAA, n) <span class="sc">|&gt;</span></span>
-<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">shadowRAA =</span> n <span class="sc">*</span> repl_avg_pitch) <span class="sc">|&gt;</span></span>
-<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">WAR =</span> (RAA <span class="sc">-</span> shadowRAA)<span class="sc">/</span><span class="dv">10</span>)</span>
-<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>pitch_war <span class="sc">|&gt;</span></span>
-<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(WAR)) <span class="sc">|&gt;</span></span>
-<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>pitch_war <span class="ot">&lt;-</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  raa <span class="sc">|&gt;</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span>key_mlbam <span class="sc">%in%</span> repl_pitchers) <span class="sc">|&gt;</span></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> pitcher_pa, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Name, key_mlbam, RAA, n) <span class="sc">|&gt;</span></span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">shadowRAA =</span> n <span class="sc">*</span> repl_avg_pitch) <span class="sc">|&gt;</span></span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">WAR =</span> (RAA <span class="sc">-</span> shadowRAA)<span class="sc">/</span><span class="dv">10</span>)</span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>pitch_war <span class="sc">|&gt;</span></span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(WAR)) <span class="sc">|&gt;</span></span>
+<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 10 × 6
    Name            key_mlbam   RAA     n shadowRAA   WAR
@@ -2045,6 +2050,38 @@ Baumer, Benjamin S., Shane T. Jensen, and Gregory J. Matthews. 2015. <span>“<s
   });
   </script>
 </div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
 
 
 
