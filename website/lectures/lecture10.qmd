@@ -43,7 +43,7 @@ We will also fit two separate multilevel models of EPA on rushing plays, one for
 ## Data Preparation {#sec-data-prep}
 
 We will restrict our analysis to plays from the 2024-25 regular season and exclude all post-season/play-off games.
-Later, in @sec-replacement, we will define replacement-level players on a position-by-position basis.
+Later, in @sec-skill-replacement, we will define replacement-level players on a position-by-position basis.
 So that we can look up player positions, we will re-load the roster information using `nflfastR::fast_scraper_roster()`.
 ```{r}
 #| label: load-pbp-roster
@@ -86,7 +86,7 @@ pass2024 <-
   dplyr::select(-gsis_id) #<7>
 ```
 1. Remove pass attempts on two-point conversions
-2. **nflfastR** classifies sacks as passing plays. For the purposes of building a version of WAR for the NFL, we will treat sacks as running plays, similar to @Yurko2019_nflWar.
+2. **nflfastR** classifies sacks as passing plays. For the purposes of building a version of WAR for the NFL, we will treat sacks as running plays, similar to @Yurko2019_nflWAR.
 3. Remove [plays like this](https://www.youtube.com/shorts/roJrUCFDrFA) where the passer catches their own pass (usually off a deflection). 
 4. Copy receiver ID into a temporary column, which will be used append receiver position with a join.
 5. Append receiver position.
@@ -552,7 +552,7 @@ nonqb_run_fit <-
        data = nonqb_runs)
 
 
-tmp_qbrun <- ranef(qb_run_fit)
+tmp_qbrun <- ranef(qbrun_fit)
 qbrun_effects <-
   data.frame(
     gsis_id = rownames(tmp_qbrun[["rusher_player_id"]]), 
@@ -680,9 +680,9 @@ run_ipaa |>
 
 
 
-### Position-specific replacement levels for non-quarterbacks
+### Position-specific replacement levels for non-quarterbacks {#sec-skill-replacement}
 
-Although the IPAA values are interesting and informative, they represent a comparion between players and a nebulously defined average.
+Although the IPAA values are interesting and informative, they represent a comparison between players and a nebulously defined average.
 Recall that IPAA is just a scaled version of IPA, which we defined to be the difference between the player-specific random intercept and a global mean parameter in our multilevel model.
 That mean does not represent the average of all observed players in the league.
 Instead, it captures the average intercept across a theoretical, infinite super-population of players from which we assume the set of observed players is sampled.
@@ -997,7 +997,7 @@ all_skill_players <-
   unique(c(run_ipar$gsis_id, receiver_ipar$gsis_id))
 
 skill_war <-
-  data.frame(gsis_id = all_players) |>
+  data.frame(gsis_id = all_skill_players) |>
   dplyr::left_join(y = roster2024 |> dplyr::select(gsis_id, full_name, position, team), by = "gsis_id") |>
   dplyr::left_join(y = run_ipar |> dplyr::select(gsis_id, n_run, ipar_run), by = "gsis_id") |>
   dplyr::left_join(y = receiver_ipar |> dplyr::select(gsis_id, n_rec, ipar_air_rec, ipar_yac_rec), by = "gsis_id") |>
@@ -1017,22 +1017,20 @@ qb_war <-
     war_air_pass = ipar_air_pass * beta,
     war_qbrun = ipar_qbrun * beta,
     war = war_air_pass + war_qbrun)
-
-war <-
-  data.frame(gsis_id = all_players) |>
-  dplyr::left_join(y = roster2024 |> dplyr::select(gsis_id, full_name, position, team), by = "gsis_id") |>
-  dplyr::left_join(y = run_ipar |> dplyr::select(gsis_id, n_run, ipar_run), by = "gsis_id") |>
-  dplyr::left_join(y = receiver_ipar |> dplyr::select(gsis_id, n_rec, ipar_air_rec, ipar_yac_rec), by = "gsis_id") |>
-  dplyr::left_join(y = qb_ipar |> dplyr::select(gsis_id, n_pass, n_qbrun, ipar_air_pass, ipar_qbrun), by = "gsis_id")
-
-
 ```
 
-
-<!--
-  For each team, let us regress the number of wins onto the score differential
-  1/hat{beta} is the number of points per win.; take iPAR and divide by esimated points per win (i.e., multiply iPAR by beta)
--->
-
-
+Here are the top-10 skill-position players based on our WAR calculations are
+```{r}
+#| label: top10-skill-war
+skill_war |>
+  dplyr::arrange(dplyr::desc(war)) |>
+  dplyr::slice_head(n=10)
+```
+And here are the top-10 quarterbacks based on our WAR calculations
+```{r}
+#| label: top10-qb-war
+qb_war |>
+  dplyr::arrange(dplyr::desc(war)) |>
+  dplyr::slice_head(n = 10)
+```
 

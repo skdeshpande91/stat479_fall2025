@@ -471,17 +471,24 @@ Fitting our out probability model takes a few minutes
 
 ```{r}
 #| label: fit-gam
-#| fig-width: 6
-#| fig-height: 6
-#| fig-align: center
 library(mgcv)
 gam_fit <-
   bam(formula = Out ~ s(x,y), 
       family = binomial(link="logit"), data = bip)
 
+
+```
+After fitting our GAM, we can visualized the estimated out probabilities.
+
+```{r}
+#| label: fig-out-gam
+#| fig-width: 6
+#| fig-height: 6
+#| fig-align: center
 grid_gam_preds <- 
   predict(object = gam_fit,
           newdata = grid, type = "response")
+
 grid_gam_cols <-   
   rgb(colorRamp(col_list,bias=1)(grid_gam_preds)/255) 
 

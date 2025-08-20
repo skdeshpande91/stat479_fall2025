@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.7.31">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -71,7 +71,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-10c2ad7cdbdc86dea93900442ad0167d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -103,6 +103,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -163,7 +192,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture08.html">
- <span class="dropdown-text">Lecture 8: Defensive creidt &amp; replacement level</span></a>
+ <span class="dropdown-text">Lecture 8: Defensive credit &amp; replacement level</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture09.html">
@@ -281,7 +310,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../lectures/lecture08.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lecture 8: Defensive creidt &amp; replacement level</span></a>
+ <span class="menu-text">Lecture 8: Defensive credit &amp; replacement level</span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -325,10 +354,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
-  <li><a href="#historical-strike-probabilities" id="toc-historical-strike-probabilities" class="nav-link" data-scroll-target="#historical-strike-probabilities">Historical Strike Probabilities</a></li>
-  <li><a href="#an-initial-multi-level-model" id="toc-an-initial-multi-level-model" class="nav-link" data-scroll-target="#an-initial-multi-level-model">An initial multi-level model</a></li>
-  <li><a href="#a-more-involved-multi-level-model" id="toc-a-more-involved-multi-level-model" class="nav-link" data-scroll-target="#a-more-involved-multi-level-model">A more involved multi-level model</a></li>
-  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
+  <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data">Data</a>
+  <ul class="collapse">
+  <li><a href="#sec-called-strike-value" id="toc-sec-called-strike-value" class="nav-link" data-scroll-target="#sec-called-strike-value">Value of a called strike</a></li>
+  </ul></li>
+  <li><a href="#sec-multilevel" id="toc-sec-multilevel" class="nav-link" data-scroll-target="#sec-multilevel">A multilevel model</a>
+  <ul class="collapse">
+  <li><a href="#sec-hgam" id="toc-sec-hgam" class="nav-link" data-scroll-target="#sec-hgam">Historical Strike Probabilities</a></li>
+  <li><a href="#sec-fit-multilevel" id="toc-sec-fit-multilevel" class="nav-link" data-scroll-target="#sec-fit-multilevel">A multilevel model</a></li>
+  </ul></li>
+  <li><a href="#sec-frame-war" id="toc-sec-frame-war" class="nav-link" data-scroll-target="#sec-frame-war">Runs saved above replacement</a></li>
   </ul>
 </nav>
     </div>
@@ -354,77 +389,516 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-✔ dplyr     1.1.4     ✔ readr     2.1.5
-✔ forcats   1.0.0     ✔ stringr   1.5.1
-✔ ggplot2   3.5.2     ✔ tibble    3.3.0
-✔ lubridate 1.9.4     ✔ tidyr     1.3.1
-✔ purrr     1.0.4     
-── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-✖ dplyr::filter() masks stats::filter()
-✖ dplyr::lag()    masks stats::lag()
-ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
-</div>
-</div>
 <section id="overview" class="level2">
 <h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<p>In October 2015, the Houston Astros played the New York Yankees in the American League Wild Card game. During and after the game, several Yankees fans took to social media to complain about inconsistencies in the strike zone being called by home plate umpire Eric Cooper. They argued that Cooper was not calling balls and strikes consistently for both teams, putting the Yankees at a distinct disadvantage. Beyond simple fan reaction, individual players took exception to Cooper’s strike zone: after striking out, Yankees catcher Brian McCann complained to Cooper that on similar pitches, Cooper was calling strikes when the Astros were pitching but balls when the Yankees were pitching. <a href="#fig-mccann-castro" class="quarto-xref">Figure&nbsp;1</a> shows two such pitches.</p>
+<div id="fig-mccann-castro" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-mccann-castro-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<img src="figures/lecture11_mccann.png" class="img-fluid figure-img">
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-mccann-castro-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1
+</figcaption>
+</figure>
+</div>
+<p>Both pitches were thrown low and outside<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, near the bottom left corner of the strike zone<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> shown in the figure. Because no part of the ball passed through the strike zone, by rule, both pitches should have been called balls. But umpire Cooper called the pitch on the left, thrown by Yankees pitcher Masahiro Tanaka, a ball and called the pitch on the right, thrown by Astros pitcher Dallas Keuchel, a strike. During the television broadcast and on <a href="https://www.crawfishboxes.com/2015/10/8/9483213/astros-pitching-dominates-yankee-hitting-with-better-pitch-framing">social media after the game</a>, many speculated that the reason for this discrepancy in strike zones is due Astros catcher Jason Castro’s ability to <em>frame</em> pitches, catching them in a way so as to increase the chances of the umpire calling a strike.</p>
+<p>Pitch framing, which has been studied by the sabermetrics community since at least 2008, received a lot of coverage in the popular press between 2014 and 2016. A good example is <a href="https://www.espn.com/mlb/story/_/id/12492794/jonathan-lucroy-needs-raise">this article about Jonathan Lucroy</a> from ESPN The Magazine, which estimated that Lucroy’s framing accounted for a total of two wins for the Brewers in 2014 and was worth around $14 million. That article went on to say that claim that the most impactful player in baseball today is the game’s 17th highest-paid catcher.”</p>
+<p>In this lecture, we will estimate how many more runs a catcher saves his team through his framing compared to a replacement-level catcher. Like we did in Lectures <a href="../lectures/lecture06.html">6</a>, <a href="../lectures/lecture07.html">7</a>, and <a href="../lectures/lecture08.html">8</a>, we will work with pitch tracking data scraped from StatCast. This time, however, we will need to scrape data f We will use the data from 2023 to establish historical strike probabilities (<a href="#sec-hgam" class="quarto-xref">Section&nbsp;3.1</a>) based on pitch location, batter handedness, and pitcher handedness. We will then include these historical baselines as fixed effects in a multilevel model that also includes random intercepts for the catcher, pitcher, and batter involved in pitches from the 2024 season (<a href="#sec-multilevel" class="quarto-xref">Section&nbsp;3</a>). Using the estimated deviations between catcher intercepts and the grand mean from our multilevel model, we conclude by estimating how many more expected runs catchers save than a replacement-level catcher (<a href="#sec-frame-war" class="quarto-xref">Section&nbsp;4</a>).</p>
 </section>
-<section id="historical-strike-probabilities" class="level2">
-<h2 class="anchored" data-anchor-id="historical-strike-probabilities">Historical Strike Probabilities</h2>
-<!--
-  Load in StatCast data from 2021, 2022, and 2023
-  Pull out all taken pitches
-  Visualize the raw data; potentially fit separate models for handedness combos
-  Add in the predictions to 2024 data
--->
+<section id="data" class="level2">
+<h2 class="anchored" data-anchor-id="data">Data</h2>
+<section id="sec-called-strike-value" class="level3">
+<h3 class="anchored" data-anchor-id="sec-called-strike-value">Value of a called strike</h3>
+<p>Later, in <a href="#sec-frame-war" class="quarto-xref">Section&nbsp;4</a>, we will compute how many expected runs catchers save their teams To do this, we must first determine the value of a called strike using a similar framework as in <a href="../lectures/lecture06.html">Lecture 6</a>. Specifically, we will compute the number of runs scored by the batting the team in the remainder of the half-inning following every pitch. Then, for every combination of the count<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> and the number of outs, we will compute the average number of runs scored in the remainder of the half-inning after a called ball and after a called strike on <em>taken pitches</em><a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>. The difference between these quantities captures the value of a called strike in that particular count-out state.</p>
+<p>To compute this, we start by loading the data frame <code>statcast2024</code> that we prepared and saved in <a href="../lectures/lecture06.html">Lecture 6</a>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"statcast2024.RData"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Recall that this data table contains a row for every pitch and that the column <code>RunsRemaining</code> recorded how many runs the batting team scored in the remainder of the half-inning following each pitch. We determine whether a pitch was taken using the <code>description</code> field</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-2"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-2-1"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(statcast2024<span class="sc">$</span>description)</span>
+<span id="annotated-cell-2-2"><a href="#annotated-cell-2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-3"><a href="#annotated-cell-2-3" aria-hidden="true" tabindex="-1"></a>ball_descriptions <span class="ot">&lt;-</span> </span>
+<span id="annotated-cell-2-4"><a href="#annotated-cell-2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">"ball"</span>, <span class="st">"blocked_ball"</span>, <span class="st">"pitchout"</span>, <span class="st">"hit_by_pitch"</span>)</span>
+<span id="annotated-cell-2-5"><a href="#annotated-cell-2-5" aria-hidden="true" tabindex="-1"></a>swing_descriptions <span class="ot">&lt;-</span> </span>
+<span id="annotated-cell-2-6"><a href="#annotated-cell-2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">"bunt_foul_tip"</span>, <span class="st">"foul"</span>, <span class="st">"foul_bunt"</span>, <span class="st">"foul_tip"</span>,</span>
+<span id="annotated-cell-2-7"><a href="#annotated-cell-2-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"hit_into_play"</span>, <span class="st">"missed_bunt"</span>, <span class="st">"swinging_strike"</span>,</span>
+<span id="annotated-cell-2-8"><a href="#annotated-cell-2-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"swinging_strike_block"</span>)</span>
+<span id="annotated-cell-2-9"><a href="#annotated-cell-2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-2-10"><a href="#annotated-cell-2-10" aria-hidden="true" tabindex="-1"></a>taken2024 <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-2-11"><a href="#annotated-cell-2-11" aria-hidden="true" tabindex="-1"></a>  statcast2024 <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1">1</button><span id="annotated-cell-2-12" class="code-annotation-target"><a href="#annotated-cell-2-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span>description <span class="sc">%in%</span> swing_descriptions) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-2-13"><a href="#annotated-cell-2-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="2">2</button><span id="annotated-cell-2-14" class="code-annotation-target"><a href="#annotated-cell-2-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">Y =</span> <span class="fu">ifelse</span>(description <span class="sc">==</span> <span class="st">"called_strike"</span>, <span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="annotated-cell-2-15"><a href="#annotated-cell-2-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">Count =</span> <span class="fu">paste</span>(balls, strikes, <span class="at">sep =</span> <span class="st">"-"</span>)) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-2-16"><a href="#annotated-cell-2-16" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Y, plate_x, plate_z, </span>
+<span id="annotated-cell-2-17"><a href="#annotated-cell-2-17" aria-hidden="true" tabindex="-1"></a>                Count, Outs,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="3">3</button><span id="annotated-cell-2-18" class="code-annotation-target"><a href="#annotated-cell-2-18" aria-hidden="true" tabindex="-1"></a>                batter, pitcher, fielder_2,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="4">4</button><span id="annotated-cell-2-19" class="code-annotation-target"><a href="#annotated-cell-2-19" aria-hidden="true" tabindex="-1"></a>                stand, p_throws,</span>
+<span id="annotated-cell-2-20"><a href="#annotated-cell-2-20" aria-hidden="true" tabindex="-1"></a>                RunsRemaining, sz_top, sz_bot) <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-2-21"><a href="#annotated-cell-2-21" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="annotated-cell-2-22"><a href="#annotated-cell-2-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">Count =</span> <span class="fu">factor</span>(Count),</span>
+<span id="annotated-cell-2-23"><a href="#annotated-cell-2-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">batter =</span> <span class="fu">factor</span>(batter),</span>
+<span id="annotated-cell-2-24"><a href="#annotated-cell-2-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">pitcher =</span> <span class="fu">factor</span>(pitcher),</span>
+<span id="annotated-cell-2-25"><a href="#annotated-cell-2-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">fielder_2 =</span> <span class="fu">factor</span>(fielder_2),</span>
+<span id="annotated-cell-2-26"><a href="#annotated-cell-2-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">stand =</span> <span class="fu">factor</span>(stand),</span>
+<span id="annotated-cell-2-27"><a href="#annotated-cell-2-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_throws =</span> <span class="fu">factor</span>(p_throws))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="12" data-code-annotation="1">Extract only the taken pitches</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="14,15" data-code-annotation="2">Add columns recording whether taken pitch was called a strike (<code>Y = 1</code>) or a ball (<code>Y = 0</code>) and the count.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="18" data-code-annotation="3"><code>fielder_2</code> contains the MLB Advanced Media ID for the catcher</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="19" data-code-annotation="4"><code>stand</code> and <code>p_throws</code> record the handedness of the batter and pitcher.</span>
+</dd>
+</dl>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+                   ball            blocked_ball           bunt_foul_tip 
+                 231032                   14717                      15 
+          called_strike                    foul               foul_bunt 
+                 113912                  126012                    1208 
+               foul_tip            hit_by_pitch           hit_into_play 
+                   7218                    1979                  121751 
+            missed_bunt                pitchout         swinging_strike 
+                    196                      52                   73209 
+swinging_strike_blocked 
+                   3834 </code></pre>
+</div>
+</div>
+<p>We can now compute the expected numbers of runs scored after a called ball or strike for every combination of out and count.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>er_balls <span class="ot">&lt;-</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  taken2024 <span class="sc">|&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(Y <span class="sc">==</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(Count, Outs) <span class="sc">|&gt;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">er_ball =</span> <span class="fu">mean</span>(RunsRemaining), <span class="at">.groups =</span> <span class="st">'drop'</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>er_strikes <span class="ot">&lt;-</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  taken2024 <span class="sc">|&gt;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(Y <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(Count, Outs) <span class="sc">|&gt;</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">er_strike =</span> <span class="fu">mean</span>(RunsRemaining), <span class="at">.groups =</span> <span class="st">'drop'</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>er_taken <span class="ot">&lt;-</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  er_balls <span class="sc">|&gt;</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> er_strikes, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Count"</span>, <span class="st">"Outs"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">value =</span> er_ball <span class="sc">-</span> er_strike)</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>er_taken <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 5
+  Count  Outs er_ball er_strike  value
+  &lt;fct&gt; &lt;int&gt;   &lt;dbl&gt;     &lt;dbl&gt;  &lt;dbl&gt;
+1 0-0       0   0.731     0.605 0.126 
+2 0-0       1   0.547     0.425 0.122 
+3 0-0       2   0.283     0.193 0.0902
+4 0-1       0   0.660     0.525 0.135 
+5 0-1       1   0.464     0.365 0.0990</code></pre>
+</div>
+</div>
+<p>Looking at <code>er_taken</code>, we find that batting teams score</p>
+<ul>
+<li>About 0.731 runs following a called ball on a 0-0 pitch with 0 outs</li>
+<li>About 0.605 runs following a called strike on a 0-0 pitch with 0 outs So, if a good pitch framer can get a 0-0 pitch with 0 outs called a strike instead of ball, he saves the fielding team about 0.126 runs, on average. From the standpoint of the fielding team, a called strike is most valuable on a 3-2 pitch with 0 outs (when they can expect to save almost 0.8 runs on average) and least value on a 0-1 pitch with 2 outs (when they can expect to save about 0.068 runs on average).</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>er_taken <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(value)) <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span>, dplyr<span class="sc">::</span><span class="fu">n</span>()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 5
+  Count  Outs er_ball er_strike  value
+  &lt;fct&gt; &lt;int&gt;   &lt;dbl&gt;     &lt;dbl&gt;  &lt;dbl&gt;
+1 3-2       0   1.12      0.321 0.800 
+2 0-1       2   0.234     0.166 0.0684</code></pre>
+</div>
+</div>
+<p>So that we can use it later in <a href="#sec-frame-war" class="quarto-xref">Section&nbsp;4</a>, we will append a column to <code>taken2024</code> containing the value of a called strike (from the fielding team’s perspective).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>taken2024 <span class="ot">&lt;-</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  taken2024 <span class="sc">|&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> er_taken <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(Count, Outs, value), <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Count"</span>, <span class="st">"Outs"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
-<section id="an-initial-multi-level-model" class="level2">
-<h2 class="anchored" data-anchor-id="an-initial-multi-level-model">An initial multi-level model</h2>
-<!--
-  lme4::glmer(called_strike ~ logit(strike_prob) + (1 | fielder_2), data = taken_pitches2024, family = binomial(link="logit"))
-
-  fixed.effects() function will give us the intercept and coefficient of the historical
-
-  VarCorr: variability of random catcher effects
-
-  Use the ranef function
-
--->
 </section>
-<section id="a-more-involved-multi-level-model" class="level2">
-<h2 class="anchored" data-anchor-id="a-more-involved-multi-level-model">A more involved multi-level model</h2>
-<p>Catchers are not the only people who might influence the called strike probability!</p>
-<!--
-  Include pitcher, catcher, umpire, batter
-  Look at the VarCorr to see what the largest standard deviations of the random effects are; the larger the sd, the more it suggests that it is pitcher or batter that drives this
--->
+<section id="sec-multilevel" class="level2">
+<h2 class="anchored" data-anchor-id="sec-multilevel">A multilevel model</h2>
+<p>We are ultimately interested in understanding how individual players (i.e., batters, catchers, and pitchers) can influence the called strike probability. Any credible model for these probabilities must account for location. After all, if a pitch is thrown several feet away from the batter, no amount of pitch framing will change the call from a ball to a strike. Similarly, catcher skill is likely n The StatCast variables <code>plate_x</code> and <code>plate_z</code> respectively record the horizontal and vertical coordinate of each pitch as it crosses the front edge of home plate. These variables are measured from the catcher’s perspective so pitches thrown to the left of home plate have negative <code>plate_x</code> values and pitches thrown to the right of home plate have positive <code>plate_x</code> values. Both <code>plate_x</code> and <code>plate_z</code> are measured in feet.</p>
+<p>A natural starting point is to fit a multilevel model with player-specific random intercepts that adjusts for the fixed effects of <code>plate_x</code> and <code>plate_z</code>. Specifically, because we are dealing with a binary outcome, we might start with the model <span class="math display">\[
+\log \left( \frac{\mathbb{P}(Y_{i} = 1)}{\mathbb{P}(Y_{i} = 0)} \right) = B_{b[i]} + C_{c[i]} + P_{p[i]} + \beta_{x} x_{i} + \beta_{z}z_{i}
+\]</span> where <span class="math inline">\(b[i], c[i],\)</span> and <span class="math inline">\(p[i]\)</span> record the identities of the batter, catcher, and pitcher involved in taken pitch <span class="math inline">\(i;\)</span> <span class="math inline">\(x_{i}\)</span> and <span class="math inline">\(z_{i}\)</span> are the <code>plate_x</code> and <code>plate_z</code> measurements; and the <span class="math inline">\(B_{b}\)</span>’s, <span class="math inline">\(C_{c}\)</span>’s, and <span class="math inline">\(P_{p}\)</span>’s are random intercepts for the batters, catchers, and pitchers with <span class="math inline">\(B_{b} \sim N(\mu_{B}, \sigma^{2}_{B}),\)</span> <span class="math inline">\(C_{c} \sim N(\mu_{C}, \sigma^{2}_{C})\)</span>, and <span class="math inline">\(P_{p} \sim N(\mu_{P})\)</span>. This simple model <strong>assumes</strong> that the log-odds of a called strike is monotonic in <code>plate_x</code> and <code>plate_z</code>. Due to the monotonicity of the inverse logistic transformation[^invlogit], a positive (resp. negative) <span class="math inline">\(\beta_{x}\)</span> would imply that the probability of a called strike increases (resp. decreases) as the pitch moves from left to right. Similarly, a positive (resp. negative) <span class="math inline">\(\beta_{z}\)</span> implies that the probability of a called strike increases (resp. decreases) the higher up a pitch is thrown.</p>
+<p>A cursory glance at the data reveals such monotonicity is not realistic. Specifically, if called strike probability was monotonic in <code>plate_x</code> and <code>plate_z</code>, then we should see progressively more strikes in one of the four corners of the plot<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>. In the plot, we overlay the “average” rule book strike zone<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="annotated-cell-6"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-6-1"><a href="#annotated-cell-6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>), <span class="at">mgp =</span> <span class="fu">c</span>(<span class="fl">1.8</span>, <span class="fl">0.5</span>, <span class="dv">0</span>))</span>
+<span id="annotated-cell-6-2"><a href="#annotated-cell-6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="dv">1</span>, <span class="at">type =</span> <span class="st">"n"</span>,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="1">1</button><span id="annotated-cell-6-3" class="code-annotation-target"><a href="#annotated-cell-6-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">2.5</span>, <span class="fl">2.5</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">6</span>),</span>
+<span id="annotated-cell-6-4"><a href="#annotated-cell-6-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">ylab =</span> <span class="st">""</span>,</span>
+<span id="annotated-cell-6-5"><a href="#annotated-cell-6-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Called pitches (2024)"</span>,</span>
+<span id="annotated-cell-6-6"><a href="#annotated-cell-6-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">xaxt =</span> <span class="st">"n"</span>, <span class="at">yaxt =</span> <span class="st">"n"</span>, <span class="at">bty =</span> <span class="st">"n"</span>)</span>
+<span id="annotated-cell-6-7"><a href="#annotated-cell-6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="at">x =</span> taken2024<span class="sc">$</span>plate_x, <span class="at">y =</span> taken2024<span class="sc">$</span>plate_z,</span>
+<span id="annotated-cell-6-8"><a href="#annotated-cell-6-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">cex =</span> <span class="fl">0.25</span>,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="2">2</button><span id="annotated-cell-6-9" class="code-annotation-target"><a href="#annotated-cell-6-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">ifelse</span>(taken2024<span class="sc">$</span>Y <span class="sc">==</span> <span class="dv">1</span>, <span class="fu">rgb</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="fl">0.25</span>), <span class="fu">rgb</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="fl">0.25</span>)))</span>
+<span id="annotated-cell-6-10"><a href="#annotated-cell-6-10" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="at">xleft =</span> <span class="sc">-</span><span class="fl">8.5</span><span class="sc">/</span><span class="dv">12</span>, </span>
+<span id="annotated-cell-6-11"><a href="#annotated-cell-6-11" aria-hidden="true" tabindex="-1"></a>     <span class="at">ybottom =</span> <span class="fu">mean</span>(taken2024<span class="sc">$</span>sz_bot, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="annotated-cell-6-12"><a href="#annotated-cell-6-12" aria-hidden="true" tabindex="-1"></a>     <span class="at">xright =</span> <span class="fl">8.5</span><span class="sc">/</span><span class="dv">12</span>,</span>
+<span id="annotated-cell-6-13"><a href="#annotated-cell-6-13" aria-hidden="true" tabindex="-1"></a>     <span class="at">ytop =</span> <span class="fu">mean</span>(taken2024<span class="sc">$</span>sz_top, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-6" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="3" data-code-annotation="1">Restrict attention to pitches that are not in the dirt (i.e., <code>plate_z &gt; 0</code>) but not thrown too high (i.e.&nbsp;<code>plate_z &lt; 6</code>), are within 2.5 feet of the center of home plate in either direction.</span>
+</dd>
+<dt data-target-cell="annotated-cell-6" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="9" data-code-annotation="2">Color strikes (<code>Y = 1</code>) in red and balls in blue (<code>Y = 0</code>). The 0.25 sets the transparency</span>
+</dd>
+</dl>
+</div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="lecture11_files/figure-html/plot-calls-24-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="480"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Letting <span class="math inline">\(n_{B}, n_{C},\)</span> and <span class="math inline">\(n_{P}\)</span> be the numbers of batters, catchers, and pitchers, we will instead model <span class="math display">\[
+\log \left( \frac{\mathbb{P}(Y_{i} = 1)}{\mathbb{P}(Y_{i} = 0)} \right) = B_{b[i]} + C_{c[i]} + P_{p[i]} + \beta_{p} \log\left(\frac{\hat{p}(x_{i}, z_{i})}{1 - \hat{p}(x_{i}, z_{i})}\right)
+\]</span> where <span class="math inline">\(\hat{p}(x,z)\)</span> is a <em>baseline</em> called strike probability estimated using data from the previous season<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a> and the random player intercepts satisfy <span class="math display">\[
+\begin{align}
+B_{b} &amp;= \mu_{B} + u_{b}^{(B)}; \quad u^{(B)}_{b} \sim N(0, \sigma^{2}_{B}) \quad \text{for each}~b = 1, \ldots, n_{B} \\
+C_{c} &amp;= \mu_{C} + u_{c}^{(C)}; \quad u^{(C)}_{c} \sim N(0, \sigma^{2}_{C}) \quad \text{for each}~c = 1, \ldots, n_{C} \\
+P_{p} &amp;= \mu_{P} + u_{p}^{(P)}; \quad u^{(P)}_{p} \sim N(0, \sigma^{2}_{P}) \quad \text{for each}~p = 1, \ldots, n_{P}. \\
+\end{align}
+\]</span> Our model accounts for pitch location by including a suitably-transformed baseline called strike probability estimate as a fixed effect. The random player intercepts capture how much each player contributions to the log-odds of a called strike <em>over and above what is determined by pitch location</em>.</p>
+<section id="sec-hgam" class="level3">
+<h3 class="anchored" data-anchor-id="sec-hgam">Historical Strike Probabilities</h3>
+<p>To fit our proposed multilevel model, we must first compute the baseline called strike probabilities using data from the 2023 season. We first scrape all StatCast data fr om2023 using the function <code>annual_statcast_query</code>, which we defined in <a href="../lectures/lecture06.html#sec-statcast-query">Lecture 6</a> and is available <a href="https://github.com/skdeshpande91/stat479_fall2025/blob/main/scripts/annual_statcast_query.R">here</a>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-7"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="1">1</button><span id="annotated-cell-7-1" class="code-annotation-target"><a href="#annotated-cell-7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"annual_statcast_query.R"</span>)</span>
+<span id="annotated-cell-7-2"><a href="#annotated-cell-7-2" aria-hidden="true" tabindex="-1"></a>raw_statcast2023 <span class="ot">&lt;-</span> <span class="fu">annual_statcast_query</span>(<span class="at">season =</span> <span class="dv">2023</span>)</span>
+<span id="annotated-cell-7-3"><a href="#annotated-cell-7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(raw_statcast2023, <span class="at">file =</span> <span class="st">"raw_statcast2023.RData"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-7" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="1" data-code-annotation="1">This will only work if the file “annual_statcast_query.R” is saved in your R working directory</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>We can now apply the same basic pre-processing to <code>raw_statcast2023</code> that we did to <code>raw_statcast2024</code> back in <a href="../lectures/lecture06.html">Lecture 6</a>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>statcast2023 <span class="ot">&lt;-</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  raw_statcast2023 <span class="sc">|&gt;</span> </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(game_type <span class="sc">==</span> <span class="st">"R"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    strikes <span class="sc">&gt;=</span> <span class="dv">0</span> <span class="sc">&amp;</span> strikes <span class="sc">&lt;</span> <span class="dv">3</span> <span class="sc">&amp;</span> </span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>      balls <span class="sc">&gt;=</span> <span class="dv">0</span> <span class="sc">&amp;</span> balls <span class="sc">&lt;</span> <span class="dv">4</span> <span class="sc">&amp;</span> </span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>      outs_when_up <span class="sc">&gt;=</span> <span class="dv">0</span> <span class="sc">&amp;</span> outs_when_up <span class="sc">&lt;</span> <span class="dv">3</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(game_pk, at_bat_number, pitch_number) <span class="sc">|&gt;</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">BaseRunner =</span> </span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">paste0</span>(<span class="dv">1</span><span class="sc">*</span>(<span class="sc">!</span><span class="fu">is.na</span>(on_1b)),<span class="dv">1</span><span class="sc">*</span>(<span class="sc">!</span><span class="fu">is.na</span>(on_2b)),<span class="dv">1</span><span class="sc">*</span>(<span class="sc">!</span><span class="fu">is.na</span>(on_3b)))) <span class="sc">|&gt;</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">Outs =</span> outs_when_up)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now that we have pre-processed the 2023 StatCast data, we will extract all called pitches. We will fit our generalized additive model only to pitches with <code>plate_x</code> values between -1.5 and 1.5 and <code>plate_z</code> values between 1 and 6. Beyond this region there are virtually no called strikes. Including pitches that are too far away from the strike zone — i.e., pitches for which the called strike probability is likely <em>exactly</em> zero — can lead to some numerical instabilities when fitting the GAM.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>taken2023 <span class="ot">&lt;-</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  statcast2023 <span class="sc">|&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span>description <span class="sc">%in%</span> swing_descriptions) <span class="sc">|&gt;</span> </span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">Y =</span> <span class="fu">ifelse</span>(description <span class="sc">==</span> <span class="st">"called_strike"</span>, <span class="dv">1</span>, <span class="dv">0</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Y, plate_x, plate_z, stand, p_throws) <span class="sc">|&gt;</span> </span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(plate_x) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(plate_z)) <span class="sc">|&gt;</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="fu">abs</span>(plate_x) <span class="sc">&lt;=</span> <span class="fl">1.5</span> <span class="sc">&amp;</span> plate_z <span class="sc">&gt;=</span> <span class="dv">1</span> <span class="sc">&amp;</span> plate_z <span class="sc">&lt;=</span> <span class="dv">6</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">stand =</span> <span class="fu">factor</span>(stand),</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_throws =</span> <span class="fu">factor</span>(p_throws))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We now fit our generalized additive model.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The following code takes several minutes to run</p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-10"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-10-1"><a href="#annotated-cell-10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mgcv)</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="1">1</button><span id="annotated-cell-10-2" class="code-annotation-target"><a href="#annotated-cell-10-2" aria-hidden="true" tabindex="-1"></a>hgam_fit <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-10-3"><a href="#annotated-cell-10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bam</span>(<span class="at">formula =</span> Y <span class="sc">~</span> stand <span class="sc">+</span> p_throws <span class="sc">+</span> <span class="fu">s</span>(plate_x, plate_z),</span>
+<span id="annotated-cell-10-4"><a href="#annotated-cell-10-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link=</span><span class="st">"logit"</span>), </span>
+<span id="annotated-cell-10-5"><a href="#annotated-cell-10-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">data =</span> taken2023)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-10" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-10" data-code-lines="2" data-code-annotation="1">The “h” serves as a reminder that we’re getting <strong>h</strong>istorical called strike probabilities</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Like we did with our model for the probability of making an out as a function of fielding location in <a href="../lectures/lecture08.html#sec-out-gam">Lecture 8</a>, we can visualize the fitted probabilities along a fine grid of locations. The following code plots the fitted called strike probabilities as a function of location for a right-handed pitcher facing a right-handed batter.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="annotated-cell-11"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-11-1"><a href="#annotated-cell-11-1" aria-hidden="true" tabindex="-1"></a>grid_sep <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
+<span id="annotated-cell-11-2"><a href="#annotated-cell-11-2" aria-hidden="true" tabindex="-1"></a>x_grid <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="fl">1.5</span>, <span class="fl">1.5</span>, <span class="at">by =</span> grid_sep)</span>
+<span id="annotated-cell-11-3"><a href="#annotated-cell-11-3" aria-hidden="true" tabindex="-1"></a>z_grid <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">6</span>, <span class="at">by =</span> grid_sep)</span>
+<span id="annotated-cell-11-4"><a href="#annotated-cell-11-4" aria-hidden="true" tabindex="-1"></a>col_list <span class="ot">&lt;-</span> colorBlindness<span class="sc">::</span>Blue2DarkRed18Steps </span>
+<span id="annotated-cell-11-5"><a href="#annotated-cell-11-5" aria-hidden="true" tabindex="-1"></a>plate_grid <span class="ot">&lt;-</span> </span>
+<span id="annotated-cell-11-6"><a href="#annotated-cell-11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">expand.grid</span>(<span class="at">plate_x =</span> x_grid, <span class="at">plate_z =</span> z_grid) <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="1">1</button><span id="annotated-cell-11-7" class="code-annotation-target"><a href="#annotated-cell-11-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">stand =</span> <span class="st">"R"</span>, <span class="at">p_throws =</span> <span class="st">"R"</span>) <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="2">2</button><span id="annotated-cell-11-8" class="code-annotation-target"><a href="#annotated-cell-11-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">stand =</span> <span class="fu">factor</span>(stand, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"L"</span>, <span class="st">"R"</span>)),</span>
+<span id="annotated-cell-11-9"><a href="#annotated-cell-11-9" aria-hidden="true" tabindex="-1"></a>                <span class="at">p_throws =</span> <span class="fu">factor</span>(p_throws, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"L"</span>, <span class="st">"R"</span>)))</span>
+<span id="annotated-cell-11-10"><a href="#annotated-cell-11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-11-11"><a href="#annotated-cell-11-11" aria-hidden="true" tabindex="-1"></a>grid_preds <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-11-12"><a href="#annotated-cell-11-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict</span>(<span class="at">object =</span> hgam_fit,</span>
+<span id="annotated-cell-11-13"><a href="#annotated-cell-11-13" aria-hidden="true" tabindex="-1"></a>          <span class="at">newdata =</span> plate_grid,</span>
+<span id="annotated-cell-11-14"><a href="#annotated-cell-11-14" aria-hidden="true" tabindex="-1"></a>          <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="annotated-cell-11-15"><a href="#annotated-cell-11-15" aria-hidden="true" tabindex="-1"></a>grid_prob_cols <span class="ot">&lt;-</span> </span>
+<span id="annotated-cell-11-16"><a href="#annotated-cell-11-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rgb</span>(<span class="fu">colorRamp</span>(col_list,<span class="at">bias=</span><span class="dv">1</span>)(grid_preds)<span class="sc">/</span><span class="dv">255</span>)</span>
+<span id="annotated-cell-11-17"><a href="#annotated-cell-11-17" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>), <span class="at">mgp =</span> <span class="fu">c</span>(<span class="fl">1.8</span>, <span class="fl">0.5</span>, <span class="dv">0</span>))</span>
+<span id="annotated-cell-11-18"><a href="#annotated-cell-11-18" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="dv">1</span>, <span class="at">type =</span> <span class="st">"n"</span>, </span>
+<span id="annotated-cell-11-19"><a href="#annotated-cell-11-19" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.5</span>, <span class="fl">1.5</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">6</span>),</span>
+<span id="annotated-cell-11-20"><a href="#annotated-cell-11-20" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Historical called strike probabilities"</span>,</span>
+<span id="annotated-cell-11-21"><a href="#annotated-cell-11-21" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">ylab =</span> <span class="st">""</span>, </span>
+<span id="annotated-cell-11-22"><a href="#annotated-cell-11-22" aria-hidden="true" tabindex="-1"></a>     <span class="at">xaxt =</span> <span class="st">"n"</span>, <span class="at">yaxt =</span> <span class="st">"n"</span>)</span>
+<span id="annotated-cell-11-23"><a href="#annotated-cell-11-23" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(plate_grid)){</span>
+<span id="annotated-cell-11-24"><a href="#annotated-cell-11-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rect</span>(<span class="at">xleft =</span> plate_grid<span class="sc">$</span>plate_x[i] <span class="sc">-</span> grid_sep<span class="sc">/</span><span class="dv">2</span>, </span>
+<span id="annotated-cell-11-25"><a href="#annotated-cell-11-25" aria-hidden="true" tabindex="-1"></a>       <span class="at">ybot =</span> plate_grid<span class="sc">$</span>plate_z[i] <span class="sc">-</span> grid_sep<span class="sc">/</span><span class="dv">2</span>,</span>
+<span id="annotated-cell-11-26"><a href="#annotated-cell-11-26" aria-hidden="true" tabindex="-1"></a>       <span class="at">xright =</span> plate_grid<span class="sc">$</span>plate_x[i] <span class="sc">+</span> grid_sep<span class="sc">/</span><span class="dv">2</span>,</span>
+<span id="annotated-cell-11-27"><a href="#annotated-cell-11-27" aria-hidden="true" tabindex="-1"></a>       <span class="at">ytop =</span> plate_grid<span class="sc">$</span>plate_z[i] <span class="sc">+</span> grid_sep<span class="sc">/</span><span class="dv">2</span>,</span>
+<span id="annotated-cell-11-28"><a href="#annotated-cell-11-28" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">adjustcolor</span>(grid_prob_cols[i], <span class="at">alpha.f =</span> <span class="fl">0.5</span>),</span>
+<span id="annotated-cell-11-29"><a href="#annotated-cell-11-29" aria-hidden="true" tabindex="-1"></a>       <span class="at">border =</span> <span class="cn">NA</span>)</span>
+<span id="annotated-cell-11-30"><a href="#annotated-cell-11-30" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="annotated-cell-11-31"><a href="#annotated-cell-11-31" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="at">xleft =</span> <span class="sc">-</span><span class="fl">8.5</span><span class="sc">/</span><span class="dv">12</span>, </span>
+<span id="annotated-cell-11-32"><a href="#annotated-cell-11-32" aria-hidden="true" tabindex="-1"></a>     <span class="at">ybottom =</span> <span class="fu">mean</span>(taken2024<span class="sc">$</span>sz_bot, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="annotated-cell-11-33"><a href="#annotated-cell-11-33" aria-hidden="true" tabindex="-1"></a>     <span class="at">xright =</span> <span class="fl">8.5</span><span class="sc">/</span><span class="dv">12</span>,</span>
+<span id="annotated-cell-11-34"><a href="#annotated-cell-11-34" aria-hidden="true" tabindex="-1"></a>     <span class="at">ytop =</span> <span class="fu">mean</span>(taken2024<span class="sc">$</span>sz_top, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-11" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-11" data-code-lines="7" data-code-annotation="1">Change this line to visualize the fitted probabilities for different combinations of batter and pitcher handedness</span>
+</dd>
+<dt data-target-cell="annotated-cell-11" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-11" data-code-lines="8,9" data-code-annotation="2">We will eventually pass <code>plate_grid</code> to the <code>predict</code> function, which will expect both <code>stand</code> and <code>p_throws</code> to be factor variables</span>
+</dd>
+</dl>
+</div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="lecture11_files/figure-html/plot-hgam-RR-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="480"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
-<section id="exercises" class="level2">
-<h2 class="anchored" data-anchor-id="exercises">Exercises</h2>
-<!--
-  None of the models adjusted for count. Re-run the historical strike prediction model to include count. What changes?
-  None of the models adjust for the quality of the pitcher: try to find, e.g., the pitchers ERA from the previous season or some other measure of skill (e.g. wOBA) and include that as a fixed effect (good potential project idea)
-
-  While parameter estimates are useful, let's take an approahc similar to what we did for WAR: try to divide credit between Y - E[Y] between catcher, batter, pitcher, and umpire. How does these compare? 
-
-  How much is pitch frmaing worth? Stay tuned!
-
--->
-<!--
-  0. Set up a guide for scraping savant data: link to Bill Petti's website
-  1. Scrape pitch-by-pitch for a single season (2024); this takes a while!
-  2. Fit a GAM : p_throws + stand + s(plate_x, plate_z)
-  3. Take the estimated p-hat and convert to logistic scale; then do a mixed-model with player-level random effects
-  4. Suggest pitch framing estimate as a project
--->
+<section id="sec-fit-multilevel" class="level3">
+<h3 class="anchored" data-anchor-id="sec-fit-multilevel">A multilevel model</h3>
+<p>Now that we have fit a GAM model to the historical data, we are ready to compute the baseline log-odds for a called strike for each pitch from 2024. We can do this using the <code>predict</code> function with the argument <code>type = "link"</code> instead of <code>type  = "response"</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-12"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-12-1"><a href="#annotated-cell-12-1" aria-hidden="true" tabindex="-1"></a>baseline <span class="ot">&lt;-</span> </span>
+<span id="annotated-cell-12-2"><a href="#annotated-cell-12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict</span>(<span class="at">object =</span> hgam_fit,</span>
+<span id="annotated-cell-12-3"><a href="#annotated-cell-12-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">newdata =</span> taken2024, </span>
+<span id="annotated-cell-12-4"><a href="#annotated-cell-12-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">type =</span> <span class="st">"link"</span>)</span>
+<span id="annotated-cell-12-5"><a href="#annotated-cell-12-5" aria-hidden="true" tabindex="-1"></a>taken2024 <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-12-6"><a href="#annotated-cell-12-6" aria-hidden="true" tabindex="-1"></a>  taken2024 <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-12-7"><a href="#annotated-cell-12-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">baseline =</span> baseline) <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-12" data-target-annotation="1">1</button><span id="annotated-cell-12-8" class="code-annotation-target"><a href="#annotated-cell-12-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="fu">abs</span>(plate_x) <span class="sc">&lt;=</span> <span class="fl">1.5</span> <span class="sc">&amp;</span> plate_z <span class="sc">&gt;=</span> <span class="dv">1</span> <span class="sc">&amp;</span> plate_z <span class="sc">&lt;=</span> <span class="dv">6</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-12" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-12" data-code-lines="8" data-code-annotation="1">We focus only on “frameable” pitches which are not throw too far away from home plate in the horizontal direction and are not thrown too high or too low in the vertical direction.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>We’re finally ready to fit our multilevel model</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-13"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-13-1"><a href="#annotated-cell-13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lme4)</span>
+<span id="annotated-cell-13-2"><a href="#annotated-cell-13-2" aria-hidden="true" tabindex="-1"></a>multilevel_fit <span class="ot">&lt;-</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-13" data-target-annotation="1">1</button><span id="annotated-cell-13-3" class="code-annotation-target"><a href="#annotated-cell-13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glmer</span>(<span class="at">formula =</span> Y <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> fielder_2) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> batter)  <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> pitcher) <span class="sc">+</span>  baseline,</span>
+<span id="annotated-cell-13-4"><a href="#annotated-cell-13-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">"logit"</span>),</span>
+<span id="annotated-cell-13-5"><a href="#annotated-cell-13-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">data =</span> taken2024)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-13" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-13" data-code-lines="3,4" data-code-annotation="1">Because the outcome is binary, we need to use the function <code>glmer()</code> instead of <code>lmer()</code>. We moreover need to specify the <code>family</code> argument.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Although we cannot estimate the actual player-specific random intercepts <span class="math inline">\(B_{b}, C_{c}\)</span> and <span class="math inline">\(P_{p},\)</span> we can estimate the deviations between these the overall global means <span class="math inline">\(\mu_{B}, \mu_{C},\)</span> and <span class="math inline">\(\mu_{P}.\)</span> The following code pulls out the deviations for the catchers (i.e., the deviations <span class="math inline">\(u_{c}^{(C)}\)</span>) and appends these values to</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-14"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-14-1"><a href="#annotated-cell-14-1" aria-hidden="true" tabindex="-1"></a>tmp <span class="ot">&lt;-</span> <span class="fu">ranef</span>(multilevel_fit)</span>
+<span id="annotated-cell-14-2"><a href="#annotated-cell-14-2" aria-hidden="true" tabindex="-1"></a>catcher_u <span class="ot">&lt;-</span> </span>
+<span id="annotated-cell-14-3"><a href="#annotated-cell-14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="1">1</button><span id="annotated-cell-14-4" class="code-annotation-target"><a href="#annotated-cell-14-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">fielder_2 =</span> <span class="fu">as.integer</span>(<span class="fu">rownames</span>(tmp[[<span class="st">"fielder_2"</span>]])),</span>
+<span id="annotated-cell-14-5"><a href="#annotated-cell-14-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">catcher_u =</span> tmp[[<span class="st">"fielder_2"</span>]][,<span class="dv">1</span>])</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-14" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-14" data-code-lines="4" data-code-annotation="1">The MLB Advanced Media IDs are saved as integers but <code>rownames()</code> returns them as a string.</span>
+</dd>
+</dl>
+</div>
+</div>
+</section>
+</section>
+<section id="sec-frame-war" class="level2">
+<h2 class="anchored" data-anchor-id="sec-frame-war">Runs saved above replacement</h2>
+<p>The data table <code>catcher_u</code> estimates of the amount each catcher adds to log-odds of a called strike, after adjusting for the historical baseline and the other players, relative to a global average across a super-population of catchers. As we argued in <a href="../lectures/lecture10.html">Lecture 10</a>, it is arguably more useful to compare each individual catcher’s performance to a well-defined replacement level rather than to a nebulously defined global average. Noting that most MLB teams carry two catchers on their active roster, we will sort catchers based on the total number of pitches received in the 2024 season. We define the top-60 as non-replacement level and the remaining catchers as replacement-level.</p>
+<p>The following code determines the pitch count threshold for defining replacement-level. It then computes the average of the estimated deviations <span class="math inline">\(u^{(C)}_{c}\)</span>’s across all replacement-level catchers. We will denote this average by <span class="math inline">\(\overline{u}^{(C)}_{R}.\)</span></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>catcher_counts <span class="ot">&lt;-</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  statcast2024 <span class="sc">|&gt;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(fielder_2) <span class="sc">|&gt;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">count =</span> dplyr<span class="sc">::</span><span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(count))</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>catcher_threshold <span class="ot">&lt;-</span> </span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  catcher_counts <span class="sc">|&gt;</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="dv">60</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(count)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>catcher_u <span class="ot">&lt;-</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  catcher_u <span class="sc">|&gt;</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> catcher_counts, <span class="at">by =</span> <span class="st">"fielder_2"</span>)</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>repl_u <span class="ot">&lt;-</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  catcher_u <span class="sc">|&gt;</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(count <span class="sc">&lt;</span> catcher_threshold) <span class="sc">|&gt;</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(catcher_u) <span class="sc">|&gt;</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>For every pitch thrown in 2024, we can estimate how the called strike probability changes when the original catcher is replaced with a replacement-level catcher. First, observe that the log-odds of a called strike on pitch <span class="math inline">\(i\)</span> is given by <span class="math display">\[
+\mu_{C} + u_{c[i]}^{(C)} + B_{b[i]} + P_{p[i]} + \hat{\beta}_{p} \times \log\left(\frac{\hat{p}(x_{i}, z_{i})}{1 - \hat{p}(x_{i}, z_{i})} \right)
+\]</span> We can compute these predicted log-odds using the <code>predict()</code> function and append them to the data table <code>taken2024</code>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-16"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-16-1"><a href="#annotated-cell-16-1" aria-hidden="true" tabindex="-1"></a>ml_preds <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-16-2"><a href="#annotated-cell-16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict</span>(<span class="at">object =</span> multilevel_fit,</span>
+<span id="annotated-cell-16-3"><a href="#annotated-cell-16-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">newdata =</span> taken2024,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-16" data-target-annotation="1">1</button><span id="annotated-cell-16-4" class="code-annotation-target"><a href="#annotated-cell-16-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">type =</span> <span class="st">"link"</span>)</span>
+<span id="annotated-cell-16-5"><a href="#annotated-cell-16-5" aria-hidden="true" tabindex="-1"></a>taken2024 <span class="ot">&lt;-</span> </span>
+<span id="annotated-cell-16-6"><a href="#annotated-cell-16-6" aria-hidden="true" tabindex="-1"></a>  taken2024 <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-16-7"><a href="#annotated-cell-16-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">fitted_log_odds =</span> ml_preds)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-16" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-16" data-code-lines="4" data-code-annotation="1">Since we want the fitted log-odds and not the fitted probabilities, we specify <code>type = "link"</code>.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>If we replace the original catcher <span class="math inline">\(c[i]\)</span> with a replacement-level catcher, then the log-odds of a called strike is now <span class="math display">\[
+\mu_{C} + \overline{u}_{R}^{(C)} + B_{b[i]} + P_{p[i]} + \hat{\beta}_{p} \times \log\left(\frac{\hat{p}(x_{i}, z_{i})}{1 - \hat{p}(x_{i}, z_{i})} \right)
+\]</span> To compute the counter-factual log-odds, we need to take the fitted log-odds, subtract the original catcher’s deviation <span class="math inline">\(u_{c[i]}^{(C)}\)</span>, and add the average deviation across all replacement-level catchers (i.e., <span class="math inline">\(\overline{u}_{R}^{(C)}\)</span>). The following code does this by first appending the estimated <span class="math inline">\(u^{(C)}_{c[i]}\)</span> to each row of <code>taken2024</code> and then computing the counter-factual log-odds</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-17"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-17-1"><a href="#annotated-cell-17-1" aria-hidden="true" tabindex="-1"></a>taken2024 <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-17-2"><a href="#annotated-cell-17-2" aria-hidden="true" tabindex="-1"></a>  taken2024 <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-17-3"><a href="#annotated-cell-17-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> catcher_u <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-17-4"><a href="#annotated-cell-17-4" aria-hidden="true" tabindex="-1"></a>                     dplyr<span class="sc">::</span><span class="fu">select</span>(fielder_2, catcher_u) <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-17" data-target-annotation="1">1</button><span id="annotated-cell-17-5" class="code-annotation-target"><a href="#annotated-cell-17-5" aria-hidden="true" tabindex="-1"></a>                     dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">fielder_2 =</span> <span class="fu">factor</span>(fielder_2)),</span>
+<span id="annotated-cell-17-6"><a href="#annotated-cell-17-6" aria-hidden="true" tabindex="-1"></a>                   <span class="at">by =</span> <span class="st">"fielder_2"</span>) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-17-7"><a href="#annotated-cell-17-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">repl_log_odds =</span> fitted_log_odds <span class="sc">-</span> catcher_u <span class="sc">+</span> repl_u) </span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-17" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-17" data-code-lines="5" data-code-annotation="1"><code>fielder_2</code> is a factor variable in <code>taken2024</code> but a numeric variable in <code>catcher_u</code>. By converting it to a factor, we ensure that the join is successful</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>The number of expected runs a catcher saves through his framing relative to a replacement-level catcher is the product of the value of a called strike multiplied by the actual and counter-factual called strike probability.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>taken2024 <span class="ot">&lt;-</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  taken2024 <span class="sc">|&gt;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">fitted_prob =</span> <span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> fitted_log_odds)),</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">repl_prob =</span> <span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> repl_log_odds)),</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">rsar =</span> value <span class="sc">*</span> (fitted_prob <span class="sc">-</span> repl_prob))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Summing over all pitches received by a catcher over the season, we can compute his total number of runs saved above replacement. In the following code, we load in the player look-up table we created in <a href="../lectures/lecture06.html">Lecture 6</a></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"player2024_lookup.RData"</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>rsar <span class="ot">&lt;-</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  taken2024 <span class="sc">|&gt;</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(fielder_2) <span class="sc">|&gt;</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">rsar =</span> <span class="fu">sum</span>(rsar), <span class="at">n =</span> dplyr<span class="sc">::</span><span class="fu">n</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> fielder_2) <span class="sc">|&gt;</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(player2024_lookup <span class="sc">|&gt;</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>                     dplyr<span class="sc">::</span><span class="fu">select</span>(key_mlbam, Name) <span class="sc">|&gt;</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>                     dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">key_mlbam =</span> <span class="fu">factor</span>(key_mlbam)), <span class="at">by =</span> <span class="st">"key_mlbam"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>There is considerable overlap between the top-10 catchers according to our framing runs saved above replacement metric and the top-10 catchers according to rankings produced by <a href="https://baseballsavant.mlb.com/leaderboard/catcher-framing?count=&amp;gameType=Regular&amp;seasonStart=2024&amp;seasonEnd=2024&amp;type=catcher&amp;minPitches=q&amp;minResults=1&amp;sortColumn=rv_tot&amp;sortDirection=desc">Baseball Savant</a>. Both models, for instance, identify Patrick Bailey, who won a Golden Glove award in 2024, as a particularly strong framer.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>rsar <span class="sc">|&gt;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(rsar)) <span class="sc">|&gt;</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>) <span class="sc">|&gt;</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Name, rsar, n)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 3
+   Name               rsar     n
+   &lt;chr&gt;             &lt;dbl&gt; &lt;int&gt;
+ 1 Patrick Bailey     30.1  6118
+ 2 Cal Raleigh        19.9  6449
+ 3 Austin Wells       17.9  5540
+ 4 Alejandro Kirk     17.3  4761
+ 5 Jake Rogers        16.7  4417
+ 6 Christian Vazquez  15.2  4541
+ 7 Jose Trevino       14.6  3639
+ 8 Francisco Alvarez  13.6  4629
+ 9 Bo Naylor          11.6  5639
+10 Yasmani Grandal    11.0  3535</code></pre>
+</div>
+</div>
 
 
 </section>
 
-</main> <!-- /main -->
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>That is, away from the batter.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>The strike zone is defined as “the area over home plate from the midpoint between a batter’s shoulders and the top of the uniform pants – when the batter is in his stance and prepared to swing at a pitched ball – and a point just below the kneecap.” See <a href="https://www.mlb.com/glossary/rules/strike-zone">here</a>.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>The numbers of balls and strikes previously called in the at-bat.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>These are pitches in which the batter doesn’t swing.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>Try to prove yourself by considering four cases, one for each combination of the sign of <span class="math inline">\(\beta_{x}\)</span> and <span class="math inline">\(\beta_{z}\)</span> in the model above.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>Home plate measures 17 inches across, so we set the horizontal limits at -8.5/12 and 8.5/12. To set the vertical limits, we take the average values of the StatCast variable <code>sz_top</code> and <code>sz_bot</code>, which are <em>manually</em> determined by the StatCast operator on every pitch<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>The strategy to include a suitably-transformed baseline probability estimates was first used by Judge, Pavlidis, and Brooks in a <a href="https://www.baseballprospectus.com/article.php?articleid=25514">2015 Baseball Prospectus article</a>. It was also used by <span class="citation" data-cites="DeshpandeWyner2017">(<a href="#ref-DeshpandeWyner2017" role="doc-biblioref"><strong>DeshpandeWyner2017?</strong></a>)</span> (see Section 2.2 of that paper).<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.7.31">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -20,7 +20,62 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -36,7 +91,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-10c2ad7cdbdc86dea93900442ad0167d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -68,6 +123,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -128,7 +212,7 @@ ul.task-list li input[type="checkbox"] {
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture08.html">
- <span class="dropdown-text">Lecture 8: Defensive creidt &amp; replacement level</span></a>
+ <span class="dropdown-text">Lecture 8: Defensive credit &amp; replacement level</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture09.html">
@@ -246,7 +330,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../lectures/lecture08.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lecture 8: Defensive creidt &amp; replacement level</span></a>
+ <span class="menu-text">Lecture 8: Defensive credit &amp; replacement level</span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -289,14 +373,24 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#recap-overview" id="toc-recap-overview" class="nav-link active" data-scroll-target="#recap-overview">Recap &amp; Overview</a></li>
-  <li><a href="#passing-model-1-air-yards" id="toc-passing-model-1-air-yards" class="nav-link" data-scroll-target="#passing-model-1-air-yards">Passing Model 1: Air yards</a></li>
-  <li><a href="#passing-model-2-yards-after-catch" id="toc-passing-model-2-yards-after-catch" class="nav-link" data-scroll-target="#passing-model-2-yards-after-catch">Passing Model 2: Yards after Catch</a></li>
-  <li><a href="#rushing-model" id="toc-rushing-model" class="nav-link" data-scroll-target="#rushing-model">Rushing Model</a></li>
-  <li><a href="#individual-points-above-average-replacement-level" id="toc-individual-points-above-average-replacement-level" class="nav-link" data-scroll-target="#individual-points-above-average-replacement-level">Individual Points Above Average &amp; Replacement Level</a>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#sec-data-prep" id="toc-sec-data-prep" class="nav-link" data-scroll-target="#sec-data-prep">Data Preparation</a>
   <ul class="collapse">
-  <li><a href="#computing-a-players-ipaa" id="toc-computing-a-players-ipaa" class="nav-link" data-scroll-target="#computing-a-players-ipaa">Computing a player’s iPAA</a></li>
-  <li><a href="#position-specific-replacement-levels" id="toc-position-specific-replacement-levels" class="nav-link" data-scroll-target="#position-specific-replacement-levels">Position-specific replacement levels</a></li>
+  <li><a href="#passing-plays" id="toc-passing-plays" class="nav-link" data-scroll-target="#passing-plays">Passing plays</a></li>
+  <li><a href="#sec-rushing-data" id="toc-sec-rushing-data" class="nav-link" data-scroll-target="#sec-rushing-data">Rushing data</a></li>
+  <li><a href="#accounting-for-team-strengths" id="toc-accounting-for-team-strengths" class="nav-link" data-scroll-target="#accounting-for-team-strengths">Accounting for team strengths</a></li>
+  </ul></li>
+  <li><a href="#sec-passing-models" id="toc-sec-passing-models" class="nav-link" data-scroll-target="#sec-passing-models">Passing Models</a>
+  <ul class="collapse">
+  <li><a href="#constructing-composition-outcomes" id="toc-constructing-composition-outcomes" class="nav-link" data-scroll-target="#constructing-composition-outcomes">Constructing composition outcomes</a></li>
+  <li><a href="#sec-air-model" id="toc-sec-air-model" class="nav-link" data-scroll-target="#sec-air-model">Modeling <span class="math inline">\(\Delta_{\textrm{air}}\)</span></a></li>
+  <li><a href="#sec-yac-model" id="toc-sec-yac-model" class="nav-link" data-scroll-target="#sec-yac-model">Modeling <span class="math inline">\(\Delta_{\textrm{yac}}\)</span></a></li>
+  </ul></li>
+  <li><a href="#rushing-model" id="toc-rushing-model" class="nav-link" data-scroll-target="#rushing-model">Rushing Model</a></li>
+  <li><a href="#sec-ipaa" id="toc-sec-ipaa" class="nav-link" data-scroll-target="#sec-ipaa">Total Individual Points Added Above Average</a>
+  <ul class="collapse">
+  <li><a href="#sec-skill-replacement" id="toc-sec-skill-replacement" class="nav-link" data-scroll-target="#sec-skill-replacement">Position-specific replacement levels for non-quarterbacks</a></li>
+  <li><a href="#sec-qb-ipar" id="toc-sec-qb-ipar" class="nav-link" data-scroll-target="#sec-qb-ipar">Computing IPAR for QB’s</a></li>
   </ul></li>
   <li><a href="#from-points-to-wins" id="toc-from-points-to-wins" class="nav-link" data-scroll-target="#from-points-to-wins">From points to wins</a></li>
   </ul>
@@ -324,74 +418,1189 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="recap-overview" class="level2">
-<h2 class="anchored" data-anchor-id="recap-overview">Recap &amp; Overview</h2>
-<p><a href="../lectures/lecture09.html">In Lecture 9</a>.</p>
-<p>Let’s look at the two touchdown plays</p>
-<p>How much credit should be assign to the quarterback and how much credit should we assign to the receiver? In both cases, the receiver</p>
-<p>Effectively, we can treat a single passing play in two phases. Thus <code>epa_air</code> is the change in EP between the start of the play and the moment the ball is caught and <code>epa_yac</code> is the change in EP between the moment the ball is caught and</p>
-<p>So, on the two passing plays from before<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, we have</p>
-<p>As we saw with our baseball analysis, it is not completely reasonable to give the quarterback all the credit for <code>epa_air</code> and the receiver all the credit for <code>epa_yac</code>.</p>
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<p>In <a href="../lectures/lecture09.html#sec-intro">Lecture 9</a>, we looked at two touchdowns from the 2024-25 NFL season:</p>
+<ul>
+<li>A 86-yard touchdown by Ladd McConckey on a pass from Justin Herbert (<a href="https://www.youtube.com/watch?v=Hu9flYe2VrA">video link</a>)</li>
+<li>A 64-yard touchdown by Kavontae Turpin on a pass from Cooper Rush (<a href="https://www.youtube.com/watch?v=U0Zp_is-X18">video link</a>)</li>
+</ul>
+<p>The McConckey touchdown was thrown on a 3rd and 26 from the Charger’s 14 yard line. From that position, teams are expected to score about -1.54 points; that is, starting from that positions, teams, on average, give up points rather than score them. Over the course of the play, the Chargers offense generated around 8.54 points of EPA. The Turpin touchdown, on the other hand, was thrown on a 3rd and 10 from the Cowboys’ 36 yard line, a position from which teams score about 0.77 on average. The Cowboys offense generated about 6.23 points of EPA during that play. How much of the created EPA on these plays should be credited to the quarterbacks and how much should be credited to the receivers? Which players</p>
+<p>In this lecture, we will use multilevel modeling to answer these questions. We separately model EPA on passing and running plays. For passing plays, we will decompose the EPA into two parts, the expected points gained while the pass is in the air and the expected points gained on the ground after the catch (if the pass was caught). Each of our multilevel models will include random intercepts for players nested by their position (e.g., passer and receiver in the passing EPA models) and will also adjust for several important fixed effects. From these models, we will determine how many more expected points per play each player adds relative to the league average. Finally, like we did in <a href="../lectures/lecture08.html">Lecture 8</a>, we will translate these expected points added to the win scale and conclude with a version of wins above replacement for offensive players in football. Our development closely follows the nflWAR model introduced by <span class="citation" data-cites="Yurko2019_nflWAR">Yurko, Ventura, and Horowitz (<a href="#ref-Yurko2019_nflWAR" role="doc-biblioref">2019</a>)</span> but makes some simplifications.</p>
 <!--
+Briefly, we will model EPA using random player intercepts, which account for the fact that players are generally nested within different positions, while simultaneously adjusting for several important fixed effects.
+We will then convert these random intercepts, which represent, in some sense, the average per-play EPA generated for each player, into an estimate of the number of expected points added by each player.
+Finally, like we did in 
 
-  Start with a single play: how do we give credit? obviously, the quarterback made the pass, the receiver caught
-  
-  Is the running back's contribution more or less valuable than the 
-  
-  Over the next two lectures, we will
-  
-  
-  Like with our other sports, we will first estimate the value of different game states. Whereas in baseball this was defined using the number of outs and baserunners, in football it is primarily based on the yardline, yards to gain (i.e., down & distance) and other contextual factors.
-  
-  Then, we will look at how much the expected value changes over the course of a single play.
-  
-  Before allocating credit, we need to introduce a new type of model, which can properly account for the complicated dependence structure and avoid small sample size issues.
 
-  We have so far looked at apportioning credit: 
+At a high-level, we will decompose the EPA on passing plays into two parts, the expected points generated through the air and the expected points generated on the ground after the catch (if the pass was caught), and fit separate multilevel models for both parts.
+We will also fit two separate multilevel models of EPA on rushing plays, one for non-quarterbacks and one for quarterbacks.
 -->
-<p>Last lecture, we introduce two-level models.</p>
-<p>Our plan will be to compute the player’s average effect (their “individual points added (iPA)”) for three different types of offensive production: rushing players, passing plays (air yards), and passing plays (yards after catch)</p>
 </section>
-<section id="passing-model-1-air-yards" class="level2">
-<h2 class="anchored" data-anchor-id="passing-model-1-air-yards">Passing Model 1: Air yards</h2>
+<section id="sec-data-prep" class="level2">
+<h2 class="anchored" data-anchor-id="sec-data-prep">Data Preparation</h2>
+<p>We will restrict our analysis to plays from the 2024-25 regular season and exclude all post-season/play-off games. Later, in <a href="#sec-skill-replacement" class="quarto-xref">Section&nbsp;5.1</a>, we will define replacement-level players on a position-by-position basis. So that we can look up player positions, we will re-load the roster information using <code>nflfastR::fast_scraper_roster()</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pbp2024 <span class="ot">&lt;-</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  nflfastR<span class="sc">::</span><span class="fu">load_pbp</span>(<span class="at">season =</span> <span class="dv">2024</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(season_type <span class="sc">==</span> <span class="st">"REG"</span>) </span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>roster2024 <span class="ot">&lt;-</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  nflfastR<span class="sc">::</span><span class="fu">fast_scraper_roster</span>(<span class="at">seasons =</span> <span class="dv">2024</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(gsis_id))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="passing-plays" class="level3">
+<h3 class="anchored" data-anchor-id="passing-plays">Passing plays</h3>
+<p>We will extract information about all passing plays from <code>pbp2024</code> into a data table called <code>pass2024</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-2"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-2-1"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a>pass2024 <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-2-2"><a href="#annotated-cell-2-2" aria-hidden="true" tabindex="-1"></a>  pbp2024 <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-2-3"><a href="#annotated-cell-2-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="annotated-cell-2-4"><a href="#annotated-cell-2-4" aria-hidden="true" tabindex="-1"></a>    play_type <span class="sc">==</span> <span class="st">"pass"</span> <span class="sc">&amp;</span></span>
+<span id="annotated-cell-2-5"><a href="#annotated-cell-2-5" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">is.na</span>(posteam) <span class="sc">&amp;</span> </span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1">1</button><span id="annotated-cell-2-6" class="code-annotation-target"><a href="#annotated-cell-2-6" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"TWO-POINT CONVERSION ATTEMPT"</span>, desc) <span class="sc">&amp;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="2">2</button><span id="annotated-cell-2-7" class="code-annotation-target"><a href="#annotated-cell-2-7" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"sack"</span>, desc)  ) <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="3">3</button><span id="annotated-cell-2-8" class="code-annotation-target"><a href="#annotated-cell-2-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(passer_player_id <span class="sc">!=</span> receiver_player_id) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-2-9"><a href="#annotated-cell-2-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
+<span id="annotated-cell-2-10"><a href="#annotated-cell-2-10" aria-hidden="true" tabindex="-1"></a>    passer_player_id,</span>
+<span id="annotated-cell-2-11"><a href="#annotated-cell-2-11" aria-hidden="true" tabindex="-1"></a>    receiver_player_id,</span>
+<span id="annotated-cell-2-12"><a href="#annotated-cell-2-12" aria-hidden="true" tabindex="-1"></a>    posteam, defteam,</span>
+<span id="annotated-cell-2-13"><a href="#annotated-cell-2-13" aria-hidden="true" tabindex="-1"></a>    air_yards, shotgun, </span>
+<span id="annotated-cell-2-14"><a href="#annotated-cell-2-14" aria-hidden="true" tabindex="-1"></a>    qb_hit, no_huddle,</span>
+<span id="annotated-cell-2-15"><a href="#annotated-cell-2-15" aria-hidden="true" tabindex="-1"></a>    posteam_type, </span>
+<span id="annotated-cell-2-16"><a href="#annotated-cell-2-16" aria-hidden="true" tabindex="-1"></a>    pass_location,</span>
+<span id="annotated-cell-2-17"><a href="#annotated-cell-2-17" aria-hidden="true" tabindex="-1"></a>    yards_after_catch,</span>
+<span id="annotated-cell-2-18"><a href="#annotated-cell-2-18" aria-hidden="true" tabindex="-1"></a>    epa, air_epa, yac_epa, complete_pass, desc) <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="4">4</button><span id="annotated-cell-2-19" class="code-annotation-target"><a href="#annotated-cell-2-19" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">gsis_id =</span> receiver_player_id) <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="5">5</button><span id="annotated-cell-2-20" class="code-annotation-target"><a href="#annotated-cell-2-20" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> roster2024 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(gsis_id, position), <span class="at">by =</span> <span class="st">"gsis_id"</span>) <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="6">6</button><span id="annotated-cell-2-21" class="code-annotation-target"><a href="#annotated-cell-2-21" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">receiver_position =</span> position) <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="7">7</button><span id="annotated-cell-2-22" class="code-annotation-target"><a href="#annotated-cell-2-22" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>gsis_id)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="6" data-code-annotation="1">Remove pass attempts on two-point conversions</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="7" data-code-annotation="2"><strong>nflfastR</strong> classifies sacks as passing plays. For the purposes of building a version of WAR for the NFL, we will treat sacks as running plays, similar to <span class="citation" data-cites="Yurko2019_nflWAR">Yurko, Ventura, and Horowitz (<a href="#ref-Yurko2019_nflWAR" role="doc-biblioref">2019</a>)</span>.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="8" data-code-annotation="3">Remove <a href="https://www.youtube.com/shorts/roJrUCFDrFA">plays like this</a> where the passer catches their own pass (usually off a deflection).</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="19" data-code-annotation="4">Copy receiver ID into a temporary column, which will be used append receiver position with a join.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="5">5</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="20" data-code-annotation="5">Append receiver position.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="6">6</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="21" data-code-annotation="6">Rename the column containing receiver position.</span>
+</dd>
+<dt data-target-cell="annotated-cell-2" data-target-annotation="7">7</dt>
+<dd>
+<span data-code-cell="annotated-cell-2" data-code-lines="22" data-code-annotation="7">Remove the temporary column holding the receiver ID</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>In addition to the identity of the passer (<code>passer_player_id</code>) and intended receiver (<code>receiver_player_id</code>), the data table contains the following columns: * <code>posteam</code>: the identity of the team in possession of the ball * <code>defteam</code>: the identity of the team on defense * <code>air_yards</code>: the distance traveled by the pass through the air[^airyard] * <code>shotgun</code>: whether the pass was thrown out of the <a href="https://en.wikipedia.org/wiki/Shotgun_formation">shotgun formation</a> * <code>qb_hit</code>: whether the quarterback was hit while throwing * <code>no_huddle</code>: whether the play was run <a href="https://en.wikipedia.org/wiki/Hurry-up_offense">without a huddle</a> * <code>posteam_type</code>: whether the home team had possession (i.e., was on offense) * <code>pass_location</code>: whether the pass was thrown to the left, right, or center of the field * <code>yards_after_catch</code>: for completions, how many yards did the receiver gain after catching the pass * <code>epa</code>: the expected points added on the play * <code>air_epa</code> and <code>yac_epa</code>: the expected points added through the air and running after the catch (for completed passes) * <code>complete_pass</code>: whether the pass was completed * <code>receiver_position</code>: the position of the actual receiver on completed passes and the intended receiver on incomplete passes</p>
+<p>For every passing play, <strong>nflfastR</strong> computes two different EPA values. The first, <code>air_epa</code> is the expected points added through the air and <code>yac_epa</code> is the expected points added after the catch. For completed passes, computing <code>air_epa</code> and <code>yac_epa</code> is relatively straightforward: as soon as the pass is caught, imagine stopping the play and computing the expected points based on the resulting game state. Then, the difference between this intermediate EP and the starting EP of the original play is <code>air_epa</code> and the difference between the final EP and this intermediate EP is <code>yac_epa</code>. Computing <code>air_epa</code> and <code>yac_epa</code> for incomplete passes is trickier and involves computing the difference in expected points between the final state, initial state, and an intermediate state that would result had the pass been caught.</p>
 </section>
-<section id="passing-model-2-yards-after-catch" class="level2">
-<h2 class="anchored" data-anchor-id="passing-model-2-yards-after-catch">Passing Model 2: Yards after Catch</h2>
+<section id="sec-rushing-data" class="level3">
+<h3 class="anchored" data-anchor-id="sec-rushing-data">Rushing data</h3>
+<p>Success in the run game depends not only on the skill of the individual runner to run through the <a href="https://youtu.be/hrlrYzCioiI?t=208">space created by his teammates</a> and <a href="https://youtu.be/hrlrYzCioiI?t=66">evade defenders</a> but also on the ability of his teammates (usually linemen) to <a href="https://youtu.be/hrlrYzCioiI?t=122">create space near the line</a> and to <a href="https://www.youtube.com/watch?v=f_z8E6E3iYo">make blocks down the field</a>. Unfortunately, publicly available NFL play-by-play does not record the identities of all 22 players on the field nor does it include information about play (i.e., whether the play involved a pulling guard). It does, however, contain two variables, <code>run_location</code>, and <code>run_gap</code> that provide some context about the play.</p>
+<p>We start by building a data table containing all rushing plays. As noted above, we will treat sacks as rushing plays.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-3"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-3-1"><a href="#annotated-cell-3-1" aria-hidden="true" tabindex="-1"></a>rush2024 <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-3-2"><a href="#annotated-cell-3-2" aria-hidden="true" tabindex="-1"></a>  pbp2024 <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-3-3"><a href="#annotated-cell-3-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="annotated-cell-3-4"><a href="#annotated-cell-3-4" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"TWO-POINT CONVERSION ATTEMPT"</span>, desc)) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-3-5"><a href="#annotated-cell-3-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="1">1</button><span id="annotated-cell-3-6" class="code-annotation-target"><a href="#annotated-cell-3-6" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"No play"</span>, desc, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-3-7"><a href="#annotated-cell-3-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="annotated-cell-3-8"><a href="#annotated-cell-3-8" aria-hidden="true" tabindex="-1"></a>    play_type <span class="sc">==</span> <span class="st">"run"</span> <span class="sc">|</span></span>
+<span id="annotated-cell-3-9"><a href="#annotated-cell-3-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">grepl</span>(<span class="st">"sack"</span>, desc, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-3-10"><a href="#annotated-cell-3-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
+<span id="annotated-cell-3-11"><a href="#annotated-cell-3-11" aria-hidden="true" tabindex="-1"></a>    game_id, play_id,</span>
+<span id="annotated-cell-3-12"><a href="#annotated-cell-3-12" aria-hidden="true" tabindex="-1"></a>    posteam, defteam, </span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-3" data-target-annotation="2">2</button><span id="annotated-cell-3-13" class="code-annotation-target"><a href="#annotated-cell-3-13" aria-hidden="true" tabindex="-1"></a>    passer_player_id,</span>
+<span id="annotated-cell-3-14"><a href="#annotated-cell-3-14" aria-hidden="true" tabindex="-1"></a>    rusher_player_id,</span>
+<span id="annotated-cell-3-15"><a href="#annotated-cell-3-15" aria-hidden="true" tabindex="-1"></a>    posteam_type,</span>
+<span id="annotated-cell-3-16"><a href="#annotated-cell-3-16" aria-hidden="true" tabindex="-1"></a>    shotgun, no_huddle,</span>
+<span id="annotated-cell-3-17"><a href="#annotated-cell-3-17" aria-hidden="true" tabindex="-1"></a>    run_location, run_gap, </span>
+<span id="annotated-cell-3-18"><a href="#annotated-cell-3-18" aria-hidden="true" tabindex="-1"></a>    epa, desc) </span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-3" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="6" data-code-annotation="1">Remove the plays that are whistled dead or involve penalties like roughing the passer or are otherwise classified as “No Play”</span>
+</dd>
+<dt data-target-cell="annotated-cell-3" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-3" data-code-lines="13" data-code-annotation="2">On sacks, the quarterback is sometimes not classified as a runner but as passer</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>The data table <code>rush2024</code> contains several of the same variables <code>pass2024</code> including the identities of the offensive and defensive teams, the EPA, and the indicators <code>shotgun</code>, <code>no_huddle</code>, and <code>posteam_type</code>. It also includes the ID for the runner and their listed position and two variables, <code>run_location</code> and <code>run_gap</code>, that contain some contextual information about the run. Unfortunately, there are a lot of missing values of <code>rusher_player_id</code>, all of which correspond to sacks.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(rush2024<span class="sc">$</span>rusher_player_id))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1327</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">grepl</span>(<span class="st">"sack"</span>, rush2024<span class="sc">$</span>desc, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>) <span class="sc">&amp;</span> <span class="fu">is.na</span>(rush2024<span class="sc">$</span>rusher_player_id))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1327</code></pre>
+</div>
+</div>
+<section id="dealing-with-sacks" class="level4">
+<h4 class="anchored" data-anchor-id="dealing-with-sacks">Dealing with sacks</h4>
+<p><strong>nflfastR</strong> treats sacks as passing plays and not running plays. However, because the ball is not thrown during a sack, there is no well-defined <code>air_epa</code> or <code>yac_epa</code>. We instead follow the example of <span class="citation" data-cites="Yurko2019_nflWAR">Yurko, Ventura, and Horowitz (<a href="#ref-Yurko2019_nflWAR" role="doc-biblioref">2019</a>)</span> and treat sacks as running plays. Unfortunately, for the vast majority of sacks, the <code>rusher_player_id</code> variable is not available.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>sacks <span class="ot">&lt;-</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  rush2024 <span class="sc">|&gt;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="fu">grepl</span>(<span class="st">"sack"</span>, desc, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">is.na</span>(sacks<span class="sc">$</span>rusher_player_id))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.999247</code></pre>
+</div>
+</div>
+<p>Instead, the id of the player who was sacked — whom we wish to treat as the rusher in our models — is saved as <code>passer_player_id</code>. We first verify that all sacks with a missing <code>rusher_player_id</code> do not also have a missing <code>passer_player_id</code></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-7"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="1">1</button><span id="annotated-cell-7-1" class="code-annotation-target"><a href="#annotated-cell-7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(sacks<span class="sc">$</span>rusher_player_id))</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="2">2</button><span id="annotated-cell-7-2" class="code-annotation-target"><a href="#annotated-cell-7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(sacks<span class="sc">$</span>passer_player_id) <span class="sc">&amp;</span> <span class="fu">is.na</span>(sacks<span class="sc">$</span>rusher_player_id))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-7" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="1" data-code-annotation="1">Number of sacks for which we are missing the <code>rusher_player_id</code></span>
+</dd>
+<dt data-target-cell="annotated-cell-7" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="2" data-code-annotation="2">Number of sacks for which are missing the <code>rusher_player_id</code> but are <strong>not</strong> missing the <code>passer_player_id</code></span>
+</dd>
+</dl>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1327
+[1] 1327</code></pre>
+</div>
+</div>
+<p>The following code overwrites the missing <code>rusher_player_id</code> values on sacks and then appends the rusher’s position.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>rush2024 <span class="ot">&lt;-</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  rush2024 <span class="sc">|&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">rusher_player_id =</span> </span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">is.na</span>(rusher_player_id) <span class="sc">&amp;</span> <span class="fu">grepl</span>(<span class="st">"sack"</span>, desc, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>) <span class="sc">~</span> passer_player_id,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">.default =</span> rusher_player_id)) <span class="sc">|&gt;</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">gsis_id =</span> rusher_player_id) <span class="sc">|&gt;</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> roster2024 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(gsis_id, position), <span class="at">by =</span> <span class="st">"gsis_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">rusher_position =</span> position) <span class="sc">|&gt;</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>gsis_id)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="sec-run-context" class="level4">
+<h4 class="anchored" data-anchor-id="sec-run-context">Run context</h4>
+<p>The data table <code>rush2024</code> contains two variables that describe the run play. The first, <code>run_location</code>, records whether the run was towards the left, right or middle of the offensive line. To describe <code>run_gap</code>, we need to introduce a little bit of additional notation. Every offensive play in American football begins with 5 offensive players (the “linemen”) on the line of scrimmage. The center is responsible for snapping the ball to the quarterback — thereby starting the play — and is positioned in the middle of the line. Next to the center are the two guards and next to the guards are the two tackles. The spaces between the linemen are known as “gaps” and are conventionally labelled with letters: “A” gap between the center and guard; “B” gap between guard and tackle, and “C” gap outside the tackle. Sometimes, but not always, a tight end lines up next to one or both of the tackles. When that happens, the space between the tackle and end is labelled “C” gap and the space outside the tight end is known as “D” gap.</p>
+<p>Although the naming convention is very prevalent within football (i.e, amongs coaches and players), the NFL play-by-play data does not use this convention. Instead, the variable <code>run_gap</code> takes the value <code>guard</code> for runs through the “B” gap, <code>tackle</code> for runs through the “C” gap, and <code>end</code> for runs through the “D” gap. For runs through the “B”, “C”, or “D” gap, the variable <code>run_location</code> takes on the value “left” or “right”, to indicate which side of the line But for runs through the “A” gap, <code>run_gap</code> is NA and <code>run_location</code> is equal to “middle”.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(rush2024[,<span class="fu">c</span>(<span class="st">"run_gap"</span>, <span class="st">"run_location"</span>)], <span class="at">useNA =</span> <span class="st">'always'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        run_location
+run_gap  left middle right &lt;NA&gt;
+  end    1958      0  1805    0
+  guard  1822      0  1739    0
+  tackle 1645      0  1628    0
+  &lt;NA&gt;      0   3565     0 1447</code></pre>
+</div>
+</div>
+<p>We will combine these two variables into a composite variable <code>run_context</code>. For runs where both <code>run_gap</code> and <code>run_location</code> are not <code>NA</code>, we will concatenate the three variables (e.g., <code>"left end"</code> or <code>"right tackle"</code>). For runs through the “A” gap (when <code>run_location == "middle"</code> and <code>run_gap</code> is <code>NA</code>), we will set the contextual variable to be <code>"middle"</code>. It turns out that the remaining 1447 running plays with missing <code>run_location</code> and <code>run_gap</code> involve a sack or fumble (and sometimes both!)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-10"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="1">1</button><span id="annotated-cell-10-1" class="code-annotation-target"><a href="#annotated-cell-10-1" aria-hidden="true" tabindex="-1"></a>tmp <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-10-2"><a href="#annotated-cell-10-2" aria-hidden="true" tabindex="-1"></a>  rush2024 <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-10-3"><a href="#annotated-cell-10-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="fu">is.na</span>(run_gap) <span class="sc">&amp;</span> <span class="fu">is.na</span>(run_location))</span>
+<span id="annotated-cell-10-4"><a href="#annotated-cell-10-4" aria-hidden="true" tabindex="-1"></a></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="2">2</button><span id="annotated-cell-10-5" class="code-annotation-target"><a href="#annotated-cell-10-5" aria-hidden="true" tabindex="-1"></a><span class="fu">all</span>(</span>
+<span id="annotated-cell-10-6"><a href="#annotated-cell-10-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">grepl</span>(<span class="st">"sack"</span>, tmp<span class="sc">$</span>desc, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>) <span class="sc">|</span> <span class="co">#&lt;3</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="3">3</button><span id="annotated-cell-10-7" class="code-annotation-target"><a href="#annotated-cell-10-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">grepl</span>(<span class="st">"fumble"</span>, tmp<span class="sc">$</span>desc, <span class="at">ignore.case =</span> <span class="cn">TRUE</span>) )</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-10" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-10" data-code-lines="1,2,3" data-code-annotation="1">Pull out all the plays missing both <code>run_gap</code> and <code>run_location</code>.</span>
+</dd>
+<dt data-target-cell="annotated-cell-10" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-10" data-code-lines="5" data-code-annotation="2"><code>all</code> returns <code>TRUE</code> if <strong>all</strong> elements in a logical vector are true</span>
+</dd>
+<dt data-target-cell="annotated-cell-10" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-10" data-code-lines="7" data-code-annotation="3">Check whether the strings “sack” or “fumble” appears in the play description.</span>
+</dd>
+</dl>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+</div>
+<p>For these plays, we will set <code>run_context == "other"</code>. We further combine <code>run_context</code> with the identity of the offensive team (i.e., <code>posteam</code>) to create what <span class="citation" data-cites="Yurko2019_nflWAR">Yurko, Ventura, and Horowitz (<a href="#ref-Yurko2019_nflWAR" role="doc-biblioref">2019</a>)</span> describe as a “proxy for the offensive linemen or blockers involved in a rushing attempt.”</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>rush2024 <span class="ot">&lt;-</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  rush2024 <span class="sc">|&gt;</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">run_context =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>      run_location <span class="sc">==</span> <span class="st">"middle"</span> <span class="sc">~</span> <span class="fu">paste</span>(posteam, <span class="st">"middle"</span>, <span class="at">sep =</span> <span class="st">"_"</span>),</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">is.na</span>(run_location) <span class="sc">&amp;</span> <span class="fu">is.na</span>(run_gap) <span class="sc">~</span> <span class="fu">paste</span>(posteam, <span class="st">"other"</span>, <span class="at">sep =</span> <span class="st">"_"</span>),</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">.default =</span> <span class="fu">paste</span>(posteam, run_gap, run_location, <span class="at">sep =</span> <span class="st">"_"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="accounting-for-team-strengths" class="level3">
+<h3 class="anchored" data-anchor-id="accounting-for-team-strengths">Accounting for team strengths</h3>
+<p>Recall one of the main <a href="../lectures/lecture04.html#sec-pm-issues">drawbacks of plus/minus</a> was its inability to account for the quality of the player’s teammates. When trying to construct a version of WAR for offensive players in the NFL, we need to make sure that we do not overly reward players who happen to play for good teams or overly penalize players who play on bad offenses. In our multilevel models, we will quantify each offense’ running and passing strength using the average EPA on rushing and passing plays.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>pass_strength <span class="ot">&lt;-</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  pass2024 <span class="sc">|&gt;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(posteam) <span class="sc">|&gt;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">pass_strength =</span> <span class="fu">mean</span>(epa,<span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>rush_strength <span class="ot">&lt;-</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  rush2024 <span class="sc">|&gt;</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(posteam) <span class="sc">|&gt;</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">rush_strength =</span> <span class="fu">mean</span>(epa, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>pass2024 <span class="ot">&lt;-</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  pass2024 <span class="sc">|&gt;</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(pass_strength, <span class="at">by =</span> <span class="st">"posteam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(rush_strength, <span class="at">by =</span> <span class="st">"posteam"</span>)</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>rush2024 <span class="ot">&lt;-</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  rush2024 <span class="sc">|&gt;</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(pass_strength, <span class="at">by =</span> <span class="st">"posteam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(rush_strength, <span class="at">by =</span> <span class="st">"posteam"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="sec-passing-models" class="level2">
+<h2 class="anchored" data-anchor-id="sec-passing-models">Passing Models</h2>
+<section id="constructing-composition-outcomes" class="level3">
+<h3 class="anchored" data-anchor-id="constructing-composition-outcomes">Constructing composition outcomes</h3>
+<p>We’re now ready to determine how much individual players contribute to their team’s overall EPA on passing plays. While it is tempting to fit separate multilevel models to predict the values in the <code>air_epa</code> and <code>yac_epa</code>, we need to be a bit more careful in how we deal with incomplete passes. Specifically, on an incomplete pass, there is necessarily no run after the catch and any change in EP is driven entirely by what happens while the ball is in the air. To account for this, we will define two composite outcomes that are based on <code>air_epa</code>, <code>yac_epa</code>, and <code>epa</code>.</p>
+<p>Formally, say that there are <span class="math inline">\(n\)</span> passing plays and for passing play <span class="math inline">\(i,\)</span> let <span class="math inline">\(\Delta_{i}\)</span> be the observed EPA on the play. Let <span class="math inline">\(\delta_{i,\textrm{air}}\)</span> and <span class="math inline">\(\delta_{i,\textrm{yac}}\)</span> be the values of <code>air_epa</code> and <code>yac_epa</code> provided by <strong>nflfastR</strong>. We will decompose <span class="math inline">\(\Delta_{i} = \Delta_{i,\textrm{air}} + \Delta_{i,\textrm{yac}}\)</span> where <span class="math display">\[
+\Delta_{i, \textrm{air}} =
+\begin{cases}
+\delta_{i, \textrm{air}} &amp; \textrm{if the pass is caught} \\
+\Delta_{i} &amp; \textrm{if the pass is incomplete,}
+\end{cases}
+\]</span> and <span class="math display">\[
+\Delta_{i, \textrm{yac}} =
+\begin{cases}
+\delta_{i, \textrm{yac}} &amp; \textrm{if the pass is caught} \\
+0 &amp; \textrm{if the pass is incomplete.}
+\end{cases}
+\]</span> The following code creates columns for these composite outcomes and also converts categorical predictors like defensive team and receiver position into factor variables.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>pass2024 <span class="ot">&lt;-</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  pass2024 <span class="sc">|&gt;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">Delta_air =</span> <span class="fu">ifelse</span>(complete_pass <span class="sc">==</span> <span class="dv">1</span>, air_epa, epa),</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">Delta_yac =</span> <span class="fu">ifelse</span>(complete_pass <span class="sc">==</span> <span class="dv">1</span>, yac_epa, <span class="dv">0</span>),</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">passer_player_id =</span> <span class="fu">factor</span>(passer_player_id),</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">receiver_player_id =</span> <span class="fu">factor</span>(receiver_player_id),</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">posteam =</span> <span class="fu">factor</span>(posteam),</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">defteam =</span> <span class="fu">factor</span>(defteam),</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">pass_location =</span> <span class="fu">factor</span>(pass_location),</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">receiver_position =</span> <span class="fu">factor</span>(receiver_position))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="sec-air-model" class="level3">
+<h3 class="anchored" data-anchor-id="sec-air-model">Modeling <span class="math inline">\(\Delta_{\textrm{air}}\)</span></h3>
+<p>Our first multilevel model, fitted to data from all passing plays, includes separate random intercepts for the passers, receivers, and defenses. It also accounts for the fixed effects of * <code>air_yards</code>: the distance traveled by the pass through the air * <code>shotgun</code>: whether the pass was thrown out of the <a href="https://en.wikipedia.org/wiki/Shotgun_formation">shotgun formation</a> * <code>qb_hit</code>: whether the quarterback was hit while throwing * <code>no_huddle</code>: whether the play was run <a href="https://en.wikipedia.org/wiki/Hurry-up_offense">without a huddle</a> * <code>posteam_type</code>: whether the home team had possession (i.e., was on offense) * <code>pass_location</code>: whether the pass was thrown to the left, right, or center of the field * <code>receiver_position</code>: the position of the intended receiver * <code>rush_strength</code>: the average EPA per rush attempt for the offense</p>
+<p>Before writing down our model, we introduce some more notation. Formally, suppose that there are <span class="math inline">\(n_{q}\)</span> passers<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, <span class="math inline">\(n_{c}\)</span> receivers<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>, and <span class="math inline">\(n_{D}\)</span> defenses. For passing play <span class="math inline">\(i,\)</span> let <span class="math inline">\(q[i], c[i],\)</span> and <span class="math inline">\(d[i]\)</span> denote the identity of the passer, receiver, and defense involved in the play and let <span class="math inline">\(\boldsymbol{\mathbf{x}}_{i}\)</span> be the vector of fixed effect covariates (i.e., the ones listed above).</p>
+<p>We model <span class="math display">\[
+\begin{align}
+\Delta_{i, \textrm{air}} &amp;= Q_{q[i]} + C_{c[i]} + D_{d[i]} + \boldsymbol{\mathbf{x}}_{i}^{\top}\boldsymbol{\beta} + \epsilon_{i} \quad \text{for all passes}\ i = 1, \ldots, n \\
+Q_{q} &amp;\sim N(\mu_{Q}, \sigma^{2}_{Q}) \quad \textrm{for all passers}\ q = 1, \ldots, n_{Q} \\
+C_{c} &amp;\sim N(\mu_{C}, \sigma^{2}_{C}) \quad \textrm{for all pass catchers}\ c = 1, \ldots, n_{C},  \\
+D_{d} &amp;\sim N(\mu_{D}, \sigma^{2}_{D}) \quad \textrm{for all defenseive teams}\ d = 1, \ldots n_{D}.
+\end{align}
+\]</span></p>
+<p>We can fit this model with <code>lme4::lmer()</code> using similar notation as was used in <a href="../lectures/lecture09.html">Lecture 9</a>. Just like in that lecture, we can read off lots of important information and parameter estimates from the model summary. For instance, there is much more variability in the receiver effects than the passer or defense effects.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lme4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-15" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-15" data-code-lines="2" data-code-annotation="1">We want random intercepts for the passer, receiver, and defensive team</span>
+</dd>
+<dt data-target-cell="annotated-cell-15" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-15" data-code-lines="3" data-code-annotation="2">Specify the fixed effects</span>
+</dd>
+</dl>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: Matrix</code></pre>
+</div>
+<div class="sourceCode cell-code" id="annotated-cell-15"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-15-1"><a href="#annotated-cell-15-1" aria-hidden="true" tabindex="-1"></a>air_model <span class="ot">&lt;-</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-15" data-target-annotation="1">1</button><span id="annotated-cell-15-2" class="code-annotation-target"><a href="#annotated-cell-15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lmer</span>(Delta_air <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>passer_player_id) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> receiver_player_id) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> defteam )</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-15" data-target-annotation="2">2</button><span id="annotated-cell-15-3" class="code-annotation-target"><a href="#annotated-cell-15-3" aria-hidden="true" tabindex="-1"></a>       <span class="sc">+</span> air_yards <span class="sc">+</span> shotgun <span class="sc">+</span> qb_hit <span class="sc">+</span> no_huddle <span class="sc">+</span> posteam_type <span class="sc">+</span> pass_location <span class="sc">+</span> receiver_position <span class="sc">+</span> rush_strength,</span>
+<span id="annotated-cell-15-4"><a href="#annotated-cell-15-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">data =</span> pass2024)</span>
+<span id="annotated-cell-15-5"><a href="#annotated-cell-15-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(air_model)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Correlation matrix not shown by default, as p = 16 &gt; 12.
+Use print(x, correlation=TRUE)  or
+    vcov(x)        if you need it</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed model fit by REML ['lmerMod']
+Formula: Delta_air ~ 1 + (1 | passer_player_id) + (1 | receiver_player_id) +  
+    (1 | defteam) + air_yards + shotgun + qb_hit + no_huddle +  
+    posteam_type + pass_location + receiver_position + rush_strength
+   Data: pass2024
+
+REML criterion at convergence: 56640.3
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-9.6663 -0.4475 -0.0140  0.4521  4.2381 
+
+Random effects:
+ Groups             Name        Variance Std.Dev.
+ receiver_player_id (Intercept) 0.011544 0.10745 
+ passer_player_id   (Intercept) 0.002242 0.04735 
+ defteam            (Intercept) 0.001354 0.03680 
+ Residual                       1.622752 1.27387 
+Number of obs: 17000, groups:  
+receiver_player_id, 492; passer_player_id, 99; defteam, 32
+
+Fixed effects:
+                     Estimate Std. Error t value
+(Intercept)         -2.642055   0.573232  -4.609
+air_yards            0.035027   0.001077  32.537
+shotgun             -0.081497   0.028132  -2.897
+qb_hit              -0.276667   0.036182  -7.647
+no_huddle            0.134666   0.029805   4.518
+posteam_typehome    -0.008663   0.019728  -0.439
+pass_locationmiddle  0.172170   0.026424   6.516
+pass_locationright  -0.034797   0.022336  -1.558
+receiver_positionDL  4.627420   1.401649   3.301
+receiver_positionLB  3.750986   1.070748   3.503
+receiver_positionOL  2.527147   0.729736   3.463
+receiver_positionQB  3.661843   0.934966   3.917
+receiver_positionRB  1.922465   0.573394   3.353
+receiver_positionTE  2.279044   0.573261   3.976
+receiver_positionWR  2.254500   0.573040   3.934
+rush_strength        0.307995   0.118268   2.604</code></pre>
+</div>
+</div>
+<p>For each passer <span class="math inline">\(q,\)</span> <span class="math inline">\(Q_{q}\)</span> is a <em>latent</em><a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> quantity measuring how many expected points passer <span class="math inline">\(q\)</span> adds through the air, after you account for the fixed effects and also the quality of the intended receiver and the defense. The quantity <span class="math inline">\(\mu_{Q}\)</span> represents the global average of these latent quantities. Similarly, <span class="math inline">\(C_{c}\)</span> is the latent measurement of how many expected points receiver <span class="math inline">\(c\)</span> adds while the pass is in the air<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> after accounting for the fixed effects and the quality of the passer and of the opposing defense. And <span class="math inline">\(D_{d}\)</span> is the latent measurement of how many expected points are added for the <em>offensive</em> team by defensive team <span class="math inline">\(d\)</span> while the pass is in the air. Since EPA is signed so that positive values are considered good for the offense, large <em>negative</em> values of <span class="math inline">\(D_{d}\)</span> are treated as good for the defense. In our model, the random intercepts <span class="math inline">\(Q_{q}, C_{c},\)</span> and <span class="math inline">\(D_{d}\)</span> are all modeled as noisy deviations away from league-wise averages <span class="math inline">\(\mu_{Q}, \mu_{C},\)</span> and <span class="math inline">\(\mu_{D}.\)</span></p>
+<p>Unfortunately, we cannot estimate <span class="math inline">\(\mu_{Q}, \mu_{C},\)</span> and <span class="math inline">\(\mu_{D}\)</span> because these parameters are not <strong>identified</strong>. Without going into too many technical details<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>, there are infinitely many settings of the values of these three parameters that yield exactly the same fit to the data. Because we cannot estimate <span class="math inline">\(\mu_{Q}, \mu_{C},\)</span> and <span class="math inline">\(\mu_{D},\)</span> we are unable to obtain estimates for the random intercepts <span class="math inline">\(Q_{q}, C_{c},\)</span> and <span class="math inline">\(D_{d}\)</span> like we did in <a href="../lectures/lecture09.html">Lecture 9</a>. We are, however, able to estimate the deviations <span class="math inline">\(Q_{q} - \mu_{Q},\)</span> <span class="math inline">\(C_{c} - \mu_{C},\)</span> and <span class="math inline">\(D_{d} - \mu_{D}.\)</span> For each passer <span class="math inline">\(q\)</span>, the quantity <span class="math inline">\(Q_{q} - \mu_{Q}\)</span> measures many more expected points per play passer <span class="math inline">\(q\)</span> adds through the air <em>than the league average</em>. Following <span class="citation" data-cites="Yurko2019_nflWAR">Yurko, Ventura, and Horowitz (<a href="#ref-Yurko2019_nflWAR" role="doc-biblioref">2019</a>)</span>, we will refer to this number as passer <span class="math inline">\(q\)</span>’s individual points added over average or <span class="math inline">\(\textrm{IPA}^{(Q)}_{\textrm{air},q}\)</span><a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>. We can similarly define <span class="math inline">\(\textrm{IPA}^{(C)}_{\textrm{air}, c}\)</span> for receivers. For each defense <span class="math inline">\(d,\)</span> let <span class="math inline">\(D_{d} - \mu_{D}\)</span> is the number of points per passing play over league average given up by the defensive team while the bar is in the air. We will denote this quantity by <span class="math inline">\(\textrm{TPA}^{(D)}_{\textrm{air},d},\)</span> with negative <span class="math inline">\(\textrm{TPA}\)</span> values corresponding to better defenses.</p>
+<p>We can extract the IPA and TPA values using the function <code>ranef()</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-16"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-16" data-target-annotation="1">1</button><span id="annotated-cell-16-1" class="code-annotation-target"><a href="#annotated-cell-16-1" aria-hidden="true" tabindex="-1"></a>tmp_air <span class="ot">&lt;-</span> <span class="fu">ranef</span>(air_model)</span>
+<span id="annotated-cell-16-2"><a href="#annotated-cell-16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-16-3"><a href="#annotated-cell-16-3" aria-hidden="true" tabindex="-1"></a>air_passer_effects <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-16-4"><a href="#annotated-cell-16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-16" data-target-annotation="2">2</button><span id="annotated-cell-16-5" class="code-annotation-target"><a href="#annotated-cell-16-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">gsis_id =</span> <span class="fu">rownames</span>(tmp_air[[<span class="st">"passer_player_id"</span>]]),</span>
+<span id="annotated-cell-16-6"><a href="#annotated-cell-16-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">ipa_air_pass =</span> tmp_air[[<span class="st">"passer_player_id"</span>]][,<span class="dv">1</span>])</span>
+<span id="annotated-cell-16-7"><a href="#annotated-cell-16-7" aria-hidden="true" tabindex="-1"></a>air_receiver_effects <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-16-8"><a href="#annotated-cell-16-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="annotated-cell-16-9"><a href="#annotated-cell-16-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">gsis_id =</span> <span class="fu">rownames</span>(tmp_air[[<span class="st">"receiver_player_id"</span>]]),</span>
+<span id="annotated-cell-16-10"><a href="#annotated-cell-16-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">ipa_air_rec =</span> tmp_air[[<span class="st">"receiver_player_id"</span>]][,<span class="dv">1</span>])</span>
+<span id="annotated-cell-16-11"><a href="#annotated-cell-16-11" aria-hidden="true" tabindex="-1"></a>air_defense_effects <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-16-12"><a href="#annotated-cell-16-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="annotated-cell-16-13"><a href="#annotated-cell-16-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">Team =</span> <span class="fu">rownames</span>(tmp_air[[<span class="st">"defteam"</span>]]),</span>
+<span id="annotated-cell-16-14"><a href="#annotated-cell-16-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">tpa_air_def =</span> tmp_air[[<span class="st">"defteam"</span>]][,<span class="dv">1</span>])</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-16" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-16" data-code-lines="1" data-code-annotation="1">Extract the passer, receiver, and defensive random intercepts in a large list</span>
+</dd>
+<dt data-target-cell="annotated-cell-16" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-16" data-code-lines="5" data-code-annotation="2">Because we will eventually append player names by <code>inner_join()</code>’ing with <code>roster2024</code>, we’ll record the passer IDs in a column called <code>gsis_id</code>.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Taking a quick look at the top-10 (resp. bottom-10) IPA passer values, we see a number of highly regarded (resp. heavily criticized) quarterbacks.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>air_passer_effects <span class="sc">|&gt;</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> roster2024 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(gsis_id, full_name), <span class="at">by =</span> <span class="st">"gsis_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(full_name, ipa_air_pass) <span class="sc">|&gt;</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(ipa_air_pass)) <span class="sc">|&gt;</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, (dplyr<span class="sc">::</span><span class="fu">n</span>()<span class="sc">-</span><span class="dv">4</span>)<span class="sc">:</span>dplyr<span class="sc">::</span><span class="fu">n</span>()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                  full_name ipa_air_pass
+1                Joe Burrow   0.06736333
+2               Sam Darnold   0.04033663
+3             Lamar Jackson   0.03292716
+4            Tua Tagovailoa   0.03281935
+5               Brock Purdy   0.03000549
+6                 Drew Lock  -0.02737783
+7                    Bo Nix  -0.02808707
+8  Dorian Thompson-Robinson  -0.03832239
+9           Spencer Rattler  -0.05005097
+10       Anthony Richardson  -0.07074920</code></pre>
+</div>
+</div>
+</section>
+<section id="sec-yac-model" class="level3">
+<h3 class="anchored" data-anchor-id="sec-yac-model">Modeling <span class="math inline">\(\Delta_{\textrm{yac}}\)</span></h3>
+<p>By fitting a similar multilevel model to predict the <span class="math inline">\(\Delta_{i, \textrm{yac}}\)</span>’s, we can estimate how much each passer, receiver, and defense contributes to EPA during the part of a passing play following a catch. Because these contributions can, by definition, only be made following a completed pass, we fit this model using only the data from completed pass<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>completions <span class="ot">&lt;-</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  pass2024 <span class="sc">|&gt;</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(complete_pass<span class="sc">==</span><span class="dv">1</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>yac_model <span class="ot">&lt;-</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lmer</span>(Delta_yac <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>passer_player_id) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> receiver_player_id) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> defteam ) </span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>       <span class="sc">+</span> air_yards <span class="sc">+</span> shotgun <span class="sc">+</span> qb_hit <span class="sc">+</span> no_huddle <span class="sc">+</span> posteam_type <span class="sc">+</span> pass_location <span class="sc">+</span> receiver_position <span class="sc">+</span> rush_strength, </span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">data =</span> completions)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>boundary (singular) fit: see help('isSingular')</code></pre>
+</div>
+</div>
+<p>While fitting the model, <code>lmer</code> printed a message saying that the fit was singular. The manual page for <code>isSingular</code>, which the message instructs us to visit, contains lots of information about singular models. Briefly, when fitting complicated multilevel models with lots of random effects, it can sometimes be the case that some of the “between” group variances are estimated to be exactly zero. Quoting from the manual &gt; While singular models are statistically well-defined … there are real concerns that (1) singular fits correspond to overfitted models that may have poor power; (2) chances of numerical problems or mis-convergence are higher for singular models … ; (3) standard inferential procedures such as Wald statistics and likelihood ratio tests may be inappropriate.</p>
+<p>Taking a look at the model summary, we see that the passer-to-passer variation has been set to zero.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(yac_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed model fit by REML ['lmerMod']
+Formula: Delta_yac ~ 1 + (1 | passer_player_id) + (1 | receiver_player_id) +  
+    (1 | defteam) + air_yards + shotgun + qb_hit + no_huddle +  
+    posteam_type + pass_location + receiver_position + rush_strength
+   Data: completions
+
+REML criterion at convergence: 32367.4
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-8.9533 -0.5437 -0.2533  0.2882  7.4637 
+
+Random effects:
+ Groups             Name        Variance  Std.Dev.
+ receiver_player_id (Intercept) 0.0190108 0.1379  
+ passer_player_id   (Intercept) 0.0000000 0.0000  
+ defteam            (Intercept) 0.0006814 0.0261  
+ Residual                       0.9296857 0.9642  
+Number of obs: 11627, groups:  
+receiver_player_id, 468; passer_player_id, 90; defteam, 32
+
+Fixed effects:
+                     Estimate Std. Error t value
+(Intercept)          1.710173   0.689922   2.479
+air_yards           -0.022666   0.001214 -18.675
+shotgun             -0.046899   0.025546  -1.836
+qb_hit               0.037119   0.039172   0.948
+no_huddle           -0.174386   0.027107  -6.433
+posteam_typehome    -0.007157   0.018083  -0.396
+pass_locationmiddle -0.057884   0.024339  -2.378
+pass_locationright   0.011441   0.020532   0.557
+receiver_positionDL -1.567487   1.193518  -1.313
+receiver_positionLB -0.728621   0.974493  -0.748
+receiver_positionOL -1.046652   0.781368  -1.340
+receiver_positionQB -0.728794   0.974704  -0.748
+receiver_positionRB -0.515251   0.689574  -0.747
+receiver_positionTE -0.837277   0.689576  -1.214
+receiver_positionWR -0.847828   0.689446  -1.230
+rush_strength        0.382583   0.105680   3.620</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Correlation matrix not shown by default, as p = 16 &gt; 12.
+Use print(x, correlation=TRUE)  or
+    vcov(x)        if you need it</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>optimizer (nloptwrap) convergence code: 0 (OK)
+boundary (singular) fit: see help('isSingular')</code></pre>
+</div>
+</div>
+<p>We can further confirm that this is the case by checking whether all the estimated deviation between each passer’s random intercept and the global mean across all passers (i.e., all <span class="math inline">\(\textrm{IPA}^{(Q)}_{\textrm{yac},q})\)</span>’s) are equal to zero.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-20"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-20" data-target-annotation="1">1</button><span id="annotated-cell-20-1" class="code-annotation-target"><a href="#annotated-cell-20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">all</span>(<span class="fu">ranef</span>(yac_model)[[<span class="st">"passer_player_id"</span>]][,<span class="dv">1</span>] <span class="sc">==</span> <span class="dv">0</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-20" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-20" data-code-lines="1" data-code-annotation="1">Checks whether all of the passer IPA values are equal to 0.</span>
+</dd>
+</dl>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+</div>
+<p>This phenomenon makes some intuitive sense: once the catch is made, there is very little for the passer, who is typically several yards away, to contribute. The <a href="https://rdrr.io/cran/lme4/man/isSingular.html">manual entry for <code>isSingular</code></a> goes on to say that “There is not yet consensus about how to deal with singularity, or more generally to choose which random-effects specifications (from a range of choices of varying complexity to use)”<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a> and suggests that one option is to “avoid fitting overly complex models in the first place.” So, at this point we have a choice: either we move forward with our model or we re-fit it without the passer random intercepts.</p>
+<p>Recall that we ultimately plan to aggregate the IPA from air yards, YAC, and rushing for all offensive players. If we move forward with our existing model, the YAC IPA values for passers are already set to zero. But if we re-fit the model, we will have to manually set these values to zero. To avoid this extra step, we’ll continue to use our current<a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>tmp_yac <span class="ot">&lt;-</span> <span class="fu">ranef</span>(yac_model)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>yac_passer_effects <span class="ot">&lt;-</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">gsis_id =</span> <span class="fu">rownames</span>(tmp_yac[[<span class="st">"passer_player_id"</span>]]), </span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">ipa_yac_pass =</span> tmp_yac[[<span class="st">"passer_player_id"</span>]][,<span class="dv">1</span>])</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>yac_receiver_effects <span class="ot">&lt;-</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">gsis_id =</span> <span class="fu">rownames</span>(tmp_yac[[<span class="st">"receiver_player_id"</span>]]),</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">ipa_yac_rec =</span> tmp_yac[[<span class="st">"receiver_player_id"</span>]][,<span class="dv">1</span>])</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>yac_defense_effects <span class="ot">&lt;-</span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">Team =</span> <span class="fu">rownames</span>(tmp_yac[[<span class="st">"defteam"</span>]]),</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">tpa_yac_def =</span> tmp_yac[[<span class="st">"defteam"</span>]][,<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Among the receivers with the largest <span class="math inline">\(\textrm{IPA}_{\textrm{YAC}, c}^{(C)}\)</span> values, we see players like Ja’Marr Chase, Khalil Shakir, and Brock Bowers who <a href="https://www.espn.com/nfl/stats/player/_/stat/receiving/table/receiving/sort/receivingYardsAfterCatch/dir/desc">led the league in yards after the catch during the 2024 regular season</a>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>yac_receiver_effects <span class="sc">|&gt;</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> roster2024 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(gsis_id, full_name), <span class="at">by =</span> <span class="st">"gsis_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(ipa_yac_rec)) <span class="sc">|&gt;</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>) <span class="sc">|&gt;</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(full_name, ipa_yac_rec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         full_name ipa_yac_rec
+1  Marvin Mims Jr.   0.4038113
+2    Khalil Shakir   0.2763021
+3  KaVontae Turpin   0.2225070
+4    Xavier Worthy   0.2179003
+5     Tucker Kraft   0.2141390
+6     Brock Bowers   0.1885809
+7    Austin Ekeler   0.1830305
+8   Antonio Gibson   0.1818104
+9    Ja'Marr Chase   0.1778265
+10  Raheem Mostert   0.1729994</code></pre>
+</div>
+</div>
+</section>
 </section>
 <section id="rushing-model" class="level2">
 <h2 class="anchored" data-anchor-id="rushing-model">Rushing Model</h2>
-<p>We now turn to running plays</p>
+<p>As <span class="citation" data-cites="Yurko2019_nflWAR">Yurko, Ventura, and Horowitz (<a href="#ref-Yurko2019_nflWAR" role="doc-biblioref">2019</a>)</span> notes, we cannot distinguish between designed quarterback runs from scrambles on broken plays using publicly available play-by-play data. So, we will fit two separate models of EPA for running plays, one for all quarterback runs (i.e., <code>rusher_position=="QB"</code>) and one for all non-quarterback runs (i.e., <code>rusher_position != "QB"</code>). Before creating separate data tables for the two types of running plays, we convert several categorical covariates to factors.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>rush2024 <span class="ot">&lt;-</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  rush2024 <span class="sc">|&gt;</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">rusher_player_id =</span> <span class="fu">factor</span>(rusher_player_id),</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">posteam =</span> <span class="fu">factor</span>(posteam),</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">defteam =</span> <span class="fu">factor</span>(defteam),</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">posteam_type =</span> <span class="fu">factor</span>(posteam_type),</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    rusher_position <span class="sc">==</span> <span class="fu">factor</span>(rusher_position),</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">run_context =</span> <span class="fu">factor</span>(run_context))</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>qb_runs <span class="ot">&lt;-</span></span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>  rush2024 <span class="sc">|&gt;</span></span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(rusher_position <span class="sc">==</span> <span class="st">"QB"</span>)</span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>nonqb_runs <span class="ot">&lt;-</span></span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>  rush2024 <span class="sc">|&gt;</span></span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(rusher_position <span class="sc">!=</span> <span class="st">"QB"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We now fit multilevel models to predict the EPA on running plays for both QB-runs and non-QB-runs. Like with our other models, we extract the number of expected points per play each player adds over the league average via their running.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-24"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-24-1"><a href="#annotated-cell-24-1" aria-hidden="true" tabindex="-1"></a>qbrun_fit <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-24-2"><a href="#annotated-cell-24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lmer</span>(epa <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> rusher_player_id) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> defteam) <span class="sc">+</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-24" data-target-annotation="1">1</button><span id="annotated-cell-24-3" class="code-annotation-target"><a href="#annotated-cell-24-3" aria-hidden="true" tabindex="-1"></a>         shotgun <span class="sc">+</span> no_huddle <span class="sc">+</span> posteam_type <span class="sc">+</span> pass_strength,</span>
+<span id="annotated-cell-24-4"><a href="#annotated-cell-24-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">data =</span> qb_runs)</span>
+<span id="annotated-cell-24-5"><a href="#annotated-cell-24-5" aria-hidden="true" tabindex="-1"></a>nonqb_run_fit <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-24-6"><a href="#annotated-cell-24-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lmer</span>(epa <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> rusher_player_id) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> defteam) <span class="sc">+</span>  </span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-24" data-target-annotation="2">2</button><span id="annotated-cell-24-7" class="code-annotation-target"><a href="#annotated-cell-24-7" aria-hidden="true" tabindex="-1"></a>         shotgun <span class="sc">+</span> no_huddle <span class="sc">+</span> posteam_type <span class="sc">+</span> rusher_position <span class="sc">+</span> run_context <span class="sc">+</span> pass_strength,</span>
+<span id="annotated-cell-24-8"><a href="#annotated-cell-24-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">data =</span> nonqb_runs)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-24" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-24" data-code-lines="3" data-code-annotation="1">For the quarterback run model, there is no need to include <code>rusher_position</code> since every rusher in the dataset plays the same position. We also exclude <code>run_context</code> since many of the observations in this data table are not designed runs.</span>
+</dd>
+<dt data-target-cell="annotated-cell-24" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-24" data-code-lines="7" data-code-annotation="2">For the non-quarterback run model, we adjust for the runner’s position and the run context</span>
+</dd>
+</dl>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>fixed-effect model matrix is rank deficient so dropping 2 columns / coefficients</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>tmp_qbrun <span class="ot">&lt;-</span> <span class="fu">ranef</span>(qbrun_fit)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>qbrun_effects <span class="ot">&lt;-</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">gsis_id =</span> <span class="fu">rownames</span>(tmp_qbrun[[<span class="st">"rusher_player_id"</span>]]), </span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">ipa_qbrun =</span> tmp_qbrun[[<span class="st">"rusher_player_id"</span>]][,<span class="dv">1</span>])</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>tmp_run <span class="ot">&lt;-</span> <span class="fu">ranef</span>(nonqb_run_fit) </span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>run_effects <span class="ot">&lt;-</span></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">gsis_id =</span> <span class="fu">rownames</span>(tmp_run[[<span class="st">"rusher_player_id"</span>]]),</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">ipa_run =</span> tmp_run[[<span class="st">"rusher_player_id"</span>]][,<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Taking a look at the top non-QB IPA values, we see several highly-regarded running backs</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>run_effects <span class="sc">|&gt;</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> roster2024 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(gsis_id, full_name), <span class="at">by =</span> <span class="st">"gsis_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(full_name, ipa_run) <span class="sc">|&gt;</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(ipa_run)) <span class="sc">|&gt;</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         full_name    ipa_run
+1    De'Von Achane 0.13626662
+2   Saquon Barkley 0.10131412
+3     Jahmyr Gibbs 0.09383069
+4      Jerome Ford 0.08473154
+5    Chuba Hubbard 0.08423388
+6     J.K. Dobbins 0.07766485
+7  Emari Demercado 0.07656891
+8    Dameon Pierce 0.06755530
+9      Rico Dowdle 0.06517368
+10     Taysom Hill 0.06219509</code></pre>
+</div>
+</div>
 </section>
-<section id="individual-points-above-average-replacement-level" class="level2">
-<h2 class="anchored" data-anchor-id="individual-points-above-average-replacement-level">Individual Points Above Average &amp; Replacement Level</h2>
-<section id="computing-a-players-ipaa" class="level3">
-<h3 class="anchored" data-anchor-id="computing-a-players-ipaa">Computing a player’s iPAA</h3>
-<!--
-  QB: k_{p,pass} is number of pass attempts, k_{p,rush} is sum of rush attempts, scrambles, and sacks
-  For non-QB; k_{p,pass} number of targets, p_{p,rush} is number of rush attempts
-
-Summing over all three components gives player p's individual points added above average, iPAA_{p}
--->
+<section id="sec-ipaa" class="level2">
+<h2 class="anchored" data-anchor-id="sec-ipaa">Total Individual Points Added Above Average</h2>
+<p>For each offensive player, we have estimates for the number of expected points they add <strong>per play</strong> through the air, after the catch, and through their running.</p>
+<p>By multiplying each player’s IPA by the number of times they attempted the corresponding play, we can compute each player’s <em>individual points added above average</em> or IPAA for every type of play.</p>
+<p>For instance, let’s start with quarterbacks and how they generate EPA through the air on passing plays. Our modeling suggests that Joe Burrow created 42 more points of EP for his team through the air than a league-average quarterback would have. Burrow’s IPAA of 42 points through the air is substantially larger than the next best quarterbacks (Darnlod and Jackson). Recall from <a href="#sec-yac-model" class="quarto-xref">Section&nbsp;3.3</a> that every passer has an IPA of zero based on their contributions after the catch is made.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-27"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-27-1"><a href="#annotated-cell-27-1" aria-hidden="true" tabindex="-1"></a>passer_ipaa <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-27-2"><a href="#annotated-cell-27-2" aria-hidden="true" tabindex="-1"></a>  pass2024 <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-27" data-target-annotation="1">1</button><span id="annotated-cell-27-3" class="code-annotation-target"><a href="#annotated-cell-27-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(passer_player_id) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-27-4"><a href="#annotated-cell-27-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">n_pass =</span> dplyr<span class="sc">::</span><span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-27" data-target-annotation="2">2</button><span id="annotated-cell-27-5" class="code-annotation-target"><a href="#annotated-cell-27-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">gsis_id =</span> passer_player_id) <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-27" data-target-annotation="3">3</button><span id="annotated-cell-27-6" class="code-annotation-target"><a href="#annotated-cell-27-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(air_passer_effects, <span class="at">by =</span> <span class="st">"gsis_id"</span>) <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-27" data-target-annotation="4">4</button><span id="annotated-cell-27-7" class="code-annotation-target"><a href="#annotated-cell-27-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(yac_passer_effects, <span class="at">by =</span> <span class="st">"gsis_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-27-8"><a href="#annotated-cell-27-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="annotated-cell-27-9"><a href="#annotated-cell-27-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">ipaa_air_pass =</span> ipa_air_pass <span class="sc">*</span> n_pass,</span>
+<span id="annotated-cell-27-10"><a href="#annotated-cell-27-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">ipaa_yac_pass =</span> ipa_yac_pass <span class="sc">*</span> n_pass) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-27-11"><a href="#annotated-cell-27-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> roster2024 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(gsis_id, full_name, position), <span class="at">by =</span> <span class="st">"gsis_id"</span>)</span>
+<span id="annotated-cell-27-12"><a href="#annotated-cell-27-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-27-13"><a href="#annotated-cell-27-13" aria-hidden="true" tabindex="-1"></a>passer_ipaa <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-27-14"><a href="#annotated-cell-27-14" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(full_name, n_pass, ipaa_air_pass, ipaa_yac_pass) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-27-15"><a href="#annotated-cell-27-15" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(ipaa_air_pass)) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-27-16"><a href="#annotated-cell-27-16" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-27" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-27" data-code-lines="3,4" data-code-annotation="1">Compute the number of passing attempts for each passer</span>
+</dd>
+<dt data-target-cell="annotated-cell-27" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-27" data-code-lines="5" data-code-annotation="2">Rename the column with passer ID so that we can append their IPA values</span>
+</dd>
+<dt data-target-cell="annotated-cell-27" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-27" data-code-lines="6" data-code-annotation="3">Append the IPA values for all passers</span>
+</dd>
+<dt data-target-cell="annotated-cell-27" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-27" data-code-lines="7" data-code-annotation="4">Compute the IPAA by multiplying number of attempts by IPA</span>
+</dd>
+</dl>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 4
+   full_name      n_pass ipaa_air_pass ipaa_yac_pass
+   &lt;chr&gt;           &lt;int&gt;         &lt;dbl&gt;         &lt;dbl&gt;
+ 1 Joe Burrow        628         42.3              0
+ 2 Sam Darnold       512         20.7              0
+ 3 Lamar Jackson     454         14.9              0
+ 4 Brock Purdy       440         13.2              0
+ 5 Tua Tagovailoa    388         12.7              0
+ 6 Justin Herbert    484         12.7              0
+ 7 Baker Mayfield    562         11.1              0
+ 8 C.J. Stroud       509          8.45             0
+ 9 Russell Wilson    306          7.07             0
+10 Geno Smith        554          6.07             0</code></pre>
+</div>
+</div>
+<p>We can repeat these calculations for receivers on passing plays</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>receiver_ipaa <span class="ot">&lt;-</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  pass2024 <span class="sc">|&gt;</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(receiver_player_id) <span class="sc">|&gt;</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">n_rec =</span> dplyr<span class="sc">::</span><span class="fu">n</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">gsis_id =</span> receiver_player_id) <span class="sc">|&gt;</span> </span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(air_receiver_effects, <span class="at">by =</span> <span class="st">"gsis_id"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(yac_receiver_effects, <span class="at">by =</span> <span class="st">"gsis_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>   <span class="at">ipaa_air_rec =</span> ipa_air_rec <span class="sc">*</span> n_rec,</span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>   <span class="at">ipaa_yac_rec =</span> ipa_yac_rec <span class="sc">*</span> n_rec) <span class="sc">|&gt;</span></span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> roster2024 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(gsis_id, full_name, position), <span class="at">by =</span> <span class="st">"gsis_id"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Here are the top 10 IPAA values for receivers based on their contributions while the ball is in the air:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>receiver_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(full_name, n_rec, ipaa_air_rec, ipaa_yac_rec) <span class="sc">|&gt;</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(ipaa_air_rec)) <span class="sc">|&gt;</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 4
+   full_name         n_rec ipaa_air_rec ipaa_yac_rec
+   &lt;chr&gt;             &lt;int&gt;        &lt;dbl&gt;        &lt;dbl&gt;
+ 1 Tee Higgins         109         19.9       -8.07 
+ 2 Amon-Ra St. Brown   141         19.6        7.93 
+ 3 Ladd McConkey       112         16.5       -1.38 
+ 4 Terry McLaurin      117         13.7       -7.16 
+ 5 DeVonta Smith        89         12.7       -3.41 
+ 6 Jauan Jennings      113         12.6      -13.3  
+ 7 Jakobi Meyers       129         12.0        0.373
+ 8 Justin Jefferson    153         11.4        8.66 
+ 9 Courtland Sutton    135         11.0      -21.1  
+10 Jonnu Smith         111         10.1       18.4  </code></pre>
+</div>
+</div>
+<p>And here are the top 10 IPAA values for receivers based on their contributions following a catch:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>receiver_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(full_name, n_rec, ipaa_air_rec, ipaa_yac_rec) <span class="sc">|&gt;</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(ipaa_yac_rec)) <span class="sc">|&gt;</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 4
+   full_name        n_rec ipaa_air_rec ipaa_yac_rec
+   &lt;chr&gt;            &lt;int&gt;        &lt;dbl&gt;        &lt;dbl&gt;
+ 1 Ja'Marr Chase      175         4.84         31.1
+ 2 Brock Bowers       153        -4.53         28.9
+ 3 Khalil Shakir      100       -10.3          27.6
+ 4 DJ Moore           140       -14.4          22.5
+ 5 Brian Thomas Jr.   133        -2.92         22.4
+ 6 Xavier Worthy       98       -10.7          21.4
+ 7 Marvin Mims Jr.     52        -7.46         21.0
+ 8 Jonnu Smith        111        10.1          18.4
+ 9 Puka Nacua         106         4.33         16.4
+10 Josh Downs         107        -1.95         15.2</code></pre>
+</div>
+</div>
+<p>It is particularly interesting to note that there are several receivers whose contributions while the ball in the air are worse than league average but who are better than league average once they catch the ball.</p>
+<p>We repeat this calculation for the IPA values arising from yards after the catch and for both types of running play.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>qbrun_ipaa <span class="ot">&lt;-</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  qb_runs <span class="sc">|&gt;</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(rusher_player_id) <span class="sc">|&gt;</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">n_qbrun =</span> dplyr<span class="sc">::</span><span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">gsis_id =</span> rusher_player_id) <span class="sc">|&gt;</span></span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> qbrun_effects, <span class="at">by =</span> <span class="st">"gsis_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">ipaa_qbrun =</span> n_qbrun <span class="sc">*</span> ipa_qbrun) <span class="sc">|&gt;</span></span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> roster2024 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(gsis_id, full_name, position), <span class="at">by =</span> <span class="st">"gsis_id"</span>)</span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>run_ipaa <span class="ot">&lt;-</span></span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>  nonqb_runs <span class="sc">|&gt;</span></span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(rusher_player_id) <span class="sc">|&gt;</span></span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">n_run =</span> dplyr<span class="sc">::</span><span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">gsis_id =</span> rusher_player_id) <span class="sc">|&gt;</span></span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> run_effects, <span class="at">by =</span> <span class="st">"gsis_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">ipaa_run =</span> n_run <span class="sc">*</span> ipa_run) <span class="sc">|&gt;</span></span>
+<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> roster2024 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(gsis_id, full_name, position), <span class="at">by =</span> <span class="st">"gsis_id"</span>)</span>
+<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-19"><a href="#cb43-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-20"><a href="#cb43-20" aria-hidden="true" tabindex="-1"></a>run_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb43-21"><a href="#cb43-21" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(full_name, ipaa_run) <span class="sc">|&gt;</span></span>
+<span id="cb43-22"><a href="#cb43-22" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(ipaa_run)) <span class="sc">|&gt;</span></span>
+<span id="cb43-23"><a href="#cb43-23" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 2
+   full_name      ipaa_run
+   &lt;chr&gt;             &lt;dbl&gt;
+ 1 Saquon Barkley     35.1
+ 2 De'Von Achane      27.7
+ 3 Jahmyr Gibbs       23.5
+ 4 Chuba Hubbard      21.1
+ 5 Derrick Henry      16.9
+ 6 Rico Dowdle        15.3
+ 7 J.K. Dobbins       15.1
+ 8 Bijan Robinson     14.5
+ 9 Najee Harris       12.7
+10 Chase Brown        11.6</code></pre>
+</div>
+</div>
+<section id="sec-skill-replacement" class="level3">
+<h3 class="anchored" data-anchor-id="sec-skill-replacement">Position-specific replacement levels for non-quarterbacks</h3>
+<p>Although the IPAA values are interesting and informative, they represent a comparison between players and a nebulously defined average. Recall that IPAA is just a scaled version of IPA, which we defined to be the difference between the player-specific random intercept and a global mean parameter in our multilevel model. That mean does not represent the average of all observed players in the league. Instead, it captures the average intercept across a theoretical, infinite super-population of players from which we assume the set of observed players is sampled. So, it is not strictly correct to say that IPA measures a player’s expected contribution over and above a league-average player’s contribution on a per-play basis.</p>
+<p>To facilitate comparisons that are easier to interpret, we now translate the IPAA values into measures of a player’s contribution relative to a replacement-level player. As discussed in the context of baseball, there are myriad ways to define what replacement level. Like we did in <a href="../lectures/lecture08.html">Lecture 8</a>, we take a roster-based approach and define different replacement levels for different combinations of position and our EPA models. Noting that most NFL teams carry 3 running backs (RBs), 4 wide receivers (WRs), and 2 tight ends (TE), we define replacement levels based o on the following thresholds:</p>
+<ul>
+<li>WRs on passing plays: The top <span class="math inline">\(32 \times 4 = 128\)</span> WRs sorted by <em>receiving attempts</em> (i.e., <code>n_rec</code> in <code>pass_ipaa</code>) are non-replacement-level; everyone else is replacement-level</li>
+<li>TEs on passing plays: The top <span class="math inline">\(32 \times 2 = 64\)</span> TEs sorted by <em>receiving attempts</em> are non-replacement-level; everyone else is replacement-level</li>
+<li>RBs on passing plays: The top <span class="math inline">\(32 \times 3 = 96\)</span> RBs sorted by <em>receiving attempts</em> are non-replacement-level; everyone else is replacement-level</li>
+<li>WR/TEs on running plays: The top <span class="math inline">\(32 \times 1 = 32\)</span> WR and TEs sorted by <em>rushing attempts</em> are non-replacement-level; everyone else is replacement-level</li>
+<li>RBs on running plays: The top <span class="math inline">\(32 \times 3 = 96\)</span> RBs sorted by <em>rusing attempts</em> are non-replacement-level; everyone else is replacement-level.</li>
+</ul>
+<p>These definitions allow for the possibility that a RB may be non-replacement-level based on his running but is at or below replacement-level when it comes to receiving. Like we did in <a href="../lectures/lecture08.html">Lecture 8</a>, for every player we can compare his IPAA to the IPAA that a replacement level player would achieve if given the same number of attempts. To compute this “shadow” IPAA, we will multiply the number of attempts by the average IPA value across all corresponding replacement-level players.</p>
+<p>The following code computes the receiving attempt thresholds for each position on passing plays. It then computes the replacement-level IPA</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-32"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-32-1"><a href="#annotated-cell-32-1" aria-hidden="true" tabindex="-1"></a>wr_pass_threshold <span class="ot">&lt;-</span> </span>
+<span id="annotated-cell-32-2"><a href="#annotated-cell-32-2" aria-hidden="true" tabindex="-1"></a>  receiver_ipaa <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-32-3"><a href="#annotated-cell-32-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"WR"</span>) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-32-4"><a href="#annotated-cell-32-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(<span class="fu">desc</span>(n_rec)) <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-32" data-target-annotation="1">1</button><span id="annotated-cell-32-5" class="code-annotation-target"><a href="#annotated-cell-32-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="dv">128</span>) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-32-6"><a href="#annotated-cell-32-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(n_rec)</span>
+<span id="annotated-cell-32-7"><a href="#annotated-cell-32-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-32-8"><a href="#annotated-cell-32-8" aria-hidden="true" tabindex="-1"></a>te_pass_threshold <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-32-9"><a href="#annotated-cell-32-9" aria-hidden="true" tabindex="-1"></a>  receiver_ipaa <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-32-10"><a href="#annotated-cell-32-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"TE"</span>) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-32-11"><a href="#annotated-cell-32-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(<span class="fu">desc</span>(n_rec)) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-32-12"><a href="#annotated-cell-32-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="dv">64</span>) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-32-13"><a href="#annotated-cell-32-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(n_rec)</span>
+<span id="annotated-cell-32-14"><a href="#annotated-cell-32-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-32-15"><a href="#annotated-cell-32-15" aria-hidden="true" tabindex="-1"></a>rb_pass_threshold <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-32-16"><a href="#annotated-cell-32-16" aria-hidden="true" tabindex="-1"></a>  receiver_ipaa <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-32-17"><a href="#annotated-cell-32-17" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"RB"</span>) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-32-18"><a href="#annotated-cell-32-18" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(<span class="fu">desc</span>(n_rec)) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-32-19"><a href="#annotated-cell-32-19" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="dv">32</span>) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-32-20"><a href="#annotated-cell-32-20" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(n_rec)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-32" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-32" data-code-lines="5,12,19" data-code-annotation="1">Players with fewer passing plays these value will be considered replacement-level at their position</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>We add columns to <code>receiver_ipaa</code> indicating whether each player is considered to be replacement-level at his position or not.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>receiver_ipaa <span class="ot">&lt;-</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  receiver_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">repl_wr =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>      position <span class="sc">==</span> <span class="st">"WR"</span> <span class="sc">&amp;</span> n_rec <span class="sc">&lt;</span> wr_pass_threshold <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>      position <span class="sc">==</span> <span class="st">"WR"</span> <span class="sc">&amp;</span> n_rec <span class="sc">&gt;=</span> wr_pass_threshold <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>      position <span class="sc">!=</span> <span class="st">"WR"</span> <span class="sc">~</span> <span class="cn">NA</span>),</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">repl_te =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>      position <span class="sc">==</span> <span class="st">"TE"</span> <span class="sc">&amp;</span> n_rec <span class="sc">&lt;</span> te_pass_threshold <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>      position <span class="sc">==</span> <span class="st">"TE"</span> <span class="sc">&amp;</span> n_rec <span class="sc">&gt;=</span> te_pass_threshold <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>      position <span class="sc">!=</span> <span class="st">"TE"</span> <span class="sc">~</span> <span class="cn">NA</span>),</span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">repl_rb =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a>      position <span class="sc">==</span> <span class="st">"RB"</span> <span class="sc">&amp;</span> n_rec <span class="sc">&lt;</span> rb_pass_threshold <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a>      position <span class="sc">==</span> <span class="st">"RB"</span> <span class="sc">&amp;</span> n_rec <span class="sc">&gt;=</span> rb_pass_threshold <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a>      position <span class="sc">!=</span> <span class="st">"RB"</span> <span class="sc">~</span> <span class="cn">NA</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We now average the IPA across all replacement-level players at each position in both phases of a passing play</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>repl_wr_ipa_air <span class="ot">&lt;-</span> </span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>  receiver_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(repl_wr <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(ipa_air_rec) <span class="sc">|&gt;</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(<span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>repl_wr_ipa_yac <span class="ot">&lt;-</span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>  receiver_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(repl_wr <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(ipa_yac_rec) <span class="sc">|&gt;</span></span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(<span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a>repl_te_ipa_air <span class="ot">&lt;-</span> </span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a>  receiver_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(repl_te <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(ipa_air_rec) <span class="sc">|&gt;</span></span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(<span class="at">na.rm=</span><span class="cn">TRUE</span>)</span>
+<span id="cb46-17"><a href="#cb46-17" aria-hidden="true" tabindex="-1"></a>repl_te_ipa_yac <span class="ot">&lt;-</span></span>
+<span id="cb46-18"><a href="#cb46-18" aria-hidden="true" tabindex="-1"></a>  receiver_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb46-19"><a href="#cb46-19" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(repl_te <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb46-20"><a href="#cb46-20" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(ipa_yac_rec) <span class="sc">|&gt;</span></span>
+<span id="cb46-21"><a href="#cb46-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(<span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb46-22"><a href="#cb46-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-23"><a href="#cb46-23" aria-hidden="true" tabindex="-1"></a>repl_rb_ipa_air <span class="ot">&lt;-</span> </span>
+<span id="cb46-24"><a href="#cb46-24" aria-hidden="true" tabindex="-1"></a>  receiver_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb46-25"><a href="#cb46-25" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(repl_rb <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb46-26"><a href="#cb46-26" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(ipa_air_rec) <span class="sc">|&gt;</span></span>
+<span id="cb46-27"><a href="#cb46-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(<span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb46-28"><a href="#cb46-28" aria-hidden="true" tabindex="-1"></a>repl_rb_ipa_yac <span class="ot">&lt;-</span></span>
+<span id="cb46-29"><a href="#cb46-29" aria-hidden="true" tabindex="-1"></a>  receiver_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb46-30"><a href="#cb46-30" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(repl_rb <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb46-31"><a href="#cb46-31" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(ipa_yac_rec) <span class="sc">|&gt;</span></span>
+<span id="cb46-32"><a href="#cb46-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(<span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Finally, we compute the difference between every player’s actual IPAA and their replacement-level shadow IPAA value, to obtain their individual points added over replacement (or IPAR)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>receiver_ipar <span class="ot">&lt;-</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  receiver_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>,<span class="st">"RB"</span>, <span class="st">"TE"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">shadow_air_rec =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>      position <span class="sc">==</span> <span class="st">"WR"</span> <span class="sc">~</span> n_rec <span class="sc">*</span> repl_wr_ipa_air,</span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>      position <span class="sc">==</span> <span class="st">"TE"</span> <span class="sc">~</span> n_rec <span class="sc">*</span> repl_te_ipa_air,</span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>      position <span class="sc">==</span> <span class="st">"RB"</span> <span class="sc">~</span> n_rec <span class="sc">*</span> repl_rb_ipa_air),</span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">shadow_yac_rec =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>      position <span class="sc">==</span> <span class="st">"WR"</span> <span class="sc">~</span> n_rec <span class="sc">*</span> repl_wr_ipa_yac,</span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>      position <span class="sc">==</span> <span class="st">"TE"</span> <span class="sc">~</span> n_rec <span class="sc">*</span> repl_te_ipa_yac,</span>
+<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>      position <span class="sc">==</span> <span class="st">"RB"</span> <span class="sc">~</span> n_rec <span class="sc">*</span> repl_rb_ipa_yac),</span>
+<span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">ipar_air_rec =</span> ipaa_air_rec <span class="sc">-</span> shadow_air_rec,</span>
+<span id="cb47-14"><a href="#cb47-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">ipar_yac_rec =</span> ipaa_yac_rec <span class="sc">-</span> shadow_yac_rec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We perform similar calculations to compute the IPAR value from running plays for each non-QB player</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>wrte_run_threshold <span class="ot">&lt;-</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  run_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>, <span class="st">"TE"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(<span class="fu">desc</span>(n_run)) <span class="sc">|&gt;</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="dv">32</span>) <span class="sc">|&gt;</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(n_run)</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>rb_run_threshold <span class="ot">&lt;-</span></span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>  run_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"RB"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(<span class="fu">desc</span>(n_run)) <span class="sc">|&gt;</span></span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="dv">96</span>) <span class="sc">|&gt;</span></span>
+<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(n_run)</span>
+<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-16"><a href="#cb48-16" aria-hidden="true" tabindex="-1"></a>run_ipaa <span class="ot">&lt;-</span></span>
+<span id="cb48-17"><a href="#cb48-17" aria-hidden="true" tabindex="-1"></a>  run_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb48-18"><a href="#cb48-18" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb48-19"><a href="#cb48-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">repl_wrte =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb48-20"><a href="#cb48-20" aria-hidden="true" tabindex="-1"></a>      position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>, <span class="st">"TE"</span>) <span class="sc">&amp;</span> n_run <span class="sc">&lt;</span> wrte_run_threshold <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb48-21"><a href="#cb48-21" aria-hidden="true" tabindex="-1"></a>      position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>, <span class="st">"TE"</span>) <span class="sc">&amp;</span> n_run <span class="sc">&gt;=</span> wrte_run_threshold <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb48-22"><a href="#cb48-22" aria-hidden="true" tabindex="-1"></a>      <span class="sc">!</span>position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>, <span class="st">"TE"</span>) <span class="sc">~</span> <span class="cn">NA</span>),</span>
+<span id="cb48-23"><a href="#cb48-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">repl_rb =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb48-24"><a href="#cb48-24" aria-hidden="true" tabindex="-1"></a>      position <span class="sc">==</span> <span class="st">"RB"</span> <span class="sc">&amp;</span> n_run <span class="sc">&lt;</span> rb_run_threshold <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb48-25"><a href="#cb48-25" aria-hidden="true" tabindex="-1"></a>      position <span class="sc">==</span> <span class="st">"RB"</span> <span class="sc">&amp;</span> n_run <span class="sc">&gt;=</span> rb_run_threshold <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb48-26"><a href="#cb48-26" aria-hidden="true" tabindex="-1"></a>      position <span class="sc">!=</span> <span class="st">"RB"</span> <span class="sc">~</span> <span class="cn">NA</span>))</span>
+<span id="cb48-27"><a href="#cb48-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-28"><a href="#cb48-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-29"><a href="#cb48-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-30"><a href="#cb48-30" aria-hidden="true" tabindex="-1"></a>repl_wrte_ipa_run <span class="ot">&lt;-</span> </span>
+<span id="cb48-31"><a href="#cb48-31" aria-hidden="true" tabindex="-1"></a>  run_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb48-32"><a href="#cb48-32" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(repl_wrte <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb48-33"><a href="#cb48-33" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(ipa_run) <span class="sc">|&gt;</span></span>
+<span id="cb48-34"><a href="#cb48-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(<span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb48-35"><a href="#cb48-35" aria-hidden="true" tabindex="-1"></a>repl_rb_ipa_run <span class="ot">&lt;-</span></span>
+<span id="cb48-36"><a href="#cb48-36" aria-hidden="true" tabindex="-1"></a>  run_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb48-37"><a href="#cb48-37" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(repl_rb <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb48-38"><a href="#cb48-38" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(ipa_run) <span class="sc">|&gt;</span></span>
+<span id="cb48-39"><a href="#cb48-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(<span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb48-40"><a href="#cb48-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-41"><a href="#cb48-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-42"><a href="#cb48-42" aria-hidden="true" tabindex="-1"></a>run_ipar <span class="ot">&lt;-</span></span>
+<span id="cb48-43"><a href="#cb48-43" aria-hidden="true" tabindex="-1"></a>  run_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb48-44"><a href="#cb48-44" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>, <span class="st">"RB"</span>, <span class="st">"TE"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb48-45"><a href="#cb48-45" aria-hidden="true" tabindex="-1"></a>   dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb48-46"><a href="#cb48-46" aria-hidden="true" tabindex="-1"></a>    <span class="at">shadow_run =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb48-47"><a href="#cb48-47" aria-hidden="true" tabindex="-1"></a>      position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>, <span class="st">"TE"</span>) <span class="sc">~</span> n_run <span class="sc">*</span> repl_wrte_ipa_run,</span>
+<span id="cb48-48"><a href="#cb48-48" aria-hidden="true" tabindex="-1"></a>      position <span class="sc">==</span> <span class="st">"RB"</span> <span class="sc">~</span> n_run <span class="sc">*</span> repl_rb_ipa_run),</span>
+<span id="cb48-49"><a href="#cb48-49" aria-hidden="true" tabindex="-1"></a>    <span class="at">ipar_run =</span> ipaa_run <span class="sc">-</span> shadow_run)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
 </section>
-<section id="position-specific-replacement-levels" class="level3">
-<h3 class="anchored" data-anchor-id="position-specific-replacement-levels">Position-specific replacement levels</h3>
+<section id="sec-qb-ipar" class="level3">
+<h3 class="anchored" data-anchor-id="sec-qb-ipar">Computing IPAR for QB’s</h3>
+<p>We defined replacement-levels for running backs, wide receivers, and tight ends based on typical patterns of roster construction. Due to the unique nature of the quarterback position — virtually <em>every</em> offensive play involves runs through the quarterbac — we need to define “replacement” level somewhat differently. One option would be to create a group of 32 non-replacement quarterbacks by identifying the quarterback one each team who were involved in the most passing and rushing attempts. While simple to impelement, this implicitly assumes that every NFL team has at least one non-replacement quarterback. Instead, we sort quarterbacks by the total number of passing and rushing plays in which they were involved and designate the top-32 to be non-replacement level.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>qb_ipaa <span class="ot">&lt;-</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  passer_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"QB"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(gsis_id, full_name, n_pass, ipa_air_pass, ipaa_air_pass) <span class="sc">|&gt;</span></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> qbrun_ipaa <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(gsis_id, n_qbrun, ipa_qbrun, ipaa_qbrun), <span class="at">by =</span> <span class="st">"gsis_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">n_plays =</span> n_pass <span class="sc">+</span> n_qbrun)</span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>qb_threshold <span class="ot">&lt;-</span></span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>  qb_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(n_plays)) <span class="sc">|&gt;</span></span>
+<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="dv">32</span>) <span class="sc">|&gt;</span></span>
+<span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(n_plays)</span>
+<span id="cb49-13"><a href="#cb49-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-14"><a href="#cb49-14" aria-hidden="true" tabindex="-1"></a>qb_ipaa <span class="ot">&lt;-</span></span>
+<span id="cb49-15"><a href="#cb49-15" aria-hidden="true" tabindex="-1"></a>  qb_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb49-16"><a href="#cb49-16" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">repl_qb =</span> <span class="fu">ifelse</span>(n_plays <span class="sc">&lt;</span> qb_threshold, <span class="dv">1</span>, <span class="dv">0</span>))</span>
+<span id="cb49-17"><a href="#cb49-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-18"><a href="#cb49-18" aria-hidden="true" tabindex="-1"></a>repl_qb_ipa_air <span class="ot">&lt;-</span></span>
+<span id="cb49-19"><a href="#cb49-19" aria-hidden="true" tabindex="-1"></a>  qb_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb49-20"><a href="#cb49-20" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(repl_qb <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb49-21"><a href="#cb49-21" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(ipa_air_pass) <span class="sc">|&gt;</span></span>
+<span id="cb49-22"><a href="#cb49-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(<span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb49-23"><a href="#cb49-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-24"><a href="#cb49-24" aria-hidden="true" tabindex="-1"></a>repl_qb_ipa_qbrun <span class="ot">&lt;-</span></span>
+<span id="cb49-25"><a href="#cb49-25" aria-hidden="true" tabindex="-1"></a>  qb_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb49-26"><a href="#cb49-26" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(repl_qb <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb49-27"><a href="#cb49-27" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(ipa_qbrun) <span class="sc">|&gt;</span></span>
+<span id="cb49-28"><a href="#cb49-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(<span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb49-29"><a href="#cb49-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-30"><a href="#cb49-30" aria-hidden="true" tabindex="-1"></a>qb_ipar <span class="ot">&lt;-</span></span>
+<span id="cb49-31"><a href="#cb49-31" aria-hidden="true" tabindex="-1"></a>  qb_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb49-32"><a href="#cb49-32" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb49-33"><a href="#cb49-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">shadow_air =</span> n_pass <span class="sc">*</span> repl_qb_ipa_air,</span>
+<span id="cb49-34"><a href="#cb49-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">shadow_qbrun =</span> n_qbrun <span class="sc">*</span> repl_qb_ipa_qbrun,</span>
+<span id="cb49-35"><a href="#cb49-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">ipar_air_pass =</span> ipaa_air_pass <span class="sc">-</span> shadow_air,</span>
+<span id="cb49-36"><a href="#cb49-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">ipar_qbrun =</span> ipaa_qbrun <span class="sc">-</span> shadow_qbrun)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 </section>
 <section id="from-points-to-wins" class="level2">
 <h2 class="anchored" data-anchor-id="from-points-to-wins">From points to wins</h2>
+<p>The IPAR values are on the scale of point differential. Figure shows point differential plotted against wins. If we fit a line to these data — that is, if we find some <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span> such that <span class="math inline">\(\textrm{Wins} \approx \alpha + \beta \times \textrm{PtsDiff}\)</span> — then we can multiply the IPAR values by the estimated slope to convert from the point differential scale to the win scale.</p>
+<p>To get this, we load the schedules for the last 10 seasons using the function <code>load_schedules()</code> from the <strong>nflreadr</strong> package</p>
 <!--
-  For each team, let us regress the number of wins onto the score differential
-  1/hat{beta} is the number of points per win.; take iPAR and divide by esimated points per win (i.e., multiply iPAR by beta)
+  1. Load all the schedules
+  2. For each game, determine who the winner (if result > 0, it's the home team, if result < 0, it's the losing team)
+  3. Get score differential for winning team and losing team (-1 * results)
+
 -->
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-38"><pre class="sourceCode r code-annotation-code code-with-copy"><code class="sourceCode r"><span id="annotated-cell-38-1"><a href="#annotated-cell-38-1" aria-hidden="true" tabindex="-1"></a>schedules <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-38-2"><a href="#annotated-cell-38-2" aria-hidden="true" tabindex="-1"></a>  nflreadr<span class="sc">::</span><span class="fu">load_schedules</span>(<span class="at">seasons =</span> <span class="dv">2015</span><span class="sc">:</span><span class="dv">2024</span>) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-38-3"><a href="#annotated-cell-38-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(game_type <span class="sc">==</span> <span class="st">"REG"</span>) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-38-4"><a href="#annotated-cell-38-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(season, away_team, home_team, home_score, away_score, result) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-38-5"><a href="#annotated-cell-38-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">winning_team =</span> <span class="fu">ifelse</span>(result <span class="sc">&gt;</span> <span class="dv">0</span>, home_team, away_team),</span>
+<span id="annotated-cell-38-6"><a href="#annotated-cell-38-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">losing_team =</span> <span class="fu">ifelse</span>(result <span class="sc">&lt;</span> <span class="dv">0</span>, home_team, away_team),</span>
+<span id="annotated-cell-38-7"><a href="#annotated-cell-38-7" aria-hidden="true" tabindex="-1"></a>                <span class="at">winning_ptsdiff =</span> <span class="fu">ifelse</span>(winning_team <span class="sc">==</span> home_team, result, <span class="sc">-</span><span class="dv">1</span><span class="sc">*</span>result),</span>
+<span id="annotated-cell-38-8"><a href="#annotated-cell-38-8" aria-hidden="true" tabindex="-1"></a>                <span class="at">losing_ptsdiff =</span> <span class="fu">ifelse</span>(losing_team <span class="sc">==</span> home_team, result, <span class="sc">-</span><span class="dv">1</span><span class="sc">*</span>result))</span>
+<span id="annotated-cell-38-9"><a href="#annotated-cell-38-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-38-10"><a href="#annotated-cell-38-10" aria-hidden="true" tabindex="-1"></a>win_diff <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-38-11"><a href="#annotated-cell-38-11" aria-hidden="true" tabindex="-1"></a>  schedules <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-38-12"><a href="#annotated-cell-38-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(season, winning_team) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-38-13"><a href="#annotated-cell-38-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">wins =</span> dplyr<span class="sc">::</span><span class="fu">n</span>(), <span class="at">win_diff =</span> <span class="fu">sum</span>(winning_ptsdiff), <span class="at">.groups =</span> <span class="st">'drop'</span>) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-38-14"><a href="#annotated-cell-38-14" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">team =</span> winning_team)</span>
+<span id="annotated-cell-38-15"><a href="#annotated-cell-38-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-38-16"><a href="#annotated-cell-38-16" aria-hidden="true" tabindex="-1"></a>loss_diff <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-38-17"><a href="#annotated-cell-38-17" aria-hidden="true" tabindex="-1"></a>  schedules <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-38-18"><a href="#annotated-cell-38-18" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(season, losing_team) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-38-19"><a href="#annotated-cell-38-19" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">loss =</span> dplyr<span class="sc">::</span><span class="fu">n</span>(), <span class="at">loss_diff =</span> <span class="fu">sum</span>(losing_ptsdiff), <span class="at">.groups =</span> <span class="st">'drop'</span>) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-38-20"><a href="#annotated-cell-38-20" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">team =</span> losing_team)</span>
+<span id="annotated-cell-38-21"><a href="#annotated-cell-38-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-38-22"><a href="#annotated-cell-38-22" aria-hidden="true" tabindex="-1"></a>records <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-38-23"><a href="#annotated-cell-38-23" aria-hidden="true" tabindex="-1"></a>  win_diff <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-38-24"><a href="#annotated-cell-38-24" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> loss_diff, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"season"</span>, <span class="st">"team"</span>)) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-38-25"><a href="#annotated-cell-38-25" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">scoring_differential =</span> win_diff <span class="sc">+</span> loss_diff)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Plotting wins against total scoring differential, we see an obvious increasing trend</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>), <span class="at">mgp =</span> <span class="fu">c</span>(<span class="fl">1.8</span>, <span class="fl">0.5</span>, <span class="dv">0</span>))</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(records<span class="sc">$</span>scoring_differential,</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>     records<span class="sc">$</span>wins,</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Total scoring margin"</span>,</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"Wins"</span>,</span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Wins vs Score Differential"</span>,</span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">cex =</span> <span class="fl">0.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="lecture10_files/figure-html/wins-score-plot-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We fit a linear to these data</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>win_score_fit <span class="ot">&lt;-</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lm</span>(wins<span class="sc">~</span>scoring_differential, <span class="at">data =</span> records)</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>beta <span class="ot">&lt;-</span> <span class="fu">coefficients</span>(win_score_fit)[<span class="dv">2</span>]</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>beta</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>scoring_differential 
+          0.02807309 </code></pre>
+</div>
+</div>
+<p>We see that every additional point scored is associated with about an increase of about 0.02 wins, on average.</p>
+<p>We can now multiply each IPAR value by this factor to determine how wins each player contributes above replacement in different phases of the game.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>all_skill_players <span class="ot">&lt;-</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>(<span class="fu">c</span>(run_ipar<span class="sc">$</span>gsis_id, receiver_ipar<span class="sc">$</span>gsis_id))</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>skill_war <span class="ot">&lt;-</span></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">gsis_id =</span> all_skill_players) <span class="sc">|&gt;</span></span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> roster2024 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(gsis_id, full_name, position, team), <span class="at">by =</span> <span class="st">"gsis_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> run_ipar <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(gsis_id, n_run, ipar_run), <span class="at">by =</span> <span class="st">"gsis_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> receiver_ipar <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(gsis_id, n_rec, ipar_air_rec, ipar_yac_rec), <span class="at">by =</span> <span class="st">"gsis_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">replace_na</span>(<span class="fu">list</span>(<span class="at">ipar_run=</span><span class="dv">0</span>, <span class="at">ipar_air_rec=</span><span class="dv">0</span>, <span class="at">ipar_yac_rec=</span><span class="dv">0</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">war_air_rec =</span> ipar_air_rec <span class="sc">*</span> beta,</span>
+<span id="cb53-12"><a href="#cb53-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">war_yac_rec =</span> ipar_yac_rec <span class="sc">*</span> beta,</span>
+<span id="cb53-13"><a href="#cb53-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">war_run =</span> ipar_run <span class="sc">*</span> beta,</span>
+<span id="cb53-14"><a href="#cb53-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">war =</span> war_air_rec <span class="sc">+</span> war_yac_rec <span class="sc">+</span> war_run)</span>
+<span id="cb53-15"><a href="#cb53-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-16"><a href="#cb53-16" aria-hidden="true" tabindex="-1"></a>qb_war <span class="ot">&lt;-</span></span>
+<span id="cb53-17"><a href="#cb53-17" aria-hidden="true" tabindex="-1"></a>  qb_ipar <span class="sc">|&gt;</span></span>
+<span id="cb53-18"><a href="#cb53-18" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(gsis_id, full_name, n_pass, n_qbrun, ipar_air_pass, ipar_qbrun) <span class="sc">|&gt;</span></span>
+<span id="cb53-19"><a href="#cb53-19" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> roster2024 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(gsis_id, team, position), <span class="at">by =</span> <span class="st">"gsis_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb53-20"><a href="#cb53-20" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">replace_na</span>(<span class="fu">list</span>(<span class="at">ipar_air_pass=</span><span class="dv">0</span>, <span class="at">ipar_qbrun=</span><span class="dv">0</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb53-21"><a href="#cb53-21" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb53-22"><a href="#cb53-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">war_air_pass =</span> ipar_air_pass <span class="sc">*</span> beta,</span>
+<span id="cb53-23"><a href="#cb53-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">war_qbrun =</span> ipar_qbrun <span class="sc">*</span> beta,</span>
+<span id="cb53-24"><a href="#cb53-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">war =</span> war_air_pass <span class="sc">+</span> war_qbrun)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Here are the top-10 skill-position players based on our WAR calculations are</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>skill_war <span class="sc">|&gt;</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(war)) <span class="sc">|&gt;</span></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      gsis_id         full_name position team n_run     ipar_run n_rec
+1  00-0039040     De'Von Achane       RB  MIA   203 29.664608808    87
+2  00-0034844    Saquon Barkley       RB  PHI   346 38.467788479    43
+3  00-0036900     Ja'Marr Chase       WR  CIN     3  0.064225554   175
+4  00-0039139      Jahmyr Gibbs       RB  DET   250 25.923785492    63
+5  00-0033858       Jonnu Smith       TE  MIA     2 -0.032029431   111
+6  00-0036963 Amon-Ra St. Brown       WR  DET     2 -0.003518778   141
+7  00-0039338      Brock Bowers       TE   LV     5 -0.069345894   153
+8  00-0032764     Derrick Henry       RB  BAL   325 20.091003420    22
+9  00-0039075        Puka Nacua       WR   LA    11  0.053233996   106
+10 00-0036322  Justin Jefferson       WR  MIN     1  0.002778183   153
+   ipar_air_rec ipar_yac_rec  war_air_rec war_yac_rec       war_run       war
+1     0.0690579    14.466115  0.001938669  0.40610855  8.327773e-01 1.2408245
+2     0.4847627     2.197136  0.013608788  0.06168040  1.079910e+00 1.1551989
+3     6.2418395    31.257835  0.175227726  0.87750403  1.803010e-03 1.0545348
+4    -1.2572827     6.203777 -0.035295810  0.17415921  7.277608e-01 0.8666242
+5    10.7653664    19.354982  0.302217105  0.54335416 -8.991651e-04 0.8446721
+6    20.7627215     8.044577  0.582873763  0.22583615 -9.878297e-05 0.8086111
+7    -3.6140405    30.181512 -0.101457287  0.84728831 -1.946754e-03 0.7438843
+8    -0.7543523     3.393370 -0.021176999  0.09526238  5.640166e-01 0.6381019
+9     5.1775439    16.442442  0.145349660  0.46159017  1.494443e-03 0.6084343
+10   12.6382021     8.777840  0.354793394  0.24642111  7.799217e-05 0.6012925</code></pre>
+</div>
+</div>
+<p>And here are the top-10 quarterbacks based on our WAR calculations</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>qb_war <span class="sc">|&gt;</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(war)) <span class="sc">|&gt;</span></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 11
+   gsis_id    full_name   n_pass n_qbrun ipar_air_pass ipar_qbrun team  position
+   &lt;chr&gt;      &lt;chr&gt;        &lt;int&gt;   &lt;int&gt;         &lt;dbl&gt;      &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;   
+ 1 00-0039910 Jayden Dan…    461     184        -8.14        90.9 WAS   QB      
+ 2 00-0034857 Josh Allen     459     108         3.55        78.7 BUF   QB      
+ 3 00-0034796 Lamar Jack…    454     150        16.6         52.0 BAL   QB      
+ 4 00-0036389 Jalen Hurts    334     167         5.94        55.5 PHI   QB      
+ 5 00-0039164 Anthony Ri…    247      94       -16.6         65.1 IND   QB      
+ 6 00-0037834 Brock Purdy    440      92        14.8         31.7 SF    QB      
+ 7 00-0039732 Bo Nix         546     102       -13.3         51.6 DEN   QB      
+ 8 00-0035228 Kyler Murr…    520     102         0.547       36.8 ARI   QB      
+ 9 00-0035710 Daniel Jon…    317      88         5.41        27.1 MIN   QB      
+10 00-0033873 Patrick Ma…    552      74         4.87        27.3 KC    QB      
+# ℹ 3 more variables: war_air_pass &lt;dbl&gt;, war_qbrun &lt;dbl&gt;, war &lt;dbl&gt;</code></pre>
+</div>
+</div>
+
 
 
 </section>
 
 
-<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-Yurko2019_nflWAR" class="csl-entry" role="listitem">
+Yurko, Ronald, Samuel Ventura, and Maksim Horowitz. 2019. <span>“<span class="nocase">nflWAR</span>: A Reproducible Method for Offensive Player Evaluation in Football.”</span> <em>Journal of Quantitative Analysis in Sports</em> 15 (3): 163–83.
+</div>
+</div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
-<li id="fn1"><p>I manually search for the <code>play_id</code> and <code>game_id</code> for these plays.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>Because the vast majority of passes are thrown by <strong>q</strong>uarterbacks, we’ll index passers with “q”.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Because “r” could refer to either receiver or runner, we’ll index receivers with “c” for pass <strong>c</strong>atchers.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>That is, unobservable.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>E.g., via his route running.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>If you have taken STAT 310 or 312, the issue is that the <a href="">likelihood</a> function depends on these parameters only through their sum <span class="math inline">\(\mu_{Q} + \mu_{C} + \mu_{D}.\)</span> So, the data alone cannot distinguish configurations of these parameters that yield the same sum. For instance, setting <span class="math inline">\(\mu_{Q} = \mu_{C} = \mu_{D} = 0\)</span> yields exactly the same fit to the data <span class="math inline">\(\mu_{Q} = 5, \mu_{C} = -5, \mu_{D} = 0.\)</span> One way to get around this inject prior information and fit a hierarchical Bayesian model, but that is beyond the scope of this course.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>The superscript <span class="math inline">\(^{(Q)}\)</span> is there to remind us that this is for passers (i.e., quarterbacks) and the subscript <span class="math inline">\(\textrm{air}\)</span> reminds us that the IPA values are derived from our model for EPA through the air.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>In the original nflWAR paper <span class="citation" data-cites="Yurko2019_nflWAR">(<a href="#ref-Yurko2019_nflWAR" role="doc-biblioref">Yurko, Ventura, and Horowitz 2019</a>)</span>, they set <span class="math inline">\(\Delta_{\textrm{air},i} =\Delta_{\textrm{yac},i} = \Delta_{i}\)</span> on incomplete passes and fit the YAC EPA model using data from both complete and incomplete passes. This effectively “double counts” contributions of offensive players.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p>Personally, I disagree with the statement. A very natural way around this issue is to use a Bayesian hierarchical model. In fact, I’d go further and say that multilevel models of the type fitted by <code>lmer()</code> are just impoverished versions of Bayesian hierarchical models. But Bayesian models are regrettably outside the scope of the course and non-Bayesian multilevel models are very widely used so you have to learn a little about them.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p>But you should check whether our downstream results change if we estimate the YAC IPA values for receivers using a reduced model that excludes the passer random intercept!<a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

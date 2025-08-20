@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.7.31">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -71,7 +71,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-10c2ad7cdbdc86dea93900442ad0167d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -192,7 +192,7 @@ window.Quarto = {
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture08.html">
- <span class="dropdown-text">Lecture 8: Defensive creidt &amp; replacement level</span></a>
+ <span class="dropdown-text">Lecture 8: Defensive credit &amp; replacement level</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture09.html">
@@ -310,7 +310,7 @@ window.Quarto = {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../lectures/lecture08.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lecture 8: Defensive creidt &amp; replacement level</span></a>
+ <span class="menu-text">Lecture 8: Defensive credit &amp; replacement level</span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -494,19 +494,19 @@ window.Quarto = {
 </dl>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>BodyPart misclassification 0.107 
-BodyPart+Technique misclassificaiton 0.107 </code></pre>
+<pre><code>BodyPart misclassification 0.112 
+BodyPart+Technique misclassificaiton 0.112 </code></pre>
 </div>
 </div>
 <p>Our two simple models have identical misclassification rates of about 10.7%. At first glance this is a bit surprising because the two models return different predicted XG values</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Unique XG1 values:"</span>, <span class="fu">sort</span>(<span class="fu">unique</span>(simple_preds<span class="sc">$</span>XG1)), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Unique XG1 values: 0.1015056 0.1118336 0.1132812 </code></pre>
+<pre><code>Unique XG1 values: 0.1113281 0.1119565 0.1140625 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Unique XG2 values:"</span>, <span class="fu">sort</span>(<span class="fu">unique</span>(simple_preds<span class="sc">$</span>XG2)), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Unique XG2 values: 0 0.04117647 0.06770833 0.08011869 0.08333333 0.1108898 0.113307 0.1213333 0.1363636 0.1621622 0.3333333 </code></pre>
+<pre><code>Unique XG2 values: 0 0.06372549 0.06756757 0.07142857 0.08920188 0.1034483 0.1131868 0.1207729 0.1214361 0.1632653 0.2083333 </code></pre>
 </div>
 </div>
 <p>On closer inspection, we find that the two simple models both output predicted XG values that are all less than 0.5. So, the thresholded values <span class="math inline">\(\mathbb{I}(\hat{p}_{i} \geq 0.5)\)</span> are identical for both models’ <span class="math inline">\(\hat{p}_{i}\)</span>’s. Just for comparison’s sake, let’s compute the misclassification rate of the proprietary StatsBomb XG model</p>
@@ -514,7 +514,7 @@ BodyPart+Technique misclassificaiton 0.107 </code></pre>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"StatsBomb misclassificaiton"</span>, </span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">misclass</span>(wi_shots<span class="sc">$</span>Y, wi_shots<span class="sc">$</span>shot.statsbomb_xg), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>StatsBomb misclassificaiton 0.088 </code></pre>
+<pre><code>StatsBomb misclassificaiton 0.095 </code></pre>
 </div>
 </div>
 <p>We see that StatsBomb’s model has a slightly smaller misclassification rate than our two simple models, but the gap is not very large.</p>
@@ -536,17 +536,17 @@ BodyPart+Technique misclassificaiton 0.107 </code></pre>
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"BodyPart Brier"</span>, </span>
 <span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">brier</span>(simple_preds<span class="sc">$</span>Y, simple_preds<span class="sc">$</span>XG1), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>BodyPart Brier 0.0953 </code></pre>
+<pre><code>BodyPart Brier 0.0996 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"BodyPart+Technique Brier"</span>, </span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">brier</span>(simple_preds<span class="sc">$</span>Y, simple_preds<span class="sc">$</span>XG2) , <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>BodyPart+Technique Brier 0.0947 </code></pre>
+<pre><code>BodyPart+Technique Brier 0.0991 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"StatsBomb Brier"</span>,</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">brier</span>(wi_shots<span class="sc">$</span>Y, wi_shots<span class="sc">$</span>shot.statsbomb_xg), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>StatsBomb Brier 0.0706 </code></pre>
+<pre><code>StatsBomb Brier 0.0753 </code></pre>
 </div>
 </div>
 <div class="cell">
@@ -572,9 +572,9 @@ BodyPart+Technique misclassificaiton 0.107 </code></pre>
 </dl>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>BodyPart LogLoss: 0.339 
-BodyPart+Technique LogLoss: 0.336 
-StatsBomb LogLoss: 0.252 </code></pre>
+<pre><code>BodyPart LogLoss: 0.351 
+BodyPart+Technique LogLoss: 0.348 
+StatsBomb LogLoss: 0.264 </code></pre>
 </div>
 </div>
 </section>
@@ -660,14 +660,14 @@ StatsBomb LogLoss: 0.252 </code></pre>
 <span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"test log-loss:"</span>,</span>
 <span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">logloss</span>(test_preds<span class="sc">$</span>Y, test_preds<span class="sc">$</span>XG1), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>BodyPart train log-loss: 0.334 test log-loss: 0.356 </code></pre>
+<pre><code>BodyPart train log-loss: 0.357 test log-loss: 0.334 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"BodyPart+Technique train log-loss:"</span>,</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">logloss</span>(train_preds<span class="sc">$</span>Y, train_preds<span class="sc">$</span>XG2), <span class="at">digits =</span> <span class="dv">3</span>), </span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"test log-loss:"</span>,</span>
 <span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">logloss</span>(test_preds<span class="sc">$</span>Y, test_preds<span class="sc">$</span>XG2), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>BodyPart+Technique train log-loss: 0.331 test log-loss: 0.351 </code></pre>
+<pre><code>BodyPart+Technique train log-loss: 0.355 test log-loss: 0.351 </code></pre>
 </div>
 </div>
 <p>For this training/testing split, we see that the more complex model, which conditioned on both body-part and technique, produced slightly smaller log-loss than the simple model, which only conditioned on body-part. But this may not necessarily always hold. For instance, if we drew a different training/testing split (e.g., by initially setting a different randomization seed), we might observe the opposite.</p>
@@ -704,14 +704,14 @@ StatsBomb LogLoss: 0.252 </code></pre>
 <span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>    <span class="st">"test log-loss:"</span>,</span>
 <span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">logloss</span>(test_preds<span class="sc">$</span>Y, test_preds<span class="sc">$</span>XG1), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>BodyPart train log-loss: 0.339 test log-loss: 0.341 </code></pre>
+<pre><code>BodyPart train log-loss: 0.359 test log-loss: 0.327 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"BodyPart+Technique train log-loss:"</span>,</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">logloss</span>(train_preds<span class="sc">$</span>Y, train_preds<span class="sc">$</span>XG2), <span class="at">digits =</span> <span class="dv">3</span>), </span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"test log-loss:"</span>,</span>
 <span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">logloss</span>(test_preds<span class="sc">$</span>Y, test_preds<span class="sc">$</span>XG2), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>BodyPart+Technique train log-loss: 0.335 test log-loss: 0.364 </code></pre>
+<pre><code>BodyPart+Technique train log-loss: 0.356 test log-loss: 0.346 </code></pre>
 </div>
 </div>
 <p>On this second random split, the simpler model had better in-sample and out-of-sample performance.</p>
@@ -787,10 +787,10 @@ StatsBomb LogLoss: 0.252 </code></pre>
 </dl>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>XG1 training logloss: 0.34 
-XG2 training logloss: 0.336 
-XG1 test logloss: 0.339 
-XG2 test logloss: 0.345 </code></pre>
+<pre><code>XG1 training logloss: 0.351 
+XG2 training logloss: 0.348 
+XG1 test logloss: 0.352 
+XG2 test logloss: 0.356 </code></pre>
 </div>
 </div>
 <p>Based on this analysis, we conclude that the simpler model provides better out-of-sample predictions than the more complex model. In other words, the more complex model appears to <em>over-fit</em> the data!</p>
@@ -823,16 +823,16 @@ glm(formula = Y ~ DistToGoal, family = binomial("logit"), data = train_data)
 
 Coefficients:
              Estimate Std. Error z value Pr(&gt;|z|)    
-(Intercept) -0.429695   0.144511  -2.973  0.00294 ** 
-DistToGoal  -0.112567   0.009972 -11.288  &lt; 2e-16 ***
+(Intercept) -0.134174   0.128410  -1.045    0.296    
+DistToGoal  -0.127023   0.009115 -13.935   &lt;2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
-    Null deviance: 1930.9  on 2888  degrees of freedom
-Residual deviance: 1765.3  on 2887  degrees of freedom
-AIC: 1769.3
+    Null deviance: 2549.7  on 3569  degrees of freedom
+Residual deviance: 2290.7  on 3568  degrees of freedom
+AIC: 2294.7
 
 Number of Fisher Scoring iterations: 6</code></pre>
 </div>
@@ -860,11 +860,11 @@ Number of Fisher Scoring iterations: 6</code></pre>
 <span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist training logloss:"</span>, <span class="fu">round</span>(<span class="fu">logloss</span>(train_data<span class="sc">$</span>Y, train_pred1), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Dist training logloss: 0.306 </code></pre>
+<pre><code>Dist training logloss: 0.321 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist testing logloss:"</span>, <span class="fu">round</span>(<span class="fu">logloss</span>(test_data<span class="sc">$</span>Y, test_pred1), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Dist testing logloss: 0.307 </code></pre>
+<pre><code>Dist testing logloss: 0.305 </code></pre>
 </div>
 </div>
 <p>At least for this training/testing split, the logistic regression model that conditions on distance is a bit more accurate than the simpler models. Before concluding that this model indeed is more accurate than the body-part based model, we will repeat the above calculation using 100 training/testing splits.</p>
@@ -901,11 +901,11 @@ Number of Fisher Scoring iterations: 6</code></pre>
 <span id="cb36-30"><a href="#cb36-30" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb36-31"><a href="#cb36-31" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist training logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(train_logloss), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Dist training logloss: 0.306 </code></pre>
+<pre><code>Dist training logloss: 0.317 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist testing logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(test_logloss), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Dist testing logloss: 0.305 </code></pre>
+<pre><code>Dist testing logloss: 0.317 </code></pre>
 </div>
 </div>
 <p>So, accounting for the shot distance appears to yield more accurate predictions than account for just body-part. This immediately raises the question “how much more accurate would predictions be if we accounted for shot distance, body-part, and technique?”</p>
@@ -938,18 +938,18 @@ glm(formula = Y ~ DistToGoal + shot.body_part.name, family = binomial("logit"),
 
 Coefficients:
                               Estimate Std. Error z value Pr(&gt;|z|)    
-(Intercept)                   -0.75354    0.16662  -4.523 6.11e-06 ***
-DistToGoal                    -0.14462    0.01145 -12.626  &lt; 2e-16 ***
-shot.body_part.nameLeft Foot   1.02331    0.19192   5.332 9.72e-08 ***
-shot.body_part.nameRight Foot  1.03471    0.17388   5.951 2.67e-09 ***
+(Intercept)                   -0.48741    0.14831  -3.287  0.00101 ** 
+DistToGoal                    -0.15839    0.01032 -15.348  &lt; 2e-16 ***
+shot.body_part.nameLeft Foot   1.02210    0.16747   6.103 1.04e-09 ***
+shot.body_part.nameRight Foot  1.03793    0.15106   6.871 6.38e-12 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
-    Null deviance: 1930.9  on 2888  degrees of freedom
-Residual deviance: 1722.9  on 2885  degrees of freedom
-AIC: 1730.9
+    Null deviance: 2549.7  on 3569  degrees of freedom
+Residual deviance: 2234.3  on 3566  degrees of freedom
+AIC: 2242.3
 
 Number of Fisher Scoring iterations: 6</code></pre>
 </div>
@@ -992,11 +992,11 @@ Number of Fisher Scoring iterations: 6</code></pre>
 <span id="cb42-31"><a href="#cb42-31" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb42-32"><a href="#cb42-32" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist+BodyPart training logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(train_logloss), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Dist+BodyPart training logloss: 0.298 </code></pre>
+<pre><code>Dist+BodyPart training logloss: 0.307 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist+BodyPart testing logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(test_logloss), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Dist+BodyPart testing logloss: 0.296 </code></pre>
+<pre><code>Dist+BodyPart testing logloss: 0.308 </code></pre>
 </div>
 </div>
 </section>
@@ -1025,27 +1025,27 @@ glm(formula = Y ~ DistToGoal * shot.body_part.name, family = binomial("logit"),
 
 Coefficients:
                                          Estimate Std. Error z value Pr(&gt;|z|)
-(Intercept)                               0.48927    0.45700   1.071  0.28434
-DistToGoal                               -0.29471    0.05500  -5.358  8.4e-08
-shot.body_part.nameLeft Foot             -0.29355    0.55786  -0.526  0.59874
-shot.body_part.nameRight Foot            -0.33824    0.50859  -0.665  0.50601
-DistToGoal:shot.body_part.nameLeft Foot   0.15524    0.05870   2.645  0.00818
-DistToGoal:shot.body_part.nameRight Foot  0.15902    0.05674   2.803  0.00507
+(Intercept)                               1.04701    0.41889   2.499  0.01244
+DistToGoal                               -0.34422    0.05092  -6.761 1.37e-11
+shot.body_part.nameLeft Foot             -0.21195    0.50881  -0.417  0.67700
+shot.body_part.nameRight Foot            -0.82193    0.46059  -1.785  0.07434
+DistToGoal:shot.body_part.nameLeft Foot   0.16418    0.05457   3.009  0.00263
+DistToGoal:shot.body_part.nameRight Foot  0.20871    0.05233   3.988 6.66e-05
                                             
-(Intercept)                                 
+(Intercept)                              *  
 DistToGoal                               ***
 shot.body_part.nameLeft Foot                
-shot.body_part.nameRight Foot               
+shot.body_part.nameRight Foot            .  
 DistToGoal:shot.body_part.nameLeft Foot  ** 
-DistToGoal:shot.body_part.nameRight Foot ** 
+DistToGoal:shot.body_part.nameRight Foot ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
-    Null deviance: 1930.9  on 2888  degrees of freedom
-Residual deviance: 1714.3  on 2883  degrees of freedom
-AIC: 1726.3
+    Null deviance: 2549.7  on 3569  degrees of freedom
+Residual deviance: 2214.5  on 3564  degrees of freedom
+AIC: 2226.5
 
 Number of Fisher Scoring iterations: 6</code></pre>
 </div>
@@ -1091,11 +1091,11 @@ Number of Fisher Scoring iterations: 6</code></pre>
 <span id="cb48-31"><a href="#cb48-31" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb48-32"><a href="#cb48-32" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist*BodyPart training logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(train_logloss), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Dist*BodyPart training logloss: 0.2961 </code></pre>
+<pre><code>Dist*BodyPart training logloss: 0.3047 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist*BodyPart testing logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(test_logloss), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Dist*BodyPart testing logloss: 0.295 </code></pre>
+<pre><code>Dist*BodyPart testing logloss: 0.3066 </code></pre>
 </div>
 </div>
 <p>Interestingly, adding the interaction between distance and body part did not seem to improve the test-set log-loss by much.</p>
@@ -1184,8 +1184,8 @@ Number of Fisher Scoring iterations: 6</code></pre>
 </dl>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.106593
-[1] 0.2697499</code></pre>
+<pre><code>[1] 0.1135258
+[1] 0.2522654</code></pre>
 </div>
 </div>
 <p>At least for this training/testing split, our in-sample log-loss is <strong>much</strong> smaller than our out-of-sample log-loss. This is not at all surprising: flexible regression models like random forests are trained to predict the in-sample data and so we should expect to see smaller training errors than testing errors.</p>
@@ -1234,11 +1234,11 @@ Number of Fisher Scoring iterations: 6</code></pre>
 <span id="cb54-41"><a href="#cb54-41" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb54-42"><a href="#cb54-42" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"RandomForest training logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(train_logloss), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>RandomForest training logloss: 0.1066 </code></pre>
+<pre><code>RandomForest training logloss: 0.1135 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"RandomForest testing logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(test_logloss), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>RandomForest testing logloss: 0.2697 </code></pre>
+<pre><code>RandomForest testing logloss: 0.2523 </code></pre>
 </div>
 </div>
 <section id="comparison-to-statsbombs-model" class="level3">

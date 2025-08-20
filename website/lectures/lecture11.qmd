@@ -1,13 +1,9 @@
 ---
 title: "Lecture 11: Pitch Framing"
 format: html
+execute: 
+  cache: true
 ---
-
-```{r set-up}
-library(tidyverse)
-
-```
-
 ## Overview
 
 In October 2015, the Houston Astros played the New York Yankees in the American League Wild Card game.
@@ -25,17 +21,19 @@ Beyond simple fan reaction, individual players took exception to Cooper's strike
 Both pitches were thrown low and outside[^lowoutside], near the bottom left corner of the strike zone[^strikezone] shown in the figure.
 Because no part of the ball passed through the strike zone, by rule, both pitches should have been called balls.
 But umpire Cooper called the pitch on the left, thrown by Yankees pitcher Masahiro Tanaka, a ball and called the pitch on the right, thrown by Astros pitcher Dallas Keuchel, a strike.
-During the television broadcast and on [social media after the game](https://www.crawfishboxes.com/2015/10/8/9483213/astros-pitching-dominates-yankee-hitting-with-better-pitch-framing), many speculated that the reason for this discrepancy in strike zones is due Astros catcher Jason Castro's ability to *frame* pitches, catching them in a way so as to increase the chances of the umpire calling a strike.
-
+During the television broadcast of the game and on social media after the game[^crawfish], many speculated many speculated that the reason for this discrepancy in strike zones is due Astros catcher Jason Castro's ability to *frame* pitches, catching them in a way so as to increase the chances of the umpire calling a strike.
 
 [^lowoutside]: That is, away from the batter.
 
 [^strikezone]: The strike zone is defined as "the area over home plate from the midpoint between a batter's shoulders and the top of the uniform pants -- when the batter is in his stance and prepared to swing at a pitched ball -- and a point just below the kneecap." See [here](https://www.mlb.com/glossary/rules/strike-zone).
 
+[^crawfish]: See [this blogpost](https://www.crawfishboxes.com/2015/10/8/9483213/astros-pitching-dominates-yankee-hitting-with-better-pitch-framing) for a compilation of posts.
 
-Pitch framing
+Pitch framing, which has been studied by the sabermetrics community since at least 2008, received lots of coverage in the popular press between 2014 and 2016.
+A good example is [this article about Jonathan Lucroy](https://www.espn.com/mlb/story/_/id/12492794/jonathan-lucroy-needs-raise) from ESPN The Magazine, which estimated that Lucroy's framing accounted for a total of two wins for the Brewers in 2014 and was worth around $14 million.
+That article went on to say that claim that the most impactful player in baseball today is the game’s 17th highest-paid catcher."
 
-
+In this lecture, we will estimate how many more runs a catcher saves his team through his framing compared to a replacement-level catcher.
 Like we did in Lectures [6](lecture06.qmd), [7](lecture07.qmd), and [8](lecture08.qmd), we will work with pitch tracking data scraped from StatCast.
 This time, however, we will need to scrape data f
 We will use the data from 2023 to establish historical strike probabilities (@sec-hgam) based on pitch location, batter handedness, and pitcher handedness.
@@ -271,10 +269,13 @@ taken2023 <-
 ```
 
 We now fit our generalized additive model.
+
 :::{.callout-important}
 ## Warning
 The following code takes several minutes to run
 :::
+
+
 ```{r}
 #| label: fit-hgam
 #| message: false
@@ -294,7 +295,7 @@ The following code plots the fitted called strike probabilities as a function of
 #| fig-height: 6
 #| fig-align: "center"
 grid_sep <- 0.05
-x_grid <- seq(-2.5, 2.5, by = grid_sep)
+x_grid <- seq(-1.5, 1.5, by = grid_sep)
 z_grid <- seq(0, 6, by = grid_sep)
 col_list <- colorBlindness::Blue2DarkRed18Steps 
 plate_grid <- 
@@ -311,7 +312,7 @@ grid_prob_cols <-
   rgb(colorRamp(col_list,bias=1)(grid_preds)/255)
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
 plot(1, type = "n", 
-     xlim = c(-2.5, 2.5), ylim = c(0,6),
+     xlim = c(-1.5, 1.5), ylim = c(0,6),
      main = "Historical called strike probabilities",
      xlab = "", ylab = "", 
      xaxt = "n", yaxt = "n")
@@ -347,8 +348,9 @@ baseline <-
           type = "link")
 taken2024 <-
   taken2024 |>
-  dplyr::filter(abs(plate_x) <= 1.5 & plate_z >= 1 & plate_z <= 6) |> #<1>
-  dplyr::mutate(baseline = baseline)
+  dplyr::mutate(baseline = baseline) |>
+  dplyr::filter(abs(plate_x) <= 1.5 & plate_z >= 1 & plate_z <= 6) #<1>
+
 ```
 1. We focus only on "frameable" pitches which are not throw too far away from home plate in the horizontal direction and are not thrown too high or too low in the vertical direction.
 
