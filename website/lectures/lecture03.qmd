@@ -7,16 +7,23 @@ execute:
 ---
 
 
-## Overview
+## Overview {#sec-overview}
 
-Last lecture, we fit two very basic models for XG.
+In [Lecture 2](lectures02.qmd), we fit two very basic models for XG.
 The first used only body part to predict the probability of the shot resulting in a goal while the second used both body part and shot technique.
 By looking at a few of Beth Mead's shots from EURO 2022, we decided that the second model was a better because it assigned a higher XG to her one-on-one lob than the shot through multiple defenders.
-In this lecture, we will 
 
+
+<!--
+  Write the organizational part
+-->
+
+
+### Data Preparation {#sec-data-preparation}
 We will continue to work with all shot event data from women's international competitions that StatsBomb makes publicly available.
 Using code from [Lecture 2](lecture02.qmd), we can load in all the shot event data and create a binary outcome recording whether the shot resulted in a goal.
-```{r load-data}
+```{r}
+#| label: load-data
 #| output: false
 #| message: false
 #| warning: false
@@ -41,7 +48,8 @@ wi_shots <-
 
 We will also re-construct the two simple XG models, one that conditions only on body part and the other that conditions on body part and technique.
 We then create a data table with columns containing the body part, technique, and outcome of the shot as well as the XG predictions from both models.
-```{r orig-xg-models}
+```{r}
+#| label: orig-xg-models
 xg_model1 <- 
   wi_shots |>
   dplyr::group_by(shot.body_part.name) |>
@@ -144,7 +152,8 @@ Notice that if $y_{i} = 1$ as $\hat{p}_{i} \rightarrow 0,$ the term $y_{i} \time
 So, while the Brier score is mathematically bounded between 0 and 1, the average log-loss can be arbitrarily large.
 Essentially, log-loss heavily penalizes predictions that are confident (i.e., very close to 0 or 1) but wrong (i.e., different than $y_{i}$.)
 
-```{r compute-brier}
+```{r}
+#| label: compute-brier
 brier <- function(y, phat){
   return(mean( (y - phat)^2 ))
 }
@@ -158,7 +167,8 @@ cat("StatsBomb Brier",
 ```
 
 
-```{r compute-logloss}
+```{r}
+#| label: compute-logloss
 logloss <- function(y, phat){
   
   if(any(phat < 1e-12)) phat[phat < 1e-12] <- 1e-12 # <1>
@@ -199,8 +209,8 @@ The next codeblock illustrates this workflow.
 To help create training/testing splits, we start by giving every row its own unique ID.
 Then, we randomly select a fixed number of rows to form our training dataset.
 
-
-```{r simple-train-test}
+```{r}
+#| label: simple-train-test
 n <- nrow(wi_shots)
 n_train <- floor(0.75 * n) # <1>
 n_test <- n - n_train
@@ -208,7 +218,6 @@ n_test <- n - n_train
 wi_shots <-
   wi_shots |>
   dplyr::mutate(id = 1:n) # <2>
-
 
 set.seed(479) # <3>
 train_data <-
@@ -225,13 +234,15 @@ test_data <-
 5. The function [`anti_join()`](https://dplyr.tidyverse.org/reference/filter-joins.html) extracts the rows in `wi_shots` whose IDs are **not** contained in `train_data`
 
 As a sanity check, we can check whether any of the `id`'s in `test_data` are also in `train_data`:
-```{r sanity-check}
+```{r}
+#| label: sanity-check
 any(train_data$id %in% test_data$id)
 ```
 
 
 Now that we have a single training and testing split, let's fit our two simple XG models and then computing the average training and testing losses
-```{r single-fold-simple}
+```{r}
+#| label: single-fold-simple
 model1 <- 
   train_data |>
   dplyr::group_by(shot.body_part.name) |>
@@ -266,7 +277,8 @@ For this training/testing split, we see that the more complex model, which condi
 But this may not necessarily always hold.
 For instance, if we drew a different training/testing split (e.g., by initially setting a different randomization seed), we might observe the opposite.
 
-```{r simple-cv-478}
+```{r}
+#| label: simpel-cv-478
 set.seed(478)
 train_data <-
   wi_shots |>
@@ -369,10 +381,6 @@ cat("XG2 test logloss:", round(mean(test_logloss["XG2",]), digits = 3), "\n")
 Based on this analysis, we conclude that the simpler model provides better out-of-sample predictions than the more complex model.
 In other words, the more complex model appears to *over-fit* the data!
 
-
-
-
-
 ## Logistic Regression {#sec-logit}
 
 Although the model that conditions only on body-part has smaller out-of-sample loss than the model that additionally accounts for shot technique, the model is still not wholly satisfactory.
@@ -408,7 +416,8 @@ fit1 <- glm(Y~DistToGoal, data = train_data, family = binomial("logit"))
 ```
 
 The `summary` function provides a snapshot about the fitted model, showing the individual parameter estimates, their associated standard errors, and whether or not they are statistically significantly different than zero.
-```{r summarize-fit1}
+```{r}
+#| label: summarize-fit1
 summary(fit1)
 ```
 We see that the estimate of $\beta_{1},$ the coefficient capturing `DistToGoal`'s effect on the log-odds of a goal, is negative (-0.11) and that this is statistically significantly different than 0 (the associated p-value is <2e-16).
@@ -428,12 +437,14 @@ In general, we need to exercise caution when using such extrapolations in any do
 Crucially, we can use our fitted model to make predictions about shots not seen in our training data.
 In R, we make predictions using the `predict()` function.
 The function takes three arguments:
+
   1. `object`: this is the output from our `glm` call (i.e., the fitted model object), which we have here saved as `fit1`
   2. `newdata`: this is a data table containing the features of the observations for which we would like predictions. The table that we pass here needs to have columns for every feature used in the model.
   3. `type`: When `object` is the result from fitting a logistic regression model, `predict` will return predictions on the log-odds scale (i.e, $\hat{\beta}_{0} + \hat{\beta}_{1}X_[1} + \cdots + \hat{\beta}_{p}X_{p}$) by default. To get predictions on the probability scale, we need to set `type = "response"`
 
 In the code below, we obtain predictions for both the training and testing observations and then compute the average log-loss for this training/testing split.
-```{r assess-preds1}
+```{r}
+#| label: assess-preds1
 train_pred1 <- 
   predict(object = fit1,
           newdata = train_data,
@@ -449,7 +460,8 @@ cat("Dist testing logloss:", round(logloss(test_data$Y, test_pred1), digits = 3)
 At least for this training/testing split, the logistic regression model that conditions on distance is a bit more accurate than the simpler models.
 Before concluding that this model indeed is more accurate than the body-part based model, we will repeat the above calculation using 100 training/testing splits.
 
-```{r logistic-cv1}
+```{r}
+#| label: logistic-cv1
 n_sims <- 100
 train_logloss <- rep(NA, times = n_sims)
 test_logloss <- rep(NA, times = n_sims)
@@ -487,13 +499,14 @@ cat("Dist testing logloss:", round(mean(test_logloss), digits = 3), "\n")
 So, accounting for the shot distance appears to yield more accurate predictions than account for just body-part.
 This immediately raises the question "how much more accurate would predictions be if we accounted for shot distance, body-part, and technique?"
 
-### Account for multiple predictors
+### Account for multiple predictors {#sec-addtl-preds}
 
 It turns out to be relatively straightforward to answer this question using `glm()`.
 Specifically, we can include more variables in the `formula` argument.
 Note that we first convert the variables `shot.body_part.name` and `shot.technique.name` to factors.
 
-```{r model3}
+```{r}
+#| label: model3
 wi_shots <-
   wi_shots |>
   dplyr::mutate(shot.body_part.name = factor(shot.body_part.name))
@@ -516,17 +529,20 @@ Looking at the output of `summary(fit)`, we see that the model includes several 
 There is a slope associated with left-footed and right-footed shots.
 Internally, `glm()` has *one-hot-encoded* the categorical predictor `shot.body_part.name` and decomposed the log-odds of a goal as
 $$
-\beta_{0} + \beta_{1}\textrm{DistToGoal} + \beta_{LeftFoot}\mathbb{I}(\textrm{LeftFoot}) + \beta_{RightFoot} \mathbb{I}(\textrm{RightFoot})
+\beta_{0} + \beta_{1}\times \textrm{DistToGoal} + \beta_{LeftFoot}\times \mathbb{I}(\textrm{LeftFoot}) + \beta_{RightFoot} \times \mathbb{I}(\textrm{RightFoot})
 $$
 Suppose a shot is taken from distance $d.$
 The model makes different predictions based on the body part used to attempt the shot:
+
   * If the shot was taken with a header then the log-odds of a goal is $\beta_{0} + \beta_{1}d$
   * If the shot was taken with the left foot, then the log-odds of a goal is $\beta_{0} + \beta_{1}d + \beta_{\textrm{LeftFoot}}$ 
   * If the shot was taken with the right foot, then the log-odds of a goal is $\beta_{0} + \beta_{1}d + \beta_{\textrm{RightFoot}}$
+
 Reassuringly, the estimates for $\beta_{\textrm{RightFoot}}$ and $\beta_{\textrm{LeftFoot}}$ are positive, indicating that for a fixed distance, the log-odds of scoring a goal on a left- or right-footed shot is higher than headers.
 
 By repeatedly fitting and assessing our new model using 100 random training/testing splits, we discover that account for both body part and shot distance results in even more accurate predictions.
-```{r cv-model3}
+```{r}
+#| label: cv-model3
 n_sims <- 100
 train_logloss <- rep(NA, times = n_sims)
 test_logloss <- rep(NA, times = n_sims)
@@ -562,7 +578,7 @@ cat("Dist+BodyPart training logloss:", round(mean(train_logloss), digits = 3), "
 cat("Dist+BodyPart testing logloss:", round(mean(test_logloss), digits = 3), "\n")
 ```
 
-### Interactions
+### Interactions {#sec-interactions}
 
 Our most accurate model so far accounts for both shot distance and the body part used to attempt the shot.
 Taking a closer look at the assumed log-odds of a goal, however, reveals a potentially important limitation: the effect of distance is assumed to be the same for all shot-types.
@@ -571,7 +587,8 @@ That is, the model assume that moving one yard further away decreases the log-od
 Interactions between factors in a regression model allow the effect of one factor to vary based on the value of another factor.
 Using R's formula interface, we can introduce interactions between two variables using `*`.
 
-```{r model4-interaction}
+```{r}
+#| label: model4-interaction
 set.seed(479)
 train_data <-
   wi_shots |>
@@ -595,11 +612,13 @@ $$
 where $\mathbb{I}(RightFoot)$ is an indicator of whether or not the shot was taken with the right foot.
 
 Now for a given shot taken at distance $d$, the log-odds of a goal are:
+
   * $\beta_{0} + \beta_{\textrm{DistToGoal} * d$ is the shot was a header.
   * $\beta_{0} + \beta_{\textrm{LeftFoot}} + (\beta_{\textrm{DistToGoal}} + \beta_{\textrm{DistToGoal:LeftFoot}}) * d$ if the shot was taken with the left foot.
   * $\beta_{0} + \beta_{\textrm{RightFoot}} + (\beta_{\textrm{DistToGoal}} + \beta_{\textrm{DistToGoal:RightFoot}}) * d$ if the shot was taken with the right foot.
 
-```{r cv-model4}
+```{r}
+#| label: cv-model4
 n_sims <- 100
 train_logloss <- rep(NA, times = n_sims)
 test_logloss <- rep(NA, times = n_sims)
@@ -636,10 +655,11 @@ cat("Dist*BodyPart testing logloss:", round(mean(test_logloss), digits = 4), "\n
 ```
 Interestingly, adding the interaction between distance and body part did not seem to improve the test-set log-loss by much. 
 
-## Random forests
+## Random forests {#sec-rf}
 
 Remember how we used the function `StatsBombR::allclean()` to apply some of StatsBomb's suggested pre-processing?
-It turns out that this function creates several features related to shot attempt including[^docs]
+It turns out that this function creates several features related to shot attempt including[^docs]:
+
   * Distances from the shot the center of the goal line (`DistToGoal`); from the shot to the goal keeper (`DistSGK`); from the goalkeeper to the center of the goal line (`DistToGK`)
   * The horizontal angles between the shot and goalkeeper to the center of the goal line (`AngleToGoal` & `AngleToKeeper`) and the difference between these angles (`AngleDeviation`)
   * The distances between the shot and the two nearest defenders (`distance.ToD1` and `distance.ToD2`)
@@ -710,7 +730,7 @@ Unlike `glm()`, which required us to specify the argument `family = binomial("lo
 This signals to the function that we want predictions on the probability scale and not the $\{0,1\}$-outcome scale.
 
 We can also use `predict()` to get predictions from a model fitted with `ranger().`
-But this involves slightly different syntax: instead of using the argument `newdata`, we need to use the argument `data`.
+But this also involves slightly different syntax: instead of using the argument `newdata`, we need to use the argument `data`.
 Additionally, when making predictions based on a `ranger` model with `probability = TRUE`, the function `predict` returns a named list.
 One element of that list is called `predictions` and it is a matrix whose rows correspond to the rows of `data` and whose columns contain the probabilities $\mathbb{P}(Y = 0)$ and $\mathbb{P}(Y = 1).$
 So, to get the predicting XG values, we need to look at the 2nd column of this matrix.
@@ -739,8 +759,9 @@ logloss(y_test, test_preds)
 At least for this training/testing split, our in-sample log-loss is **much** smaller than our out-of-sample log-loss.
 This is not at all surprising: flexible regression models like random forests are trained to predict the in-sample data and so we should expect to see smaller training errors than testing errors.
 
-Repeating these calculations over 100 training/testing splits, we can conclude that our more flexible random forest model, which accounts for many more features and can accommodate many more interaction terms than our simple logistic regression model, does seem to out-perform the logistic regression models.  
-```{r cv-ranger}
+Repeating these calculations over 100 training/testing splits, we can conclude that our more flexible random forest model, which accounts for many more features and can accommodate many more interaction terms than our simple logistic regression model, out-performs the logistic regression models.  
+```{r}
+#| label: cv-ranger
 n_sims <- 100
 train_logloss <- rep(NA, times = n_sims)
 test_logloss <- rep(NA, times = n_sims)
@@ -787,7 +808,7 @@ cat("RandomForest testing logloss:", round(mean(test_logloss), digits = 4), "\n"
 ```
 
 
-### Comparison to StatsBomb's model
+### Comparison to StatsBomb's model {#sec-comparison}
 
 Now that we have a much more predictive model, we can compare our model estimates to those from StatsBomb's proprietary model.
 In the code below, we re-fit a random forests model to the whole dataset.

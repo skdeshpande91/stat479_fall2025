@@ -1,0 +1,122 @@
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{bm, bbm}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{float, graphicx, fullpage, parskip, subcaption, setspace}
+\usepackage{comment}
+\usepackage{url}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{nicematrix}
+\usepackage{csquotes}
+\usepackage{listings}
+
+
+% SKD is this strictly necessary?
+% line spacing after floats, if we need to set manually
+\setlength{\intextsep}{10pt} % Vertical space above & below [h] floats
+\setlength{\textfloatsep}{10pt} % Vertical space below (above) [t] ([b]) floats
+\setlength{\abovecaptionskip}{10pt}
+\setlength{\belowcaptionskip}{5pt}
+
+% Define some colors
+\definecolor{SkyBlue}{RGB}{14, 118, 188}
+\definecolor{BrightRed}{RGB}{223, 82, 78}
+\definecolor{Green638}{RGB}{165,255,118} % from colours.cafe on instagram; pallete638
+\definecolor{mygray}{rgb}{0.9, 0.9, 0.9}
+% Set up colorful hyperlinks without any silly green boxes
+\hypersetup{pdfborder = {0 0 0.5 [3 3]}, colorlinks = true, linkcolor = BrightRed, citecolor = SkyBlue}
+
+\lstset{
+language=R,
+basicstyle=\small\ttfamily,
+commentstyle=\color{SkyBlue},
+otherkeywords={0,1,2,3,4,5,6,7,8,9},
+morekeywords={TRUE, FALSE, return, print},
+keywordstyle=\color{BrightRed},
+backgroundcolor = \color{mygray},
+escapeinside={<@}{@>}
+}
+
+
+
+% Math macros
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}} % useful if we want to number one equation inside an align*
+\newcommand\numbereqn{\addtocounter{equation}{1}\tag{\theequation}}
+
+\newcommand{\R}{\mathbb{R}} % boldfaced R for the reals
+\newcommand{\E}{\mathbb{E}} % boldfaced E for expectations
+\def\P{\mathbb{P}} % boldfaced P for probability. overriding \P for paragraph symbol
+
+\newcommand{\calP}{\mathcal{P}} % caligraphic P for a generic distribution
+\newcommand{\calQ}{\mathcal{Q}} % caligraphic Q for another generic distribution
+\newcommand{\calF}{\mathcal{F}} % caligraphic F, typically for sigma-algebras
+
+\newcommand{\ind}[1]{\mathbbm{1}\left( #1 \right)} % indicator function, with an argument
+\newcommand{\var}[1]{\textrm{Var}\left( #1 \right)} % variance
+\newcommand{\cov}[2]{\textrm{Cov}\left( #1, #2 \right)} % covariance
+\newcommand{\sign}[1]{\textrm{sign}\left(#1\right)} % sign
+\newcommand{\parallelsum}{\mathbin{\|}} % for double bar to behave like a binary operation
+\newcommand{\kl}[2]{\textrm{KL}\left(#1 \mid \parallelsum \# \right)} % KL divergence with two arguments
+
+
+% distributions
+\newcommand{\normaldist}[2]{\mathcal{N}\left(#1, #2\right)} % normal distribution
+\newcommand{\mvnormaldist}[3]{\mathcal{N}_{#1}\left(#2, #3\right)} % multivariate normal distribution
+\newcommand{\gammadist}[2]{\textrm{Gamma}\left(#1, #2\right)} % gamma distribution
+\newcommand{\igammadist}[2]{\textrm{Inv.~Gamma}\left(#1, #2\right)} % inverse gamma
+\newcommand{\binomialdist}[2]{\textrm{Binomial}\left(#1, #2\right)} % Binomial
+\newcommand{\berndist}[1]{\textrm{Bernoulli}\left(#1\right)} % Bernoulli
+\newcommand{\poissondist}[1]{\textrm{Poisson}\left(#1\right)} % Poisson
+\newcommand{\hafltdist}[2]{\textrm{half-t}_{\#1}\left(#2\right)} %half-t
+\newcommand{\unifdist}[2]{\textrm{Uniform}\left(#1, #2\right)} % uniform
+\newcommand{\betadist}[2]{\textrm{Beta}\left(#1, #2\right)} % Beta distribution
+
+% bolded alphabet time
+\newcommand{\by}{\bm{y}}
+\newcommand{\bx}{\bm{x}}
+\newcommand{\bz}{\bm{z}}
+\newcommand{\bw}{\bm{w}}
+
+
+% bolded capitalized alphabet
+\newcommand{\bY}{\bm{Y}}
+\newcommand{\bX}{\bm{X}}
+
+% bolded greek alphabet time!
+\newcommand{\btheta}{\boldsymbol{\theta}}
+\newcommand{\bbeta}{\boldsymbol{\beta}}
+\newcommand{\bmu}{\boldsymbol{\mu}}
+
+%overline time
+\newcommand{\ybar}{\overline{y}}
+\newcommand{\xbar}{\overline{x}}
+\newcommand{\mubar}{\overline{\mu}}
+
+
+% Theorem-like declarations
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+
+\newtheorem{ex}{Example} % don't ever use \begin{ex} in a document
+\newenvironment{example}{\begin{ex}}{\qed \end{ex}} % use example to get the qed box
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+% comment fields
+\newcommand{\skd}[1]{\textcolor{red}{[skd]: #1}}
+
+% Programmning languages
+\newcommand{\Rlang}{\textsf{R}}
+\newcommand{\Stan}{\textsf{Stan}}
