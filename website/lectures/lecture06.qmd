@@ -1,12 +1,11 @@
 ---
-title: "Lecture 6: Run expectancy"
+title: "Lecture 6: Run Expectancy"
 format: html
 execute: 
   cache: true
 ---
 
-
-## Overview: Allocation of credit in baseball
+## Motivation: Credit allocation in baseball {#sec-motivation}
 
 The first game of the 2024 MLB Regular Season, between the Los Angeles Dodgers and the San Diego Padres, took place on March 20, 2024[^korea] 
 During the game, Shohei Ohtani recorded [two hits in his five plate appearances](https://www.mlb.com/video/shohei-ohtani-records-two-hits-rbi-in-dodgers-debut):
@@ -16,9 +15,10 @@ During the game, Shohei Ohtani recorded [two hits in his five plate appearances]
   1. In the 3rd inning, with 2 outs and no runners on base, Ohtani singled into right field.
   2. In the 8th inning, with 1 out and runners on first and second base, Ohtani singled into left center field, driving in one run.
 
-Which of these singles was most valuable to Dodgers? And how much of that value should be credited to Ohtani specifically?
+Which of these singles was more valuable to Dodgers? 
+And how much of that value should be specifically credited to Ohtani?
 
-Because the second directly resulted in a run scoring, it is tempting to conclude that the second single was more valuable than the first.
+Because the second single directly resulted in a run scoring, it is tempting to conclude that the second single was more valuable than the first.
 However, although the Dodgers didn't score as a result of the first single, Ohtani reached first base, putting his team in a position to potential score more runs than if he had not reached first[^steal].
 In terms of allocating credit, it seems natural to give Ohtani all the credit for whatever value was created on his first single.
 But on his second single, at least some of the value created is attributable to a baserunner scoring from second base. 
@@ -32,98 +32,42 @@ In [Lecture 7](lecture07.qmd), we will distribute the run value created in every
 We will then begin [Lecture 8](lecture08.qmd) by distributing the negative of the run value created by th batting team between the pitcher and fielders involved in each at-bat.
 Finally, we will aggregate the total run value over average created by each player through their hitting, fielding, base running, and pitching and convert that aggregate into a measure of wins above replacement. 
 Our development largely follows [@Baumer2015_openWAR], who created a transparent, open-source version of wins above replacement, a cornerstone of baseball analytics. 
+## Tracking Data in Baseball {#sec-statcast}
+ 
+### A Brief History {#sec-history}
+
+On October 4, 2006, during an American League Division Series game between the Oakland Athletics and Minnesota Twins, the sports media company Sportvision[^sportvision] debuted PitchF/X[^fast], a system of cameras for tracking the position of every pitch as it traveled from the pitcher's hand to the batter.
+After installing the system in every MLB ballpark, Sportvision began providing the data in real-time data to the MLB.
+These data, combined with additional information recorded by an MLB Advanced Media employee, powered the popular [GameDay application](https://www.mlb.com/schedule/gameday) and were publicly available through the GameDay application programming interface (API) for many years.
+
+[^fast]: See [this article by Mike Fast](https://tht.fangraphs.com/wp-content/uploads/sites/8/images/pitchfx_guide.bt.pdf) for more background
+
+In 2017, PithcF/X system was phased out replaced by the radar-based Trackman system, which was originally developed to track the trajectories of golf balls.
+Trackman is part of the larger Statcast system, which additionally tracks the movement of all players on the field.
+See [this New York Times article](https://www.nytimes.com/athletic/5627303/2024/07/10/mlb-statcast-10-year-anniversary/) for more about the history of Statcast.
 
 
 
-<!--
-  July 28: 
-  1. Look at these two Ohtani at-bats. he singles on the first, getting on base. and in the second, he drives in a run with a single.
-  2. In what at-bat did he create more value?
-  3. One argument: second one becaue it actually scored a run. But the first one resulted in him getting on base. And then he stole second -- so it's very likely for him to score now
-  4. The punchline: to properly value a player's contribution, we need to account not only for runs actually scored but also how player set their team up to score, even if they don't score themselves (e.g., getting on base, stealing, sacrifice fly, etc)
-  5. 
--->
+[^sportvision]: Sportvision is perhaps most famous for the [yellow first down line that appears in American football broadcasts](https://smt.com/behind-the-nfls-yellow-first-down-line-and-whats-next-for-sports-tv/). They were eventually acquired by [SMT](https://smt.com).
 
-<!--
-  Look at the two Ohtani at-bats. let's talk qualitatively about the differences between them
-  In the first, Ohtani gets on base. This is good --- and then he steals second, so even better! So long as the next batter gets a base hit, he can likely score.
-  In the second, Ohtani singles and drives in a run. Should he get all the credit? How much should go to the baserunner? And what exactly how much value was created?
-  We need to look both at the actual runs scored (because, scoreboard). But also, we should give credit for putting his team in favorable positions.
-  
-  Over the next 3 lectures, we will address this. Here is our plan. Today, we will introduce run value, which is a number that tracks (i) the number of runs scored in each at-bat and (ii) the change in the number of runs the team can **expect** to score in the remainder of the at-bat.
-  Then we will look at assigning credit, after accounting for things outside the batting teams' control (e.g., the ballpark and handedness).
-  Then we will look at defense: how much blame should go to the fielder for not making the out or the pitcher for giving up the hit.
-  We will finally combine these and then convert our valuations to an easily-interpretable scale: wins above replacement. In doing so, we will 
-  
-  In class, we will focus primarily on the *conceptual* ideas: I've posted the code --- full disclosure, I spent about a week of solid development. I share this with you not to intimidate or impress y'all, but because I believe you can do it.
-  
-  Fair warning: these calculations
-  
-  
-
-  Compare two plays in baseball. The batter hits a homerun; obviously they should get credit, pitcher should get little credit, and the fielders
-  
-  But in this second play the situation is a bit murkier, the batter puts the ball in play (which is better than striking out!); the baserunners advances, but the fielder 
-  
-  If we can divide up credit to the players and sum up over all plays, then we 
-  
-  Credit in baseball is often expressed in terms of run expectancy. Loosely, this combines what is expected to happen with what actually happened. Neither extreme is quite what we want
-  
-  Eventually when we aggregate, it is more useful to turn absolute numbers into a comparison. How much better than is one player's performance than another's.
-  This is at the heart of the concept of "wins above replacement".
-  
-  While there are many proprietary approaches to computing this, we will emulate the calculation outlined by Baumer et al. in their landmark openWAR paper
-  
-  As with most lectures, there is a **lot** more in these notes than presented in lecture.
-  
--->
-
-<!--During the [March 20, 2024 game between the Dodgers and Padres](https://www.espn.com/mlb/playbyplay/_/gameId/401568469), Shohei Ohtani singled in the top of the 3rd inning and the top of the 8th inning.
-
-https://www.youtube.com/watch?v=wdvHcqXP5Ug
-
-Based on the results alone, the single in the 8th inning was more valuable --- it drove in a run.
-
-But, as we've discussed, it's not advisable to draw conclusions based only the result.
-We can make much more nuanced comparisons by thinking carefully about what we **expect** to happen.
--->
-
-
-
-## Obtaining and preparing baseball tracking data
-
-### History of tracking data 
-<!-- historical aside about history of pitchf/x 
-
-Statcast at 10: https://www.nytimes.com/athletic/5627303/2024/07/10/mlb-statcast-10-year-anniversary/
--->
-
-### Accessing StatCast Data{#sec-statcast-query}
-Major League Baseball hosts a public-facing web interface for accessing StatCast data.
+### Accessing Statcast Data in R{#sec-statcast-query}
+Major League Baseball hosts a [public-facing web interface](https://baseballsavant.mlb.com) for accessing Statcast data.
 Using that interface, users can pull up data for individual players or about all pitches of a certain type.
-Powering this website is an application programming interface (API), which allows software applications to connect to the underlying StatCast database.
-It is through this API that the **baseballR** package acquires data.
-If you have not yet installed that package, you can do so using the code `devtools::install_github(repo = "BillPetti/baseballr")`
-
-The **baseballR** package provides a function [`baseballr::statcast_search()`](https://billpetti.github.io/baseballr/reference/statcast_search.html) that allows users query all StatCast data by date, player, or player type.
-One of the original **baseballr** authors, Bill Petti, wrote a wrapper function that uses `baseballr::statcast_search()` to pull down an entire season's worth of pitch-by-pitch data; see [this blog post](https://billpetti.github.io/2021-04-02-build-statcast-database-rstats-version-3.0/) for more the wrapper function code and [this earlier post]() for details about its design.
-Since he published his original function, StatCast has added some new fields, necessitating a few changes to the original script.
-The code below defines a new scraper, which we will use in the course. 
-An R script containing this code is available at [this link](https://github.com/skdeshpande91/stat479_fall2025/blob/main/scripts/annual_statcast_query.R).
-At a high level, the scraping function pulls data from StatCast on a week-by-week basis. 
-
-
-:::{.callout-tip icon=false}
-## Installing **baseballr**
-
-We will use the development version of **baseballr**, which can be installed using the code
+Powering this website is an API, which allows software applications to connect to the underlying Statcast database.
+It is through this API that the **baseballr** package acquires data.
+You can install the package with the code:
 ```{r}
 #| label: install-baseballr
 #| eval: false
 devtools::install_github(repo = "BillPetti/baseballr")
 ```
-:::
 
+The function [`baseballr::statcast_search()`](https://billpetti.github.io/baseballr/reference/statcast_search.html) allows users query all Statcast data by date, player, or player type.
+One of the original **baseballr** authors, Bill Petti, wrote a wrapper function that uses `baseballr::statcast_search()` to pull down an entire season's worth of pitch-by-pitch data; see [this blog post](https://billpetti.github.io/2021-04-02-build-statcast-database-rstats-version-3.0/) for the wrapper function code and [this earlier post](https://billpetti.github.io/2018-02-19-build-statcast-database-rstats/) for details about its design.
+Since he published his original function, Statcast has added some new fields, necessitating a few changes to the original script.
+The code below defines a new scraper, which we will use in the course. 
+An R script containing this code is available at [this link](https://github.com/skdeshpande91/stat479_fall2025/blob/main/scripts/annual_statcast_query.R).
+At a high level, the scraping function pulls data from Statcast on a week-by-week basis. 
 
 ```{r}
 #| label:  annual-statcast-query-def
@@ -131,8 +75,7 @@ devtools::install_github(repo = "BillPetti/baseballr")
 #| code-summary: "Show the code"
 #| eval: false
 ## Code modified from Bill Petti's original annual Statcast scraper:
-# https://billpetti.github.io/2021-04-02-build-statcast-database-rstats-version-3.0/
-# Main change is in the column names of the fielders
+## Main change is in the column names of the fielders
 
 annual_statcast_query <- function(season) {
   
@@ -217,7 +160,7 @@ raw_statcast2024 <- annual_statcast_query(2024)
 ```
 :::{#statcast-warning .callout-important}
 ## Warning
-Scraping a single season of StatCast data can take between 30 and 45 minutes.
+Scraping a single season of Statcast data can take between 30 and 45 minutes.
 I **highly** recommend scraping the data for any season only once and saving the resulting data table in an `.RData` file that can be loaded into future R sessions.
 ```{r}
 #| eval: false
@@ -226,11 +169,11 @@ raw_statcast2024 <- annual_statcast_query(2024)
 save(raw_statcast2024, file = "raw_statcast2024.RData")
 ```
 These `.RData` files take between 75MB and 150MB of space.
-So, if you want to work with several seasons (e.g., going back all the way to 2008, the first season for which pitch tracking data is available), you will need about 2.5GB of storage space on your computer.
+So, if you want to work with data from all available seasons (2008 to the present), you will need about 2.5GB of storage space on your computer.
 :::
 
 
-### Working with StatCast Data
+### Statcast Basis {#sec-statcast-basics}
 ```{r load-statcast}
 #| echo: false
 #| message: false
@@ -241,7 +184,7 @@ load("raw_statcast2024.RData")
 
 The function `annual_statcast_query` actually scrapes data not only from the regular season but also from the pre-season and the play-offs.
 The column `game_type` records the type of game in which each pitch was thrown.
-Looking at the [StatCast documentation](https://baseballsavant.mlb.com/csv-docs), we see that regular season pitches have `game_type=="R"`.
+Looking at the [Statcast documentation](https://baseballsavant.mlb.com/csv-docs), we see that regular season pitches have `game_type=="R"`.
 ```{r table-game_type}
 table(raw_statcast2024$game_type, useNA = 'always')
 ```
@@ -262,9 +205,9 @@ statcast2024 <-
 We're now left with 695,135 regular season pitches.
 
 ### Pitch- and at-bat-level descriptions
-StatCast records a ton of information about each pitch including the type of pitch (`pitch_type`), the velocity of the pitch when it was released (`vx0`, `vy0`, `vz0`), the acceleration of the pitch at about the half-way point between the pitcher and batter (`ax`, `ay`, and `az`), and horizontal and vertical coordinates of the pitch as it crosses the front edge of home plate (`plate_x`) and (`plate_y`).
+Statcast records a ton of information about each pitch including the type of pitch (`pitch_type`), the velocity of the pitch when it was released (`vx0`, `vy0`, `vz0`), the acceleration of the pitch at about the half-way point between the pitcher and batter (`ax`, `ay`, and `az`), and horizontal and vertical coordinates of the pitch as it crosses the front edge of home plate (`plate_x`) and (`plate_y`).
 The column `type` also records whether the pitch resulted ball (`type=B`), a strike (`type=S`), or whether the ball was put in play (`type=X`).
-For balls in play, StatCast also records things like the launch speed and angle (`launch_speed`, `launch_angle`), the coordinates on the field where the ball landed (`hc_x`) and (`hc_y`), and the position of the first fielder to touch the ball (`hit_location`).
+For balls in play, Statcast also records things like the launch speed and angle (`launch_speed`, `launch_angle`), the coordinates on the field where the ball landed (`hc_x`) and (`hc_y`), and the position of the first fielder to touch the ball (`hit_location`).
 In Lecture 8, we will work with `hc_x` and `hc_y` to build a model that predicts the probability that each fielder makes an out on balls hit to a specific part of the field.
 As a bit of a preview, here is a plot of all the `hc_x` and `hc_y` values.
 
@@ -302,7 +245,7 @@ statcast2024 <-
 
 ### Getting player names
 
-For every pitch, the StatCast dataset records the identities of the batter (`batter`), pitcher (`pitcher`), and the other fielders (`fielders_2`, ..., `fielders_9`).
+For every pitch, the Statcast dataset records the identities of the batter (`batter`), pitcher (`pitcher`), and the other fielders (`fielders_2`, ..., `fielders_9`).
 However, it does not identify them by name, instead using an ID number, which is assigned by MLB Advanced Media. 
 We can look up the corresponding player names using a database maintained by the [Chadwick Register](https://github.com/chadwickbureau/register).
 The function `baseballr::chadwick_player_lu` downloads the Chadwick database and stores it as a data table in R.
@@ -466,7 +409,7 @@ But the exact same scenario would result in 3 runs in an earlier inning.
 Suppose that in a given at-bat $a$ that there are $n_{a}$ pitches.
 Within at-bat $a,$ for each $i = 1, \ldots, n_{a},$ let $R_{i,a}$ be the number of runs scored in the half-inning after that pitch (including any runs scored as a result of pitch $i$).
 So $R_{1,a}$ is the number of runs scored in the half-inning after the first pitch, $R_{2,a}$ is the number of runs scored subsequent to the second pitch, etc. 
-Our first step towards building the necessary at-bat-level data set will be to append a column of $R_{i,a}$ values to each season's StatCast data.
+Our first step towards building the necessary at-bat-level data set will be to append a column of $R_{i,a}$ values to each season's Statcast data.
 
 We start by illustrating the computation using a single half-inning from the Dodgers-Padres game introduced earlier.
 The code below pulls out all pitches thrown in the top of the 8th inning of the game.
@@ -491,7 +434,7 @@ rbind(bat_score = dodgers_inning$bat_score, post_bat_score = dodgers_inning$post
 ```
 Cross-referencing the table above with the [play-by-play data](https://www.espn.com/mlb/playbyplay/_/gameId/401568469), we see that the Dodgers score their second run after the 14th pitch of the half-inning (on a Enrique Hernández sacrifice fly); their third run on the very next pitch (Gavin Lux grounding into a fielder's choice); and their fourth and fifth runs on consecutive pitches (on singles by Mookie Betts and Shohei Ohtani).
 
-![Dodgers-Padres Play-by-Play](figures/lecture3_dodgers_pbp.png){fig-align="center"}
+![Play-by-Play from the March 20, 2024 Dodgers-Padres game](figures/lecture3_dodgers_pbp.png){fig-align="center"#fig-dodgers-pbp}
 
 We can verify this by looking at the variable `des`, which stores a narrative description about what happened during the at-bat. 
 ```{r}
@@ -552,7 +495,7 @@ expected_runs <-
 
 The table `expected_runs` contains one row for every combination of outs and base-runner configuration.
 Traditionally, expected runs is reported using an $8\times 3$ matrix, with rows corresponding to base-runner configurations and columns corresponding to outs.
-We can re-format `expected_runs` to this matrix format using the [`pivot_wider()`](https://tidyr.tidyverse.org/reference/pivot_wider.html) function
+We can re-format `expected_runs` to this matrix format using the [`tidyr::pivot_wider()`](https://tidyr.tidyverse.org/reference/pivot_wider.html) function
 ```{r}
 #| label: pivot-rho
 expected_runs |> 
@@ -568,7 +511,7 @@ As a result of Ohtani's single, he changed the game state to `Outs = 2` and `Bas
 So, although his at-bat did not directly result in a run scoring, Ohtani *increased* his team's run expectancy by about 0.12 runs.
 
 
-## Run value {#sec-run-value}
+## Run Value {#sec-run-value}
 
 While expected runs is a really useful metric, for the purposes of allocating credit, we need to account not only for what we expect to happen but also what actually happened as a result of each at-bat.
 
@@ -593,9 +536,9 @@ To do compute the run value of each at-bat in the 2024 season, we must compute
 We will first develop the necessary code using the data from Dodger's 8th inning from their game against the Padres.
 Then, we will deploy that code to the whole `statcast2024` table by grouping by `game_pk` and `at_bat_number`. 
 
-### Calculating RunsScored
+### Calculating Runs Score {#sec-compute-runsscored}
 
-StatCast numbers every at-bat within the game and every pitch within each at-bat.
+Statcast numbers every at-bat within the game and every pitch within each at-bat.
 To compute the number of runs scored within each at-bat, we will:
 
   1. Sort the pitches by at-bat number and then by pitch number in ascending order
@@ -603,7 +546,7 @@ To compute the number of runs scored within each at-bat, we will:
 
 Let's try to verify this by looking at pitches from the third, fourth, and fifth at-bats of Dodgers' 8th inning against the Padres[^atbatindex]
 
-[^atbatindex]: StatCast assigns each at-bat in a game a unique number. The third, fourth, and fifth at-bats during the Dodger's 8th inning were the 61st, 62nd, and 63rd at-bats of the game.
+[^atbatindex]: Statcast assigns each at-bat in a game a unique number. The third, fourth, and fifth at-bats during the Dodger's 8th inning were the 61st, 62nd, and 63rd at-bats of the game.
 
 ```{r}
 #| label: dodgers-345ab
@@ -649,7 +592,8 @@ save(statcast2024, file = "statcast2024.RData")
 1. Sub-divide the data based on individual at-bats
 2. Place pitches within each at-bat in sequential order
 3. Add column recording the number of runs scored in the at-bat
-### Computing the starting and ending states
+
+### Computing Starting & Ending States {#sec-computing-states}
 
 Except for the very last pitch in a team's innings, the ending state of that pitch is, by definition, the starting state of the next pitch.
 In order to compute $\rho(\textrm{o}_{\text{end}}, \textrm{br}_{\text{end}}),$ and $\rho(\textrm{o}_{\text{start}}, \textrm{br}_{\text{start}})$ for each at-bat, we will first create a columns in `statcast2024` that encode the game state at the beginning and end of the at-bat.
@@ -729,7 +673,7 @@ runValue2024 <-
 3. Goes to last pitch of each at-bat and gets the next value of `Outs` and `BaseRunner`, which are the *starting* values of these variables in the next at-bat.
 4. Gets the first pitch from each at-bat
 
-### Computing run-values
+### Computing Run Values {#sec-compute-run-values}
 
 Now that we have a table `runValue` containing information about the starting and ending states of each at-bat, we are ready to compute run-values.
 In particular, we can use a join (just like we did with XG in Lecture 2) to add in the values of the starting and ending expected runs.
@@ -839,44 +783,4 @@ re24
 When we compare our top-10 to [FanGraph's leaderboard for RE24](https://www.fangraphs.com/leaders/major-league?pos=all&type=3&sortcol=5&sortdir=default&qual=30&team=0&startdate=&enddate=&month=0&season1=2024&season=2024), we see a lot of overlap.
 But there are some differences, especially with regards to the number of plate appearances and actual RE24 values.
 For the latter, FanGraph likely used a different expected run matrix.
-And the StatCast data is not complete; for instance, it is missing 3 games in which Judge played.
-
-
-<!--
-  1. Compute run-value of each at-bat
-  2. Mimic Chapter 5 of Albert & Baumer & Marchi; sum up run-value and group by the base-runner configuration
-  3. Summing up run-values over all plate appearances is what's known as RE24; how big is this
-  4. " We can summarize a player’s batting performance in a season by the total number of plate appearances, the sum of the runs potentials, and the sum of the run values. One can remove pitchers and non-starters by focusing on batters with at least 400 plate appearances"
-  
--->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+And the Statcast data is not complete; for instance, it is missing 3 games in which Judge played.

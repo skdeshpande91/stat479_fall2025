@@ -187,7 +187,7 @@ window.Quarto = {
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture06.html">
- <span class="dropdown-text">Lecture 6: Run expectancy</span></a>
+ <span class="dropdown-text">Lecture 6: Run Expectancy</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture07.html">
@@ -203,7 +203,7 @@ window.Quarto = {
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture10.html">
- <span class="dropdown-text">Lecture 10: nflWAR II</span></a>
+ <span class="dropdown-text">Lecture 10: NFl WAR</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture11.html">
@@ -301,7 +301,7 @@ window.Quarto = {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../lectures/lecture06.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lecture 6: Run expectancy</span></a>
+ <span class="menu-text">Lecture 6: Run Expectancy</span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -325,7 +325,7 @@ window.Quarto = {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../lectures/lecture10.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lecture 10: nflWAR II</span></a>
+ <span class="menu-text">Lecture 10: NFl WAR</span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -356,7 +356,10 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#sec-overview" id="toc-sec-overview" class="nav-link active" data-scroll-target="#sec-overview">Overview</a>
+  <ul class="collapse">
+  <li><a href="#sec-data-preparation" id="toc-sec-data-preparation" class="nav-link" data-scroll-target="#sec-data-preparation">Data Preparation</a></li>
+  </ul></li>
   <li><a href="#sec-model-comparison" id="toc-sec-model-comparison" class="nav-link" data-scroll-target="#sec-model-comparison">Comparing XG models</a>
   <ul class="collapse">
   <li><a href="#misclassification-rate" id="toc-misclassification-rate" class="nav-link" data-scroll-target="#misclassification-rate">Misclassification Rate</a></li>
@@ -365,12 +368,12 @@ window.Quarto = {
   <li><a href="#sec-train-test" id="toc-sec-train-test" class="nav-link" data-scroll-target="#sec-train-test">The training/testing paradigm</a></li>
   <li><a href="#sec-logit" id="toc-sec-logit" class="nav-link" data-scroll-target="#sec-logit">Logistic Regression</a>
   <ul class="collapse">
-  <li><a href="#account-for-multiple-predictors" id="toc-account-for-multiple-predictors" class="nav-link" data-scroll-target="#account-for-multiple-predictors">Account for multiple predictors</a></li>
-  <li><a href="#interactions" id="toc-interactions" class="nav-link" data-scroll-target="#interactions">Interactions</a></li>
+  <li><a href="#sec-addtl-preds" id="toc-sec-addtl-preds" class="nav-link" data-scroll-target="#sec-addtl-preds">Account for multiple predictors</a></li>
+  <li><a href="#sec-interactions" id="toc-sec-interactions" class="nav-link" data-scroll-target="#sec-interactions">Interactions</a></li>
   </ul></li>
-  <li><a href="#random-forests" id="toc-random-forests" class="nav-link" data-scroll-target="#random-forests">Random forests</a>
+  <li><a href="#sec-rf" id="toc-sec-rf" class="nav-link" data-scroll-target="#sec-rf">Random forests</a>
   <ul class="collapse">
-  <li><a href="#comparison-to-statsbombs-model" id="toc-comparison-to-statsbombs-model" class="nav-link" data-scroll-target="#comparison-to-statsbombs-model">Comparison to StatsBomb’s model</a></li>
+  <li><a href="#sec-comparison" id="toc-sec-comparison" class="nav-link" data-scroll-target="#sec-comparison">Comparison to StatsBomb’s model</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -397,9 +400,14 @@ window.Quarto = {
 </header>
 
 
-<section id="overview" class="level2">
-<h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<p>Last lecture, we fit two very basic models for XG. The first used only body part to predict the probability of the shot resulting in a goal while the second used both body part and shot technique. By looking at a few of Beth Mead’s shots from EURO 2022, we decided that the second model was a better because it assigned a higher XG to her one-on-one lob than the shot through multiple defenders. In this lecture, we will</p>
+<section id="sec-overview" class="level2">
+<h2 class="anchored" data-anchor-id="sec-overview">Overview</h2>
+<p>In <a href="../lectures/lecture02.html">Lecture 2</a>, we fit two very basic models for XG. The first used only body part to predict the probability of the shot resulting in a goal while the second used both body part and shot technique. By looking at a few of Beth Mead’s shots from EURO 2022, we decided that the second model was a better because it assigned a higher XG to her one-on-one lob than the shot through multiple defenders.</p>
+<!--
+  Write the organizational part
+-->
+<section id="sec-data-preparation" class="level3">
+<h3 class="anchored" data-anchor-id="sec-data-preparation">Data Preparation</h3>
 <p>We will continue to work with all shot event data from women’s international competitions that StatsBomb makes publicly available. Using code from <a href="../lectures/lecture02.html">Lecture 2</a>, we can load in all the shot event data and create a binary outcome recording whether the shot resulted in a goal.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="annotated-cell-1"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-1-1"><a href="#annotated-cell-1-1" aria-hidden="true" tabindex="-1"></a>wi_shots <span class="ot">&lt;-</span></span>
@@ -461,6 +469,7 @@ window.Quarto = {
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> xg_model1, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>)) <span class="sc">|&gt;</span></span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> xg_model2, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>, <span class="st">"shot.technique.name"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
 </section>
 <section id="sec-model-comparison" class="level2">
 <h2 class="anchored" data-anchor-id="sec-model-comparison">Comparing XG models</h2>
@@ -597,14 +606,13 @@ StatsBomb LogLoss: 0.264 </code></pre>
 <span id="annotated-cell-11-6"><a href="#annotated-cell-11-6" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
 <button class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="2">2</button><span id="annotated-cell-11-7" class="code-annotation-target"><a href="#annotated-cell-11-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">id =</span> <span class="dv">1</span><span class="sc">:</span>n)</span>
 <span id="annotated-cell-11-8"><a href="#annotated-cell-11-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-11-9"><a href="#annotated-cell-11-9" aria-hidden="true" tabindex="-1"></a></span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="3">3</button><span id="annotated-cell-11-10" class="code-annotation-target"><a href="#annotated-cell-11-10" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">479</span>)</span>
-<span id="annotated-cell-11-11"><a href="#annotated-cell-11-11" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span></span>
-<span id="annotated-cell-11-12"><a href="#annotated-cell-11-12" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="4">4</button><span id="annotated-cell-11-13" class="code-annotation-target"><a href="#annotated-cell-11-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n =</span> n_train)</span>
-<span id="annotated-cell-11-14"><a href="#annotated-cell-11-14" aria-hidden="true" tabindex="-1"></a>test_data <span class="ot">&lt;-</span></span>
-<span id="annotated-cell-11-15"><a href="#annotated-cell-11-15" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="5">5</button><span id="annotated-cell-11-16" class="code-annotation-target"><a href="#annotated-cell-11-16" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">anti_join</span>(<span class="at">y =</span> train_data, <span class="at">by =</span> <span class="st">"id"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="3">3</button><span id="annotated-cell-11-9" class="code-annotation-target"><a href="#annotated-cell-11-9" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">479</span>)</span>
+<span id="annotated-cell-11-10"><a href="#annotated-cell-11-10" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-11-11"><a href="#annotated-cell-11-11" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="4">4</button><span id="annotated-cell-11-12" class="code-annotation-target"><a href="#annotated-cell-11-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n =</span> n_train)</span>
+<span id="annotated-cell-11-13"><a href="#annotated-cell-11-13" aria-hidden="true" tabindex="-1"></a>test_data <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-11-14"><a href="#annotated-cell-11-14" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="5">5</button><span id="annotated-cell-11-15" class="code-annotation-target"><a href="#annotated-cell-11-15" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">anti_join</span>(<span class="at">y =</span> train_data, <span class="at">by =</span> <span class="st">"id"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-hidden code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-11" data-target-annotation="1">1</dt>
@@ -617,15 +625,15 @@ StatsBomb LogLoss: 0.264 </code></pre>
 </dd>
 <dt data-target-cell="annotated-cell-11" data-target-annotation="3">3</dt>
 <dd>
-<span data-code-cell="annotated-cell-11" data-code-lines="10" data-code-annotation="3">We often manually the randomization seed, which dictates how R generates (pseudo)-random numbers (see <a href="https://stackoverflow.com/questions/32173042/are-random-seeds-spent-in-some-way/32173121#32173121">here</a>), to ensure full reproducibility of our analyses. Another user running this code should get the same results.</span>
+<span data-code-cell="annotated-cell-11" data-code-lines="9" data-code-annotation="3">We often manually the randomization seed, which dictates how R generates (pseudo)-random numbers (see <a href="https://stackoverflow.com/questions/32173042/are-random-seeds-spent-in-some-way/32173121#32173121">here</a>), to ensure full reproducibility of our analyses. Another user running this code should get the same results.</span>
 </dd>
 <dt data-target-cell="annotated-cell-11" data-target-annotation="4">4</dt>
 <dd>
-<span data-code-cell="annotated-cell-11" data-code-lines="13" data-code-annotation="4">The function <a href="https://dplyr.tidyverse.org/reference/slice.html"><code>slice_sample()</code></a> returns a random subset of rows.</span>
+<span data-code-cell="annotated-cell-11" data-code-lines="12" data-code-annotation="4">The function <a href="https://dplyr.tidyverse.org/reference/slice.html"><code>slice_sample()</code></a> returns a random subset of rows.</span>
 </dd>
 <dt data-target-cell="annotated-cell-11" data-target-annotation="5">5</dt>
 <dd>
-<span data-code-cell="annotated-cell-11" data-code-lines="16" data-code-annotation="5">The function <a href="https://dplyr.tidyverse.org/reference/filter-joins.html"><code>anti_join()</code></a> extracts the rows in <code>wi_shots</code> whose IDs are <strong>not</strong> contained in <code>train_data</code></span>
+<span data-code-cell="annotated-cell-11" data-code-lines="15" data-code-annotation="5">The function <a href="https://dplyr.tidyverse.org/reference/filter-joins.html"><code>anti_join()</code></a> extracts the rows in <code>wi_shots</code> whose IDs are <strong>not</strong> contained in <code>train_data</code></span>
 </dd>
 </dl>
 </div>
@@ -849,7 +857,12 @@ Number of Fisher Scoring iterations: 6</code></pre>
 </div>
 </div>
 <p>Since our model was trained on shots that came between 1.8 and 92 yards away, the suspiciously low 39% forecast for goal line shots represents a fairly significant <strong>extrapolation</strong>. In general, we need to exercise caution when using such extrapolations in any downstream analysis.</p>
-<p>Crucially, we can use our fitted model to make predictions about shots not seen in our training data. In R, we make predictions using the <code>predict()</code> function. The function takes three arguments: 1. <code>object</code>: this is the output from our <code>glm</code> call (i.e., the fitted model object), which we have here saved as <code>fit1</code> 2. <code>newdata</code>: this is a data table containing the features of the observations for which we would like predictions. The table that we pass here needs to have columns for every feature used in the model. 3. <code>type</code>: When <code>object</code> is the result from fitting a logistic regression model, <code>predict</code> will return predictions on the log-odds scale (i.e, <span class="math inline">\(\hat{\beta}_{0} + \hat{\beta}_{1}X_[1} + \cdots + \hat{\beta}_{p}X_{p}\)</span>) by default. To get predictions on the probability scale, we need to set <code>type = "response"</code></p>
+<p>Crucially, we can use our fitted model to make predictions about shots not seen in our training data. In R, we make predictions using the <code>predict()</code> function. The function takes three arguments:</p>
+<ol type="1">
+<li><code>object</code>: this is the output from our <code>glm</code> call (i.e., the fitted model object), which we have here saved as <code>fit1</code></li>
+<li><code>newdata</code>: this is a data table containing the features of the observations for which we would like predictions. The table that we pass here needs to have columns for every feature used in the model.</li>
+<li><code>type</code>: When <code>object</code> is the result from fitting a logistic regression model, <code>predict</code> will return predictions on the log-odds scale (i.e, <span class="math inline">\(\hat{\beta}_{0} + \hat{\beta}_{1}X_[1} + \cdots + \hat{\beta}_{p}X_{p}\)</span>) by default. To get predictions on the probability scale, we need to set <code>type = "response"</code></li>
+</ol>
 <p>In the code below, we obtain predictions for both the training and testing observations and then compute the average log-loss for this training/testing split.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>train_pred1 <span class="ot">&lt;-</span> </span>
@@ -912,8 +925,8 @@ Number of Fisher Scoring iterations: 6</code></pre>
 </div>
 </div>
 <p>So, accounting for the shot distance appears to yield more accurate predictions than account for just body-part. This immediately raises the question “how much more accurate would predictions be if we accounted for shot distance, body-part, and technique?”</p>
-<section id="account-for-multiple-predictors" class="level3">
-<h3 class="anchored" data-anchor-id="account-for-multiple-predictors">Account for multiple predictors</h3>
+<section id="sec-addtl-preds" class="level3">
+<h3 class="anchored" data-anchor-id="sec-addtl-preds">Account for multiple predictors</h3>
 <p>It turns out to be relatively straightforward to answer this question using <code>glm()</code>. Specifically, we can include more variables in the <code>formula</code> argument. Note that we first convert the variables <code>shot.body_part.name</code> and <code>shot.technique.name</code> to factors.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>wi_shots <span class="ot">&lt;-</span></span>
@@ -958,8 +971,14 @@ Number of Fisher Scoring iterations: 6</code></pre>
 </div>
 </div>
 <p>Looking at the output of <code>summary(fit)</code>, we see that the model includes several more parameters. There is a slope associated with left-footed and right-footed shots. Internally, <code>glm()</code> has <em>one-hot-encoded</em> the categorical predictor <code>shot.body_part.name</code> and decomposed the log-odds of a goal as <span class="math display">\[
-\beta_{0} + \beta_{1}\textrm{DistToGoal} + \beta_{LeftFoot}\mathbb{I}(\textrm{LeftFoot}) + \beta_{RightFoot} \mathbb{I}(\textrm{RightFoot})
-\]</span> Suppose a shot is taken from distance <span class="math inline">\(d.\)</span> The model makes different predictions based on the body part used to attempt the shot: * If the shot was taken with a header then the log-odds of a goal is <span class="math inline">\(\beta_{0} + \beta_{1}d\)</span> * If the shot was taken with the left foot, then the log-odds of a goal is <span class="math inline">\(\beta_{0} + \beta_{1}d + \beta_{\textrm{LeftFoot}}\)</span> * If the shot was taken with the right foot, then the log-odds of a goal is <span class="math inline">\(\beta_{0} + \beta_{1}d + \beta_{\textrm{RightFoot}}\)</span> Reassuringly, the estimates for <span class="math inline">\(\beta_{\textrm{RightFoot}}\)</span> and <span class="math inline">\(\beta_{\textrm{LeftFoot}}\)</span> are positive, indicating that for a fixed distance, the log-odds of scoring a goal on a left- or right-footed shot is higher than headers.</p>
+\beta_{0} + \beta_{1}\times \textrm{DistToGoal} + \beta_{LeftFoot}\times \mathbb{I}(\textrm{LeftFoot}) + \beta_{RightFoot} \times \mathbb{I}(\textrm{RightFoot})
+\]</span> Suppose a shot is taken from distance <span class="math inline">\(d.\)</span> The model makes different predictions based on the body part used to attempt the shot:</p>
+<ul>
+<li>If the shot was taken with a header then the log-odds of a goal is <span class="math inline">\(\beta_{0} + \beta_{1}d\)</span></li>
+<li>If the shot was taken with the left foot, then the log-odds of a goal is <span class="math inline">\(\beta_{0} + \beta_{1}d + \beta_{\textrm{LeftFoot}}\)</span></li>
+<li>If the shot was taken with the right foot, then the log-odds of a goal is <span class="math inline">\(\beta_{0} + \beta_{1}d + \beta_{\textrm{RightFoot}}\)</span></li>
+</ul>
+<p>Reassuringly, the estimates for <span class="math inline">\(\beta_{\textrm{RightFoot}}\)</span> and <span class="math inline">\(\beta_{\textrm{LeftFoot}}\)</span> are positive, indicating that for a fixed distance, the log-odds of scoring a goal on a left- or right-footed shot is higher than headers.</p>
 <p>By repeatedly fitting and assessing our new model using 100 random training/testing splits, we discover that account for both body part and shot distance results in even more accurate predictions.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>n_sims <span class="ot">&lt;-</span> <span class="dv">100</span></span>
@@ -1003,8 +1022,8 @@ Number of Fisher Scoring iterations: 6</code></pre>
 </div>
 </div>
 </section>
-<section id="interactions" class="level3">
-<h3 class="anchored" data-anchor-id="interactions">Interactions</h3>
+<section id="sec-interactions" class="level3">
+<h3 class="anchored" data-anchor-id="sec-interactions">Interactions</h3>
 <p>Our most accurate model so far accounts for both shot distance and the body part used to attempt the shot. Taking a closer look at the assumed log-odds of a goal, however, reveals a potentially important limitation: the effect of distance is assumed to be the same for all shot-types. That is, the model assume that moving one yard further away decreases the log-odds of a goal of a right-footed shot by exactly the same amount as it would a header.</p>
 <p>Interactions between factors in a regression model allow the effect of one factor to vary based on the value of another factor. Using R’s formula interface, we can introduce interactions between two variables using <code>*</code>.</p>
 <div class="cell">
@@ -1059,7 +1078,12 @@ Number of Fisher Scoring iterations: 6</code></pre>
 [\beta_{\textrm{DistToGoal}} + \beta_{\textrm{DistToGoal:LeftFoot}}*\mathbb{I}(\textrm{LeftFoot}) + \beta_{\textrm{DistToGoal:RightFoot}}\mathbb{I}(\textrm{RightFoot})] \times \textrm{DistToGoal} &amp;  
 \end{align}
 \]</span> where <span class="math inline">\(\mathbb{I}(RightFoot)\)</span> is an indicator of whether or not the shot was taken with the right foot.</p>
-<p>Now for a given shot taken at distance <span class="math inline">\(d\)</span>, the log-odds of a goal are: * <span class="math inline">\(\beta_{0} + \beta_{\textrm{DistToGoal} * d\)</span> is the shot was a header. * <span class="math inline">\(\beta_{0} + \beta_{\textrm{LeftFoot}} + (\beta_{\textrm{DistToGoal}} + \beta_{\textrm{DistToGoal:LeftFoot}}) * d\)</span> if the shot was taken with the left foot. * <span class="math inline">\(\beta_{0} + \beta_{\textrm{RightFoot}} + (\beta_{\textrm{DistToGoal}} + \beta_{\textrm{DistToGoal:RightFoot}}) * d\)</span> if the shot was taken with the right foot.</p>
+<p>Now for a given shot taken at distance <span class="math inline">\(d\)</span>, the log-odds of a goal are:</p>
+<ul>
+<li><span class="math inline">\(\beta_{0} + \beta_{\textrm{DistToGoal} * d\)</span> is the shot was a header.</li>
+<li><span class="math inline">\(\beta_{0} + \beta_{\textrm{LeftFoot}} + (\beta_{\textrm{DistToGoal}} + \beta_{\textrm{DistToGoal:LeftFoot}}) * d\)</span> if the shot was taken with the left foot.</li>
+<li><span class="math inline">\(\beta_{0} + \beta_{\textrm{RightFoot}} + (\beta_{\textrm{DistToGoal}} + \beta_{\textrm{DistToGoal:RightFoot}}) * d\)</span> if the shot was taken with the right foot.</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>n_sims <span class="ot">&lt;-</span> <span class="dv">100</span></span>
 <span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>train_logloss <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims)</span>
@@ -1104,9 +1128,17 @@ Number of Fisher Scoring iterations: 6</code></pre>
 <p>Interestingly, adding the interaction between distance and body part did not seem to improve the test-set log-loss by much.</p>
 </section>
 </section>
-<section id="random-forests" class="level2">
-<h2 class="anchored" data-anchor-id="random-forests">Random forests</h2>
-<p>Remember how we used the function <code>StatsBombR::allclean()</code> to apply some of StatsBomb’s suggested pre-processing? It turns out that this function creates several features related to shot attempt including<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> * Distances from the shot the center of the goal line (<code>DistToGoal</code>); from the shot to the goal keeper (<code>DistSGK</code>); from the goalkeeper to the center of the goal line (<code>DistToGK</code>) * The horizontal angles between the shot and goalkeeper to the center of the goal line (<code>AngleToGoal</code> &amp; <code>AngleToKeeper</code>) and the difference between these angles (<code>AngleDeviation</code>) * The distances between the shot and the two nearest defenders (<code>distance.ToD1</code> and <code>distance.ToD2</code>) * The number of defenders and whether the goal keeper is in the triangular area defined by the shot location and the two goal posts (the “cone”;<code>DefendersInCone</code> and <code>InCone.GK</code>) * The sum of the inverse distances between the shot location the locations of all defenders (<code>density</code>) and those defenders in the cone. A small <code>density</code> indicates that defenders are very far from the shot location. * The area of the smallest square that covers the locations of all center-backs and full-backs (<code>DefArea</code>)</p>
+<section id="sec-rf" class="level2">
+<h2 class="anchored" data-anchor-id="sec-rf">Random forests</h2>
+<p>Remember how we used the function <code>StatsBombR::allclean()</code> to apply some of StatsBomb’s suggested pre-processing? It turns out that this function creates several features related to shot attempt including<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>:</p>
+<ul>
+<li>Distances from the shot the center of the goal line (<code>DistToGoal</code>); from the shot to the goal keeper (<code>DistSGK</code>); from the goalkeeper to the center of the goal line (<code>DistToGK</code>)</li>
+<li>The horizontal angles between the shot and goalkeeper to the center of the goal line (<code>AngleToGoal</code> &amp; <code>AngleToKeeper</code>) and the difference between these angles (<code>AngleDeviation</code>)</li>
+<li>The distances between the shot and the two nearest defenders (<code>distance.ToD1</code> and <code>distance.ToD2</code>)</li>
+<li>The number of defenders and whether the goal keeper is in the triangular area defined by the shot location and the two goal posts (the “cone”;<code>DefendersInCone</code> and <code>InCone.GK</code>)</li>
+<li>The sum of the inverse distances between the shot location the locations of all defenders (<code>density</code>) and those defenders in the cone. A small <code>density</code> indicates that defenders are very far from the shot location.</li>
+<li>The area of the smallest square that covers the locations of all center-backs and full-backs (<code>DefArea</code>)</li>
+</ul>
 <p>The code below pulls out several of these features and creates a training/testing split</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>shot_vars <span class="ot">&lt;-</span></span>
@@ -1154,7 +1186,7 @@ Number of Fisher Scoring iterations: 6</code></pre>
 <p>How much more predictive accuracy can we squeeze out of an XG model when we account for all these variables? While it is tempting to continue fitting logistic regression models, these models make fairly strong assumptions about how the log-odds of a goal change as we vary the features. Moreover, it becomes increasingly difficult to specify interactions, especially between continuous/numerical factors.</p>
 <p><strong>Random forests</strong> is a powerful regression approach that avoids specifying functional forms and allows for high-order interactions. At a high-level, a random forest model approximates a regression function <span class="math inline">\(\mathbb{E}[Y \vert \boldsymbol{\mathbf{X}}]\)</span> using the sum of several piece-wise constant step functions. <!-- include some more information about random forests --></p>
 <p>In this course, we will fit random forests models using the <a href="http://imbs-hl.github.io/ranger/"><strong>ranger</strong> package</a>. The main function of that package is called <code>ranger()</code>. Its syntax is somewhat similar to <code>glm()</code> insofar as both functions require us to specify a formula and pass our data in as a data frame (or tibble). Unlike <code>glm()</code>, which required us to specify the argument <code>family = binomial("logit")</code> to fit binary outcomes, <code>ranger()</code> requires us to specify the argument <code>probability=TRUE</code>. This signals to the function that we want predictions on the probability scale and not the <span class="math inline">\(\{0,1\}\)</span>-outcome scale.</p>
-<p>We can also use <code>predict()</code> to get predictions from a model fitted with <code>ranger().</code> But this involves slightly different syntax: instead of using the argument <code>newdata</code>, we need to use the argument <code>data</code>. Additionally, when making predictions based on a <code>ranger</code> model with <code>probability = TRUE</code>, the function <code>predict</code> returns a named list. One element of that list is called <code>predictions</code> and it is a matrix whose rows correspond to the rows of <code>data</code> and whose columns contain the probabilities <span class="math inline">\(\mathbb{P}(Y = 0)\)</span> and <span class="math inline">\(\mathbb{P}(Y = 1).\)</span> So, to get the predicting XG values, we need to look at the 2nd column of this matrix.</p>
+<p>We can also use <code>predict()</code> to get predictions from a model fitted with <code>ranger().</code> But this also involves slightly different syntax: instead of using the argument <code>newdata</code>, we need to use the argument <code>data</code>. Additionally, when making predictions based on a <code>ranger</code> model with <code>probability = TRUE</code>, the function <code>predict</code> returns a named list. One element of that list is called <code>predictions</code> and it is a matrix whose rows correspond to the rows of <code>data</code> and whose columns contain the probabilities <span class="math inline">\(\mathbb{P}(Y = 0)\)</span> and <span class="math inline">\(\mathbb{P}(Y = 1).\)</span> So, to get the predicting XG values, we need to look at the 2nd column of this matrix.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="annotated-cell-32"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-32-1"><a href="#annotated-cell-32-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span></span>
 <button class="code-annotation-anchor" data-target-cell="annotated-cell-32" data-target-annotation="1">1</button><span id="annotated-cell-32-2" class="code-annotation-target"><a href="#annotated-cell-32-2" aria-hidden="true" tabindex="-1"></a>  ranger<span class="sc">::</span><span class="fu">ranger</span>(<span class="at">formula =</span> Y<span class="sc">~</span>.,</span>
@@ -1192,7 +1224,7 @@ Number of Fisher Scoring iterations: 6</code></pre>
 </div>
 </div>
 <p>At least for this training/testing split, our in-sample log-loss is <strong>much</strong> smaller than our out-of-sample log-loss. This is not at all surprising: flexible regression models like random forests are trained to predict the in-sample data and so we should expect to see smaller training errors than testing errors.</p>
-<p>Repeating these calculations over 100 training/testing splits, we can conclude that our more flexible random forest model, which accounts for many more features and can accommodate many more interaction terms than our simple logistic regression model, does seem to out-perform the logistic regression models.</p>
+<p>Repeating these calculations over 100 training/testing splits, we can conclude that our more flexible random forest model, which accounts for many more features and can accommodate many more interaction terms than our simple logistic regression model, out-performs the logistic regression models.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>n_sims <span class="ot">&lt;-</span> <span class="dv">100</span></span>
 <span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>train_logloss <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims)</span>
@@ -1244,8 +1276,8 @@ Number of Fisher Scoring iterations: 6</code></pre>
 <pre><code>RandomForest testing logloss: 0.2523 </code></pre>
 </div>
 </div>
-<section id="comparison-to-statsbombs-model" class="level3">
-<h3 class="anchored" data-anchor-id="comparison-to-statsbombs-model">Comparison to StatsBomb’s model</h3>
+<section id="sec-comparison" class="level3">
+<h3 class="anchored" data-anchor-id="sec-comparison">Comparison to StatsBomb’s model</h3>
 <p>Now that we have a much more predictive model, we can compare our model estimates to those from StatsBomb’s proprietary model. In the code below, we re-fit a random forests model to the whole dataset. We then plot our XG estimates against StatsBomb’s.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span></span>
