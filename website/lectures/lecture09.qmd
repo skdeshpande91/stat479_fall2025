@@ -1,5 +1,5 @@
 ---
-title: "Lecture 9: Expected Points Added & Multilevel Modeling"
+title: "Lecture 9: Multilevel Modeling"
 format: html
 execute: 
   cache: true
@@ -18,7 +18,7 @@ In this lecture, we introduce expected points (EP) and expected points added (EP
 Then, using a multilevel model, we will identify the players whom we would expect to generate the most expected points per passing attempt. 
 
 
-### Accessing play-by-play NFL data {#sec-nflfastr-intro}
+### Play-By-Play Football Data {#sec-nflfastr-intro}
 
 We will use of the play-by-play data available from the [**nflfastR**](https://www.nflfastr.com) package.
 The package can be installed using the code:
@@ -75,7 +75,7 @@ roster2024 <-
   nflfastR::fast_scraper_roster(seasons = 2024)
 ```
 
-## Expected Points in Football {#sec-ep}
+## Expected Points {#sec-ep}
 
 <!--
  Paraphrase from Section 1.1 of Yurko's paper 
@@ -131,7 +131,7 @@ Like random forests, xgboost builds an ensemble of decision trees, each of which
 The final prediction is formed using the proportions of trees outputting a certain outcome.
 More details are about **nflfastR**'s EP model are available [here](https://opensourcefootball.com/posts/2020-09-28-nflfastr-ep-wp-and-cp-models/).
 
-### Basic uses of EPA {#sec-basic-usage}
+### Basic EPA Uses {#sec-basic-usage}
 
 For each play in `pbp2024`, the column `epa` records the expected points added on the play.
 It turns out that the Herbert-to-McConckey touchdown introduced in @sec-intro was the play with the largest EPA across the entire 2024-25 regular season.
@@ -174,7 +174,7 @@ pbp2024 |>
 
 Interestingly, the top three offenses in terms of average EPA (the Baltimore Ravens, Buffalo Bills, and Detroit Lions) were also the three highest scoring offenses in the 2024 season, each scoring over 30 points per game, on average.
 
-## Predicting EPA on a new pass {#sec-newpass}
+## Predicting EPA On A New Pass {#sec-newpass}
 
 Based on the 2024-25 regular season data, how much EPA would we expect to see on a hypothetical future passing play?
 Without any additional information about the play --- i.e., who threw the pass, how long the pass was, whether it was thrown out of the shotgun formation, etc. --- it seems reasonable to use the average EPA across all passing plays in our data set.
@@ -211,7 +211,7 @@ mean(pass2024$epa)
 ```
 
 
-### Computing player-specific EPA per pass {#sec-empirical-average}
+### Player-Specific EPA/Pass {#sec-empirical-average}
 
 Given the vast spread of EPAs in our dataset (roughly -12.7 to 8.5), using the league-wide average of 0.159 to predict the EPA on a future pass is rather unsatisfactory.
 One avenue for improvement is to condition on additional information like the identity of the passer, which is recorded in the column `passer_player_id`.
@@ -305,7 +305,7 @@ alphas |>
   dplyr::slice(c(1:5, (dplyr::n()-4):dplyr::n())) |>
   dplyr::select(full_name, ols)
 ```
-### Issues with our initial model {#sec-epa-issues}
+### Issues {#sec-epa-issues}
 
 By this point in the course, you probably already suspect what's going on: the extreme average EPA estimates are artifacts of small sample sizes.
 To verify that this is so, we'll add a column to `alphas` recording the number of passes thrown by each player.
@@ -357,7 +357,7 @@ plot(alphas$n, alphas$ols,
 abline(h = mean(pass2024$epa), col = oi_colors[3])
 ```
 
-### Partially pooling across players {#sec-partial-pooling-motivation}
+### Partial Pooling {#sec-partial-pooling-motivation}
 Let's return to the problem of forecasting EPA on a single new pass based solely on the identity of the passer.
 One option is to ignore the passer identity and just use the overall mean of about 0.159.
 Doing so completely ignores differences between passers, which is fairly unreasonable given the large gaps in talent between NFL quarterbacks.
@@ -382,7 +382,7 @@ where the weight $w_{i}$ depends on the number of passes thrown by player $i$ an
 Ideally, if a player $i$ throws a large number of passes the weight $w_{i}$ assigned to his empirical average EPA  would be close to 1 and and if he threw very few passes, the weight would be set much closer to 0.
 The hope is, in other words, that we could *differentially shrink* every player's raw average per-pass EPA towards the grand mean. 
 
-## Multilevel models {#sec-multilevel-model}
+## Multilevel Models {#sec-multilevel-model}
 
 *Multilevel models* provide a principled way to compute these weights *automatically*. 
 Like in our initial analysis, our first multilevel will model the observed EPA's as noisy measurements of some underlying player-specific parameter.
@@ -510,7 +510,7 @@ abline(h = alpha0_hat, col = oi_colors[3])
 1. The function `fixef()` returns all the *fixed effects* (see below) in a named vector. As this is an intercept-only model, we use the name "(Intercept)" to access the parameter estimate.
 
 
-## Adjusting for additional covariates {#sec-covariates}
+## Adjusting For Additional Covariates {#sec-covariates}
 
 Up to this point, we've worked with a rather toy problem, predicting EPA given only the identity of the passer.
 But what if we include additional information about the pass (e.g., whether it was throw by the home or away team, whether it was thrown out of the shotgun formation, etc.)? 
@@ -653,7 +653,7 @@ points(alphas_full$n, alphas_full$lmer, pch = 15, col = oi_colors[2], cex = 0.5)
 abline(h = alpha0_hat, col = oi_colors[3])
 ```
 
-## Looking ahead {#sec-next-time}
+## Looking Ahead {#sec-next-time}
 
 Using Expected Points Added (EPA), we can assess individual plays based on how the probability of different scoring outcomes changed over the course of the play.
 Armed with EPA, it is very tempting to rank passers in terms of the average EPA on their passing plays.
