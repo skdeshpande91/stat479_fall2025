@@ -5,7 +5,7 @@ execute:
   cache: true
 ---
 
-## Overview
+## Overview {#sec-overview}
 
 Which NBA players do the most to help their teams win? And how might we quantify that contribution?
 One option is to rely on box score statistics like points, rebounds, assists, steals, blocks, and turnovers.
@@ -18,11 +18,11 @@ It is also difficult to compare players who play different roles: is a guard who
 More subtley, players do many things during the course of a game (e.g., setting screens, rotating on defense, dive for loose balls, etc.) that impact the outcome of a play or the game but do not appear in the box score.
 How should those contributions be valued?
 
-In today's lecture, we introduce two now-classical approaches to player evaluation: *plus/minus* and *adjusted plus/minus*. 
+In today's lecture, we introduce two now-classical approaches to player evaluation: *plus/minus* (@sec-pm) and *adjusted plus/minus* (@sec-apm-intro). 
 At a high-level, plus/minus is simply the total point differential that a player's team accrues when he is on the court.
 Adjusted plus/minus measures how much more a player contributes to his team's point differential per 100 after accounting than a baseline-level player, after accounting for the relative contributions of his teammates and opponents. 
 
-### Stint-level NBA data
+### Stint-level NBA Data {#sec-data-prep}
 
 
 :::{.callout-note icon=false}
@@ -41,18 +41,12 @@ Basically, whenever a player does something tracked by the scorekeepers or repor
 
 [^luka]: It is the game in which Luka Dončić ~~embarassed~~ hit a step-back 3 pointer over Rudy Goert to win the game ([link](https://www.nba.com/stats/events?CFID=&CFPARAMS=&GameEventID=682&GameID=0042300312&Season=2023-24&flag=1&title=Doncic%2025%27%203PT%20Step%20Back%20Jump%20Shot%20(32%20PTS))).
 
-We can scrap play-by-play data into R using the [[**hoopR**]](https://hoopr.sportsdataverse.org) package.
-
-:::{.callout-important}
-## Install **hoopR**
-
-If you have not already done so, please install **hoopR** with:
+We can scrap play-by-play data into R using the [[**hoopR**]](https://hoopr.sportsdataverse.org) package, which can be installed using the code:
 ```{r}
 #| label: install-hoopR
 #| eval: false
 install.packages("hoopR")
 ```
-:::
 
 The following function, which is based on a [script](https://github.com/SCOREnetworkorg/sports-data-repository/blob/main/_prep/nba-rapm/init-nba-rapm-data.R) written by [Ron Yurko](https://www.stat.cmu.edu/~ryurko/), extracts stint information from a single game's play-by-play.
 
@@ -65,6 +59,7 @@ It takes about 30 minutes to download all single season's worth of play-by-play 
 #| label: get-stint-data
 #| eval: false
 #| code-fold: true
+#| code-summary: "Show code to get stinte data"
 
 get_game_stint_data <- function(game_i) { #<1>
   
@@ -278,6 +273,7 @@ rapm_data <- nba_rapm_2024_2025
 ```
 
 The first 14 columns of `rapm_data` record: 
+
   * Numeric identifiers for the game (`game_id`) and stint (`stint_id`).
   * Both teams' scores and the amount of time remaining at the start of a shift: `start_home_score`, `start_away_score`, and  `start_minutes`.
   * Both teams' scores and the amount of time remaining at the end of each shift: `end_home_score`, `end_away_score`, and `end_minutes`.
@@ -307,14 +303,15 @@ player_table <-
 
 Intuitively, we expect a team to perform better when a "good" player is on the court than when he is not on the court.
 Similarly, we expect a team to perform worse when a "bad" player is on the court than when he is not on the court.
-*Plus/minus* (hereafter +/-) attempts to quantify this intuition by computing the total number of points by which a player's team outscores their opponents when that player is on the floor.
+*Plus/Minus* (hereafter +/-) attempts to quantify this intuition by computing the total number of points by which a player's team outscores their opponents when that player is on the floor.
 If a player has a large, positive +/- value, that means that the player's team outscored its opponents by a large margin 
 Similarly, a large, negative +/- value indicates that a player's team was outscored by a wide margin when the player was on the court.
 
-### Computing a single player's +/- {#sec-individual-pm}
+### Computing Individual +/-'s {#sec-individual-pm}
 
 As an example, let's compute the plus/minus values for Shai Gilgeous-Alexander (SGA), who was recognized as the league's Most Valuable Player (MVP) in the 2024-25 regular season.
 To compute SGA's +/-, we need to 
+
   1. Sum the home team point differentials (i.e., the values in the column `pts_diff`) for all shifts where SGA was on the court and playing at home.
   2. Sum the *negative* of the home team point differentials for all shifts where SGA was on the court and playing on the road.
   3. Add the two totals from Steps 1 and 2.
@@ -360,7 +357,7 @@ sum(jokic_x * delta)
 ```
 
 
-### Matrix-based computation {#sec-matrix-pm}
+### Matrix-Based Computation {#sec-matrix-pm}
 
 Repeating this calculation for all players one at a time is exceptionally tedious.
 Luckily, with a bit of matrix algebra, we can compute the +/- for *all* players in one shot.
@@ -464,8 +461,6 @@ The following code helps visualize just how much larger SGA's +/- was compared t
 #| fig-align: center
 
 oi_colors <- palette.colors(palette = "Okabe-Ito") #<1>
-
-
 n <- nrow(X_full)
 p <- ncol(X_full) #<2>
 y_lim <- max(abs(pm$pm)) * c(-1.01, 1.01) #<3>
@@ -498,8 +493,6 @@ abline(h = 0, col = oi_colors[8])
 9. The argument `lwd` controls the thickness of the lines. Setting it to 0.25 prevents over-plotting in this case
 
 
-
-
 ### Issues with +/- {#sec-pm-issues}
 
 The gap SGA's +/- and the +/- values for the rest of the league is striking.
@@ -508,10 +501,11 @@ Or is the gap an artifact of some systematic factors?
 When we plot each player's +/- against the number of possessions played, we find much more variation in the +/- values of players who played more possessions than those who played less.
 
 ```{r}
-#| label: plot-pm-poss
+#| label: fig-pm-poss
 #| fig-width: 6
 #| fig-asp: 0.5625
 #| fig-align: center
+#| fig-cap: Relationship between Plus/Minus and number of possessions played
 
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
 plot(pm$n_pos, pm$pm, 
@@ -532,7 +526,6 @@ Do we really believe that Lugentz Dort, who is known primarily for his defensive
 The player with the third-highest +/- is Isaiah Joe, who primarily came off the bench.
 Does this mean that the Oklahoma City Thunder under-utilitzed potentially the third-best player in the league?
 
-
 Recall that +/- is computed by adding up the point differential for every player when they are on the court.
 So, if a player is fortunate enough to play alongside extremely talented teammates, they might post a high +/- rating, regardless of their actual contribution.
 Moreover, players who consistently find themselves playing against the opponents' best players may have a lower +/- rating than players who more often play against their opponents' second units.
@@ -540,6 +533,7 @@ Thus, even if player A and player B played a similar number of possessions, A ha
 
 
 ## Adjusted Plus/Minus {#sec-apm-intro}
+
 
 An inherent weakness, then, of +/- is that a player's +/- necessarily depends on the performances of his teammates and opponents, which can vary dramatically across players.
 *Adjusted plus/minus*, which was first introduced by [Rosenbaum in 2004](https://www.82games.com/comm30.htm), attempts to take into account the quality of a player's teammates and opponents.
@@ -551,6 +545,7 @@ In our `rapm_data` data table, this quantity is saved in the column `margin`[^ma
 We will denote the margin for stint $i$ by $Y_{i}.$
 
 [^margin]: As best I can tell, the name `margin` refers back to the [original article](https://www.82games.com/comm30.htm).
+
 
 Formally, APM associates a number $\alpha_{j}$ to every player $j = 1, \ldots, p$ and models
 $$
@@ -564,6 +559,7 @@ In other words, APM expresses the actually observed point differential per 100 p
 
 To better understand the model, consider the first stint from the December 23, 2024 game between the Dallas Mavericks (away) and the Golden State Warriors (home).
 The players on the court were:
+
   * Mavericks (away): Luka Doncic, Dereck Lively II, Kyrie Irving, P.J. Washington, and Klay Thompson
   * Warriors (home): Stephen Curry, Buddy Hield, Andrew Wiggins, Jonathan Kuminga, and Kevon Looney.
   
@@ -587,6 +583,8 @@ Taking the difference between these two expectations, under the APM model, the M
 More generally, the quantity $\alpha_{j} - \alpha_{j'}$ represents how many more points per 100 possessions a team expects to score when player $j$ is on the court than when he is replaced by player $j'$.
 
 [^personal]: Fire Nico.
+
+### APM As A Linear Model {#sec-apm-lm}
 
 Of course, we don't know the exact $\alpha_{j}$ values and must use our data to *estimate* them.
 To this end, let $\boldsymbol{\mathbf{Z}}$ be the $n \times (p+1)$ matrix formed by appending a column of 1's to the matrix $\boldsymbol{\mathbf{X}}$ and let $\boldsymbol{\alpha} = (\alpha_{0}, \alpha_{1}, \ldots, \alpha_{p})^{\top}$ be the vector of length $p+1$ containing the home court advantage $\alpha_{0}$ and all the player-specific parameters $\alpha_{j}.$
@@ -613,7 +611,7 @@ To see this, recall that each row of $\boldsymbol{\mathbf{Z}}}$ contains exactly
 So, each row of $\boldsymbol{\mathbf{Z}}$ sums to zero, meaning that the matrix is not of full-rank.
 This in turn implies that $\boldsymbol{\mathbf{Z}}^{\top}\boldsymbol{\mathbf{Z}}$ does not have a unique inverse and that the optimization problem does not have a unique solution. 
 
-### Value relative to baseline
+### Value Relative to Baseline {#sec-baseline}
 
 In short, there are two main difficulties with our initial APM model.
 The first is practical: we simply cannot obtain player-specific estimates using the method of least squares.
@@ -629,7 +627,7 @@ Then, they **assume** that the $\alpha_{j}$'s for all baseline-level players are
 For each non-baseline player $j = 1, \ldots, \tilde{p},$ they introduce the parameter $\beta_{j} = \alpha_{j} - \mu.$
 Unlike the individual $\alpha_{j}$ values, the $\beta_{j}$ parameters for non-baseline players have a sensible interpretation: a team should expect to score $\beta_{j}$ more points per 100 possessions if they replace a baseline-level player with non-baseline player $j$, keeping all other players on the court the same[^prove].
 
-[^prove]: Try proving this for yourself! If you find yourself getting stuck with this, ask your classmates on Piazza or come to the instructor's office hours. 
+[^prove]: Try proving this for yourself! If you find yourself getting stuck with this, ask your classmates on Piazza or come to the instructor's Friday office hours. 
 
 The $\beta_{j}$'s can also be estimated using the method of least squares.
 Formally, let $\beta_{0} = \alpha_{0};$ $\boldsymbol{\beta} = (\beta_{0}, \beta_{1}, \ldots, \beta_{p'})^{\top}$ be the vector of unknown model parameters; and let $\tilde{\boldsymbol{\mathbf{Z}}}$ be the $n \times (p'+1)$ sub-matrix of $\boldsymbol{\mathbf{Z}}$ formed by removing the columns.
@@ -648,7 +646,7 @@ $$
 \hat{\boldsymbol{\beta}} = \left( \tilde{\boldsymbol{\mathbf{Z}}}^{\top}\tilde{\boldsymbol{\mathbf{Z}}}\right)^{-1}\tilde{\boldsymbol{\mathbf{Z}}}^{\top}\boldsymbol{\mathbf{Y}}.
 $$
 
-### Fitting the reparametrized APM model{#sec-apm-beta}
+### A Re-parametrized Model{#sec-apm-beta}
 
 In practice, we rarely fit linear models like our re-parametrized APM model with manual matrix calculations.
 Instead, we rely on R's built-in `lm()` function to do compute $\hat{\boldsymbol{\beta}}.$
@@ -699,8 +697,6 @@ rownames(apm) <- NULL #<2>
 ```
 1. Removes all instances of the back-tick from the names of `beta`
 2. Because `beta` is named, the data table `apm` is created with rownames, which are unnecessary. 
-
-
 The top-10 players based on adjusted plus/minus looks quite a bit different than the raw plus/minus!
 ```{r}
 #| label: top-10-apm
@@ -716,14 +712,13 @@ apm |>
 
 Although APM takes into account the quality of the teammates and opponents with whom each player plays, it fails to account fully for the *context* in which players play.
 Quoting @DeshpandeJensen2016, as a result, metrics like APM
-> "can artificially can artificially inflate the importance of performance in low-leverage situations, when the outcome of the game is essentially decided, while simultaneously deflating the importance of high-leverage performance, when the final outcome is still in question. For instance, point diﬀerential-based metrics model the home team’s lead dropping from 5 points to 0 points in the last minute of the first half in exactly the same way that they model the home team’s lead dropping from 30 points to 25 points in the last minute of the second half. 
+> "can artificially can artificially inflate the importance of performance in low-leverage situations, when the outcome of the game is essentially decided, while simultaneously deflating the importance of high-leverage performance, when the final outcome is still in question. For instance, point diﬀerential-based metrics model the home team’s lead dropping from 5 points to 0 points in the last minute of the first half in exactly the same way that they model the home team’s lead dropping from 30 points to 25 points in the last minute of the second half". 
 
 To overcome this limitation, we might try to down-weight low-leverage stints and up-weight high-leverage stints.
 For instance, we might assign a weight $w_{i}$ to stint $i$ where
   * $w_{i} = 1$ if, at the start of stint $i,$ the teams are within 10 points of each other
   * $w_{i} = 0$ if, at the start of the stint $i,$ the difference in scores exceed 30 points
   * $w_{i} = 1 - (\textrm{StartDiff} - 10)/20$: if, at the start of stint $i,$ the difference in scores is between 10 and 30 points. This weight smoothly interpolates between 0 (when the difference is 30) and 1 (when the difference is 10).
-
 
 ```{r}
 wapm_df <-
@@ -784,7 +779,7 @@ wapm |>
   dplyr::select(Name, wapm)
 ```
 
-## Looking ahead {#sec-looking-ahead}
+## Looking Ahead {#sec-looking-ahead}
 
 To fit our adjusted plus/minus model using the method of least squares, we specified a set of baseline-level players and **assumed** that all the baseline players had the exact same partial effect on their team's average point differential per 100 possessions.
 This is a very strong and, frankly, unrealistic assumption!
@@ -799,6 +794,8 @@ save(X_full, Y, player_table, file = "lecture04_05_data.RData")
 
 ## Exercises
 
-1. We used a somewhat arbitrary minutes-based cut-off when defining baseline players. Explore the sensitity of Adjusted Plus/Minus and our weighted adjusted plus/minus to different choices of the minutes cut-off. How much do the top- and bottom-10 player rankings change?
-2. We weighted stints using only on the lead at the start of the stint. One can reasonably argue that our weights should also account for the time left in the game. Propose your own weighting scheme and see how the player rankings change.
-3. We estimated adjusted plus/minus using only a single season's worth of data. Many analysts --- including several working for professional teams --- prefer to use multiple seasons worth of data. Modify the scraping code and data preparation code above 
+  1. Explore the sensitivity of APM and our weighted APM to different choices of the minutes cut-off used to define the baseline player. How much do the top- and bottom-10 player rankings change?
+  2. We weighted stints using only on the lead at the start of the stint. One can reasonably argue that our weights should also account for the time left in the game. Propose your own weighting scheme and see how the player rankings change.
+  3. We estimated APM using data from a single season. Many analysts prefer to use data from multiple season when fitting APM models. Scrape data from the 2022-23 and 2023-24 regular seasons and fit APM models using (i) data from 2023-24 and 2024-25 and (iii) data from 2022-23, 2023-34, and 2024-25. 
+  4. One can credibly argue that data from seasons further in the past should be weighted less than data from more recent seasons. Propose a weighting scheme that down-weights historical data and fit weighted versions of the models in Exercise 4.3. How do the relative player rankings change? 
+  5. Estimate the out-of-sample predictive mean square error of our basic APM model using 100 training/testing splits. That is, for each training and testing split, fit the APM model using the training data and then compute the average of the squared difference between the actual $Y$'s and the model predictions in the testing split. Is APM a good predictive model? Why or why not?

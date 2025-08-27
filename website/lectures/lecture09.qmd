@@ -14,14 +14,12 @@ Which of the two touchdown plays is more impressive?
   
 While these two plays share many similarities --- they were both thrown on 3rd down, out of the shotgun formation with no running back, against the Houston Texans, when the team on offense was trailing, and resulted in a score --- there are some big differences: Herbert and the Chargers needed 26 yards to gain a first down while the Cowboys need only 10; Herber threw his pass from a collapsing pocket while Rush threw with essentially no pressure; McConckey broke at least one tackle after catching the pass.
 Based on these qualitative differences, we might view the first touchdown pass as more impressive.
-In this lecture, we introduce expected points (EP) and expected points added (EPA), which together facilitate a more nuanced, *quantitative* comparison of plays.
-Then, using a multilevel model, we will identify the players whom we would expect to generate the most expected points per passing attempt. 
+In this lecture, we introduce *expected points* (EP; @sec-ep) and expected points added (EPA), which together facilitate a more nuanced, *quantitative* comparison of plays.
+Then, using a multilevel model (@sec-multilevel-model), we will identify the players whom we would expect to generate the most expected points per passing attempt. 
 
+## Play-By-Play Football Data {#sec-nflfastr-intro}
 
-### Play-By-Play Football Data {#sec-nflfastr-intro}
-
-We will use of the play-by-play data available from the [**nflfastR**](https://www.nflfastr.com) package.
-The package can be installed using the code:
+We will use play-by-play data from the NFL available from the [**nflfastR**](https://www.nflfastr.com) package, which can be installed using the code:
 ```{r}
 #| label: install-nflfastR
 #| eval: false
@@ -36,8 +34,7 @@ In this lecture and in [Lecture 10](lecture10.qmd), we will work with pre-proces
 #| warning: false
 #| message: false
 #| output: false
-pbp2024 <-
-  nflfastR::load_pbp(season = 2024)
+pbp2024 <- nflfastR::load_pbp(season = 2024)
 ```
 Each row of the table `pbp2024` corresponds to an individual play from the 2024-25 NFL season.
 The data table contains information about `{r} nrow(pbp2024)` distinct plays.
@@ -76,10 +73,6 @@ roster2024 <-
 ```
 
 ## Expected Points {#sec-ep}
-
-<!--
- Paraphrase from Section 1.1 of Yurko's paper 
--->
 Paraphrasing @Yurko2019_nflWAR, the expected points framework uses historical data to *estimate* the average number of points eventually scored by teams in similar situations.
 Similar to what we did in [Lecture 6](lecture06.qmd) with expected runs at the start and end of at-bats in baseball, the difference between the post-snap and pre-snap expected points is known as expected points added (EPA).
 Generally speaking, plays that result in positive EPA are considered successful while plays resulting in negative EPA are not.
@@ -99,12 +92,9 @@ Formally, for every play, we can collect features summarizing the state of the g
 Typically, these features will include things like the time left in the half, the current score, the down and distance to the first down line, etc.
 
 :::{.callout-note icon = false}
-
 ## Definition: Drive Outcome Probabilities
-
 Given the state of the game at the beginning of a play $\boldsymbol{\mathbf{z}},$ within a drive, for each possible outcome $k \in \left\{\textrm{TD}, \textrm{FG}, \ldots, \textrm{oTD}\right\}$ let $\pi_{k}(\boldsymbol{\mathbf{z}})$ conditional probability that the drives containing plays characterized by $\boldsymbol{\mathbf{z}}$ end in outcome $k.$
 We collect these probabilities into a vector $\boldsymbol{\pi}(\boldsymbol{\mathbf{z}}) = (\pi_{\textrm{TD}}(\boldsymbol{\mathbf{z}}), \ldots, \pi_{\textrm{oppFG}}(\boldsymbol{\mathbf{z}})).$  
-
 :::
 
 :::{.callout-note icon=false}
@@ -123,7 +113,7 @@ $$
 :::
 
 
-### Estimating $\textrm{EP}(\boldsymbol{\mathbf{x}})$ {#sec-estimating-ep}
+### Estimating $\textrm{EP}(\boldsymbol{\mathbf{z}})$ {#sec-estimating-ep}
 
 **nflfastR** implements a version of @Yurko2019_nflWAR's original EP model.
 At a high-level, it is a multinomial classification model built using extreme gradient boosting (xgboost).
@@ -162,6 +152,7 @@ Because the Chargers scored from a much less favorable starting point than the C
 
 Beyond comparing individual plays, we can rank different teams' offenses by their average EPA per play
 ```{r}
+#| label: team-epa
 pbp2024 |>
   dplyr::group_by(posteam) |> #<1>
   dplyr::summarize(epa = mean(epa, na.rm = TRUE)) |> #<2>
@@ -267,6 +258,7 @@ ols_betas[1:5] #<3>
 
 In our simple EPA model, the estimated intercept is exactly the average EPA on all passes thrown by Aaron Rodgers.
 ```{r}
+#| label: rodgers-avg
 mean( pass2024$epa[pass2024$passer_player_id == rodgers_id])
 ```
 To get the average EPA on all passes thrown by a different quarterback (e.g., Dak Prescott whose id is `{r} roster2024|> dplyr::filter(full_name == "Dak Prescott") |> dplyr::pull(gsis_id)`), we need to add the corresponding entry in `ols_beta` to the estimated intercept[^prove].
@@ -344,6 +336,7 @@ Plotting each player's average EPA against the number of pass attempts reveals t
 #| fig-width: 6.5
 #| fig-asp: 0.5625
 #| fig-align: center
+#| fig-cap: The variability in per-pass decreases dramatically as the number of passes increases.
 
 oi_colors <- 
   palette.colors(palette = "Okabe-Ito")
@@ -415,7 +408,6 @@ Moreover, we might expect that outcomes from the same group to be more tightly c
 For instance, if a particular medical practice uses a new, highly effective treatment strategy, knowing the outcome of one patient from that practice who received the treatment provides a lot of information about the potential outcome of another patient from that practice who also received the treatment.
 As we will soon see, the standard multiple linear regression model with which you are already familiar tends not to perform well in the presence of grouping structure, largely because it assumes observations are independent. 
 
-
 :::{.callout-important}
 ## Warning
 The above is by no means a comprehensive review of multilevel models, which is beyond the scope of this course.
@@ -426,7 +418,12 @@ I also recommend [this blog post](https://paulrjohnson.net/blog/2022-11-01-multi
 
 ### Fitting Multilevel Models {#sec-lmer}
 
-We can fit multilevel models using the [**lme4** package](https://cran.r-project.org/web/packages/lme4/index.html).
+We can fit multilevel models using the [**lme4** package](https://cran.r-project.org/web/packages/lme4/index.html), which can be installed using the code
+```{r}
+#| label: install-lme4
+#| eval: false
+install.packages("lme4")
+```
 [This cheatsheet](https://paulrjohnson.net/blog/2022-11-01-multilevel-model-r-cheatsheet/#multilevel-model-syntax-in-r) provides a really nice overview of the underlying concepts and the relevant R syntax. 
 
 ```{r}
@@ -449,7 +446,6 @@ summary(multilevel_fit)
 First, we find the estimate of the overall grand mean EPA per play in the "Fixed effects" section: the average EPA across all passers and passes is estimated to be $\hat{\alpha}_{0} \approx 0.1294.$
 The "Random effects" section reports our estimates $\hat{\sigma} \approx 1.526$ and $\hat{\sigma}_{\alpha} = 0.123$ of, respectively, the variability in EPA that we'd expect to see between passes thrown by the same player and the variability in latent EPA per pass across the different passers. 
 The fact that $\hat{\sigma}_{\alpha}$ is so much smaller than $\hat{\sigma}$ suggests that most of the variability in observed passing play EPA is driven more by noise than differences in latent player ability. 
-
 
 We can use the function `ranef()` to extract the estimates of the $u_{i}$'s, the function `fixef` to extract the estimate of $\alpha_{0},$ and the function `coef()` to extract the estimates of $\alpha_{i} = \alpha_{0} + u_{i}.$
 The function `coef()` returns a named list with one element per grouping variable[^grouping].
@@ -489,7 +485,7 @@ alphas |>
   dplyr::select(full_name, lmer, n)
 ```
 
-We see that our multilevel estimates for players who threw very few passes are are aggressively shrunk towards to the overall grand-mean.
+We see that our multilevel estimates for players who threw very few passes are aggressively shrunk towards to the overall grand-mean.
 ```{r}
 #| label: fig-shrinkage
 #| fig-width: 6.5
@@ -509,14 +505,13 @@ abline(h = alpha0_hat, col = oi_colors[3])
 ```
 1. The function `fixef()` returns all the *fixed effects* (see below) in a named vector. As this is an intercept-only model, we use the name "(Intercept)" to access the parameter estimate.
 
-
 ## Adjusting For Additional Covariates {#sec-covariates}
 
 Up to this point, we've worked with a rather toy problem, predicting EPA given only the identity of the passer.
 But what if we include additional information about the pass (e.g., whether it was throw by the home or away team, whether it was thrown out of the shotgun formation, etc.)? 
 Do we still run into the small sample size issues when determining how much EPA an individual player adds, after accounting for this other information?
 
-To see, we re-build our data table `pass2024` but now include: 
+To answer these questions, we re-build our data table `pass2024` but now include: 
 
   * `air_yards`: the distance traveled by the pass through the air[^airyard]
   * `shotgun`: whether the pass was thrown out of the [shotgun formation](https://en.wikipedia.org/wiki/Shotgun_formation)
@@ -601,7 +596,6 @@ ml_fit_full <-
 
 
 ```
-
 Like with our initial random intercept model, we can read off several important parameter estimates using the model summary.
 ```{r}
 #| label: summarise-full
@@ -618,10 +612,10 @@ The following code extracts the estimates of the player-specific latent per-pass
 #| label: compile-alphas
 
 tmp <- coef(ml_fit_full)
-lmer_alpha_full <- #<1>
+lmer_alpha_full <- 
   data.frame( 
-    lmer = tmp[["passer_player_id"]][,1], #<2>
-    gsis_id = rownames(tmp[["passer_player_id"]])) #<3>
+    lmer = tmp[["passer_player_id"]][,1],
+    gsis_id = rownames(tmp[["passer_player_id"]])) 
 alphas_full <-
   alphas_full |>
   dplyr::inner_join(y = lmer_alpha_full, by = "gsis_id")
@@ -629,18 +623,15 @@ alphas_full |>
   dplyr::arrange(dplyr::desc(lmer)) |>
   dplyr::slice(c(1:5, (dplyr::n()-4):dplyr::n()))  |>
   dplyr::select(full_name, lmer, n)
-
 ```
 
 We can further visualize the shrinkage effect by comparing the multiple linear regression a multilevel model estimates of the passer-specific per-pass EPAs to the number of passing attempts.
-
-
 ```{r}
 #| label: fig-full-alphas
 #| fig-width: 6
 #| fig-asp: 0.5625
 #| fig-align: center
-#| fig-cap: "There is much more variation in per-pass EPA among players with few pass attempts than among players with many attempts"
+#| fig-cap: Even after adjusting for covariate effects, players with fewer passing attempts display much more variation in per-pass EPA than players with more passing attempts.
 
 alpha0_hat <- fixef(ml_fit_full)["(Intercept)"]
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
@@ -662,7 +653,4 @@ Multilevel models offer a way to overcome these issues while also accounting for
 
 Using a multilevel model, we estimated the average EP per pass each passer provides over and above what could be explained by covariates like `air_yards` and the formation from which the pass was thrown.
 In [Lecture 10](lecture10.qmd), we will fit a series of multilevel models to divide the EPA on a play between the different offensive players.
-We will use the model estimates to compute a version of wins above replacement. 
-
-
-
+We will use the model estimates to compute a version of wins above replacement for offensive players in the NFL.

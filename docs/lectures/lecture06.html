@@ -180,11 +180,15 @@ window.Quarto = {
     <a class="nav-link" href="../index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../syllabus.html"> 
+<span class="menu-text">Syllabus</span></a>
+  </li>  
   <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-lectures" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Lectures</span>
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-lecture-code" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Lecture Code</span>
     </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-lectures">    
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-lecture-code">    
         <li>
     <a class="dropdown-item" href="../lectures/lecture00.html">
  <span class="dropdown-text">Lecture 0: Boxscore Metrics</span></a>
@@ -231,37 +235,11 @@ window.Quarto = {
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture12.html">
- <span class="dropdown-text">Lecture 12: Power Rankings</span></a>
+ <span class="dropdown-text">Lecture 12: Power Rankings I</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture13.html">
- <span class="dropdown-text">Motivation: Power rankings</span></a>
-  </li>  
-    </ul>
-  </li>
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-exercises" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Exercises</span>
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-exercises">    
-        <li>
-    <a class="dropdown-item" href="../exercises/exercises1_boxscore.html">
- <span class="dropdown-text">Constructing Advanced Metrics Using Box Score Data</span></a>
-  </li>  
-    </ul>
-  </li>
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-guides" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Guides</span>
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-guides">    
-        <li>
-    <a class="dropdown-item" href="../guides/getting_started.html">
- <span class="dropdown-text">Getting Started</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../guides/plot_vertical_statsbomb.html">
- <span class="dropdown-text">Plotting StatsBomb Data Vertically</span></a>
+ <span class="dropdown-text">Lecture 13: Power Rankings II</span></a>
   </li>  
     </ul>
   </li>
@@ -357,13 +335,13 @@ window.Quarto = {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../lectures/lecture12.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lecture 12: Power Rankings</span></a>
+ <span class="menu-text">Lecture 12: Power Rankings I</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../lectures/lecture13.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Motivation: Power rankings</span></a>
+ <span class="menu-text">Lecture 13: Power Rankings II</span></a>
   </div>
 </li>
     </ul>
@@ -376,24 +354,32 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#sec-motivation" id="toc-sec-motivation" class="nav-link active" data-scroll-target="#sec-motivation">Motivation: Credit allocation in baseball</a>
+  <li><a href="#sec-motivation" id="toc-sec-motivation" class="nav-link active" data-scroll-target="#sec-motivation">Motivation: Credit Allocation in Baseball</a></li>
+  <li><a href="#sec-statcast" id="toc-sec-statcast" class="nav-link" data-scroll-target="#sec-statcast">Tracking Data in Baseball</a>
   <ul class="collapse">
   <li><a href="#sec-history" id="toc-sec-history" class="nav-link" data-scroll-target="#sec-history">A Brief History</a></li>
   <li><a href="#sec-statcast-query" id="toc-sec-statcast-query" class="nav-link" data-scroll-target="#sec-statcast-query">Accessing Statcast Data in R</a></li>
-  <li><a href="#sec-statcast-basics" id="toc-sec-statcast-basics" class="nav-link" data-scroll-target="#sec-statcast-basics">Statcast Basis</a></li>
-  <li><a href="#pitch--and-at-bat-level-descriptions" id="toc-pitch--and-at-bat-level-descriptions" class="nav-link" data-scroll-target="#pitch--and-at-bat-level-descriptions">Pitch- and at-bat-level descriptions</a></li>
-  <li><a href="#adding-baserunner-information" id="toc-adding-baserunner-information" class="nav-link" data-scroll-target="#adding-baserunner-information">Adding baserunner information</a></li>
-  <li><a href="#getting-player-names" id="toc-getting-player-names" class="nav-link" data-scroll-target="#getting-player-names">Getting player names</a></li>
-  <li><a href="#getting-player-positions" id="toc-getting-player-positions" class="nav-link" data-scroll-target="#getting-player-positions">Getting Player Positions</a></li>
   </ul></li>
-  <li><a href="#sec-expected-runs" id="toc-sec-expected-runs" class="nav-link" data-scroll-target="#sec-expected-runs">Expected Runs</a></li>
+  <li><a href="#sec-statcast-basics" id="toc-sec-statcast-basics" class="nav-link" data-scroll-target="#sec-statcast-basics">Statcast Basics</a>
+  <ul class="collapse">
+  <li><a href="#pitch--and-at-bat-level-descriptions" id="toc-pitch--and-at-bat-level-descriptions" class="nav-link" data-scroll-target="#pitch--and-at-bat-level-descriptions">Pitch- and At-Bat-level Descriptions</a></li>
+  <li><a href="#sec-add-baserunner" id="toc-sec-add-baserunner" class="nav-link" data-scroll-target="#sec-add-baserunner">Adding Baserunner Information</a></li>
+  <li><a href="#getting-player-names" id="toc-getting-player-names" class="nav-link" data-scroll-target="#getting-player-names">Getting Player Names</a></li>
+  <li><a href="#sec-positions" id="toc-sec-positions" class="nav-link" data-scroll-target="#sec-positions">Getting Player Positions</a></li>
+  </ul></li>
+  <li><a href="#sec-expected-runs" id="toc-sec-expected-runs" class="nav-link" data-scroll-target="#sec-expected-runs">Expected Runs</a>
+  <ul class="collapse">
+  <li><a href="#sec-compute-runs-scored" id="toc-sec-compute-runs-scored" class="nav-link" data-scroll-target="#sec-compute-runs-scored">Computing Runs Scored in the Half-Inning</a></li>
+  <li><a href="#putting-it-all-together" id="toc-putting-it-all-together" class="nav-link" data-scroll-target="#putting-it-all-together">Putting It All Together</a></li>
+  </ul></li>
   <li><a href="#sec-run-value" id="toc-sec-run-value" class="nav-link" data-scroll-target="#sec-run-value">Run Value</a>
   <ul class="collapse">
   <li><a href="#sec-compute-runsscored" id="toc-sec-compute-runsscored" class="nav-link" data-scroll-target="#sec-compute-runsscored">Calculating Runs Score</a></li>
   <li><a href="#sec-computing-states" id="toc-sec-computing-states" class="nav-link" data-scroll-target="#sec-computing-states">Computing Starting &amp; Ending States</a></li>
   <li><a href="#sec-compute-run-values" id="toc-sec-compute-run-values" class="nav-link" data-scroll-target="#sec-compute-run-values">Computing Run Values</a></li>
   </ul></li>
-  <li><a href="#assessing-batter-production-with-run-value" id="toc-assessing-batter-production-with-run-value" class="nav-link" data-scroll-target="#assessing-batter-production-with-run-value">Assessing batter production with run value</a></li>
+  <li><a href="#sec-batter-prod" id="toc-sec-batter-prod" class="nav-link" data-scroll-target="#sec-batter-prod">Assessing Batter Production</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
   </ul>
 </nav>
     </div>
@@ -420,7 +406,7 @@ window.Quarto = {
 
 
 <section id="sec-motivation" class="level2">
-<h2 class="anchored" data-anchor-id="sec-motivation">Motivation: Credit allocation in baseball</h2>
+<h2 class="anchored" data-anchor-id="sec-motivation">Motivation: Credit Allocation in Baseball</h2>
 <p>The first game of the 2024 MLB Regular Season, between the Los Angeles Dodgers and the San Diego Padres, took place on March 20, 2024<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> During the game, Shohei Ohtani recorded <a href="https://www.mlb.com/video/shohei-ohtani-records-two-hits-rbi-in-dodgers-debut">two hits in his five plate appearances</a>:</p>
 <ol type="1">
 <li>In the 3rd inning, with 2 outs and no runners on base, Ohtani singled into right field.</li>
@@ -428,7 +414,11 @@ window.Quarto = {
 </ol>
 <p>Which of these singles was more valuable to Dodgers? And how much of that value should be specifically credited to Ohtani?</p>
 <p>Because the second single directly resulted in a run scoring, it is tempting to conclude that the second single was more valuable than the first. However, although the Dodgers didn’t score as a result of the first single, Ohtani reached first base, putting his team in a position to potential score more runs than if he had not reached first<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>. In terms of allocating credit, it seems natural to give Ohtani all the credit for whatever value was created on his first single. But on his second single, at least some of the value created is attributable to a baserunner scoring from second base. How should we divide credit between Ohtani and that baserunner?</p>
-<p>Over the next several lectures, we will work with pitch-level tracking data from Major League Baseball to answer these questions. In this lecture, we begin by computing <em>run values</em>, a metric that combines changes in the number of a team can <em>expect</em> to score and the number of runs actually scored in an at-bat. In <a href="../lectures/lecture07.html">Lecture 7</a>, we will distribute the run value created in every at-bat between the batter and base runners involved in the at-bat. We will then begin <a href="../lectures/lecture08.html">Lecture 8</a> by distributing the negative of the run value created by th batting team between the pitcher and fielders involved in each at-bat. Finally, we will aggregate the total run value over average created by each player through their hitting, fielding, base running, and pitching and convert that aggregate into a measure of wins above replacement. Our development largely follows <span class="citation" data-cites="Baumer2015_openWAR">(<a href="#ref-Baumer2015_openWAR" role="doc-biblioref">Baumer, Jensen, and Matthews 2015</a>)</span>, who created a transparent, open-source version of wins above replacement, a cornerstone of baseball analytics. ## Tracking Data in Baseball {#sec-statcast}</p>
+<p>Over the next several lectures, we will work with pitch-level tracking data from Major League Baseball to answer these questions. In this lecture, we begin by computing the number of runs that a team can <em>expect</em> to score in the remainder of a half-inning (<a href="#sec-expected-runs" class="quarto-xref">Section&nbsp;4</a>). Then, we introduce <em>run values</em> (<a href="#sec-run-value" class="quarto-xref">Section&nbsp;5</a>), a metric that combines changes in the number of a team expects to score and the number of runs actually scored in an at-bat. We conclude by determining which batters created the most run value for their teams (<a href="#sec-batter-prod" class="quarto-xref">Section&nbsp;6</a>).</p>
+<p>In <a href="../lectures/lecture07.html">Lecture 7</a>, we will distribute the run value created in every at-bat between the batter and base runners involved in the at-bat. We will then begin <a href="../lectures/lecture08.html">Lecture 8</a> by distributing the negative of the run value created by th batting team between the pitcher and fielders involved in each at-bat. Finally, we will aggregate the total run value over average created by each player through their hitting, fielding, base running, and pitching and convert that aggregate into a measure of wins above replacement. Our development largely follows <span class="citation" data-cites="Baumer2015_openWAR">(<a href="#ref-Baumer2015_openWAR" role="doc-biblioref">Baumer, Jensen, and Matthews 2015</a>)</span>, who created a transparent, open-source version of wins above replacement, a cornerstone of baseball analytics.</p>
+</section>
+<section id="sec-statcast" class="level2">
+<h2 class="anchored" data-anchor-id="sec-statcast">Tracking Data in Baseball</h2>
 <section id="sec-history" class="level3">
 <h3 class="anchored" data-anchor-id="sec-history">A Brief History</h3>
 <p>On October 4, 2006, during an American League Division Series game between the Oakland Athletics and Minnesota Twins, the sports media company Sportvision<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> debuted PitchF/X<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>, a system of cameras for tracking the position of every pitch as it traveled from the pitcher’s hand to the batter. After installing the system in every MLB ballpark, Sportvision began providing the data in real-time data to the MLB. These data, combined with additional information recorded by an MLB Advanced Media employee, powered the popular <a href="https://www.mlb.com/schedule/gameday">GameDay application</a> and were publicly available through the GameDay application programming interface (API) for many years.</p>
@@ -443,7 +433,7 @@ window.Quarto = {
 <p>The function <a href="https://billpetti.github.io/baseballr/reference/statcast_search.html"><code>baseballr::statcast_search()</code></a> allows users query all Statcast data by date, player, or player type. One of the original <strong>baseballr</strong> authors, Bill Petti, wrote a wrapper function that uses <code>baseballr::statcast_search()</code> to pull down an entire season’s worth of pitch-by-pitch data; see <a href="https://billpetti.github.io/2021-04-02-build-statcast-database-rstats-version-3.0/">this blog post</a> for the wrapper function code and <a href="https://billpetti.github.io/2018-02-19-build-statcast-database-rstats/">this earlier post</a> for details about its design. Since he published his original function, Statcast has added some new fields, necessitating a few changes to the original script. The code below defines a new scraper, which we will use in the course. An R script containing this code is available at <a href="https://github.com/skdeshpande91/stat479_fall2025/blob/main/scripts/annual_statcast_query.R">this link</a>. At a high level, the scraping function pulls data from Statcast on a week-by-week basis.</p>
 <div class="cell">
 <details class="code-fold">
-<summary>Show the code</summary>
+<summary>Show the code for Statcast scraper</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Code modified from Bill Petti's original annual Statcast scraper:</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="do">## Main change is in the column names of the fielders</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -548,8 +538,9 @@ Warning
 </div>
 </div>
 </section>
-<section id="sec-statcast-basics" class="level3">
-<h3 class="anchored" data-anchor-id="sec-statcast-basics">Statcast Basis</h3>
+</section>
+<section id="sec-statcast-basics" class="level2">
+<h2 class="anchored" data-anchor-id="sec-statcast-basics">Statcast Basics</h2>
 <p>The function <code>annual_statcast_query</code> actually scrapes data not only from the regular season but also from the pre-season and the play-offs. The column <code>game_type</code> records the type of game in which each pitch was thrown. Looking at the <a href="https://baseballsavant.mlb.com/csv-docs">Statcast documentation</a>, we see that regular season pitches have <code>game_type=="R"</code>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(raw_statcast2024<span class="sc">$</span>game_type, <span class="at">useNA =</span> <span class="st">'always'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -571,9 +562,8 @@ Warning
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(game_pk, at_bat_number, pitch_number)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We’re now left with 695,135 regular season pitches.</p>
-</section>
 <section id="pitch--and-at-bat-level-descriptions" class="level3">
-<h3 class="anchored" data-anchor-id="pitch--and-at-bat-level-descriptions">Pitch- and at-bat-level descriptions</h3>
+<h3 class="anchored" data-anchor-id="pitch--and-at-bat-level-descriptions">Pitch- and At-Bat-level Descriptions</h3>
 <p>Statcast records a ton of information about each pitch including the type of pitch (<code>pitch_type</code>), the velocity of the pitch when it was released (<code>vx0</code>, <code>vy0</code>, <code>vz0</code>), the acceleration of the pitch at about the half-way point between the pitcher and batter (<code>ax</code>, <code>ay</code>, and <code>az</code>), and horizontal and vertical coordinates of the pitch as it crosses the front edge of home plate (<code>plate_x</code>) and (<code>plate_y</code>). The column <code>type</code> also records whether the pitch resulted ball (<code>type=B</code>), a strike (<code>type=S</code>), or whether the ball was put in play (<code>type=X</code>). For balls in play, Statcast also records things like the launch speed and angle (<code>launch_speed</code>, <code>launch_angle</code>), the coordinates on the field where the ball landed (<code>hc_x</code>) and (<code>hc_y</code>), and the position of the first fielder to touch the ball (<code>hit_location</code>). In Lecture 8, we will work with <code>hc_x</code> and <code>hc_y</code> to build a model that predicts the probability that each fielder makes an out on balls hit to a specific part of the field. As a bit of a preview, here is a plot of all the <code>hc_x</code> and <code>hc_y</code> values.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>), <span class="at">mgp =</span> <span class="fu">c</span>(<span class="fl">1.8</span>, <span class="fl">0.5</span>, <span class="dv">0</span>))</span>
@@ -589,8 +579,8 @@ Warning
 </div>
 </div>
 </section>
-<section id="adding-baserunner-information" class="level3">
-<h3 class="anchored" data-anchor-id="adding-baserunner-information">Adding baserunner information</h3>
+<section id="sec-add-baserunner" class="level3">
+<h3 class="anchored" data-anchor-id="sec-add-baserunner">Adding Baserunner Information</h3>
 <p>The columns <code>on_1b</code>, <code>on_2b</code>, and <code>on_3b</code> record who is on first, second, or third base at the beginning of each pitch (<code>NA</code> values indicate that nobody is on base). For convenience, we will add a new column to the data table that records the baserunner configuration using a string of 3 binary digits. If there is a runner on first base, the first digit will be a 1 and if there is not a runner on first base, the first digit will be a 0. Similarly, the second and third digits respectively indicate whether there are runners on second and third base. So, the string <code>"101"</code> indicates that there are runners on first and third base but not on second. To create the 3-digit binary string encoding baserunner configuration, notice that <code>1*(!is.na(on_1b))</code> will return a 1 if there is someone on first base and 0 otherwise. So by pasting together the results of <code>1*(!is.na(on_1b))</code>, <code>1*(!is.na(on_2b))</code>, and <code>1*(!is.na(on_3b))</code>, we can form the 3-digit binary string described above. In following code, we also rename the column <code>outs_when_up</code> to <code>Outs</code>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>statcast2024 <span class="ot">&lt;-</span></span>
@@ -602,8 +592,8 @@ Warning
 </div>
 </section>
 <section id="getting-player-names" class="level3">
-<h3 class="anchored" data-anchor-id="getting-player-names">Getting player names</h3>
-<p>For every pitch, the Statcast dataset records the identities of the batter (<code>batter</code>), pitcher (<code>pitcher</code>), and the other fielders (<code>fielders_2</code>, …, <code>fielders_9</code>). However, it does not identify them by name, instead using an ID number, which is assigned by MLB Advanced Media. We can look up the corresponding player names using a database maintained by the <a href="https://github.com/chadwickbureau/register">Chadwick Register</a>. The function <code>baseballr::chadwick_player_lu</code> downloads the Chadwick database and stores it as a data table in R. This database contains the names and MLB Advanced Media identifiers for players across all seasons, far more than we need for our purposes. So, in the code below, we first download the Chadwick player database and then extract only those players who appeared in the 2024 regular season. Like with the raw pitch-by-pitch data, I recommend that you download this player identity database once and save the table as an <code>.RData</code> object for future use.</p>
+<h3 class="anchored" data-anchor-id="getting-player-names">Getting Player Names</h3>
+<p>For every pitch, the Statcast dataset records the identities of the batter (<code>batter</code>), pitcher (<code>pitcher</code>), and the other fielders (<code>fielders_2</code>, …, <code>fielders_9</code>). However, it does not identify them by name, instead using an ID number, which is assigned by MLB Advanced Media. We can look up the corresponding player names using a database maintained by the <a href="https://github.com/chadwickbureau/register">Chadwick Register</a>. The function <a href="https://billpetti.github.io/baseballr/reference/chadwick_player_lu.html"><code>baseballr::chadwick_player_lu()</code></a> downloads the Chadwick database and stores it as a data table in R. This database contains the names and MLB Advanced Media identifiers for players across all seasons, far more than we need for our purposes. So, in the code below, we first download the Chadwick player database and then extract only those players who appeared in the 2024 regular season. Like with the raw pitch-by-pitch data, I recommend that you download this player identity database once and save the table as an <code>.RData</code> object for future use.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="annotated-cell-8"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="1">1</button><span id="annotated-cell-8-1" class="code-annotation-target"><a href="#annotated-cell-8-1" aria-hidden="true" tabindex="-1"></a>player2024_id <span class="ot">&lt;-</span></span>
 <span id="annotated-cell-8-2"><a href="#annotated-cell-8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>(</span>
@@ -647,8 +637,8 @@ Warning
 </div>
 </div>
 </section>
-<section id="getting-player-positions" class="level3">
-<h3 class="anchored" data-anchor-id="getting-player-positions">Getting Player Positions</h3>
+<section id="sec-positions" class="level3">
+<h3 class="anchored" data-anchor-id="sec-positions">Getting Player Positions</h3>
 <p><a href="../lectures/lecture07.html#sec-rv_position">Later in Lecture 7</a>, we will compare each batter’s hitting performance to the average performance of other batters who play the same position in the field. Unfortunately, the Chadwick database does not record the position of each player. Luckily, position information can be obtained using <code>baseballr::mlb_batting_orders()</code>, which retrieves the batting order for each MLB game. In this functions output, the column <code>id</code> contains the MLB Advanced Media id number for each player (i.e., <code>key_mlbam</code> in the data table <code>player2024_lookup</code> that we created above) and the column <code>abbreviation</code> contains the fielding position. For instance, Ohtani was listed as the Designated Hitter in that March 20, 2024 game between the Dodgers and the Padres.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>baseballr<span class="sc">::</span><span class="fu">mlb_batting_orders</span>(<span class="at">game_pk =</span> <span class="dv">745444</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -787,7 +777,7 @@ Warning
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Definition
+Definition: Expected Runs
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -795,8 +785,8 @@ Definition
 </div>
 </div>
 <p>Computing <span class="math inline">\(\rho(\textrm{o}, \textrm{br})\)</span> is conceptually straightforward: we need to divide our observed at-bats into 24 bins, one for each combination of <span class="math inline">\((\textrm{o}, \textrm{br})\)</span> and then compute the average value of <span class="math inline">\(R\)</span> within each bin. This is <em>exactly</em> the same “binning-and-averaging” procedure we used to fit our <a href="../lectures/lecture02.html#sec-init-xg">initial XG models in Lecture 2</a>. We will do this using pitches taken in the first 8 innings of played in the 2024 regular season. We focus only on the first 8 innings because the 9th and extra innings are fundamentally different than the others. Specifically, the bottom half of the 9th (or later) innings is only played if the game is tied or the home team is trailing after the top of the 9th inning concludes. In those half-innings, if played, the game stops as soon as a winning run is scored. For instance, say that the home team is trailing by 1 runs in the bottom of the 9th and that there are runners on first and second base. If the batter hits a home run, the at-bat is recorded as resulting in only two runs (the tying run from second and the winning run from first). But the exact same scenario would result in 3 runs in an earlier inning.</p>
-<section id="sec-compute-runs-scored" class="level4">
-<h4 class="anchored" data-anchor-id="sec-compute-runs-scored">Computing runs scored in the half-inning</h4>
+<section id="sec-compute-runs-scored" class="level3">
+<h3 class="anchored" data-anchor-id="sec-compute-runs-scored">Computing Runs Scored in the Half-Inning</h3>
 <p>Suppose that in a given at-bat <span class="math inline">\(a\)</span> that there are <span class="math inline">\(n_{a}\)</span> pitches. Within at-bat <span class="math inline">\(a,\)</span> for each <span class="math inline">\(i = 1, \ldots, n_{a},\)</span> let <span class="math inline">\(R_{i,a}\)</span> be the number of runs scored in the half-inning after that pitch (including any runs scored as a result of pitch <span class="math inline">\(i\)</span>). So <span class="math inline">\(R_{1,a}\)</span> is the number of runs scored in the half-inning after the first pitch, <span class="math inline">\(R_{2,a}\)</span> is the number of runs scored subsequent to the second pitch, etc. Our first step towards building the necessary at-bat-level data set will be to append a column of <span class="math inline">\(R_{i,a}\)</span> values to each season’s Statcast data.</p>
 <p>We start by illustrating the computation using a single half-inning from the Dodgers-Padres game introduced earlier. The code below pulls out all pitches thrown in the top of the 8th inning of the game. During this inning, the Dodgers scored 4 runs.</p>
 <div class="cell">
@@ -859,9 +849,9 @@ Figure&nbsp;1: Play-by-Play from the March 20, 2024 Dodgers-Padres game
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RunsRemaining =</span> dplyr<span class="sc">::</span><span class="fu">last</span>(post_bat_score) <span class="sc">-</span> bat_score)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="putting-it-all-together" class="level4">
-<h4 class="anchored" data-anchor-id="putting-it-all-together">Putting it all together</h4>
-<p>We’re now ready to extend these calculation to every half-inning of every game in the season. To do this, we will take advantage of the <code>group_by()</code> command in <strong>dplyr</strong> to apply the same calculation to small groups defined by game and half-inning.</p>
+<section id="putting-it-all-together" class="level3">
+<h3 class="anchored" data-anchor-id="putting-it-all-together">Putting It All Together</h3>
+<p>We’re now ready to extend these calculation to every half-inning of every game in the season. To do this, we will take advantage of the <code>dplyr::group_by()</code> function to apply the same calculation to subsets defined by game and half-inning.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="annotated-cell-19"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-19-1"><a href="#annotated-cell-19-1" aria-hidden="true" tabindex="-1"></a>statcast2024 <span class="ot">&lt;-</span></span>
 <span id="annotated-cell-19-2"><a href="#annotated-cell-19-2" aria-hidden="true" tabindex="-1"></a>  statcast2024 <span class="sc">|&gt;</span></span>
@@ -954,7 +944,7 @@ Definition: Run Value
 </div>
 </div>
 <p>In a sense, run value rewards batters and base runners for two things, actually scoring runs and putting their team in positions from which they could potentially score more runs.</p>
-<p>To do compute the run value of each at-bat in the 2024 season, we must compute</p>
+<p>Tocompute the run value of each at-bat in the 2024 season, we must compute</p>
 <ol type="1">
 <li>The number of runs scored during each at-bat</li>
 <li>The game state (i.e., the number of outs and the base-runner configuration) at the start and end of each at-bat</li>
@@ -1127,11 +1117,6 @@ Definition: Run Value
 9            62            2     0 111             NA &lt;NA&gt;         </code></pre>
 </div>
 </div>
-<!--
-In [Lecture 7](lecture07.qmd) and [Lecture 8](lecture08.qmd), we will work not only with the game-state (i.e., the values of `Outs` and `BaseRunner`) at the end of every at-bat but also with the actual identities of the base-runners and the location where a ball-in-play was fielded (if the batter hit the ball) at the end of every at-bat.
-
-We can following an essentially identical strategy of (i) sorting pitches by at-bat and pitch numbers; (ii) computing the leading value of several columns within each half-inning; (iii) grouping by at-bat number; and (iv) taking the lasts of those leading values.
--->
 <p>We can repeat this code for all at-bats.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="annotated-cell-28"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-28-1"><a href="#annotated-cell-28-1" aria-hidden="true" tabindex="-1"></a>runValue2024 <span class="ot">&lt;-</span></span>
@@ -1180,9 +1165,8 @@ We can following an essentially identical strategy of (i) sorting pitches by at-
 </section>
 <section id="sec-compute-run-values" class="level3">
 <h3 class="anchored" data-anchor-id="sec-compute-run-values">Computing Run Values</h3>
-<p>Now that we have a table <code>runValue</code> containing information about the starting and ending states of each at-bat, we are ready to compute run-values. In particular, we can use a join (just like we did with XG in Lecture 2) to add in the values of the starting and ending expected runs.</p>
+<p>Now that we have a table <code>runValue</code> containing information about the starting and ending states of each at-bat, we are ready to compute run-values. In particular, we can use a join to add in the values of the starting and ending expected runs.</p>
 <p>Before doing that, though, we need to deal with the <code>NA</code>’s introduced by <code>lead()</code>. Looking at the at-bats from the Dodger’s 8th inning from our running example, we see that those <code>NA</code>’s correspond to the very last at-bat of the half-inning.</p>
-<p>Before doing that, though, let’s take a quick look at the rows in the table corresponding to the Dodgers’ 8th inning from our running example</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>runValue2024 <span class="sc">|&gt;</span></span>
 <span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(game_pk <span class="sc">==</span> <span class="dv">745444</span> <span class="sc">&amp;</span> inning <span class="sc">==</span> <span class="dv">8</span> <span class="sc">&amp;</span> inning_topbot <span class="sc">==</span> <span class="st">"Top"</span>) <span class="sc">|&gt;</span></span>
@@ -1234,25 +1218,27 @@ We can following an essentially identical strategy of (i) sorting pitches by at-
 </div>
 </section>
 </section>
-<section id="assessing-batter-production-with-run-value" class="level2">
-<h2 class="anchored" data-anchor-id="assessing-batter-production-with-run-value">Assessing batter production with run value</h2>
+<section id="sec-batter-prod" class="level2">
+<h2 class="anchored" data-anchor-id="sec-batter-prod">Assessing Batter Production</h2>
 <p>Each row in <code>runValue2024</code> corresponds to a single at-bat in the 2024 regular season and is uniquely determined by the game identifier (<code>game_pk</code>) and at-bat number (<code>at_bat_number</code>). We’re now in a position to quantify how run value Ohtani created during the Dodgers-Padres game introduced above?</p>
-<p>To do this, it is helpful to first look up Ohtani’s MLB Advanced Media ID number using our table <code>player2024_lookup</code>. Then, we can extract the rows of <code>statcast2024</code> corresponding to the first pitch in each at-bat from the Dodgers-Padres game <code>statcast2024</code>. Then we can filter this subset to only those at-bats where Ohtani was the batter. Finally, we can join the associated run values.</p>
+<p>To do this, we first look up Ohtani’s MLB Advanced Media ID number using our table <code>player2024_lookup</code>. Then, we can extract the rows of <code>statcast2024</code> corresponding to the first pitch in each at-bat from the Dodgers-Padres game <code>statcast2024</code>. Then we can filter this subset to only those at-bats where Ohtani was the batter. Finally, we can join the associated run values.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"player2024_lookup.RData"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>ohtani_id <span class="ot">&lt;-</span> </span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  player2024_lookup<span class="sc">$</span>key_mlbam[<span class="fu">which</span>(player2024_lookup<span class="sc">$</span>FullName <span class="sc">==</span> <span class="st">"Shohei Ohtani"</span>)]</span>
-<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>ohtani_ab <span class="ot">&lt;-</span></span>
-<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>  statcast2024 <span class="sc">|&gt;</span></span>
-<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(game_pk <span class="sc">==</span> <span class="dv">745444</span>) <span class="sc">|&gt;</span></span>
-<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(pitch_number <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> batter <span class="sc">==</span> ohtani_id) <span class="sc">|&gt;</span></span>
-<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(game_pk, at_bat_number, inning, des) <span class="sc">|&gt;</span></span>
-<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> runValue2024, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"game_pk"</span>, <span class="st">"at_bat_number"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(at_bat_number, RunValue, des)</span>
-<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>ohtani_ab</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  player2024_lookup <span class="sc">|&gt;</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(FullName <span class="sc">==</span> <span class="st">"Shohei Ohtani"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(key_mlbam)</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>ohtani_ab <span class="ot">&lt;-</span></span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>  statcast2024 <span class="sc">|&gt;</span></span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(game_pk <span class="sc">==</span> <span class="dv">745444</span>) <span class="sc">|&gt;</span></span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(pitch_number <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> batter <span class="sc">==</span> ohtani_id) <span class="sc">|&gt;</span></span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(game_pk, at_bat_number, inning, des) <span class="sc">|&gt;</span></span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> runValue2024, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"game_pk"</span>, <span class="st">"at_bat_number"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(at_bat_number, RunValue, des)</span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>ohtani_ab</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 × 3
   at_bat_number RunValue des                                                    
@@ -1301,6 +1287,13 @@ We can following an essentially identical strategy of (i) sorting pitches by at-
 </div>
 </div>
 <p>When we compare our top-10 to <a href="https://www.fangraphs.com/leaders/major-league?pos=all&amp;type=3&amp;sortcol=5&amp;sortdir=default&amp;qual=30&amp;team=0&amp;startdate=&amp;enddate=&amp;month=0&amp;season1=2024&amp;season=2024">FanGraph’s leaderboard for RE24</a>, we see a lot of overlap. But there are some differences, especially with regards to the number of plate appearances and actual RE24 values. For the latter, FanGraph likely used a different expected run matrix. And the Statcast data is not complete; for instance, it is missing 3 games in which Judge played.</p>
+</section>
+<section id="exercises" class="level2">
+<h2 class="anchored" data-anchor-id="exercises">Exercises</h2>
+<ol type="1">
+<li>Scrape data from the 2022 and 2023 regular seasons and determine which batters created the most run value.</li>
+<li>Compute a new version of expected runs that conditions on the number of outs, baserunner configuration, and ballpark. Using this new version of expected runs, determine which batters create the most run value for their team.</li>
+</ol>
 
 
 
@@ -1315,7 +1308,7 @@ Baumer, Benjamin S., Shane T. Jensen, and Gregory J. Matthews. 2015. <span>“<s
 
 <ol>
 <li id="fn1"><p>This was also the first MLB game ever played in South Korea!<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>In fact, Ohtani went on to steal second base during the next at-bat, further increasing his team’s chancse of<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>In fact, Ohtani went on to steal second base during the next at-bat, further increasing his team’s chances of scoring.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn3"><p>Sportvision is perhaps most famous for the <a href="https://smt.com/behind-the-nfls-yellow-first-down-line-and-whats-next-for-sports-tv/">yellow first down line that appears in American football broadcasts</a>. They were eventually acquired by <a href="https://smt.com">SMT</a>.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn4"><p>See <a href="https://tht.fangraphs.com/wp-content/uploads/sites/8/images/pitchfx_guide.bt.pdf">this article by Mike Fast</a> for more background<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn5"><p>Statcast assigns each at-bat in a game a unique number. The third, fourth, and fifth at-bats during the Dodger’s 8th inning were the 61st, 62nd, and 63rd at-bats of the game.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>

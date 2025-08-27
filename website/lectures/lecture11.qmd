@@ -5,7 +5,6 @@ execute:
   cache: true
 ---
 ## Overview
-
 In October 2015, the Houston Astros played the New York Yankees in the American League Wild Card game.
 During and after the game, several Yankees fans took to social media to complain about inconsistencies in the strike zone being called by home plate umpire Eric Cooper.
 They argued that Cooper was not calling balls and strikes consistently for both teams, putting the Yankees at a distinct disadvantage.
@@ -38,15 +37,13 @@ That article went on to say that claim that the most impactful player in basebal
 
 In this lecture, we will estimate how many more runs a catcher saves his team through his framing compared to a replacement-level catcher.
 Like we did in Lectures [6](lecture06.qmd), [7](lecture07.qmd), and [8](lecture08.qmd), we will work with pitch tracking data scraped from StatCast.
-This time, however, we will need to scrape data f
 We will use the data from 2023 to establish historical strike probabilities (@sec-hgam) based on pitch location, batter handedness, and pitcher handedness.
 We will then include these historical baselines as fixed effects in a multilevel model that also includes random intercepts for the catcher, pitcher, and batter involved in pitches from the 2024 season (@sec-multilevel).
 Using the estimated deviations between catcher intercepts and the grand mean from our multilevel model, we conclude by estimating how many more expected runs catchers save than a replacement-level catcher (@sec-frame-war).
 
-
 ## Data
 
-### Value of a called strike {#sec-called-strike-value}
+### Value of a Called Strike {#sec-called-strike-value}
 
 Later, in @sec-frame-war, we will compute how many expected runs catchers save their teams
 To do this, we must first determine the value of a called strike using a similar framework as in [Lecture 6](lecture06.qmd).
@@ -145,7 +142,7 @@ taken2024 <-
 ```
 
 
-## A multilevel model{#sec-multilevel}
+## A Multilevel Model{#sec-multilevel}
 
 We are ultimately interested in understanding how individual players (i.e., batters, catchers, and pitchers) can influence the called strike probability.
 Any credible model for these probabilities must account for location.
@@ -165,16 +162,17 @@ This simple model **assumes** that the log-odds of a called strike is monotonic 
 Due to the monotonicity of the inverse logistic transformation[^invlogit], a positive (resp. negative) $\beta_{x}$ would imply that the probability of a called strike increases (resp. decreases) as the pitch moves from left to right.
 Similarly, a positive (resp. negative) $\beta_{z}$ implies that the probability of a called strike increases (resp. decreases) the higher up a pitch is thrown.
 
-[^inv_logit]: If $u = \log{\frac{p}{1-p}}$ for some $p \in [0,1],$ then $p = 1/[1 + e^{-u}]$, which is monotonically increasing as  
+[^invlogit]: If $u = \log{\frac{p}{1-p}}$ for some $p \in [0,1],$ then $p = 1/[1 + e^{-u}]$, which is monotonically increasing as  
 
 A cursory glance at the data reveals such monotonicity is not realistic. 
 Specifically, if called strike probability was monotonic in `plate_x` and `plate_z`, then we should see progressively more strikes in one of the four corners of the plot[^prove].
 In the plot, we overlay the "average" rule book strike zone[^avg_rbsz]. 
 ```{r}
-#| label: plot-calls-24
+#| label: fit-calls-24
 #| fig-align: center
 #| fig-width: 5
 #| fig-height: 6
+#| fig-cap: All called balls and strikes
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
 plot(1, type = "n",
      xlim = c(-2.5, 2.5), ylim = c(0, 6), #<1>
@@ -275,7 +273,7 @@ We now fit our generalized additive model.
 
 :::{.callout-important}
 ## Warning
-The following code takes several minutes to run
+The following code takes several minutes to run.
 :::
 
 
@@ -293,10 +291,11 @@ hgam_fit <- #<1>
 Like we did with our model for the probability of making an out as a function of fielding location in [Lecture 8](lecture08.qmd#sec-out-gam), we can visualize the fitted probabilities along a fine grid of locations.
 The following code plots the fitted called strike probabilities as a function of location for a right-handed pitcher facing a right-handed batter.
 ```{r}
-#| label: plot-hgam-RR
+#| label: fig-hgam-RR
 #| fig-width: 5
 #| fig-height: 6
 #| fig-align: "center"
+#| fig-cap: Historical called strike probabilities for a right-handed batter facing a right-handed pitcher.
 grid_sep <- 0.05
 x_grid <- seq(-1.5, 1.5, by = grid_sep)
 z_grid <- seq(0, 6, by = grid_sep)
@@ -338,7 +337,7 @@ rect(xleft = -8.5/12,
 
 
 
-### A multilevel model {#sec-fit-multilevel}
+### Fitting Our Multilevel Model {#sec-fit-multilevel}
 
 Now that we have fit a GAM model to the historical data, we are ready to compute the baseline log-odds for a called strike for each pitch from 2024.
 We can do this using the `predict` function with the argument `type = "link"` instead of `type  = "response"`.
@@ -383,7 +382,7 @@ catcher_u <-
 
 
 
-## Runs saved above replacement {#sec-frame-war}
+## Runs Saved Above Replacement {#sec-frame-war}
 
 The data table `catcher_u` estimates of the amount each catcher adds to log-odds of a called strike, after adjusting for the historical baseline and the other players, relative to a global average across a super-population of catchers.
 As we argued in [Lecture 10](lecture10.qmd), it is arguably more useful to compare each individual catcher's performance to a well-defined replacement level rather than to a nebulously defined global average.

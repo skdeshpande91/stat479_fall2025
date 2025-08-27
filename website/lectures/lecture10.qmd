@@ -58,7 +58,7 @@ roster2024 <-
   dplyr::filter(!is.na(gsis_id))
 ```
 
-### Passing plays 
+### Passing Plays Data {#sec-passing-data}
 We will extract information about all passing plays from `pbp2024` into a data table called `pass2024`. 
 ```{r}
 #| label: build-pass2024
@@ -114,7 +114,7 @@ For completed passes, computing `air_epa` and `yac_epa` is relatively straightfo
 Then, the difference between this intermediate EP and the starting EP of the original play is `air_epa` and the difference between the final EP and this intermediate EP is `yac_epa`.
 Computing `air_epa` and `yac_epa` for incomplete passes is trickier and involves computing the difference in expected points between the final state, initial state, and an intermediate state that would result had the pass been caught.
 
-### Rushing data {#sec-rushing-data}
+### Rushing Plays Data {#sec-rushing-data}
 
 Success in the run game depends not only on the skill of the individual runner to run through the [space created by his teammates](https://youtu.be/hrlrYzCioiI?t=208) and [evade defenders](https://youtu.be/hrlrYzCioiI?t=66) but also on the ability of his teammates (usually linemen) to [create space near the line](https://youtu.be/hrlrYzCioiI?t=122) and to [make blocks down the field](https://www.youtube.com/watch?v=f_z8E6E3iYo).
 Unfortunately, publicly available NFL play-by-play does not record the identities of all 22 players on the field nor does it include information about play (i.e., whether the play involved a pulling guard).
@@ -158,7 +158,7 @@ sum(grepl("sack", rush2024$desc, ignore.case = TRUE) & is.na(rush2024$rusher_pla
 ```
 
 
-#### Dealing with sacks
+#### Handling Sacks {#sec-sacks}
 
 **nflfastR** treats sacks as passing plays and not running plays.
 However, because the ball is not thrown during a sack, there is no well-defined `air_epa` or `yac_epa`.
@@ -183,6 +183,7 @@ sum(!is.na(sacks$passer_player_id) & is.na(sacks$rusher_player_id)) #<2>
 
 The following code overwrites the missing `rusher_player_id` values on sacks and then appends the rusher's position.
 ```{r}
+#| label: add-position
 rush2024 <-
   rush2024 |>
   dplyr::mutate(
@@ -194,11 +195,10 @@ rush2024 <-
   dplyr::left_join(y = roster2024 |> dplyr::select(gsis_id, position), by = "gsis_id") |>
   dplyr::rename(rusher_position = position) |>
   dplyr::select(-gsis_id)
-
 ```
 
 
-#### Run context {#sec-run-context}
+#### Run Context {#sec-run-context}
 
 The data table `rush2024` contains two variables that describe the run play.
 The first, `run_location`, records whether the run was towards the left, right or middle of the offensive line.
@@ -223,6 +223,7 @@ For runs where both `run_gap` and `run_location` are not `NA`, we will concatena
 For runs through the "A" gap (when `run_location == "middle"` and `run_gap` is `NA`), we will set the contextual variable to be `"middle"`.
 It turns out that the remaining 1447 running plays with missing `run_location` and `run_gap` involve a sack or fumble (and sometimes both!)
 ```{r}
+#| label: examine-missing-context
 tmp <-  #<1>
   rush2024 |> #<1>
   dplyr::filter(is.na(run_gap) & is.na(run_location)) #<1>
@@ -248,7 +249,7 @@ rush2024 <-
       .default = paste(posteam, run_gap, run_location, sep = "_")))
 ```
 
-### Accounting for team strengths
+### Accounting for Team Strengths {#sec-team-strengths}
 
 Recall one of the main [drawbacks of plus/minus](lecture04.qmd#sec-pm-issues) was its inability to account for the quality of the player's teammates.
 When trying to construct a version of WAR for offensive players in the NFL, we need to make sure that we do not overly reward players who happen to play for good teams or overly penalize players who play on bad offenses.
@@ -278,11 +279,10 @@ rush2024 <-
   dplyr::inner_join(rush_strength, by = "posteam")
 ```
 
-
 ## Passing Models {#sec-passing-models}
 
+### Constructing Composite Outcomes {#sec-composite-outcomes}
 
-### Constructing composition outcomes
 We're now ready to determine how much individual players contribute to their team's overall EPA on passing plays.
 While it is tempting to fit separate multilevel models to predict the values in the `air_epa` and `yac_epa`, we need to be a bit more careful in how we deal with incomplete passes.
 Specifically, on an incomplete pass, there is necessarily no run after the catch and any change in EP is driven entirely by what happens while the ball is in the air.
@@ -394,9 +394,7 @@ We will denote this quantity by $\textrm{TPA}^{(D)}_{\textrm{air},d},$ with nega
 
 [^latent]: That is, unobservable.
 
-[^take310]: If you have taken STAT 310 or 312, the issue is that the [likelihood]() function depends on these parameters only through their sum $\mu_{Q} + \mu_{C} + \mu_{D}.$ So, the data alone cannot distinguish configurations of these parameters that yield the same sum. For instance, setting $\mu_{Q} = \mu_{C} = \mu_{D} = 0$ yields exactly the same fit to the data $\mu_{Q} = 5, \mu_{C} = -5, \mu_{D} = 0.$ One way to get around this inject prior information and fit a hierarchical Bayesian model, but that is beyond the scope of this course.
-
-
+[^take310]: If you have taken STAT 310 or 312, the issue is that the likelihood function depends on these parameters only through their sum $\mu_{Q} + \mu_{C} + \mu_{D}.$ So, the data alone cannot distinguish configurations of these parameters that yield the same sum. For instance, setting $\mu_{Q} = \mu_{C} = \mu_{D} = 0$ yields exactly the same fit to the data $\mu_{Q} = 5, \mu_{C} = -5, \mu_{D} = 0.$ One way to get around this inject prior information and fit a hierarchical Bayesian model, but that is beyond the scope of this course.
 
 We can extract the IPA and TPA values using the function `ranef()`.
 ```{r}
@@ -435,7 +433,6 @@ Because these contributions can, by definition, only be made following a complet
 
 [^yurkomistake]: In the original nflWAR paper [@Yurko2019_nflWAR], they set $\Delta_{\textrm{air},i} =\Delta_{\textrm{yac},i} = \Delta_{i}$ on incomplete passes and fit the YAC EPA model using data from both complete and incomplete passes. This effectively "double counts" contributions of offensive players. 
 
-
 ```{r}
 #| label: fit-yac-model
 
@@ -468,7 +465,7 @@ all(ranef(yac_model)[["passer_player_id"]][,1] == 0) #<1>
 1. Checks whether all of the passer IPA values are equal to 0.
 
 This phenomenon makes some intuitive sense: once the catch is made, there is very little for the passer, who is typically several yards away, to contribute.
-The [manual entry for `isSingular`](https://rdrr.io/cran/lme4/man/isSingular.html) goes on to say that "There is not yet consensus about how to deal with singularity, or more generally to choose which random-effects specifications (from a range of choices of varying complexity to use)"[^bayes] and suggests that one option is to "avoid fitting overly complex models in the first place."
+The [manual entry for `isSingular()`](https://rdrr.io/cran/lme4/man/isSingular.html) goes on to say that "There is not yet consensus about how to deal with singularity, or more generally to choose which random-effects specifications (from a range of choices of varying complexity to use)"[^bayes] and suggests that one option is to "avoid fitting overly complex models in the first place."
 So, at this point we have a choice: either we move forward with our model or we re-fit it without the passer random intercepts.
 
 Recall that we ultimately plan to aggregate the IPA from air yards, YAC, and rushing for all offensive players.
@@ -477,7 +474,6 @@ But if we re-fit the model, we will have to manually set these values to zero.
 To avoid this extra step, we'll continue to use our current[^homework].
 
 [^homework]: But you should check whether our downstream results change if we estimate the YAC IPA values for receivers using a reduced model that excludes the passer random intercept!
-
 
 [^bayes]: Personally, I disagree with the statement. A very natural way around this issue is to use a Bayesian hierarchical model. In fact, I'd go further and say that multilevel models of the type fitted by `lmer()` are just impoverished versions of Bayesian hierarchical models. But Bayesian models are regrettably outside the scope of the course and non-Bayesian multilevel models are very widely used so you have to learn a little about them. 
 
@@ -511,7 +507,7 @@ yac_receiver_effects |>
 ```
 
 
-## Rushing Model
+## Rushing Model {#sec-rush-model}
 
 As @Yurko2019_nflWAR notes, we cannot distinguish between designed quarterback runs from scrambles on broken plays using publicly available play-by-play data.
 So, we will fit two separate models of EPA for running plays, one for all quarterback runs (i.e., `rusher_position=="QB"`) and one for all non-quarterback runs (i.e., `rusher_position != "QB"`).
@@ -581,14 +577,11 @@ run_effects |>
 ## Total Individual Points Added Above Average {#sec-ipaa}
 
 For each offensive player, we have estimates for the number of expected points they add **per play** through the air, after the catch, and through their running.
-
-
-
 By multiplying each player's IPA by the number of times they attempted the corresponding play, we can compute each player's *individual points added above average* or IPAA for every type of play.
 
 For instance, let's start with quarterbacks and how they generate EPA through the air on passing plays.
 Our modeling suggests that Joe Burrow created 42 more points of EP for his team through the air than a league-average quarterback would have.
-Burrow's IPAA of 42 points through the air is substantially larger than the next best quarterbacks (Darnlod and Jackson).
+Burrow's IPAA of 42 points through the air is substantially larger than the next best quarterbacks (Darnold and Jackson).
 Recall from @sec-yac-model that every passer has an IPA of zero based on their contributions after the catch is made.
 ```{r}
 #| label: pass-ipaa
@@ -680,7 +673,7 @@ run_ipaa |>
 
 
 
-### Position-specific replacement levels for non-quarterbacks {#sec-skill-replacement}
+### Replacement Level for Skill Positions {#sec-skill-replacement}
 
 Although the IPAA values are interesting and informative, they represent a comparison between players and a nebulously defined average.
 Recall that IPAA is just a scaled version of IPA, which we defined to be the difference between the player-specific random intercept and a global mean parameter in our multilevel model.
@@ -788,7 +781,7 @@ repl_rb_ipa_yac <-
   mean(na.rm = TRUE)
 ```
 
-Finally, we compute the difference between every player's actual IPAA and their replacement-level shadow IPAA value, to obtain their individual points added over replacement (or IPAR)
+Finally, we compute the difference between every player's actual IPAA and their replacement-level shadow IPAA value, to obtain their individual points added over replacement (or IPAR):
 ```{r}
 #| label: compute-ipar-rec
 receiver_ipar <-
@@ -808,7 +801,7 @@ receiver_ipar <-
 ```
 
 
-We perform similar calculations to compute the IPAR value from running plays for each non-QB player
+We perform similar calculations to compute the IPAR value from running plays for each non-QB player:
 ```{r}
 #| label: compute-ipar-run
 #| code-fold: true
@@ -868,12 +861,13 @@ run_ipar <-
 ### Computing IPAR for QB's {#sec-qb-ipar}
 
 We defined replacement-levels for running backs, wide receivers, and tight ends based on typical patterns of roster construction.
-Due to the unique nature of the quarterback position --- virtually *every* offensive play involves runs through the quarterbac --- we need to define "replacement" level somewhat differently.
+Due to the unique nature of the quarterback position --- virtually *every* offensive play involves runs through the quarterback --- we need to define "replacement" level somewhat differently.
 One option would be to create a group of 32 non-replacement quarterbacks by identifying the quarterback one each team who were involved in the most passing and rushing attempts.
-While simple to impelement, this implicitly assumes that every NFL team has at least one non-replacement quarterback.
+While simple to implement, this implicitly assumes that every NFL team has at least one non-replacement quarterback.
 Instead, we sort quarterbacks by the total number of passing and rushing plays in which they were involved and designate the top-32 to be non-replacement level.
 
 ```{r}
+#| label: qb-ipar
 qb_ipaa <-
   passer_ipaa |>
   dplyr::filter(position == "QB") |>
@@ -913,25 +907,21 @@ qb_ipar <-
 ```
 
 
-## From points to wins
+## From Points to Wins {#sec-pts-win}
 
 The IPAR values are on the scale of point differential.
 Figure shows point differential plotted against wins.
 If we fit a line to these data --- that is, if we find some $\alpha$ and $\beta$ such that $\textrm{Wins} \approx \alpha + \beta \times \textrm{PtsDiff}$  --- then we can multiply the IPAR values by the estimated slope to convert from the point differential scale to the win scale.
 
-To get this, we load the schedules for the last 10 seasons using the function `load_schedules()` from the **nflreadr** package
-
-<!--
-  1. Load all the schedules
-  2. For each game, determine who the winner (if result > 0, it's the home team, if result < 0, it's the losing team)
-  3. Get score differential for winning team and losing team (-1 * results)
-
--->
-
-
+To get this, we load the schedules for the last 10 seasons using the function `nflreader::load_schedules()` from the **nflreadr** package, which can be installed using the code
+```{r}
+#| label: install-nflreadr
+#| eval: false
+install.packages("nflreader")
+```
+The following code loads schedules and computes point differentials and records.
 ```{r}
 #| label: load-schedules
-
 schedules <-
   nflreadr::load_schedules(seasons = 2015:2024) |> #<1>
   dplyr::filter(game_type == "REG") |>
@@ -963,10 +953,11 @@ records <-
 
 Plotting wins against total scoring differential, we see an obvious increasing trend
 ```{r}
-#| label: wins-score-plot
+#| label: fig-wins-score-plot
 #| fig-width: 6
 #| fig-asp: 0.5625
 #| fig-align: center
+#| fig-cap: Scoring differential is positively associated with wins
 
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
 plot(records$scoring_differential,
@@ -989,7 +980,6 @@ beta
 We see that every additional point scored is associated with about an increase of about 0.02 wins, on average.
 
 We can now multiply each IPAR value by this factor to determine how wins each player contributes above replacement in different phases of the game.
-
 ```{r}
 #| label: war
 

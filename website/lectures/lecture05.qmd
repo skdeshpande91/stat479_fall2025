@@ -5,15 +5,21 @@ execute:
   cache: true
 ---
 
-## Recap and Overview
+## Overview {#sec-overview}
 
-### Review of notation {#sec-notation-review}
+In [Lecture 4](lecture04.qmd), we introduced adjusted plus/minus, which attempts to estimate how much value an NBA player creates after adjusting for the quality of his teammates and opponents.
+As noted in [that lecture](lecture04.qmd#sec-looking-ahead), using the method of least squares to estimate APM values is problematic because it **assumes** that all baseline players have the exact same partial effect on their team's average point differential per 100 possessions.
+In this lecture, we solve a *penalized* version of the least squares problem (@sec-ridge) to fit a *regularized* adjusted plus/minus model that avoids the need to specify baseline players (@sec-rapm).
+We then use the bootstrap (@sec-bootstrap) to quantify uncertainty about differences between players and the overall RAPM rankings.
+
+
+### Notation Review {#sec-notation-review}
 
 We begin by reviewing the notation and set-up from [Lecture 4](lecture04.qmd#sec-apm-intro).
 First, let $n$ denote the number of stints and $p$ the total number of players.
 For each stint $i = 1, \ldots, n$ and player $j = 1, \ldots, p,$ let $x_{ij}$ be the signed on-court indicator for player $j$ during stint $i.$
 That is, $x_{ij} = 1$ (resp. $x_{ij} = -1)$ if player $j$ is on the court and playing at home (resp. on the road) during stint $i$ and $x_{ij} = 0$ if player $j$ is not on the court during stint $i.$
-We can arrange theseindicators into a large $n \times p$ matrix $\boldsymbol{\mathbf{X}}$ whose rows (resp. columns) correspond to stints (resp. players).
+We can arrange these indicators into a large $n \times p$ matrix $\boldsymbol{\mathbf{X}}$ whose rows (resp. columns) correspond to stints (resp. players).
 Finally, let $Y_{i}$ be the point differential per 100 possessions observed during shift $i.$
 
 The original APM model introduced a single number $\alpha_{j}$ for each player $j = 1, \ldots, p,$ and modeled
@@ -77,7 +83,7 @@ This technique of adding a small perturbation to $\boldsymbol{\mathbf{Z}}^{\top}
 
 
 
-### Picking $\lambda$ with cross-validation {#sec-lambda-cv}
+### Picking $\lambda$ with Cross-Validation {#sec-lambda-cv}
 
 In practice, we typically pick a value of $\lambda$ using cross-validation
 The basic idea is to select the value of $\lambda$ that results in the smallest out-of-sample prediction error.
@@ -94,35 +100,16 @@ After iterating through these steps many times for a single $\lambda,$ we comput
 At the end of this process, we have an estimate for the out-of-sample mean square error for every $\lambda$ and can pick the $\lambda$ that yields the smallest one.
 Then, we can fit a ridge regression model using *all* of the data to obtain our final solution.
 
-
-
-
-
-## Regularized adjusted plus/minus
+## Regularized Adjusted Plus/Minus {#sec-rapm}
 
 To recap, by fitting a ridge regression model instead of an ordinary linear model, we are able to estimate an adjusted plus/minus value *for all players*, thereby avoiding having to specify an arbitrary baseline-level.
 Although this is conceptually easy, finding a suitable $\lambda$ via cross-validation is quite an involved process.
 Luckily for us, the function [`cv.glmnet()`](https://glmnet.stanford.edu/reference/cv.glmnet.html) from the [**glmnet** package](https://glmnet.stanford.edu/articles/glmnet.html) automates the process (including specifying the initial grid).
 
-:::{.callout-important}
-## Installing **glmnet**
-If you have not already installed **glmnet**, you can do so using
-```{r}
-#| label: install-glmnet
-#| eval: false
-
-install.packages("glmnet")
-```
-:::
-
 The following code shows how to perform the cross-validation, plots the cross-validation error for each value of $\lambda$, and selects the $\lambda$ with smallest error. 
-It also
 ```{r}
 #| label: fit-rapm
 #| message: false
-#| fig-width: 6
-#| fig-asp: 0.5625
-#| fig-align: center
 set.seed(479) #<1>
 library(glmnet) #<2>
 cv_fit <-
@@ -130,8 +117,6 @@ cv_fit <-
             alpha = 0, #<4>
             standardize = FALSE) #<5>
 lambda_min <- cv_fit$lambda.min #<6>
-
-plot(cv_fit) #<7>
 ```
 1. Because cross-validation involves forming random training/testing splits, setting the randomization seed ensures our results are reproducible.
 2. Load the **glmnet** package into our R environment
@@ -139,7 +124,17 @@ plot(cv_fit) #<7>
 4. The argument `alpha = 0` tells **glmnet** to use a squared error penalty. 
 5. It is **extremely important** to set `standardize = FALSE`. If you don't, you end up over-shrinking the APM estimates of players with lots of playing time and under-shrinking APM estimates for players with little playing time
 6. Extracts the value of $\lambda$ with smallest out-of-sample error
-7. Plots the out-of-sample error as a function of $\lambda.$
+
+We can plot the out-of-sample error as a function of $\lambda$:
+```{r}
+#| label: fig-plot-cv
+#| fig-width: 6
+#| fig-asp: 0.5625
+#| fig-align: center
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+plot(cv_fit)
+```
+1. Plots the out-of-sample error as a function of $\lambda.$
 
 
 We can now fit a ridge regression model with the cross-validated choice of $\lambda$ using data from all our stints.
@@ -172,7 +167,7 @@ rapm <- #<4>
 1. Determines where in the grid of $\lambda$ values specified by `cv_glmnet()` the optimal one lies.
 2. Solves the ridge regression problem at all values of $\lambda$ along the grid specified by the initial `cv_glmnet()` fit.
 3. `glmnet()` returns a matrix of parameter estimates where the columns correspond to the different $\lambda$ values. Here, we pull out the estimates for the optimal $\lambda$, which was the second value provided.
-4. Like we did in Lecture 3, we create a data frame with every players' regularized adjusted plus/minus value and name
+4. Like we did in [Lecture 4](lecture04.qmd), we create a data frame with every players' regularized adjusted plus/minus value and name
 
 We recognize many super-star-level players (e.g., Gilgeous-Alexander, Dončić, Jokić, Giannis) among those with the highest *regularized* adjusted plus/minus values.
 ```{r}
@@ -187,7 +182,7 @@ By replacing player $j'$ with player $j,$ a team can expect to score $\alpha_{j}
 
 For instance, by replacing Luka Dončić with Anthony Davis, teams are expected to score an additional -3.41 points per possession[^nico].
 
-[^nico]: Fire Nico. 
+[^nico]: Once again: Fire Nico. 
 ```{r}
 #| label: luka-ad-rapm
 luka_rapm <- rapm |> dplyr::filter(Name == "Luka Doncic") |> dplyr::pull(rapm)
@@ -197,11 +192,10 @@ ad_rapm - luka_rapm
 ```
 
 
-## Uncertainty Quantification with the Bootstrap
+## Uncertainty Quantification with the Bootstrap {#sec-bootstrap}
 
 So far, we have only focused on obtaining point estimates.
-what is the range of our uncertainty about the relative impact of players.
-
+What is the range of our uncertainty about the relative impact of players.
 
 The **bootstrap** is an elegant way to quantify uncertainty about the output particular statistical method.
 At a high-level, the bootstrap works by repeatedly sampling observations from the original dataset and applying the method to the re-sampled dataset.
@@ -217,7 +211,6 @@ By examining the
 
 As a concrete illustration, the following code computes 100 bootstrap estimates of the RAPM parameter vector.
 It saves the bootstrap estimates of $\boldsymbol{\alpha}$ in a large matrix whose rows correspond to bootstrap samples and whose columns correspond to players.
-
 
 :::{.callout-important}
 ##Warning
@@ -261,10 +254,12 @@ for(b in 1:B){
 We can now compute the difference between Dončić's and Davis' estimated RAPM values for every bootstrap estimate.
 We find that the overwhelming majority of these samples are negative, suggesting that that we can be virtually certain that a team is expected to score score *fewer* points per 100 possessions by replacing Dončić by Davis.
 ```{r}
-#| label: bootstrap-diff
+#| label: fig-bootstrap-diff
 #| fig-width: 6
 #| fig-asp: 0.5625
 #| fig-align: center
+#| fig-cap: Bootstrap distribution of difference between Doncic & Davis
+
 doncic_id <- player_table |> dplyr::filter(Name == "Luka Doncic") |> dplyr::pull(id) #<1>
 davis_id <- player_table |> dplyr::filter(Name == "Anthony Davis") |> dplyr::pull(id) 
 
@@ -289,7 +284,7 @@ quantile(boot_diff, probs = c(0.025, 0.975)) #<1>
 
 We conclude with 95% confidence that by replacing Dončić by Davis, the Mavericks are expected to score between 0.48 and 6.3 *fewer* points per 100 possessions. 
 
-### Bootstrap intervals for ranks
+### Bootstrap Intervals for Ranks {#sec-bootstrap-rank}
 
 Recall that in our original analysis, Shai Gilgeous-Alexander had the highest RAPM value.
 How certain should we be about his overall ranking? 
@@ -355,5 +350,10 @@ quantile(sga_ranks, probs = c(0.025, 0.975))
 ```
 Our analysis reveals quite a bit of uncertainty about SGA's overall rank in terms of RAPM!
 
+## Exercises
 
+  1. Pick several players and compare the bootstrap distribution of the difference in their RAPM estimates. 
+  2. Using the same 100 training/testing splits constructed in Exercise 4.5, estimate the out-of-sample mean square error for RAPM based on the 2024-25 data. Instead of computing an optimal $\lambda$ for each training split, you may use the optimal $\lambda$ value computed on the whole dataset. Is RAPM a better predictive model than APM? 
+  3. Fit RAPM models to data from (i) the 2023-24 and 2024-25 regular seasons and (ii) the 2022-23, 2023-24, and 2024-25 regular season. Use the bootstrap to quantify how uncertainty about the difference in player RAPM values and the overall rankings changes as you include data from more seasons.
+  4. Just like `lm`, the functions `cv.glmnet()` and `glmnet()` accept a `weights` argument. Using the weighting schemes you considered in Exercise 4.2, fit regularized *weighted* adjusted plus/minus models.
 

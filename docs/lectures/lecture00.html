@@ -177,11 +177,15 @@ window.Quarto = {
     <a class="nav-link" href="../index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../syllabus.html"> 
+<span class="menu-text">Syllabus</span></a>
+  </li>  
   <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-lectures" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Lectures</span>
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-lecture-code" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Lecture Code</span>
     </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-lectures">    
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-lecture-code">    
         <li>
     <a class="dropdown-item" href="../lectures/lecture00.html">
  <span class="dropdown-text">Lecture 0: Boxscore Metrics</span></a>
@@ -228,37 +232,11 @@ window.Quarto = {
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture12.html">
- <span class="dropdown-text">Lecture 12: Power Rankings</span></a>
+ <span class="dropdown-text">Lecture 12: Power Rankings I</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture13.html">
- <span class="dropdown-text">Motivation: Power rankings</span></a>
-  </li>  
-    </ul>
-  </li>
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-exercises" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Exercises</span>
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-exercises">    
-        <li>
-    <a class="dropdown-item" href="../exercises/exercises1_boxscore.html">
- <span class="dropdown-text">Constructing Advanced Metrics Using Box Score Data</span></a>
-  </li>  
-    </ul>
-  </li>
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-guides" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Guides</span>
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-guides">    
-        <li>
-    <a class="dropdown-item" href="../guides/getting_started.html">
- <span class="dropdown-text">Getting Started</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../guides/plot_vertical_statsbomb.html">
- <span class="dropdown-text">Plotting StatsBomb Data Vertically</span></a>
+ <span class="dropdown-text">Lecture 13: Power Rankings II</span></a>
   </li>  
     </ul>
   </li>
@@ -354,13 +332,13 @@ window.Quarto = {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../lectures/lecture12.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lecture 12: Power Rankings</span></a>
+ <span class="menu-text">Lecture 12: Power Rankings I</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../lectures/lecture13.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Motivation: Power rankings</span></a>
+ <span class="menu-text">Lecture 13: Power Rankings II</span></a>
   </div>
 </li>
     </ul>
@@ -373,7 +351,7 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#motivation-the-best-shooting-season-in-the-nba" id="toc-motivation-the-best-shooting-season-in-the-nba" class="nav-link active" data-scroll-target="#motivation-the-best-shooting-season-in-the-nba">Motivation: the best shooting season in the NBA?</a></li>
+  <li><a href="#motivation-the-best-shooting-season-in-the-nba" id="toc-motivation-the-best-shooting-season-in-the-nba" class="nav-link active" data-scroll-target="#motivation-the-best-shooting-season-in-the-nba">Motivation: The Best Shooting Season in the NBA?</a></li>
   <li><a href="#sec-basic-box-score" id="toc-sec-basic-box-score" class="nav-link" data-scroll-target="#sec-basic-box-score">Basic Box Score Statistics</a></li>
   <li><a href="#sec-percentages" id="toc-sec-percentages" class="nav-link" data-scroll-target="#sec-percentages">From Totals to Percentages</a>
   <ul class="collapse">
@@ -406,9 +384,9 @@ window.Quarto = {
 
 
 <section id="motivation-the-best-shooting-season-in-the-nba" class="level2">
-<h2 class="anchored" data-anchor-id="motivation-the-best-shooting-season-in-the-nba">Motivation: the best shooting season in the NBA?</h2>
+<h2 class="anchored" data-anchor-id="motivation-the-best-shooting-season-in-the-nba">Motivation: The Best Shooting Season in the NBA?</h2>
 <p>Who is the best shooter in the NBA? How do we determine this <em>using data</em>?</p>
-<p>In this lecture, we will practice using functions from the <strong>tidyverse</strong> suite of packages (especially <strong>dplyr</strong>) to manipulate tables of NBA box score data. Hopefully, much of the functionality we encounter in this lecture will be familiar to you. But, if you need a high-level refresher, I highly recommend the following resources:</p>
+<p>In this note, we will practice using functions from the <strong>tidyverse</strong> suite of packages (especially <strong>dplyr</strong>) to manipulate tables of NBA box score data. Hopefully, much of the functionality we encounter in this lecture will be familiar to you. But, if you need a high-level refresher, I highly recommend the following resources:</p>
 <ul>
 <li><a href="https://r4ds.hadley.nz/data-transform.html">Chapter 3</a> and <a href="https://r4ds.hadley.nz/data-tidy.html">Chapter 5</a> of <a href="https://r4ds.hadley.nz"><em>R for Data Science</em></a>.</li>
 <li><a href="https://datasciencebook.ca/intro.html#adding-and-modifying-columns-using-mutate">Section 1.9</a> and <a href="https://datasciencebook.ca/wrangling.html">Chapter 3</a> of <a href="https://datasciencebook.ca">*Data Science: A First Introduction</a>.</li>

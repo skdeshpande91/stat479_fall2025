@@ -8,20 +8,20 @@ execute:
 
 ## Overview {#sec-overview}
 
-[Last lecture](lecture07.qmd), we distributed the run value created in each at-bat between the batter and base runners. 
+In [Lecture 7](lecture07.qmd), we distributed the run value created in each at-bat between the batter and base runners. 
 Aggregating over all at-bats, we computed each player's $\textrm{RAA}^{\textrm{br}},$ which quantifies how much more run value a player created through his base running than would otherwise be expected based on the starting game states and ending events of the at-bats in which he was involved.
 We also computed $\textrm{RAA}^{\textrm{b}},$ which quantifies how much more run value a player created through his hitting than would be expected based on his position. 
 
 According to the conservation of runs framework introduced by @Baumer2015_openWAR, whenever the batting team creates $\delta$ units of run value in at-bat, the fielding team (necessarily) gives up $\delta$ units of run value.
 Equivalently, the fielding team creates $-\delta$ units of run value.
-In this lecture, we discuss how to divide this $-\delta$ run value between the pitchers and fielders. 
+In this lecture, we discuss how to divide this $-\delta$ run value between the pitchers (@sec-pitching) and fielders (@sec-fielding). 
 
 For at-bats $i$ that end without the ball being put in play (i.e., a strikeout, walk, or a homerun), we will assign the entirety of the $-\delta_{i}$ run value to the pitcher.
-But for at-bats that result with balls put in play, we will divide $-\delta_{i}$ into two parts $\delta^{(p)}_{i} = -\delta \times \hat{p}_{i}$ and $\delta^{(f)} = -\delta_{i} \times (1 - \hat{p}_{i})$ where $\hat{p}_{i}$ is an *estimate* of the probability that play results in an out given the batted ball's location.
-We will first allocate 
+But for at-bats that result with balls put in play, we will divide $-\delta_{i}$ into two parts $\delta^{(p)}_{i} = -\delta \times \hat{p}_{i}$ and $\delta^{(f)} = -\delta_{i} \times (1 - \hat{p}_{i})$ where $\hat{p}_{i}$ is an *estimate* of the probability that play results in an out given the batted ball's location (@sec-out-probs).
+We will specifically estimate these out probabilities using **Generalized Additive Models** (@sec-gam).
+Finally, we compute how more run value each player creates through their batting, baserunning, pitching, and fielding than a replacement level player (@sec-war).
 
-
-### Working with hit location data
+## Hit Location Data {#sec-hit-location-data}
 
 We begin by loading several of the data tables created in [Lecture 6](lecture06.qmd) and [Lecture 7](lecture07.qmd) including `statcast2024`, which contains pitch-level data for all regular season pitches in 2024, `runValue2024`, which contains the $\delta_{i}$'s for each regular season at-bat, and `player2024_lookup`, which contains the names and MLB Advanced Media identifiers for each player.
 ```{r}
@@ -33,15 +33,16 @@ oi_colors <-
   palette.colors(palette = "Okabe-Ito")
 ```
 
-Recall from [Lecture 6](lecture06.qmd) that the StatCast variables `hc_x` and `hc_y` record the coordinates of each batted ball.
+Recall from [Lecture 6](lecture06.qmd) that the StatCast variables `hc_x` and `hc_y` record the coordinates where each batted ball is first fielded.
 When we plotted the available `hc_x` and `hc_y` values, we saw the outlines of the park, with home plate located around `hc_x = 125` and `hc_y = 200.`
 We can also roughly make out the first and third base lines and the infield.
 
 ```{r}
-#| label: plot-hc-coordinates
+#| label: fig-hc-coordinates
 #| fig-width: 6
 #| fig-height: 6
 #| fig-align: center
+#| fig-cap: Locations where all batted balls are first fielded
 
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
 plot(statcast2024$hc_x, statcast2024$hc_y, 
@@ -51,13 +52,14 @@ plot(statcast2024$hc_x, statcast2024$hc_y,
 ```
 
 It is not immediately apparent, however, whether the first base line is on the left or right.
-Luckily, StatCastalso contains the official [fielding position](https://en.wikipedia.org/wiki/Baseball_positions) of the player who first fields the ball[^positions].
-When we plot just the pitches first fielded by first basemen, we see that in the original `(hc_x, hc_y)` coordinate system, first base is on the *right* hand side of the plot.
+Luckily, StatCast also contains the official [fielding position](https://en.wikipedia.org/wiki/Baseball_positions) of the player who first fields the ball[^positions].
+When we plot just the pitches first fielded by first basemen (`hit_location=3`), we see that in the original `(hc_x, hc_y)` coordinate system, first base is on the *right* hand side of the plot.
 ```{r}
-#| label: plot-3
+#| label: fig-fielder3
 #| fig-width: 6
 #| fig-height: 6
 #| fig-align: center
+#| fig-cap: Location of all batted balls initially fielded by the first baseman
 
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
 plot(statcast2024$hc_x[statcast2024$hit_location==3], 
@@ -71,10 +73,10 @@ plot(statcast2024$hc_x[statcast2024$hit_location==3],
 
 Although MLB Stadiums are equipped with lots of very cool camera and ball tracking technology, the variables `hc_x` and `hc_y` are *not* derived from those technologies.
 Instead a stringer manually marks the location of the batted ball on a tablet so the coordinates `hc_x` and `hc_y` are expressed in units of pixels on that tablet.
-[Jim Albert](https://bayesball.github.io), who is one of the founding fathers of Statistical research in baseball, [suggested]() the following transformation from the original `(hc_x, hc_y)` coordinate system to one that places home plate at the bottom of the plot (with coordinates `(0,0)`) and measures distances in feet.
+[Jim Albert](https://bayesball.github.io), who is one of the founding fathers of Statistical research in baseball, [suggested](https://baseballwithr.wordpress.com/2021/04/) the following transformation from the original `(hc_x, hc_y)` coordinate system to one that places home plate at the bottom of the plot (with coordinates `(0,0)`) and measures distances in feet.
 $$
 \begin{align}
-x &= 2.5 \times (\texttt{hc\_x} - 125.42) & y &= 2.5 \times (198.27 - \texttt{hc\_y})
+x &= 2.5 \times (\texttt{hc_x} - 125.42) & y &= 2.5 \times (198.27 - \texttt{hc_y})
 \end{align}
 $$
 
@@ -82,10 +84,11 @@ The following code implements this transformation, storing the new coordinates a
 It also overlays the first and third base lines, the base paths and places points at the base locations.
 
 ```{r}
-#| label: plot-new
+#| label: fig-new-coords
 #| fig-width: 6
 #| fig-height: 6
 #| fig-align: center
+#| fig-cap: Locations where batted balls are first fielded in our transformed coordinate system
 
 statcast2024 <-
   statcast2024 |>
@@ -152,7 +155,7 @@ def_atbat2024 <-
   dplyr::inner_join(y = runValue2024, by = c("game_pk", "at_bat_number"))
 ```
 
-## Estimating out probabilities
+## Estimating Out Probabilities {#sec-out-probs}
 
 Recall that we need to estimate the probability that a batted ball results in an out given its coordinate.
 To do so, we first need to extract those at-bats that resulted in a ball being put in play.
@@ -172,6 +175,7 @@ table(def_atbat2024$end_events[def_atbat2024$end_type != "X"], useNA = 'always')
 ```
 So, we can isolate those at-bats with a ball put in play by filtering on `end_type`.
 ```{r}
+#| label: create-bip
 bip <-
   def_atbat2024 |>
   dplyr::filter(end_type == "X")
@@ -237,10 +241,12 @@ raw_grid <- expand.grid(x = x_grid, y = y_grid) #<3>
 The table `grid` contains many combinations of `x` and `y` that do not represent plausible batted ball locations. 
 In the figure below, we plot all batted ball locations and overlay all the grid points.
 ```{r}
-#| label: plot-grid
+#| label: fig-grid
 #| fig-width: 6
 #| fig-height: 6
 #| fig-align: center
+#| fig-cap: The initial grid of points contains many locations at which we would not expect balls to be fielded.
+
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
 plot(bip$x, bip$y, 
      xlim = c(-300, 300), ylim = c(-100, 500),
@@ -256,10 +262,12 @@ We will remove those `(x,y)` pairs in `grid` for which either
   3. `sqrt(x^2 +y^2 < 580)`: these are locations very far from home plate
 
 ```{r}
-#| label: restrict-grid
+#| label: fig-restrict-grid
 #| fig-width: 6
 #| fig-height: 6
 #| fig-align: center
+#| fig-cap: A restricted grid of spatial locations.
+
 grid <-
   raw_grid |>
   dplyr::filter(y + x > -100 & y - x > -100 & sqrt(x^2 + y^2) < 580)
@@ -320,10 +328,11 @@ We can now make a heatmap of our estimated probabilities by looping over the row
 
 <!-- redraw and add a legend at the top -->
 ```{r}
-#| label: plot-bin-probs
+#| label: fig-bin-probs
 #| fig-width: 6
 #| fig-height: 6
 #| fig-align: center
+#| fig-cap: Empirical out probabilities based on binning balls in play.
 
 col_list <- colorBlindness::Blue2DarkRed18Steps #<1>
 
@@ -338,10 +347,11 @@ for(i in 1:nrow(grid_probs_bin)){
        ybot = grid_probs_bin$y[i] - grid_sep/2,
        xright = grid_probs_bin$x[i] + grid_sep/2,
        ytop = grid_probs_bin$y[i] + grid_sep/2,
-       col = ifelse(is.na(grid_probs_bin$out_prob[i]), 
-                    adjustcolor(oi_colors[1], alpha.f = 0.2), #<7>
-                    adjustcolor(rgb(colorRamp(col_list,bias=1)(grid_probs_bin$out_prob[i])/255), #<8>
-                                alpha.f = 0.5)),
+       col = ifelse(
+         is.na(grid_probs_bin$out_prob[i]), 
+         adjustcolor(oi_colors[1], alpha.f = 0.2), #<7>
+         adjustcolor(rgb(colorRamp(col_list,bias=1)(grid_probs_bin$out_prob[i])/255), #<8>
+                     alpha.f = 0.5)),
        border = NA) #<9>
 }
 abline(a = 0, b = 1, col = oi_colors[5], lwd = 2) 
@@ -369,8 +379,7 @@ points(x = 0, y = 90*sqrt(2), pch = 16, cex = 0.8, col = "white")
 8. The expression `rgb(colorRamp(col_list, bias=1)(grid_probs_bin$out_prob)/255)` maps the fitted probability to a color in `col_list` using linear interpolation. Here 0% maps to dark blue and 100% maps to dark red.
 9. Suppresses the border of the rectangle
 
-### Generalized additive models {#sec-out-gam}
-
+### A Logistic Regression Model for Outs {#sec-logistic}
 Our naively estimated out probabilities leave much to be desired.
 For one thing, there are lots of "gaps" in the fitted surface where our initial model can't make a prediction.
 These are the cells in our grid into which no balls were hit.
@@ -383,7 +392,7 @@ Indeed, we find that about 85% of the grid cells contain 10 or fewer observation
 mean(bin_probs$n_balls <= 10)
 ```
 
-Like we did to predict [XG using shot distance](lecture02.qmd), we can overcome this challenge by building a statistical model.
+Like we did to predict [XG using shot distance](lecture03#sec-logistic.qmd), we can overcome this challenge by building a statistical model.
 In particular, we would like to model the log-odds of an out as a function of the batted balls location.
 That is,
 $$
@@ -398,10 +407,7 @@ $$
 $$
 We can estimate these parameters using `glm()` and then compute the fitted probability for every cell in our grid.
 ```{r}
-#| label: logistic-fit
-#| fig-width: 6
-#| fig-height: 6
-#| fig-align: center
+#| label: fit-logit
 logit_fit <-
   glm(Out ~ x + y,
       family = binomial(link = "logit"), data = bip)
@@ -410,6 +416,20 @@ grid_logit_preds <-
           newdata = grid, type = "response") #<1>
 grid_logit_cols <- 
   rgb(colorRamp(col_list,bias=1)(grid_logit_preds)/255) # <2>
+```
+1. To get fitted values on the probability scale, we need to specify `type = "response"`
+2. Creates a vector mapping the fitted probability at each grid location to a color between the two extremes
+
+
+The fitted logistic regression model predicts that the probability of an out decreases as one moves vertically away from home plate.
+The model further predicts that balls hit into the outfield tend not to result in outs, which is at odds with what we see in the data.
+Indeed, our earlier plot revealed pockets of high out probability in the outfield, roughly corresponding to the usual positioning of the left, right, and center fielders.
+```{r}
+#| label: fig-logistic-fit
+#| fig-width: 6
+#| fig-height: 6
+#| fig-align: center
+#| fig-cap: Logistic regression forecasts of out probabilities as a function of location.
 
 par(mar = c(1,1,5,1), mgp = c(1.8, 0.5, 0))
 plot(1, type = "n", 
@@ -422,7 +442,7 @@ for(i in 1:nrow(grid_probs_bin)){
        ybot = grid_probs_bin$y[i] - grid_sep/2,
        xright = grid_probs_bin$x[i] + grid_sep/2,
        ytop = grid_probs_bin$y[i] + grid_sep/2,
-       col = adjustcolor(grid_logit_cols[i], alpha.f = 0.5), #<3>
+       col = adjustcolor(grid_logit_cols[i], alpha.f = 0.5), #<1>
        border = NA)
 }
 abline(a = 0, b = 1, col = oi_colors[5], lwd = 2) 
@@ -433,22 +453,17 @@ lines(x = c(0,-90/sqrt(2)), y = c(0, 90/sqrt(2)), col = "white", lwd = 3)
 lines(x = c(90/sqrt(2), 0), y = c(90/sqrt(2), 90*sqrt(2)), col = "white", lwd = 3)
 lines(x = c(-90/sqrt(2), 0), y = c(90/sqrt(2), 90*sqrt(2)), col = "white", lwd = 3)
 
-
 points(x = 0, y = 0, pch = 16, cex = 0.8, col = "white")
 points(x = 90/sqrt(2), y = 90/sqrt(2), pch = 16, cex = 0.8, col = "white")
 points(x = -90/sqrt(2), y = 90/sqrt(2), pch = 16,cex = 0.8, col = "white")
 points(x = 0, y = 90*sqrt(2), pch = 16, cex = 0.8, col = "white")
-  
 ```
-1. To get fitted values on the probability scale, we need to specify `type = "response"`
-2. Creates a vector mapping the fitted probability at each grid location to a color between the two extremes
-3. Unlike with binning-and-averaging, our parametric model is able to make predictions at grid cells not present in the training data. So, we don't need to check whether the predicted probability is `NA`
+1. Unlike with binning-and-averaging, our parametric model is able to make predictions at grid cells not present in the training data. So, we don't need to check whether the predicted probability is `NA`
 
-The fitted logistic regression model predicts that the probability of an out decreases as one moves vertically away from home plate.
-The model further predicts that balls hit into the outfield tend not to result in outs, which is at odds with what we see in the data.
-Indeed, our earlier plot revealed pockets of high out probability in the outfield, roughly corresponding to the usual positioning of the left, right, and center fielders.
 
-The root cause of the conflict between our data and our model predictions is the model's strong --- and totally unrealistic --- assumption that the log-odds of an out is *linear* in both $x$ and $y.$
+## Generalized Additive Models {#sec-gam}
+
+The root cause of the conflict between our data and the logistic regression model forecasts in @fig-logistic-fit is the model's strong --- and totally unrealistic --- assumption that the log-odds of an out is *linear* in both $x$ and $y.$
 A more accurate model would allow the log-odds to vary non-linearly.
 
 Generalized Additive Models (or GAMs) are an elegant way to introduce non-linearity and create spatially smooth maps.
@@ -458,7 +473,12 @@ Such spline functions can be linearly combined to approximate really complicated
 
 [^spline-class]: If you're keen to learn more about splines, consider taking STAT 351 (Introduction to Nonparametric Statistics). A lot of the mathematical theory underpinning smoothing splines was developed by Prof. [Grace Wahba](https://en.wikipedia.org/wiki/Grace_Wahba), who was a long-serving member of the faculty here. 
 
-We can fit GAMs in R using the [**mgcv**](https://cran.r-project.org/web/packages/mgcv/refman/mgcv.html) package.
+We can fit GAMs in R using the [**mgcv**](https://cran.r-project.org/web/packages/mgcv/refman/mgcv.html) package, which can be installed using
+```{r}
+#| label: install-mgcv
+#| eval: false
+install.packages("mgcv")
+```
 The package provides two fitting functions, `gam()` and `bam()`, which is recommended for very large data sets like `bip`.
 Both functions are similar `lm()` and `glm()` in that they require users to specify a formula and, in the case of non-continuous outcomes, a link function.
 The main difference is the term `s()`, which is used to signal to `gam()` or `bam()` that we want to smooth over whatever variables appear inside of the brackets of `s()`.
@@ -475,11 +495,8 @@ library(mgcv)
 gam_fit <-
   bam(formula = Out ~ s(x,y), 
       family = binomial(link="logit"), data = bip)
-
-
 ```
-After fitting our GAM, we can visualized the estimated out probabilities.
-
+After fitting our GAM, we can visualize the estimated out probabilities:
 ```{r}
 #| label: fig-out-gam
 #| fig-width: 6
@@ -522,8 +539,7 @@ points(x = 0, y = 90*sqrt(2), pch = 16, cex = 0.8, col = "white")
 ```
 The out probabilities fitted by the GAM appear **much** more reasonable: balls hit within the in-field and close to the outfielders tend to be result in outs while balls hit in the gap between the infield and outfield tend not to result in outs.
 
-
-### Dividing run value between pitcher and fielders
+### Dividing Defensive Run Value {#sec-divide-delta}
 
 Recall that if at-bat $i$ results in a ball put in play, we will distribute $\delta_{i}^{(f)} = -\delta_{i} \times \hat{p}_{i}$ to the fielders and assign $\delta_{i}^{(p)} = -\delta \times (1 - \hat{p}_{i})$ to the pitcher.
 The following code adds a column to `def_atbat2024` containing the predicted out probabilities from our fitted GAM.
@@ -581,8 +597,7 @@ def_atbat2024 <-
     delta_f = -1 * p_out * RunValue)
 ```
 
-## Fielding run values
-
+## Fielding Run Values {#sec-fielding}
 
 If a ball is hit towards deep left field and results in the fielding team creating a large $-\delta$, how much blame should the third baseman, who is on the opposite side of the park receive? 
 Following @Baumer2015_openWAR, we will apportion $\delta_{i}^{(f)},$ the portion of the run value $-\delta_{i}$ attributable to the fielding in at-bat $i$, based on each fielder's responsibility for making an out on the batted ball.
@@ -598,17 +613,12 @@ Unlike our overall out probability model, which we fit using data from all batte
 For instance, when fitting the model for the first basemen, we won't include data from balls hit into deep left field.
 We compute the coordinates of the typical position by taking the average value of the `x` and `y` coordinates of all batted balls fielded by players at position $\ell.$
 We fit each position-specific GAM using batted balls hit within 150 ft of this typical location[^adhoc]
-<!--
-  Visual?
--->
+
 [^adhoc]: This choice is decidedly ad hoc. You should experiment with different cut-offs to see how the downstream results change!
-
-
-
 
 :::{.callout-important}
 ## Warning
-This code takes between 25 and 40 minutes to run
+This code takes between several minutes to run
 :::
 
 ```{r}
@@ -636,9 +646,6 @@ for(l in 1:9){
       fit_list[[l]] <-  #<7>
         bam(formula = newOut ~ s(x, y),
             family = binomial(link="logit"),data = train_df))["elapsed"] #<8>
-  
-  
-  
   tmp_df <-
     def_atbat2024 |> 
     dplyr::mutate(
@@ -650,7 +657,6 @@ for(l in 1:9){
   def_atbat2024[[paste0("p_out_", l)]] <- preds #<11>
 }
 save(fit_list, file = "position_gam_fits.RData") #<12>
-
 ```
 1. Vectors containing coordinates for the typical fielder location
 2. Holds all fitted objects, so that we can use them later to visualize position-specific out probabilities
@@ -780,7 +786,8 @@ raa_f3 |>
 The following code repeats this calculation for all fielding positions.
 ```{r}
 #| label: raa-f-l
-
+#| code-fold: true
+#| code-summary: Show the code computes the fielding RAA for all positions.
 raa_f1 <-
   def_atbat2024 |>
   dplyr::mutate(RAA_f1 = delta_f * w1) |>
@@ -883,16 +890,7 @@ raa_f <-
 
 
 
-
-<!--
-  1. Fit a GAM for probability an out occurs on BIP i: p_i
-  2. Give -delta * (1 - p_i) to pitcher and -delta * p_i to fielders. Call this delta_f
-  3. For each fielding position, we need to know prob. that they could have made that out
-  For BIP i we compute probability that each position could make the out; then we normalize to get s_il. 
-  Regress delta_f * s onto parks; residualize to get RAA_f
--->
-
-## Pitching run values
+## Pitching Run Values {#sec-pitching}
 
 Recall that $\delta_{i}^{(p)}$ is the amount of run value created by the pitcher in at-bat $i.$
 Summing this value across all at-bats involving each pitcher, we obtain each pitchers $\textrm{RAA}^{(p)}.$
@@ -924,8 +922,9 @@ We will save both `raa_f` and `raa_p` for later use
 save(raa_f, raa_p, file = "raa_defensive2024.RData")
 ```
 
-## Replacement Level
+## Replacement Level {#sec-war}
 
+We now combine the fielding and pitching RAA values with the baserunning and batting RAA values we computed in [Lecture 7](lecture07.qmd) into a single table.
 ```{r}
 #| label: compute-raa
 load("raa_offensive2024.RData")
@@ -944,17 +943,18 @@ raa <-
 
 $RAA$ is a comprehensive measure of a player's performance that accounts not only for the actual runs scored (or given up) due to his contributions but also the changes in the expected runs that can be attributed to his play.
 We constructed $RAA$ so that larger numbers indicate better performance.
-While the absolute $RAA$ values are useful on their own, they become even more useful --- and interpretable --- when calibrated to measure performance *relative* to a baseline player.
+While the absolute $RAA$ values are useful on their own, they become even more useful --- and easier to interpret --- when calibrated to measure performance *relative* to a baseline player.
 As argued by @Baumer2015_openWAR, although comparing an individual players $RAA$ to the league-average value is intuitive, average players are themselves quite valuable.
 Further, it is not reasonable to expect a team to be able to replace any player with a league average one.
 Thus, it is more useful to compare each player's performance relative to a replacement-level player.
 
-As discussed in class (and also in Section 3.8 of @Baumer2015_openWAR), existing definitions of replacement level are fairly arbitrary.
+As discussed in class (and also in [@Baumer2015_openWAR, Section 3.8]), existing definitions of replacement level are fairly arbitrary.
 For instance, back in 2010, [FanGraphs](https://library.fangraphs.com/misc/war/replacement-level/) asserted that a team of players making the minimum MLB salary would win 29.7% of its games (so between 48 and 49 games).
 Similar definitions have been adopted by other sites like Baseball Propsectus and Baseball Reference.
 Unfortunately, there is little empirical justification for this number.
 
-We will instead use @Baumer2015_openWAR's transparent, roster-based definition of replacement level, which is motivated and computed as follows:
+We will instead use @Baumer2015_openWAR's roster-based definition of replacement level, which is motivated and computed as follows:
+
   1. Each of the 30 major league teams typically carries 25 players, 13 of whom are position players and 12 of whom are pitchers
   2. On any given day, there are generally $12 \times 30 = 360$ pitchers and $13 \times 30 = 390$ active players.
   3. So, we will treat the 390 position players with the most plate appearances and the 360 pitchers who faced the most batters as *non*-replacement level and everyone else as replacement-level.
@@ -1052,8 +1052,6 @@ position_war |>
   dplyr::arrange(dplyr::desc(WAR)) |>
   dplyr::slice_head(n = 10)
 ```
-
-
 
 We can run a similar calculation for pitchers.
 ```{r}
