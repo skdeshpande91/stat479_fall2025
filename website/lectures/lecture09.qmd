@@ -367,7 +367,7 @@ And for players who threw a moderate number of passes, we might prefer a value s
 
 [^cole]: Indeed, if AJ Cole, who is a punter, were to throw many more passes, do we really think he'd consistently add around 4 expected points every time? 
 
-Formally, we can form such predictions with a weighted average: letting $\overline{y}$ be the overall league-wide average, we can predict the EPA on a new pass thrown by player $i$ using the quantity
+Formally, we can make such predictions with a weighted average: letting $\overline{y}$ be the overall league-wide average, we can predict the EPA on a new pass thrown by player $i$ using
 $$
 w_{i}\times \hat{\alpha}_{i} + (1 - w_{i}) \times \overline{y},
 $$
@@ -491,6 +491,7 @@ We see that our multilevel estimates for players who threw very few passes are a
 #| fig-width: 6.5
 #| fig-asp: 0.5625
 #| fig-align: center
+#| fig-cap: Although our multilevel model heavily shrink the raw per-pass EPA values (black dots) towards the overall sample mean (blue line), there is still player-to-player variability in the resulting estimates (orange).
 
 alpha0_hat <- fixef(multilevel_fit)["(Intercept)"] #<1>
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
@@ -540,7 +541,7 @@ pass2024 |> dplyr::slice_head(n = 2)
 For pass $j$ thrown by passer $i,$ let $\boldsymbol{\mathbf{x}}_{ij}$ be a vector containing the features `air_yards`, `posteam_type`, `shotgun`, `no_huddle`, `qb_hit`, and `pass_location`.
 We can elaborate our initial single-level regression model, which doesn't account for the grouping structure, to adjust for the effects of these factors:
 $$
-Y_{ij} = \alpha_{i} + \boldsymbol{\mathbf{x}}_{ij}^{\top}
+Y_{ij} = \alpha_{i} + \boldsymbol{\mathbf{x}}_{ij}^{\top}\boldsymbol{\beta} + \epsilon_{ij}
 $$
 Under this model, $\alpha_{i}$ represents the amount of EPA that can be attributable to the passer over and above what can be explained by these factors.
 When we fit this single-level linear model using `lm`, we find that the estimated passer-specific intercepts display the exact same small sample size artifacts as our initial intercept-only model. 
@@ -574,8 +575,7 @@ $$
 \textrm{Level 2}&: &\quad \alpha_{i} &= \alpha_{0} + u_{i}; \quad u_{i} \sim N(0, \sigma^{2}_{\alpha}) \quad \textrm{for all}\ i = 1, \ldots, I
 \end{align}
 $$
-
-Like our original multilevel model, Level 2 assumes that each player's latent per-pass EPA is normally distributed around some grand mean $\alpha_{0}.$
+Like our original multilevel model, Level 2 of our new model assumes that each player's latent per-pass EPA is normally distributed around some grand mean $\alpha_{0}.$
 However, it no longer assumes that the EPA on all passes thrown by passer $i$ are clustered around the latent $\alpha_{i}.$
 Instead, the average EPA on a pass thrown by passer $i$ depends on several covariates *and* the player's latent intercept.
 In our new model, the covariate effects are *assumed* to be constant across passers. 
@@ -583,7 +583,7 @@ So, for instance, keeping all other covariates the same, the difference in avera
 Within the multilevel modeling literature, these effects are often called "fixed effects" while effects that can vary across groups (e.g., passers) are termed "random effects."
 See [Section 8.5.2](https://bookdown.org/roback/bookdown-BeyondMLR/ch-multilevelintro.html#random-vs.-fixed-effects) of *Beyond Multiple Linear Regression* and [here](https://paulrjohnson.net/blog/2022-11-01-multilevel-model-r-cheatsheet/#fixed-random-effects) for some discussion about the distinction.[^confusion]
 
-[^confusion]: Personally, I find the "fixed effects" and "random effects" terminology unhelpful. For one thing, the terms mean [different things to different people](https://statmodeling.stat.columbia.edu/2005/01/25/why_i_dont_use/)! And, since I mostly work within the Bayesian paradigm, in which we use probability to model *all* of our uncertainty and not just to random noise or sampling variable, I could argue that everything is a "random." I find it much more useful to think carefully about whether a covariate's effect might vary across groups or whether it could be assumed to be constant.
+[^confusion]: Personally, I find the "fixed effects" and "random effects" terminology unhelpful. For one thing, the terms mean [different things to different people](https://statmodeling.stat.columbia.edu/2005/01/25/why_i_dont_use/)! And, since I mostly work within the Bayesian paradigm, in which we use probability to model *all* of our uncertainty and not just to random noise or sampling variable, I could argue that everything is a "random." I find it much more useful to think carefully about whether a covariate's effect might vary across groups or whether it could be assumed to be constant. But, since you will likely see this terms in future courses or later in your careers, we'll use them.
 
 It is fairly easy to fit our elaborated multilevel model that accounts for fixed covariate effects:
 ```{r}
@@ -593,8 +593,6 @@ ml_fit_full <-
   lme4::lmer(formula = epa ~ 1 + (1|passer_player_id) + 
                air_yards + posteam_type + shotgun +
                no_huddle + qb_hit + pass_location, data = pass2024)
-
-
 ```
 Like with our initial random intercept model, we can read off several important parameter estimates using the model summary.
 ```{r}

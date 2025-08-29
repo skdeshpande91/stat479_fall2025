@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.7.31">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -91,7 +91,7 @@ div.csl-indent {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-4bfb630b09c0e164834af1bb3207dbff.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -698,7 +698,7 @@ play_type      POST   REG
 <pre><code>               (Intercept) passer_player_id00-0026158 
                 0.11303340                 0.04427535 
 passer_player_id00-0026300 passer_player_id00-0026498 
-               -0.32316791                 0.05621013 
+               -0.32316791                 0.05623275 
 passer_player_id00-0027973 
                -0.19838613 </code></pre>
 </div>
@@ -829,7 +829,7 @@ passer_player_id00-0027973
 <pre><code>── nflverse play by play data ──────────────────────────────────────────────────</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>ℹ Data updated: 2025-04-30 02:39:06 EDT</code></pre>
+<pre><code>ℹ Data updated: 2025-08-11 15:43:02 EDT</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 2
@@ -868,7 +868,7 @@ Figure&nbsp;1: The variability in per-pass decreases dramatically as the number 
 <h3 class="anchored" data-anchor-id="sec-partial-pooling-motivation">Partial Pooling</h3>
 <p>Let’s return to the problem of forecasting EPA on a single new pass based solely on the identity of the passer. One option is to ignore the passer identity and just use the overall mean of about 0.159. Doing so completely ignores differences between passers, which is fairly unreasonable given the large gaps in talent between NFL quarterbacks. At the other extreme, we could use the player-specific average EPA estimates. While this approach acknowledges differences between players, it can sometimes lead to very extreme estimates. Neither option seems particularly compelling.</p>
 <p>As with most things, an ideal solution lies somewhere between the two extremes. For players who threw a large number of passes, we may be more comfortable using the their average EPA value since we are more <em>certain</em> about its value<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>. But for players who threw a very small number of passes, it’s probably safe to assume that they’ll perform closer to the league-average rather than to rely on their potentially very noisy average EPA estimate<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>. And for players who threw a moderate number of passes, we might prefer a value somewhere between the league-wide average and the player-specific estimate.</p>
-<p>Formally, we can form such predictions with a weighted average: letting <span class="math inline">\(\overline{y}\)</span> be the overall league-wide average, we can predict the EPA on a new pass thrown by player <span class="math inline">\(i\)</span> using the quantity <span class="math display">\[
+<p>Formally, we can make such predictions with a weighted average: letting <span class="math inline">\(\overline{y}\)</span> be the overall league-wide average, we can predict the EPA on a new pass thrown by player <span class="math inline">\(i\)</span> using <span class="math display">\[
 w_{i}\times \hat{\alpha}_{i} + (1 - w_{i}) \times \overline{y},
 \]</span> where the weight <span class="math inline">\(w_{i}\)</span> depends on the number of passes thrown by player <span class="math inline">\(i\)</span> and how far <span class="math inline">\(\hat{\alpha}_{i}\)</span> differs from <span class="math inline">\(\overline{y}.\)</span> Ideally, if a player <span class="math inline">\(i\)</span> throws a large number of passes the weight <span class="math inline">\(w_{i}\)</span> assigned to his empirical average EPA would be close to 1 and and if he threw very few passes, the weight would be set much closer to 0. The hope is, in other words, that we could <em>differentially shrink</em> every player’s raw average per-pass EPA towards the grand mean.</p>
 </section>
@@ -927,21 +927,21 @@ Warning
 Formula: epa ~ 1 + (1 | passer_player_id)
    Data: pass2024
 
-REML criterion at convergence: 65351.6
+REML criterion at convergence: 65367.5
 
 Scaled residuals: 
     Min      1Q  Median      3Q     Max 
--8.3587 -0.5309 -0.1400  0.5547  5.4923 
+-8.3583 -0.5309 -0.1402  0.5549  5.4894 
 
 Random effects:
  Groups           Name        Variance Std.Dev.
- passer_player_id (Intercept) 0.01518  0.1232  
- Residual                     2.33009  1.5265  
-Number of obs: 17723, groups:  passer_player_id, 101
+ passer_player_id (Intercept) 0.0152   0.1233  
+ Residual                     2.3302   1.5265  
+Number of obs: 17727, groups:  passer_player_id, 103
 
 Fixed effects:
             Estimate Std. Error t value
-(Intercept)   0.1297     0.0207   6.265</code></pre>
+(Intercept)   0.1294     0.0207    6.25</code></pre>
 </div>
 </div>
 <p>First, we find the estimate of the overall grand mean EPA per play in the “Fixed effects” section: the average EPA across all passers and passes is estimated to be <span class="math inline">\(\hat{\alpha}_{0} \approx 0.1294.\)</span> The “Random effects” section reports our estimates <span class="math inline">\(\hat{\sigma} \approx 1.526\)</span> and <span class="math inline">\(\hat{\sigma}_{\alpha} = 0.123\)</span> of, respectively, the variability in EPA that we’d expect to see between passes thrown by the same player and the variability in latent EPA per pass across the different passers. The fact that <span class="math inline">\(\hat{\sigma}_{\alpha}\)</span> is so much smaller than <span class="math inline">\(\hat{\sigma}\)</span> suggests that most of the variability in observed passing play EPA is driven more by noise than differences in latent player ability.</p>
@@ -959,11 +959,11 @@ Fixed effects:
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>           (Intercept)
-00-0023459   0.1164973
-00-0026158   0.1467385
-00-0026300   0.1231416
-00-0026498   0.1601689
-00-0027973   0.0199101</code></pre>
+00-0023459  0.11643217
+00-0026158  0.14662915
+00-0026300  0.12284041
+00-0026498  0.16012352
+00-0027973  0.01971509</code></pre>
 </div>
 </div>
 <p>We will append our multilevel estimates to our data table <code>alpha</code></p>
@@ -1001,16 +1001,16 @@ Fixed effects:
 <span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(full_name, lmer, n)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                  full_name        lmer   n
-1             Lamar Jackson  0.36827643 469
-2                Jared Goff  0.33318327 536
-3                Josh Allen  0.27346854 482
-4                Joe Burrow  0.27175401 651
-5            Baker Mayfield  0.27066068 569
-6               Andy Dalton  0.01991010 160
-7                 Drew Lock  0.01613596 180
-8        Anthony Richardson  0.01212565 261
-9           Spencer Rattler -0.04063512 227
-10 Dorian Thompson-Robinson -0.13685136 118</code></pre>
+1             Lamar Jackson  0.36825428 469
+2                Jared Goff  0.33315635 536
+3                Josh Allen  0.27342658 482
+4                Joe Burrow  0.27172057 651
+5            Baker Mayfield  0.27062324 569
+6               Andy Dalton  0.01971509 160
+7                 Drew Lock  0.01595111 180
+8        Anthony Richardson  0.01197563 261
+9           Spencer Rattler -0.04081740 227
+10 Dorian Thompson-Robinson -0.13715503 118</code></pre>
 </div>
 </div>
 <p>We see that our multilevel estimates for players who threw very few passes are aggressively shrunk towards to the overall grand-mean.</p>
@@ -1034,13 +1034,13 @@ Fixed effects:
 </dl>
 </div>
 <div class="cell-output-display">
-<div id="fig-shrinkage" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" width="624">
+<div id="fig-shrinkage" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-shrinkage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="lecture09_files/figure-html/fig-shrinkage-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;2: "><img src="lecture09_files/figure-html/fig-shrinkage-1.png" id="fig-shrinkage" class="img-fluid quarto-figure quarto-figure-center anchored figure-img" width="624"></a>
+<a href="lecture09_files/figure-html/fig-shrinkage-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;2: Although our multilevel model heavily shrink the raw per-pass EPA values (black dots) towards the overall sample mean (blue line), there is still player-to-player variability in the resulting estimates (orange)."><img src="lecture09_files/figure-html/fig-shrinkage-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="624"></a>
 </div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-shrinkage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-shrinkage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Although our multilevel model heavily shrink the raw per-pass EPA values (black dots) towards the overall sample mean (blue line), there is still player-to-player variability in the resulting estimates (orange).
 </figcaption>
 </figure>
 </div>
@@ -1088,7 +1088,7 @@ Figure&nbsp;2
 </div>
 </div>
 <p>For pass <span class="math inline">\(j\)</span> thrown by passer <span class="math inline">\(i,\)</span> let <span class="math inline">\(\boldsymbol{\mathbf{x}}_{ij}\)</span> be a vector containing the features <code>air_yards</code>, <code>posteam_type</code>, <code>shotgun</code>, <code>no_huddle</code>, <code>qb_hit</code>, and <code>pass_location</code>. We can elaborate our initial single-level regression model, which doesn’t account for the grouping structure, to adjust for the effects of these factors: <span class="math display">\[
-Y_{ij} = \alpha_{i} + \boldsymbol{\mathbf{x}}_{ij}^{\top}
+Y_{ij} = \alpha_{i} + \boldsymbol{\mathbf{x}}_{ij}^{\top}\boldsymbol{\beta} + \epsilon_{ij}
 \]</span> Under this model, <span class="math inline">\(\alpha_{i}\)</span> represents the amount of EPA that can be attributable to the passer over and above what can be explained by these factors. When we fit this single-level linear model using <code>lm</code>, we find that the estimated passer-specific intercepts display the exact same small sample size artifacts as our initial intercept-only model.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="annotated-cell-28"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-28-1"><a href="#annotated-cell-28-1" aria-hidden="true" tabindex="-1"></a>ols_fit_full <span class="ot">&lt;-</span> </span>
@@ -1136,8 +1136,7 @@ Y_{ij} = \alpha_{i} + \boldsymbol{\mathbf{x}}_{ij}^{\top}
 \textrm{Level 1}&amp;: &amp;\quad  Y_{ij} &amp;= \alpha_{i} + \boldsymbol{\mathbf{x}}_{ij}^{\top}\boldsymbol{\beta} +  \epsilon_{ij}; \quad \epsilon_{ij} \sim N(0, \sigma^{2}) \quad \textrm{for all}\ j = 1, \ldots, n_{i},\ i = 1, \ldots, I \\
 \textrm{Level 2}&amp;: &amp;\quad \alpha_{i} &amp;= \alpha_{0} + u_{i}; \quad u_{i} \sim N(0, \sigma^{2}_{\alpha}) \quad \textrm{for all}\ i = 1, \ldots, I
 \end{align}
-\]</span></p>
-<p>Like our original multilevel model, Level 2 assumes that each player’s latent per-pass EPA is normally distributed around some grand mean <span class="math inline">\(\alpha_{0}.\)</span> However, it no longer assumes that the EPA on all passes thrown by passer <span class="math inline">\(i\)</span> are clustered around the latent <span class="math inline">\(\alpha_{i}.\)</span> Instead, the average EPA on a pass thrown by passer <span class="math inline">\(i\)</span> depends on several covariates <em>and</em> the player’s latent intercept. In our new model, the covariate effects are <em>assumed</em> to be constant across passers. So, for instance, keeping all other covariates the same, the difference in average EPA on 5 yard and 10 yard passes is the same whether the pass was thrown by Patrick Mahomes or Daniel Jones. Within the multilevel modeling literature, these effects are often called “fixed effects” while effects that can vary across groups (e.g., passers) are termed “random effects.” See <a href="https://bookdown.org/roback/bookdown-BeyondMLR/ch-multilevelintro.html#random-vs.-fixed-effects">Section 8.5.2</a> of <em>Beyond Multiple Linear Regression</em> and <a href="https://paulrjohnson.net/blog/2022-11-01-multilevel-model-r-cheatsheet/#fixed-random-effects">here</a> for some discussion about the distinction.<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a></p>
+\]</span> Like our original multilevel model, Level 2 of our new model assumes that each player’s latent per-pass EPA is normally distributed around some grand mean <span class="math inline">\(\alpha_{0}.\)</span> However, it no longer assumes that the EPA on all passes thrown by passer <span class="math inline">\(i\)</span> are clustered around the latent <span class="math inline">\(\alpha_{i}.\)</span> Instead, the average EPA on a pass thrown by passer <span class="math inline">\(i\)</span> depends on several covariates <em>and</em> the player’s latent intercept. In our new model, the covariate effects are <em>assumed</em> to be constant across passers. So, for instance, keeping all other covariates the same, the difference in average EPA on 5 yard and 10 yard passes is the same whether the pass was thrown by Patrick Mahomes or Daniel Jones. Within the multilevel modeling literature, these effects are often called “fixed effects” while effects that can vary across groups (e.g., passers) are termed “random effects.” See <a href="https://bookdown.org/roback/bookdown-BeyondMLR/ch-multilevelintro.html#random-vs.-fixed-effects">Section 8.5.2</a> of <em>Beyond Multiple Linear Regression</em> and <a href="https://paulrjohnson.net/blog/2022-11-01-multilevel-model-r-cheatsheet/#fixed-random-effects">here</a> for some discussion about the distinction.<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a></p>
 <p>It is fairly easy to fit our elaborated multilevel model that accounts for fixed covariate effects:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>ml_fit_full <span class="ot">&lt;-</span></span>
@@ -1265,7 +1264,7 @@ Yurko, Ronald, Samuel Ventura, and Maksim Horowitz. 2019. <span>“<span class="
 <li id="fn4"><p>Indeed, if AJ Cole, who is a punter, were to throw many more passes, do we really think he’d consistently add around 4 expected points every time?<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn5"><p>For now, we are only using one grouping variable. But later in <a href="../lectures/lecture10.html">Lecture 10</a>, we will have multiple grouping variables.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn6"><p><span class="citation" data-cites="Yurko2019_nflWAR">Yurko, Ventura, and Horowitz (<a href="#ref-Yurko2019_nflWAR" role="doc-biblioref">2019</a>)</span> defines <em>air yards</em> as “the perpendicular distance in yards from the line of scrimmage to the yard line at which the receiver was targeted or caught the ball.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn7"><p>Personally, I find the “fixed effects” and “random effects” terminology unhelpful. For one thing, the terms mean <a href="https://statmodeling.stat.columbia.edu/2005/01/25/why_i_dont_use/">different things to different people</a>! And, since I mostly work within the Bayesian paradigm, in which we use probability to model <em>all</em> of our uncertainty and not just to random noise or sampling variable, I could argue that everything is a “random.” I find it much more useful to think carefully about whether a covariate’s effect might vary across groups or whether it could be assumed to be constant.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>Personally, I find the “fixed effects” and “random effects” terminology unhelpful. For one thing, the terms mean <a href="https://statmodeling.stat.columbia.edu/2005/01/25/why_i_dont_use/">different things to different people</a>! And, since I mostly work within the Bayesian paradigm, in which we use probability to model <em>all</em> of our uncertainty and not just to random noise or sampling variable, I could argue that everything is a “random.” I find it much more useful to think carefully about whether a covariate’s effect might vary across groups or whether it could be assumed to be constant. But, since you will likely see this terms in future courses or later in your careers, we’ll use them.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
