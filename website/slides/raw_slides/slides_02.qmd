@@ -1,0 +1,69 @@
+---
+title: "STAT 479 Lecture 2"
+subtitle: "Expected Goals"
+format: revealjs
+execute: 
+  cache: true
+---
+
+# Motivation & Outline
+
+## Motivation: Beth Mead in EURO 2022
+- Beth Mead scored 6 goals in EURO 2022. Which was more impressive?
+  - Goal against Austria ([video link](https://youtube.com/clip/UgkxnOKsnw4W3h-BqV5kyh-tOVnnTgBEc9u5?si=zpQB7OF43gt3yiwK))
+  - Goal against Norway [link](https://youtube.com/clip/UgkxqZ03bRBGCr4vS0M4yTMtHMOHsA6kkTHw?si=2IlC7AVi2CQotunG)
+  - Goal against Sweden [link](https://youtube.com/clip/UgkxwW9N1bXUv4G9HoSHVvYy_rk_aSjkrgwO?si=O90nkbgNd2FTv3e_)
+
+. . .
+
+- We can argue endlessly about *qualitative* differences
+- How can we provide a quantiative answer?
+
+## A thought experiment
+
+- What if we could replay each shot over and over again?
+- How often would she score?
+
+# Conditional Expectations
+
+## Notation & definition
+
+# Soccer Event Data
+
+## StatsBomb
+<!-- describe what they did -->
+
+## Accessing data in R
+- Get all publicly available event data for women's internationals w/ the **StatsBombR** package
+
+```{r}
+#| label: get-wi
+#| code-line-numbers: "1|2|3-7"
+wi_events <-
+  StatsBombR::FreeCompetitions() |> 
+  dplyr::filter(competition_gender == "female" & competition_international) |>
+  StatsBombR::FreeMatches() |> 
+  StatsBombR::free_allevents() |> 
+  StatsBombR::allclean() |>
+  StatsBombR::get.opposingteam()
+```
+
+
+## Focusing on shots
+
+```{r}
+#| label: wi-shots-foot
+#| eval: true
+#| echo: true
+#| code-line-numbers: "3|4|"
+wi_shots <-
+  wi_events |>
+  dplyr::filter(type.name == "Shot" & shot.body_part.name != "Other") |>  
+  dplyr::mutate(Y = ifelse(shot.outcome.name == "Goal", 1, 0))
+```
+
+# Goals Over Expected
+
+## Goals Over Expected
+
+
