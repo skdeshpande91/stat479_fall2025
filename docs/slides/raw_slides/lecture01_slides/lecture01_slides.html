@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-html/tabby.min.js"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.7.31">
+
+  <title>STAT479 – STAT 479 Lecture 1</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="../../../site_libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="../../../site_libs/revealjs/dist/reveal.css">
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      { color: #003b4f; background-color: #f1f3f5; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #003b4f; } /* Normal */
+    code span.al { color: #ad0000; } /* Alert */
+    code span.an { color: #5e5e5e; } /* Annotation */
+    code span.at { color: #657422; } /* Attribute */
+    code span.bn { color: #ad0000; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #003b4f; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #20794d; } /* Char */
+    code span.cn { color: #8f5902; } /* Constant */
+    code span.co { color: #5e5e5e; } /* Comment */
+    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+    code span.dt { color: #ad0000; } /* DataType */
+    code span.dv { color: #ad0000; } /* DecVal */
+    code span.er { color: #ad0000; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #ad0000; } /* Float */
+    code span.fu { color: #4758ab; } /* Function */
+    code span.im { color: #00769e; } /* Import */
+    code span.in { color: #5e5e5e; } /* Information */
+    code span.kw { color: #003b4f; font-weight: bold; } /* Keyword */
+    code span.op { color: #5e5e5e; } /* Operator */
+    code span.ot { color: #003b4f; } /* Other */
+    code span.pp { color: #ad0000; } /* Preprocessor */
+    code span.sc { color: #5e5e5e; } /* SpecialChar */
+    code span.ss { color: #20794d; } /* SpecialString */
+    code span.st { color: #20794d; } /* String */
+    code span.va { color: #111111; } /* Variable */
+    code span.vs { color: #20794d; } /* VerbatimString */
+    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../../../site_libs/revealjs/dist/theme/quarto-9a1a2c3d5c7ea7f04258c8f180195b78.css">
+  <link href="../../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="../../../site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="../../../site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="../../../site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+</head>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">STAT 479 Lecture 1</h1>
+  <p class="subtitle">Course Overview</p>
+
+<div class="quarto-title-authors">
+</div>
+
+</section>
+<section>
+<section id="logistics" class="title-slide slide level1 center">
+<h1>Logistics</h1>
+
+</section>
+<section id="lectures-office-hours" class="slide level2">
+<h2>Lectures &amp; Office Hours</h2>
+<ul>
+<li>Lectures: Tuesdays &amp; Thursday 11:00am-12:15pm in 1514 Morgridge Hall</li>
+<li>Instructor: Sameer Deshpande (sameer.deshpande@wisc.edu)</li>
+<li>Instructor Office Hours:
+<ul>
+<li>Mondays: 11am - 12pm (Morgridge Hall 5586)</li>
+<li>Wednesdays: 4pm - 5pm (Morgridge Hall 5586)</li>
+<li>Fridays: 3:00pm - 4:30pm (Morgridge Hall 3610)</li>
+</ul></li>
+<li>TA: Zhexuan Liu (zhexuan.liu2@wisc.edu)
+<ul>
+<li>TA Office Hours: Tuesdays &amp; Thursdays 9:15am-10:45am (Morgridge Hall 2515)</li>
+</ul></li>
+</ul>
+</section>
+<section id="course-learning-outcomes" class="slide level2">
+<h2>Course Learning Outcomes</h2>
+<ol type="1">
+<li>Implement appropriate statistical methods to assess player and team performance</li>
+<li>Work with play-by-play and high-resolution tracking data</li>
+<li>Provide constructive and actionable feedback on your peers’ analytic reports</li>
+<li>Build a personal portfolio of sports data analyses</li>
+</ol>
+<div class="fragment">
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Unofficial Goal</strong></p>
+</div>
+<div class="callout-content">
+<p>Practice the skills needed to work for professional teams</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="requisites" class="slide level2">
+<h2>Requisites</h2>
+<ul>
+<li>STAT 333 or 340
+<ul>
+<li>Random variables, expectations, variance</li>
+<li>Fitting linear models &amp; interpreting outputs . . .</li>
+</ul></li>
+<li>Prior experience with R
+<ul>
+<li>Assignment, scripting, loops, control flow</li>
+<li>Saving objects, installing &amp; loading packages.</li>
+<li>Data wrangling and manipulation with <strong>dplyr</strong> and other <strong>tidyverse</strong> packages.</li>
+<li>Creating visualizations</li>
+</ul></li>
+</ul>
+</section>
+<section id="course-website" class="slide level2">
+<h2>Course Website</h2>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><a href="stat479_f25_qr.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img data-src="stat479_f25_qr.png" class="quarto-figure quarto-figure-center"></a></p>
+</figure>
+</div>
+<div class="fragment">
+<p>We’ll also use <a href="https://canvas.wisc.edu/courses/476839">Canvas</a> &amp; <a href="https://canvas.wisc.edu/courses/476839">Piazza</a></p>
+</div>
+</section>
+<section id="assignments-grading" class="slide level2">
+<h2>Assignments &amp; Grading</h2>
+<ul>
+<li>3 Group Projects (900 pts): Due on 10/10, 11/7, and 12/5
+<ul>
+<li>Written Report (100 pts) &amp; Presentation (100 pts)</li>
+<li>Peer Reviews (60 pts)</li>
+<li>Team Accountability Survey (40 pts)</li>
+</ul></li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Participation (100 pts): Assessed holistically
+<ul>
+<li>Regularly attend lectures &amp; office hours</li>
+<li>Contribute to Piazza discussions</li>
+</ul></li>
+</ul>
+<p>. . . - Final grade based on how many of the 1000 points earned</p>
+</div>
+</section>
+<section id="projects" class="slide level2">
+<h2>Projects</h2>
+<ul>
+<li>Work in groups of up to 4
+<ul>
+<li>Form groups by Friday September 12</li>
+<li>Use Piazza to help find teammates</li>
+<li>Sign up on Canvas</li>
+</ul></li>
+<li>Course projects can
+<ul>
+<li>Modify or extend analysis from lecture (e.g., to new sport)</li>
+<li>Answer a new question not covered in lecture</li>
+</ul></li>
+<li>Ideally jump-start a portfolio that you can show teams</li>
+</ul>
+</section>
+<section id="project-report" class="slide level2">
+<h2>Project Report</h2>
+<ul>
+<li>Executive Summary:
+<ul>
+<li><strong>Non-technical</strong> overview of goals, methods, and results</li>
+<li>Audience: front office executive, coach, or player</li>
+</ul></li>
+<li>Technical Report:
+<ul>
+<li>Include <em>all</em> code needed to reproduce findings</li>
+<li>Tightly integrate code &amp; output w/ written exposition</li>
+<li>Audience: fellow data scientists</li>
+</ul></li>
+</ul>
+<div class="fragment">
+<p>I <strong>highly</strong> recommend using Quarto or RMarkdown</p>
+</div>
+</section>
+<section id="project-presentation" class="slide level2">
+<h2>Project Presentation</h2>
+<ul>
+<li>Record &amp; upload a 8–10 minute presentation</li>
+<li>Components:
+<ul>
+<li>Problem Statement, Motivation, &amp; Background</li>
+<li>High-level Analysis Overview</li>
+<li>Main Results</li>
+<li>Conclusions</li>
+</ul></li>
+<li>Every group member must speak</li>
+</ul>
+</section>
+<section id="project-peer-review" class="slide level2">
+<h2>Project Peer Review</h2>
+<ul>
+<li>Provide feedback on 3 presentations &amp; 3 reports
+<ul>
+<li>Rubrics will be available</li>
+<li>Fill out rubric + leave <em>constructive</em> comments</li>
+</ul></li>
+<li>Due 1 weeks after projects: 10/17, 11/14, and 12/12</li>
+</ul>
+</section>
+<section id="team-accountability-survey" class="slide level2">
+<h2>Team Accountability Survey</h2>
+<ul>
+<li>Assign score from 0 (least) to 10 (most) for
+<ul>
+<li>Participation, Preparation, and Respectfulness</li>
+</ul></li>
+<li>Rate every group member (including yourself)</li>
+<li>Ratings and comments will be kept anonymous</li>
+<li>Course staff may give warnings for low peer score</li>
+</ul>
+</section></section>
+<section>
+<section id="what-is-sports-analytics" class="title-slide slide level1 center">
+<h1>What is Sports Analytics?</h1>
+
+</section>
+<section id="statistics-vs-analytics" class="slide level2">
+<h2>Statistics vs Analytics</h2>
+<ul>
+<li>Sports statistics refer to counts and rates that <em>summarize</em> performance:
+<ul>
+<li>Number of rebounds, wins, games played</li>
+<li>Free throw percentage, batting average</li>
+</ul></li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Analytics refers to the use of statistical <em>modeling</em> to help gain competitive advantage
+<ul>
+<li>Analytics makes use of basic statistics &amp; creates new ones</li>
+<li>Analytics uses data to answer <strong>substantive sports questions</strong></li>
+</ul></li>
+</ul>
+</div>
+</section>
+<section id="major-questions" class="slide level2 smaller">
+<h2>Major Questions</h2>
+<ul>
+<li>Quantifying Individual Player Performance
+<ul>
+<li>Expected vs actual performance</li>
+<li>Performance above “replacement” level</li>
+<li>Uncertainty quantification</li>
+</ul></li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Rankings &amp; Simulation
+<ul>
+<li>Power rankings from paired comparisons</li>
+<li>Simulating games, tournaments, and drafts</li>
+<li>Propagating uncertainty</li>
+</ul></li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li>Tracking Data
+<ul>
+<li>Predictive models with spatial information</li>
+<li>Defining new, tracking-based metrics</li>
+<li>Space ownership &amp; player trajectories</li>
+</ul></li>
+</ul>
+</div>
+</section></section>
+<section>
+<section id="warmup-nba-shooting-performance" class="title-slide slide level1 center">
+<h1>Warmup: NBA Shooting Performance</h1>
+
+</section>
+<section id="bestnba-shooting-performances" class="slide level2">
+<h2>“Best”NBA Shooting Performances</h2>
+<ul>
+<li>Which NBA player had the best single-season shooting performance?</li>
+<li>How should we define best?
+<ul>
+<li>Made the most shots? Made the highest proportion of shots?</li>
+<li>Should 2- and 3-point shots count the same?</li>
+</ul></li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Data: boxscores from each game since 2002-03</li>
+<li>Available from the <strong>hoopR</strong> package</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a>raw_box <span class="ot">&lt;-</span></span>
+<span id="cb1-2"><a></a>  hoopR<span class="sc">::</span><span class="fu">load_nba_player_box</span>(</span>
+<span id="cb1-3"><a></a>    <span class="at">seasons =</span> <span class="dv">2002</span><span class="sc">:</span>(hoopR<span class="sc">::</span><span class="fu">most_recent_nba_season</span>()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</section>
+<section id="data-snapshot" class="slide level2">
+<h2>Data snapshot</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2" data-code-line-numbers="1|2-5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a></a>raw_box <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(game_date <span class="sc">==</span> <span class="st">"2011-06-12"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(athlete_display_name, </span>
+<span id="cb2-3"><a></a>         field_goals_made, field_goals_attempted,</span>
+<span id="cb2-4"><a></a>         three_point_field_goals_made, three_point_field_goals_attempted,</span>
+<span id="cb2-5"><a></a>         free_throws_made, free_throws_attempted)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="fragment">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 30 × 7
+   athlete_display_name field_goals_made field_goals_attempted
+   &lt;chr&gt;                           &lt;int&gt;                 &lt;int&gt;
+ 1 Dirk Nowitzki                       9                    27
+ 2 Tyson Chandler                      2                     4
+ 3 Jason Kidd                          2                     4
+ 4 Shawn Marion                        4                    10
+ 5 J.J. Barea                          7                    12
+ 6 Brian Cardinal                      1                     1
+ 7 Caron Butler                       NA                    NA
+ 8 Ian Mahinmi                         2                     3
+ 9 Rodrigue Beaubois                  NA                    NA
+10 DeShawn Stevenson                   3                     5
+# ℹ 20 more rows
+# ℹ 4 more variables: three_point_field_goals_made &lt;int&gt;,
+#   three_point_field_goals_attempted &lt;int&gt;, free_throws_made &lt;int&gt;,
+#   free_throws_attempted &lt;int&gt;</code></pre>
+</div>
+</div>
+</div>
+</section>
+<section id="isolating-regular-season-games" class="slide level2">
+<h2>Isolating regular season games</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4" data-code-line-numbers="1-7|9-10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a></a>allstar_dates <span class="ot">&lt;-</span> lubridate<span class="sc">::</span><span class="fu">date</span>(<span class="fu">c</span>(<span class="st">"2002-02-10"</span>, <span class="st">"2003-02-09"</span>, </span>
+<span id="cb4-2"><a></a>    <span class="st">"2004-02-15"</span>,<span class="st">"2005-02-20"</span>, <span class="st">"2006-02-19"</span>, <span class="st">"2007-02-18"</span>, </span>
+<span id="cb4-3"><a></a>    <span class="st">"2008-02-17"</span>, <span class="st">"2009-02-15"</span>, <span class="st">"2010-02-14"</span>,<span class="st">"2011-02-20"</span>, </span>
+<span id="cb4-4"><a></a>    <span class="st">"2012-02-26"</span>, <span class="st">"2013-02-17"</span>, <span class="st">"2014-02-16"</span>, <span class="st">"2015-02-15"</span>, </span>
+<span id="cb4-5"><a></a>    <span class="st">"2016-02-14"</span>,<span class="st">"2017-02-19"</span>, <span class="st">"2018-02-18"</span>, <span class="st">"2019-02-17"</span>,</span>
+<span id="cb4-6"><a></a>    <span class="st">"2020-02-16"</span>, <span class="st">"2021-03-07"</span>, <span class="st">"2022-02-20"</span>,<span class="st">"2023-02-19"</span>, </span>
+<span id="cb4-7"><a></a>    <span class="st">"2024-02-18"</span>, <span class="st">"2025-02-16"</span>))</span>
+<span id="cb4-8"><a></a>reg_box <span class="ot">&lt;-</span> raw_box <span class="sc">|&gt;</span></span>
+<span id="cb4-9"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(season_type <span class="sc">==</span> <span class="dv">2</span> <span class="sc">&amp;</span> </span>
+<span id="cb4-10"><a></a>      <span class="sc">!</span>did_not_play <span class="sc">&amp;</span> <span class="sc">!</span>game_date <span class="sc">%in%</span> allstar_dates)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="further-preprocessing" class="slide level2">
+<h2>Further preprocessing</h2>
+<ul>
+<li>Rename columns &amp; set defaults for players with no minutes</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5" data-code-line-numbers="1-2|3-7|8-11|"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a>reg_box <span class="ot">&lt;-</span></span>
+<span id="cb5-2"><a></a>  reg_box <span class="sc">|&gt;</span></span>
+<span id="cb5-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(</span>
+<span id="cb5-4"><a></a>    <span class="at">Player =</span> athlete_display_name, </span>
+<span id="cb5-5"><a></a>    <span class="at">FGM =</span> field_goals_made, <span class="at">FGA =</span> field_goals_attempted,</span>
+<span id="cb5-6"><a></a>    <span class="at">TPM =</span> three_point_field_goals_made,<span class="at">TPA =</span> three_point_field_goals_attempted,</span>
+<span id="cb5-7"><a></a>    <span class="at">FTM =</span> free_throws_made, <span class="at">FTA =</span> free_throws_attempted) <span class="sc">|&gt;</span></span>
+<span id="cb5-8"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb5-9"><a></a>    <span class="at">FGM =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(minutes), <span class="dv">0</span>, FGM), <span class="at">FGA =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(minutes), <span class="dv">0</span>, FGA),</span>
+<span id="cb5-10"><a></a>    <span class="at">TPM =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(minutes), <span class="dv">0</span>, TPM),<span class="at">TPA =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(minutes), <span class="dv">0</span>, TPA),</span>
+<span id="cb5-11"><a></a>    <span class="at">FTM =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(minutes), <span class="dv">0</span>, FTM),<span class="at">FTA =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(minutes), <span class="dv">0</span>, FTA)) <span class="sc">|&gt;</span></span>
+<span id="cb5-12"><a></a>  tidyr<span class="sc">::</span><span class="fu">replace_na</span>(<span class="fu">list</span>(<span class="at">minutes =</span> <span class="dv">0</span>))         </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="player-season-totals" class="slide level2">
+<h2>Player-season totals</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6" data-code-line-numbers="3|4-6|"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a>season_box <span class="ot">&lt;-</span></span>
+<span id="cb6-2"><a></a>  reg_box <span class="sc">|&gt;</span></span>
+<span id="cb6-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(Player, season) <span class="sc">|&gt;</span></span>
+<span id="cb6-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">FGM =</span> <span class="fu">sum</span>(FGM),<span class="at">FGA =</span> <span class="fu">sum</span>(FGA),</span>
+<span id="cb6-5"><a></a>    <span class="at">TPM =</span> <span class="fu">sum</span>(TPM),<span class="at">TPA =</span> <span class="fu">sum</span>(TPA),<span class="at">FTM =</span> <span class="fu">sum</span>(FTM),<span class="at">FTA =</span> <span class="fu">sum</span>(FTA),</span>
+<span id="cb6-6"><a></a>    <span class="at">minutes =</span> <span class="fu">sum</span>(minutes), <span class="at">n_games =</span> dplyr<span class="sc">::</span><span class="fu">n</span>(),<span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb6-7"><a></a>season_box <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(Player <span class="sc">==</span> <span class="st">"Dirk Nowitzki"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="fragment">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 18 × 10
+   Player        season   FGM   FGA   TPM   TPA   FTM   FTA minutes n_games
+   &lt;chr&gt;          &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;   &lt;int&gt;
+ 1 Dirk Nowitzki   2002   600  1258   139   350   440   516    2891      76
+ 2 Dirk Nowitzki   2003   690  1489   148   390   483   548    3117      80
+ 3 Dirk Nowitzki   2004   605  1310    99   290   371   423    2915      77
+ 4 Dirk Nowitzki   2005   663  1445    91   228   615   708    3020      78
+ 5 Dirk Nowitzki   2006   751  1564   110   271   539   598    3086      81
+ 6 Dirk Nowitzki   2007   673  1341    72   173   498   551    2819      80
+ 7 Dirk Nowitzki   2008   630  1314    79   220   478   544    2769      81
+ 8 Dirk Nowitzki   2009   774  1616    61   170   485   545    3051      82
+ 9 Dirk Nowitzki   2010   720  1496    51   121   536   586    3041      82
+10 Dirk Nowitzki   2011   610  1179    66   168   395   443    2505      82
+11 Dirk Nowitzki   2012   473  1034    78   212   318   355    2078      66
+12 Dirk Nowitzki   2013   332   707    63   151   164   191    1628      52
+13 Dirk Nowitzki   2014   633  1273   131   329   338   376    2625      80
+14 Dirk Nowitzki   2015   487  1062   104   274   255   289    2285      77
+15 Dirk Nowitzki   2016   498  1112   126   342   250   280    2362      75
+16 Dirk Nowitzki   2017   296   678    79   209    98   112    1421      54
+17 Dirk Nowitzki   2018   346   758   138   337    97   108    1901      77
+18 Dirk Nowitzki   2019   135   376    64   205    39    50     794      51</code></pre>
+</div>
+</div>
+</div>
+</section>
+<section id="who-made-the-most-shots" class="slide level2">
+<h2>Who made the most shots?</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a>season_box <span class="sc">|&gt;</span></span>
+<span id="cb8-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(FGM)) <span class="sc">|&gt;</span></span>
+<span id="cb8-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Player, season, FGM, FGA, minutes, n_games) <span class="sc">|&gt;</span> </span>
+<span id="cb8-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 6
+  Player                  season   FGM   FGA minutes n_games
+  &lt;chr&gt;                    &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;   &lt;int&gt;
+1 Kobe Bryant               2006   949  2109    3184      78
+2 LeBron James              2006   875  1823    3361      82
+3 Kobe Bryant               2003   868  1924    3401      82
+4 Shai Gilgeous-Alexander   2025   868  1680    2633      77
+5 LeBron James              2018   857  1580    3024      82</code></pre>
+</div>
+</div>
+<div class="fragment">
+<p>Is Kobe’s 2002-03 performance really better than SGA’s 2024-25 performance???</p>
+</div>
+</section>
+<section id="field-goal-percentage" class="slide level2">
+<h2>Field Goal Percentage</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a>season_box <span class="ot">&lt;-</span></span>
+<span id="cb10-2"><a></a>  season_box <span class="sc">|&gt;</span></span>
+<span id="cb10-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">FGP =</span> <span class="fu">ifelse</span>(FGA <span class="sc">&gt;</span> <span class="dv">0</span>, FGM<span class="sc">/</span>FGA, <span class="cn">NA_real_</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="fragment">
+<div class="panel-tabset">
+<ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-1-1">FGP Leaders</a></li><li><a href="#tabset-1-2">Another look</a></li><li><a href="#tabset-1-3">Restricted Leaders</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a>season_box <span class="sc">|&gt;</span> </span>
+<span id="cb11-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(FGP)) <span class="sc">|&gt;</span></span>
+<span id="cb11-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">5</span>) <span class="sc">|&gt;</span></span>
+<span id="cb11-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Player, season, FGP)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 3
+  Player           season   FGP
+  &lt;chr&gt;             &lt;int&gt; &lt;dbl&gt;
+1 Ahmad Caver        2022     1
+2 Alondes Williams   2025     1
+3 Andris Biedrins    2014     1
+4 Anthony Brown      2018     1
+5 Braxton Key        2023     1</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-1-2">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a>season_box <span class="sc">|&gt;</span> </span>
+<span id="cb13-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(FGP)) <span class="sc">|&gt;</span></span>
+<span id="cb13-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">5</span>) <span class="sc">|&gt;</span></span>
+<span id="cb13-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Player, season, FGP, FGA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 4
+  Player           season   FGP   FGA
+  &lt;chr&gt;             &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;
+1 Ahmad Caver        2022     1     1
+2 Alondes Williams   2025     1     2
+3 Andris Biedrins    2014     1     1
+4 Anthony Brown      2018     1     1
+5 Braxton Key        2023     1     1</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-1-3">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a>season_box <span class="sc">|&gt;</span> </span>
+<span id="cb15-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(FGA <span class="sc">&gt;=</span> <span class="dv">400</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb15-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(FGP)) <span class="sc">|&gt;</span></span>
+<span id="cb15-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Player, season, FGP, FGA) <span class="sc">|&gt;</span></span>
+<span id="cb15-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 4
+  Player         season   FGP   FGA
+  &lt;chr&gt;           &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;
+1 Daniel Gafford   2024 0.725   480
+2 Walker Kessler   2023 0.720   414
+3 DeAndre Jordan   2017 0.714   577
+4 Rudy Gobert      2022 0.713   508
+5 DeAndre Jordan   2015 0.710   534</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="effective-field-goal-percentage" class="slide level2 scrollable">
+<h2>Effective Field Goal Percentage</h2>
+<ul>
+<li>FGP treats 2- and 3-point shots the same!</li>
+<li><span class="math inline">\(\textrm{eFGP} = (\textrm{FGM} + 0.5 \times \textrm{TPM})/\textrm{FGA}\)</span></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a>season_box <span class="ot">&lt;-</span> </span>
+<span id="cb17-2"><a></a>  season_box <span class="sc">|&gt;</span> </span>
+<span id="cb17-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">eFGP =</span> (FGM <span class="sc">+</span> <span class="fl">0.5</span> <span class="sc">*</span> TPM)<span class="sc">/</span>FGA) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="fragment">
+<div class="panel-tabset">
+<ul id="tabset-2" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-2-1">Raw eFGP Leaders</a></li><li><a href="#tabset-2-2">Restricted Leaders</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a>season_box <span class="sc">|&gt;</span></span>
+<span id="cb18-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(FGA <span class="sc">&gt;=</span> <span class="dv">400</span>) <span class="sc">|&gt;</span></span>
+<span id="cb18-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(eFGP), dplyr<span class="sc">::</span><span class="fu">desc</span>(FGP)) <span class="sc">|&gt;</span></span>
+<span id="cb18-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Player, season, eFGP, FGP, TPA, n_games) <span class="sc">|&gt;</span></span>
+<span id="cb18-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 6
+  Player         season  eFGP   FGP   TPA n_games
+  &lt;chr&gt;           &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;int&gt;
+1 Daniel Gafford   2024 0.725 0.725     0      74
+2 Walker Kessler   2023 0.721 0.720     3      74
+3 DeAndre Jordan   2017 0.714 0.714     2      81
+4 Rudy Gobert      2022 0.713 0.713     4      66
+5 DeAndre Jordan   2015 0.711 0.710     4      82</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-2-2">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a>season_box <span class="sc">|&gt;</span></span>
+<span id="cb20-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(FGA <span class="sc">&gt;=</span> <span class="dv">400</span> <span class="sc">&amp;</span> TPA <span class="sc">&gt;=</span> <span class="dv">100</span>) <span class="sc">|&gt;</span></span>
+<span id="cb20-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(eFGP), dplyr<span class="sc">::</span><span class="fu">desc</span>(FGP)) <span class="sc">|&gt;</span></span>
+<span id="cb20-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Player, season, eFGP, FGP, TPA, n_games) <span class="sc">|&gt;</span></span>
+<span id="cb20-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 6
+  Player          season  eFGP   FGP   TPA n_games
+  &lt;chr&gt;            &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;int&gt;
+1 Kyle Korver       2015 0.671 0.487   449      75
+2 Duncan Robinson   2020 0.667 0.470   606      73
+3 Obi Toppin        2024 0.660 0.571   260      83
+4 Nikola Jokic      2023 0.660 0.632   149      69
+5 Joe Harris        2021 0.655 0.502   427      69</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="summary-limitations" class="slide level2">
+<h2>Summary &amp; limitations</h2>
+<ul>
+<li>No single definition of “best” performance</li>
+<li>FGM, FGP, and eFGP share certain limitations
+<ul>
+<li>All are affected by low-sample sizes</li>
+<li>None account for free throws</li>
+</ul></li>
+<li>Remaining questions
+<ul>
+<li>Season-to-season to stability?</li>
+<li>How to make predictions for players w/ limited sample size?</li>
+<li>How do these <em>statistics</em> help gain competitive advantage?</li>
+</ul></li>
+</ul>
+
+
+</section></section>
+    </div>
+  <div class="quarto-auto-generated-content" style="display: none;">
+<div class="footer footer-default">
+
+</div>
+</div></div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="../../../site_libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="../../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="../../../site_libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/search/search.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="../../../site_libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'jumpToSlide': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'smaller': false,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: false,
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'none',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1050,
+
+        height: 700,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        math: {
+          mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/MathJax.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
+        },
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    
+    <script>
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+      // slide changes (different for each slide format).
+      (function () {
+        // dispatch for htmlwidgets
+        function fireSlideEnter() {
+          const event = window.document.createEvent("Event");
+          event.initEvent("slideenter", true, true);
+          window.document.dispatchEvent(event);
+        }
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+          fireSlideEnter();
+
+          // dispatch for shiny
+          if (window.jQuery) {
+            if (previousSlide) {
+              window.jQuery(previousSlide).trigger("hidden");
+            }
+            if (currentSlide) {
+              window.jQuery(currentSlide).trigger("shown");
+            }
+          }
+        }
+
+        // hookup for slidy
+        if (window.w3c_slidy) {
+          window.w3c_slidy.add_observer(function (slide_num) {
+            // slide_num starts at position 1
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+          });
+        }
+
+      })();
+    </script>
+
+    <script id="quarto-html-after-body" type="application/javascript">
+      window.document.addEventListener("DOMContentLoaded", function (event) {
+        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+        tabsets.forEach(function(tabset) {
+          const tabby = new Tabby('#' + tabset.id);
+        });
+        const isCodeAnnotation = (el) => {
+          for (const clz of el.classList) {
+            if (clz.startsWith('code-annotation-')) {                     
+              return true;
+            }
+          }
+          return false;
+        }
+        const onCopySuccess = function(e) {
+          // button target
+          const button = e.trigger;
+          // don't keep focus
+          button.blur();
+          // flash "checked"
+          button.classList.add('code-copy-button-checked');
+          var currentTitle = button.getAttribute("title");
+          button.setAttribute("title", "Copied!");
+          let tooltip;
+          if (window.bootstrap) {
+            button.setAttribute("data-bs-toggle", "tooltip");
+            button.setAttribute("data-bs-placement", "left");
+            button.setAttribute("data-bs-title", "Copied!");
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
+                customClass: "code-copy-button-tooltip",
+                offset: [0, -8]});
+            tooltip.show();    
+          }
+          setTimeout(function() {
+            if (tooltip) {
+              tooltip.hide();
+              button.removeAttribute("data-bs-title");
+              button.removeAttribute("data-bs-toggle");
+              button.removeAttribute("data-bs-placement");
+            }
+            button.setAttribute("title", currentTitle);
+            button.classList.remove('code-copy-button-checked');
+          }, 1000);
+          // clear code selection
+          e.clearSelection();
+        }
+        const getTextToCopy = function(trigger) {
+            const codeEl = trigger.previousElementSibling.cloneNode(true);
+            for (const childEl of codeEl.children) {
+              if (isCodeAnnotation(childEl)) {
+                childEl.remove();
+              }
+            }
+            return codeEl.innerText;
+        }
+        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+          text: getTextToCopy
+        });
+        clipboard.on('success', onCopySuccess);
+        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+            text: getTextToCopy,
+            container: window.document.getElementById('quarto-embedded-source-code-modal')
+          });
+          clipboardModal.on('success', onCopySuccess);
+        }
+          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+          var mailtoRegex = new RegExp(/^mailto:/);
+            var filterRegex = new RegExp('/' + window.location.host + '/');
+          var isInternal = (href) => {
+              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+          }
+          // Inspect non-navigation links and adorn them if external
+         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+          for (var i=0; i<links.length; i++) {
+            const link = links[i];
+            if (!isInternal(link.href)) {
+              // undo the damage that might have been done by quarto-nav.js in the case of
+              // links that we want to consider external
+              if (link.dataset.originalHref !== undefined) {
+                link.href = link.dataset.originalHref;
+              }
+            }
+          }
+        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+          const config = {
+            allowHTML: true,
+            maxWidth: 500,
+            delay: 100,
+            arrow: false,
+            appendTo: function(el) {
+                return el.closest('section.slide') || el.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'light-border',
+            placement: 'bottom-start',
+          };
+          if (contentFn) {
+            config.content = contentFn;
+          }
+          if (onTriggerFn) {
+            config.onTrigger = onTriggerFn;
+          }
+          if (onUntriggerFn) {
+            config.onUntrigger = onUntriggerFn;
+          }
+            config['offset'] = [0,0];
+            config['maxWidth'] = 700;
+          window.tippy(el, config); 
+        }
+        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+        for (var i=0; i<noterefs.length; i++) {
+          const ref = noterefs[i];
+          tippyHover(ref, function() {
+            // use id or data attribute instead here
+            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+            try { href = new URL(href).hash; } catch {}
+            const id = href.replace(/^#\/?/, "");
+            const note = window.document.getElementById(id);
+            if (note) {
+              return note.innerHTML;
+            } else {
+              return "";
+            }
+          });
+        }
+            let selectedAnnoteEl;
+            const selectorForAnnotation = ( cell, annotation) => {
+              let cellAttr = 'data-code-cell="' + cell + '"';
+              let lineAttr = 'data-code-annotation="' +  annotation + '"';
+              const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+              return selector;
+            }
+            const selectCodeLines = (annoteEl) => {
+              const doc = window.document;
+              const targetCell = annoteEl.getAttribute("data-target-cell");
+              const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+              const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+              const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+              const lineIds = lines.map((line) => {
+                return targetCell + "-" + line;
+              })
+              let top = null;
+              let height = null;
+              let parent = null;
+              if (lineIds.length > 0) {
+                  //compute the position of the single el (top and bottom and make a div)
+                  const el = window.document.getElementById(lineIds[0]);
+                  top = el.offsetTop;
+                  height = el.offsetHeight;
+                  parent = el.parentElement.parentElement;
+                if (lineIds.length > 1) {
+                  const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+                  const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+                  height = bottom - top;
+                }
+                if (top !== null && height !== null && parent !== null) {
+                  // cook up a div (if necessary) and position it 
+                  let div = window.document.getElementById("code-annotation-line-highlight");
+                  if (div === null) {
+                    div = window.document.createElement("div");
+                    div.setAttribute("id", "code-annotation-line-highlight");
+                    div.style.position = 'absolute';
+                    parent.appendChild(div);
+                  }
+                  div.style.top = top - 2 + "px";
+                  div.style.height = height + 4 + "px";
+                  div.style.left = 0;
+                  let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+                  if (gutterDiv === null) {
+                    gutterDiv = window.document.createElement("div");
+                    gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                    gutterDiv.style.position = 'absolute';
+                    const codeCell = window.document.getElementById(targetCell);
+                    const gutter = codeCell.querySelector('.code-annotation-gutter');
+                    gutter.appendChild(gutterDiv);
+                  }
+                  gutterDiv.style.top = top - 2 + "px";
+                  gutterDiv.style.height = height + 4 + "px";
+                }
+                selectedAnnoteEl = annoteEl;
+              }
+            };
+            const unselectCodeLines = () => {
+              const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+              elementsIds.forEach((elId) => {
+                const div = window.document.getElementById(elId);
+                if (div) {
+                  div.remove();
+                }
+              });
+              selectedAnnoteEl = undefined;
+            };
+              // Handle positioning of the toggle
+          window.addEventListener(
+            "resize",
+            throttle(() => {
+              elRect = undefined;
+              if (selectedAnnoteEl) {
+                selectCodeLines(selectedAnnoteEl);
+              }
+            }, 10)
+          );
+          function throttle(fn, ms) {
+          let throttle = false;
+          let timer;
+            return (...args) => {
+              if(!throttle) { // first call gets through
+                  fn.apply(this, args);
+                  throttle = true;
+              } else { // all the others get throttled
+                  if(timer) clearTimeout(timer); // cancel #2
+                  timer = setTimeout(() => {
+                    fn.apply(this, args);
+                    timer = throttle = false;
+                  }, ms);
+              }
+            };
+          }
+            const annoteTargets = window.document.querySelectorAll('.code-annotation-anchor');
+            for (let i=0; i<annoteTargets.length; i++) {
+              const annoteTarget = annoteTargets[i];
+              const targetCell = annoteTarget.getAttribute("data-target-cell");
+              const targetAnnotation = annoteTarget.getAttribute("data-target-annotation");
+              const contentFn = () => {
+                const content = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+                if (content) {
+                  const tipContent = content.cloneNode(true);
+                  tipContent.classList.add("code-annotation-tip-content");
+                  return tipContent.outerHTML;
+                }
+              }
+              const config = {
+                allowHTML: true,
+                content: contentFn,
+                onShow: (instance) => {
+                  selectCodeLines(instance.reference);
+                  instance.reference.classList.add('code-annotation-active');
+                  window.tippy.hideAll();
+                },
+                onHide: (instance) => {
+                  unselectCodeLines();
+                  instance.reference.classList.remove('code-annotation-active');
+                },
+                maxWidth: 300,
+                delay: [50, 0],
+                duration: [200, 0],
+                offset: [5, 10],
+                arrow: true,
+                appendTo: function(el) {
+                  return el.parentElement.parentElement.parentElement;
+                },
+                interactive: true,
+                interactiveBorder: 10,
+                theme: 'light-border',
+                placement: 'right',
+                popperOptions: {
+                  modifiers: [
+                  {
+                    name: 'flip',
+                    options: {
+                      flipVariations: false, // true by default
+                      allowedAutoPlacements: ['right'],
+                      fallbackPlacements: ['right', 'top', 'top-start', 'top-end', 'bottom', 'bottom-start', 'bottom-end', 'left'],
+                    },
+                  },
+                  {
+                    name: 'preventOverflow',
+                    options: {
+                      mainAxis: false,
+                      altAxis: false
+                    }
+                  }
+                  ]        
+                }      
+              };
+              window.tippy(annoteTarget, config); 
+            }
+        const findCites = (el) => {
+          const parentEl = el.parentElement;
+          if (parentEl) {
+            const cites = parentEl.dataset.cites;
+            if (cites) {
+              return {
+                el,
+                cites: cites.split(' ')
+              };
+            } else {
+              return findCites(el.parentElement)
+            }
+          } else {
+            return undefined;
+          }
+        };
+        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+        for (var i=0; i<bibliorefs.length; i++) {
+          const ref = bibliorefs[i];
+          const citeInfo = findCites(ref);
+          if (citeInfo) {
+            tippyHover(citeInfo.el, function() {
+              var popup = window.document.createElement('div');
+              citeInfo.cites.forEach(function(cite) {
+                var citeDiv = window.document.createElement('div');
+                citeDiv.classList.add('hanging-indent');
+                citeDiv.classList.add('csl-entry');
+                var biblioDiv = window.document.getElementById('ref-' + cite);
+                if (biblioDiv) {
+                  citeDiv.innerHTML = biblioDiv.innerHTML;
+                }
+                popup.appendChild(citeDiv);
+              });
+              return popup.innerHTML;
+            });
+          }
+        }
+      });
+      </script>
+    <script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+    (function() {
+      let previousOnload = window.onload;
+      window.onload = () => {
+        if (previousOnload) {
+          previousOnload();
+        }
+        lightboxQuarto.on('slide_before_load', (data) => {
+          const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+          const href = trigger.getAttribute('href');
+          if (href !== null) {
+            const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+            if (imgEl !== null) {
+              const srcAttr = imgEl.getAttribute("src");
+              if (srcAttr && srcAttr.startsWith("data:")) {
+                slideConfig.href = srcAttr;
+              }
+            }
+          } 
+        });
+      
+        lightboxQuarto.on('slide_after_load', (data) => {
+          const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(slideNode);
+          }
+        });
+      
+      };
+      
+    })();
+              </script>
+    
+
+</body></html>
