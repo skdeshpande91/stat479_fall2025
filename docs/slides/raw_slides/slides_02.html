@@ -6,8 +6,11 @@
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="../../site_libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.7.32">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.7.31">
 
   <title>STAT479 – STAT 479 Lecture 2</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -216,7 +219,12 @@
 </ul>
 <div class="fragment">
 <ul>
-<li>We can argue endlessly about <em>qualitative</em> differences</li>
+<li>We can argue endlessly about <em>qualitative</em> differences
+<ul>
+<li>One-on-one vs shot through traffic</li>
+<li>Left or right foot, shot technique</li>
+<li>Score, time,</li>
+</ul></li>
 <li>How can we provide a quantiative answer?</li>
 </ul>
 </div>
@@ -241,9 +249,34 @@
 <h1>Soccer Event Data</h1>
 
 </section>
-<section id="statsbomb" class="slide level2">
-<h2>StatsBomb</h2>
-<!-- describe what they did -->
+<section id="statsbomb-hudl" class="slide level2">
+<h2>StatsBomb &amp; Hudl</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<ul>
+<li>Player location data for all events
+<ul>
+<li>Computer vision + human annotation</li>
+<li>Humans log events (shots, tackles, passes, etc.)</li>
+<li>CV to extra location</li>
+</ul></li>
+<li>Locations mapped to fixed coordinate system</li>
+<li>Offensive action moves left-to-right</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><a href="statsbomb_coordinates.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="StatsBomb Coordinates"><img data-src="statsbomb_coordinates.png" style="width:50.0%" alt="StatsBomb Coordinates"></a></p>
+<figcaption>StatsBomb Coordinates</figcaption>
+</figure>
+</div>
+</div></div>
+</section>
+<section id="visualization" class="slide level2">
+<h2>Visualization</h2>
+<!--
+  Visualize Mead's goal against sweden
+-->
 </section>
 <section id="accessing-data-in-r" class="slide level2">
 <h2>Accessing data in R</h2>
@@ -849,6 +882,38 @@
         }
       });
       </script>
+    <script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+    (function() {
+      let previousOnload = window.onload;
+      window.onload = () => {
+        if (previousOnload) {
+          previousOnload();
+        }
+        lightboxQuarto.on('slide_before_load', (data) => {
+          const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+          const href = trigger.getAttribute('href');
+          if (href !== null) {
+            const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+            if (imgEl !== null) {
+              const srcAttr = imgEl.getAttribute("src");
+              if (srcAttr && srcAttr.startsWith("data:")) {
+                slideConfig.href = srcAttr;
+              }
+            }
+          } 
+        });
+      
+        lightboxQuarto.on('slide_after_load', (data) => {
+          const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(slideNode);
+          }
+        });
+      
+      };
+      
+    })();
+              </script>
     
 
 </body></html>

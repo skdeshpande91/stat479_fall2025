@@ -60,9 +60,9 @@ We can load this table into our R environment using the function `StatsBombR::Fr
 
 Each competition and season have unique id and we can also see whether it was a men's or women's competition.
 To see which matches from selected competitions have publicly available data, we can pass the corresponding rows of this table to the function `StatsBombR::FreeMatches()`.
-For instance, hereare the first few rows and some selected columns from the matches from EURO 2022.
+For instance, here are the first few rows and some selected columns from the matches from EURO 2022.
 StatsBomb graciously provided data for all the matches in the tournament.
-Figure 2 shows the table of matches from the 2022 EURO Competition; StatsBomb graciously provided data for all matches from the tournament, which can be obtained using the code below.
+Here is a table of matches from the 2022 EURO Competition; StatsBomb graciously provided data for all matches from the tournament, which can be obtained using the code below.
 ```{r}
 #| label: get-euro2022-matches
 #| message: false
@@ -199,36 +199,32 @@ These matches are arguably **not** highly representative of all women's internat
 
 We can now create a table of just Beth Mead's shots from EURO 2022 and add a column with the XG for each shot.
 To do this, we first filter our table `wi_shots` using the player name (note, StatsBomb uses her full name!).
-Then, for every left-footed shot Mead attempted, we want to copy over the corresponding value from the table `xg_model1`, which in this case is 0.113.
+Then, for every left-footed shot Mead attempted, we want to copy over the corresponding value from the table `xg_model1`, which in this case is 0.114.
 Similarly, we want to copy over the corresponding values for right-footed shots and headers from `xg_model1` into our table for Mead's shots.
 We can do this using an [left join](https://r4ds.hadley.nz/joins.html#sec-mutating-joins).
 In the code below, we actually create a temporary version of `xg_model1` that drops the column recording the overall counts of the body part used for the shots in `wi_shots`. 
 This way, when we perform the join, we don't create a new column with these counts. 
 ```{r}
-#| label: mead-xg-foot-tech
-
-tmp_xg1 <- xg_model1 |> dplyr::select(!n) # <1>
-
+#| label: mead-xg-foot
 mead_shots <-
   euro2022_shots |>
   dplyr::filter(player.name == "Bethany Mead") |>
-  dplyr::left_join(y = tmp_xg1, by = c("shot.body_part.name")) # <2>
-rm(tmp_xg1) # <3>
+  dplyr::left_join(y = xg_model1 |> dplyr::select(shot.body_part.name, XG1), # <1>
+                   by = c("shot.body_part.name"))
 ```
-1. A temporary copy of `xg_model1` that doesn't include the column `n`
-2. Create a column with estimated XG corresponding to the body part used for each shot
-3. Remove the temporary copy
+1. No need to include `n` when joining the tables
+
 
 We can now look at the what our model says about the three goals from above.
 The first, against Austria in the 15th minute; the second, against Norway in the 37th minute, and the third against Sweden in the 33rd minute.
-When These turn out to be in rows 1, 4, and 14 of the table `mead_shots`
+These turn out to be in rows 1, 4, and 14 of the table `mead_shots`
 ```{r}
 #| label: mead-xg1-goals
 mead_shots |>
   dplyr::select(OpposingTeam, minute, shot.body_part.name, Y, XG1) |>
   dplyr::slice(c(1, 4, 14))
 ```
-According to our first model, these impressiveness of these goals is pretty similar: our model put the respective chances of each shot resulting in a goal at about 10%, 11%, and 10%.
+According to our first model, the "impressiveness" of these goals is pretty similar: our model put the respective chances of each shot resulting in a goal at about 11%.
 But, watching the videos a bit more closely, this conclusion is **not** especially satisfying: Mead scored the first goal in a one-on-one situation but had to shoot through several defenders on the second and third goal.
 The discrepancy between our qualitative comparisons and our quantitative modeling results stems from the fact that we only conditioned on the body part and did not account for the other ways that the shots are different.
 In other words, our initial XG model is much too coarse to quantify the differences between the three chances that we believe are important.
@@ -257,11 +253,11 @@ xg_model2 <-
   dplyr::group_by(shot.body_part.name, shot.technique.name) |>
   dplyr::summarize(XG2 = mean(Y), n = dplyr::n(), .groups = "drop")
 
-tmp_xg2 <- xg_model2 |> dplyr::select(-n)
 mead_shots <-
   mead_shots |>
-  dplyr::inner_join(y = xg_model2, by = c("shot.body_part.name", "shot.technique.name"))
-rm(tmp_xg2)
+  dplyr::inner_join(
+    y = xg_model2 |> dplyr::select(-n), 
+    by = c("shot.body_part.name", "shot.technique.name"))
 
 mead_shots |>
   dplyr::select(OpposingTeam, minute, shot.body_part.name, shot.technique.name, Y, XG2) |>
