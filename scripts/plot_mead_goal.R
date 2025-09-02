@@ -1,3 +1,7 @@
+shot <- mead_shots[14,]
+ff <- shot$shot.freeze_frame[[1]]
+
+
 # corners of pitch
 top_left_corner <- c(0,0)
 bot_left_corner <- c(0,80)
@@ -58,6 +62,9 @@ right_halfcirc <-
   data.frame(x = 60 + 10*cos(seq(from =-pi/2, to = pi/2, length = 100)),
              y = 40 - 10 * sin(seq(from = -pi/2, to = pi/2, length = 100)))
 
+# Now plot Mead's location
+oi_colors <- palette.colors(palette = "Okabe-Ito")
+
 
 par(mar = c(3,3,2,1), 
     mgp = c(1.8, 0.5, 0), 
@@ -68,47 +75,53 @@ plot(1, type = "n",
      xlim = c(0,120), ylim = c(80,0))
 # boundaries of pitch
 rect(xleft = bot_left_corner[1], ybottom = bot_left_corner[2], 
-     xright = top_right_corner[1], ytop = top_right_corner[2])
+     xright = top_right_corner[1], ytop = top_right_corner[2],
+     col = adjustcolor(oi_colors[4], alpha.f = 0.5),
+     border = "white", lwd = 2)
 # left penalty area
 rect(xleft = bot_left_penl[1], ybottom = bot_left_penl[2],
-     xright = top_right_penl[1], ytop = top_right_penl[2])
+     xright = top_right_penl[1], ytop = top_right_penl[2],
+     border = "white", lwd = 2)
 # left goalkeeper's area
 rect(xleft = bot_left_gkl[1], ybottom = bot_left_gkl[2],
-     xright = top_right_gkl[1], ytop = top_right_gkl[2])
+     xright = top_right_gkl[1], ytop = top_right_gkl[2],
+     border = "white", lwd = 2)
 # left net
 rect(xleft = bot_left_netl[1], ybottom = bot_left_netl[2],
-     xright = top_right_netl[1], ytop = top_right_netl[2])
+     xright = top_right_netl[1], ytop = top_right_netl[2],
+     border = oi_colors[9],
+     lwd = 2)
 
 # right penalty area
 rect(xleft = bot_left_penr[1], ybottom = bot_left_penr[2],
-     xright = top_right_penr[1], ytop = top_right_penr[2])
+     xright = top_right_penr[1], ytop = top_right_penr[2],
+     border = "white", lwd = 2)
 # right goalkeeper's area
 rect(xleft = bot_left_gkr[1], ybottom = bot_left_gkr[2],
-     xright = top_right_gkr[1], ytop = top_right_gkr[2])
+     xright = top_right_gkr[1], ytop = top_right_gkr[2],
+     border = "white", lwd = 2)
 # right net
 rect(xleft = bot_left_netr[1], ybottom = bot_left_netr[2],
-     xright = top_right_netr[1], ytop = top_right_netr[2])
+     xright = top_right_netr[1], ytop = top_right_netr[2],
+     border = oi_colors[9], lwd = 2)
 # half-line
 lines(x = c(top_halfline[1], bot_halfline[1]),
-      y = c(top_halfline[2], bot_halfline[2]))
+      y = c(top_halfline[2], bot_halfline[2]),
+      col = "white", lwd = 2)
 # left half-circle 
-lines(x = left_halfcirc$x, y = left_halfcirc$y)
+lines(x = left_halfcirc$x, y = left_halfcirc$y, lwd = 2, col = "white")
 # right half-circle
+lines(x = right_halfcirc$x, y = right_halfcirc$y, lwd = 2, col = "white")
 
-# Now plot Mead's location
-oi_colors <- palette.colors(palette = "Okabe-Ito")
-
-points(shot$location.x, shot$location.y, pch = 16, cex = 2,
-       col = oi_colors[1])
-# polygon for cone
 polygon(x = c(shot$location.x, top_postr[1], bot_postr[1], shot$location.x),
         y = c(shot$location.y, top_postr[2], bot_postr[2], shot$location.y),
-        col = adjustcolor(col = oi_colors[3], alpha.f = 0.5))
+        col = adjustcolor(oi_colors[6], alpha.f = 0.5),
+        border = oi_colors[6])
+
+points(shot$location.x, shot$location.y, 
+       pch = 16, cex = 1.2, col = "white")
+
 for(i in 1:nrow(ff)){
-  points(x = ff$location[i][[1]][1], 
-         y = ff$location[i][[1]][2],
-         pch = 1.2,
-         col = ifelse(ff$teammate[i], oi_colors[1], oi_colors[2]))
+  points(ff$location[i][[1]][1], ff$location[i][[1]][2], pch = 16, cex = 1,
+         col = ifelse(ff$teammate[i], "white", oi_colors[5]))
 }
-
-

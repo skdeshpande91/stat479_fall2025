@@ -10,22 +10,30 @@ execute:
 
 ## Motivation: Beth Mead in EURO 2022
 - Beth Mead scored 6 goals in EURO 2022. Which was more impressive?
-  - Goal against Austria ([video link](https://youtube.com/clip/UgkxnOKsnw4W3h-BqV5kyh-tOVnnTgBEc9u5?si=zpQB7OF43gt3yiwK))
-  - Goal against Norway [link](https://youtube.com/clip/UgkxqZ03bRBGCr4vS0M4yTMtHMOHsA6kkTHw?si=2IlC7AVi2CQotunG)
-  - Goal against Sweden [link](https://youtube.com/clip/UgkxwW9N1bXUv4G9HoSHVvYy_rk_aSjkrgwO?si=O90nkbgNd2FTv3e_)
+  - Goal in 15th minute against Austria [link](https://youtube.com/clip/UgkxnOKsnw4W3h-BqV5kyh-tOVnnTgBEc9u5?si=zpQB7OF43gt3yiwK)
+  - Goal in 37th minute against Norway [link](https://youtube.com/clip/UgkxqZ03bRBGCr4vS0M4yTMtHMOHsA6kkTHw?si=2IlC7AVi2CQotunG)
+  - Goal in 33rd minute against Sweden [link](https://youtube.com/clip/UgkxwW9N1bXUv4G9HoSHVvYy_rk_aSjkrgwO?si=O90nkbgNd2FTv3e_)
 
 . . .
 
 - We can argue endlessly about *qualitative* differences
-  - One-on-one vs shot through traffic
-  - Left or right foot, shot technique
-  - Score, time, 
-- How can we provide a quantiative answer?
+  - One-on-one vs in-traffic; left or right foot; 
+  - Type of shot; time; score; ...
+  
+. . .
 
-## A thought experiment
+- Goal: **quantitative** comparison
+
+## A Thought Experiment
 
 - What if we could replay each shot over and over again?
 - How often would she score?
+
+![](mead_sweden.png){width="60%" fig-align="center"}
+
+. . .
+
+- This long-run frequency is Expected Goals (XG) 
 
 # Soccer Event Data
 
@@ -43,11 +51,12 @@ execute:
 devtools::install_github("statsbomb/StatsBombR")
 ```
 
-## StatsBomb Coordinate System
+## StatsBomb Coordinates
 
 - Offensive action moves left-to-right
+- Vertical coordinate increases as you move top-to-bottom
 
-![StatsBomb Coordinates](statsbomb_coordinates.png){width=80%}
+![StatsBomb Coordinates](statsbomb_coordinates.png){fig-asp=0.75, width="65%"}
 
 ## Free Competitions
 - `FreeCompetitions()` returns table of available competitions
@@ -64,12 +73,12 @@ StatsBombR::FreeCompetitions() |>
   dplyr::slice_sample(n=10)
 ```
 
-## Free Matches
+## Free Matches{}
 ```{r}
-#| label: view-euro2022-matches
+#| label: view-euro2022-matches-code
 #| message: false
 #| warning: false
-#| eval: true
+#| eval: false
 #| echo: true
 #| code-line-numbers: "|1|2|3|5"
 StatsBombR::FreeCompetitions() |>
@@ -77,6 +86,27 @@ StatsBombR::FreeCompetitions() |>
   StatsBombR::FreeMatches() |>
   dplyr::select(match_id, home_team.home_team_name, away_team.away_team_name, home_score, away_score) |>
   dplyr::slice_sample(n=5)
+```
+
+. . .
+
+```{r}
+#| label: view-euro2022-matches-eval
+#| message: false
+#| warning: false
+#| eval: true
+#| echo: false
+#| output: false
+tmp <- StatsBombR::FreeCompetitions() |>
+  dplyr::filter(competition_id == 53 & season_id == 106) |> 
+  StatsBombR::FreeMatches() |>
+  dplyr::select(match_id, home_team.home_team_name, away_team.away_team_name, home_score, away_score) 
+```
+```{r}
+#| label: view-euro2022-matches-display
+#| eval: true 
+#| echo: false
+tmp |> dplyr::slice_sample(n=5)
 ```
 
 ## Event Data
@@ -88,6 +118,7 @@ StatsBombR::FreeCompetitions() |>
 #| label: get-euro2022-events
 #| echo: true
 #| eval: true
+#| output: false
 #| message: false
 #| warning: false
 #| code-line-numbers: "|2|3|4-6|"
@@ -105,14 +136,16 @@ euro2022_events <-
 #| label: get-euro2022-shots
 #| eval: true
 #| echo: true
-#| code-line-numbers: "|3-4|"
 euro2022_shots <-
   euro2022_events |>
   dplyr::filter(type.name == "Shot" & shot.body_part.name != "Other") |>
   dplyr::mutate(Y = ifelse(shot.outcome.name == "Goal", 1, 0))
 ```
+:::
 
-### Mead's Shots
+
+
+## Mead's Shots
 ```{r}
 #| label: get-mead-shots
 #| eval: true
@@ -127,15 +160,12 @@ mead_shots |>
 
 # Conditional Expectations
 
-## Thought experiment: Repeating shots
+## Thought Experiment: Repeating Shots
 
-- What if Mead repeated every shot a million times?
-- Across all repetitions, conditions kept the same
-  - Same defensive positioning
-  - Identical shot technique
 - What proportion of repetitions result in goals?
+- Across all repetitions, conditions kept the same
 
-![Mead's Goal Against Norway](mead_norway.png){width="50%"}
+![](mead_sweden.png){width="60%" fig-align="center"}
 
 
 ## Setup & Notation
@@ -148,48 +178,24 @@ mead_shots |>
   - Dist. to nearest defenders
 
 
-## XG as conditional probability
+## Conditional Probability
 - Assumption: data are a representative sample from an infinite *super-population* of shots
 - Each shot in super-population characterized by pair $(\boldsymbol{\mathbf{X}}, Y)$
-- Thought experiment equivalent to sampling from a slice of the super-population
+- Repeating shot with features $\boldsymbol{\mathbf{x}}$ equivalent to sampling from *slice* of super-population with $\boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}.$
 
-. . .
-
-- Features for Mead's Sweden goal is $\boldsymbol{\mathbf{x}}_{\textrm{SWE}}$: 
-  - Find all shots with $\boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}_{\textrm{SWE}}$
-  - Compute the proportion that resulted in goals
-  
 . . .
 
 $$
 \textrm{XG}(\boldsymbol{\mathbf{x}}) = \mathbb{E}[Y \vert \boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}] = \mathbb{P}(Y = 1 \vert \boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}})
 $$
 
+# Two Basic XG Models
 
+## Defining The Super-population
 
-
-
-
-# An initial XG model
-
-## Idealized Calculation
-- Suppose our only feature is `shot.body_part.name`
-- If we could access infinite super-population, compute
-$$\textrm{XG}(\text{right-footed shot}) = \mathbb{P}(\text{goal} \vert \text{right-footed shot})$$ by
-
-  - Forming subgroup containing only right-footed shots
-  - Calculating proportion of goals score
-
-## Practical Calculation
-- Since we cannot access infinite super-population, we must **estimate** XG from data
-- We do so by mimicking idealized calculation
-  1. Divide data into subgroups based on `shot.body_part.name`
-  2. Compute proportion of goals within subgroups
-- Rely on **dplyr**'s `group_by()` functionality to do this
-
-## Defining our super-population
-- Focus only on shots from Women's Internationals
-- Focus only on shots attempted with the foot or head
+- Ultimate goal is to assess Mead's performance in EURO 2022
+  - Focus on women's internationals
+  - Focus on shots attempted w/ foot or head
 
 :::{.panel-tabset}
 ### Get Events
@@ -199,7 +205,7 @@ $$\textrm{XG}(\text{right-footed shot}) = \mathbb{P}(\text{goal} \vert \text{rig
 #| echo: true
 #| warning: false
 #| message: false
-#| code-line-numbers: "1|2|3-7"
+#| output: false
 wi_events <-
   StatsBombR::FreeCompetitions() |> 
   dplyr::filter(competition_gender == "female" & competition_international) |>
@@ -214,22 +220,43 @@ wi_events <-
 #| label: wi-shots-foot
 #| eval: true
 #| echo: true
-#| code-line-numbers: "3|4|"
 wi_shots <-
   wi_events |>
   dplyr::filter(type.name == "Shot" & shot.body_part.name != "Other") |>  
   dplyr::mutate(Y = ifelse(shot.outcome.name == "Goal", 1, 0))
 ```
+
 :::
 
+
+## Idealized Calculation
+- Suppose our only feature is `shot.body_part.name`
+
+```{r}
+#| label: tabulate-body-part
+#| eval: true
+#| echo: false
+table(wi_shots |> dplyr::pull(shot.body_part.name))
+```
+
+- If we could access infinite super-population, compute $\textrm{XG}(\text{right-footed shot})$ by
+  - Forming subgroup containing only right-footed shots
+  - Calculating proportion of goals score
+
+## Practical Calculation
+- Since we cannot access infinite super-population, we must **estimate** XG from data
+- We do so by mimicking idealized calculation
+  1. Divide data into subgroups based on `shot.body_part.name`
+  2. Compute proportion of goals within subgroups
+- Rely on **dplyr**'s `group_by()` functionality to do this
 
 ## Estimating XG(body part)
 
 ```{r}
-#| label: wi-xg-body
-#| eval: true
+#| label: wi-xg-body-code
+#| eval: false
 #| echo: true
-#| code-line-numbers: "3|4|"
+#| code-line-numbers: "|3|4"
 xg_model1 <-
   wi_shots |>
   dplyr::group_by(shot.body_part.name) |>
@@ -237,24 +264,45 @@ xg_model1 <-
 xg_model1
 ```
 
-## Assessing Beth Mead's Performance
-- We can append XG estimates to `mead_shots` with a `left_join`
-- Based on bodypart, each goal is about equally impressive:
-- Model suggests only 11% of repeated shots would result in goals
+. . .
+
 ```{r}
-#| label: mead-xg-foot
+#| label: wi-xg-body-eval
+#| eval: true
+#| echo: false
+xg_model1 <-
+  wi_shots |>
+  dplyr::group_by(shot.body_part.name) |>
+  dplyr::summarise(XG1 = mean(Y), n = dplyr::n())
+xg_model1
+```
+
+
+
+## Assessing Beth Mead's Performance
+- Append XG estimates to `mead_shots` w/ `left_join`
+- Based on bodypart, each goal is about equally impressive:
+- Model suggests 11% of repeated shots would result in goals
+```{r}
+#| label: mead-xg-foot-code
 #| echo: true
 #| eval: true
-#| code-line-numbers: "3|4|"
-mead_shots <-
-  mead_shots |>
+#| code-line-numbers: "|2|3|4"
+mead_shots <- mead_shots |>
   dplyr::left_join(y = xg_model1 |> dplyr::select(shot.body_part.name, XG1),
                    by = "shot.body_part.name")
+```
+
+. . .
+
+```{r}
+#| label: mead-xg-foot-select
 mead_shots |> dplyr::slice(c(1,4,14)) |> 
   dplyr::select(OpposingTeam, minute, shot.body_part.name, Y, XG1)
 ```
 
-## Accounting for shot technique
+## Accounting For Shot Technique
+- Each goal was scored off a different type of shot
 - What if we condition body part & shot technique?
 ```{r}
 #| label: wi-tech
@@ -263,7 +311,7 @@ mead_shots |> dplyr::slice(c(1,4,14)) |>
 table(wi_shots |> dplyr::pull(shot.technique.name))
 ```
 
-## Estimating $\textrm{XG}(\textrm{body part \& technique})$
+## New XG Estimates
 :::{.panel-tabset}
 
 ### XG Estimates
@@ -297,7 +345,7 @@ mead_shots |>
 :::
 
 ## Accounting for more features{.smaller}
-- Our 2-feature model is still a bit coarse
+- Our 2-feature model is still too coarse
   - Doesn't account for distance of shot
   - Doesn't account for defenders and keeper
 - StatsBomb records many more features about shots
@@ -319,15 +367,16 @@ shot_vars
 - How can we adjust for these in our XG model?
 
 ## Digression: What is the cone?
-- Cone is the triangular area between shot location & goalposts
+- Cone: area between shot location & goalposts
 <!-- visualize this; ideally with defenders on -->
 ```{r}
-#| label: fig-mead-austria
+#| label: fig-mead-sweden
 #| eval: true
 #| echo: false
-#| fig-width: 6
-#| fig-height: 4
-
+#| fig-asp: 0.667
+#| fig-width: 8
+#| fig-align: center
+#| fig-caption: Only one defender and the goalkeeper are in the "cone"
 shot <- mead_shots[14,]
 ff <- shot$shot.freeze_frame[[1]]
 
@@ -405,35 +454,60 @@ plot(1, type = "n",
      xlim = c(0,120), ylim = c(80,0))
 # boundaries of pitch
 rect(xleft = bot_left_corner[1], ybottom = bot_left_corner[2], 
-     xright = top_right_corner[1], ytop = top_right_corner[2])
+     xright = top_right_corner[1], ytop = top_right_corner[2],
+     col = adjustcolor(oi_colors[4], alpha.f = 0.5),
+     border = "white", lwd = 2)
 # left penalty area
 rect(xleft = bot_left_penl[1], ybottom = bot_left_penl[2],
-     xright = top_right_penl[1], ytop = top_right_penl[2])
+     xright = top_right_penl[1], ytop = top_right_penl[2],
+     border = "white", lwd = 2)
 # left goalkeeper's area
 rect(xleft = bot_left_gkl[1], ybottom = bot_left_gkl[2],
-     xright = top_right_gkl[1], ytop = top_right_gkl[2])
+     xright = top_right_gkl[1], ytop = top_right_gkl[2],
+     border = "white", lwd = 2)
 # left net
 rect(xleft = bot_left_netl[1], ybottom = bot_left_netl[2],
-     xright = top_right_netl[1], ytop = top_right_netl[2])
+     xright = top_right_netl[1], ytop = top_right_netl[2],
+     border = oi_colors[9],
+     lwd = 2)
 
 # right penalty area
 rect(xleft = bot_left_penr[1], ybottom = bot_left_penr[2],
-     xright = top_right_penr[1], ytop = top_right_penr[2])
+     xright = top_right_penr[1], ytop = top_right_penr[2],
+     border = "white", lwd = 2)
 # right goalkeeper's area
 rect(xleft = bot_left_gkr[1], ybottom = bot_left_gkr[2],
-     xright = top_right_gkr[1], ytop = top_right_gkr[2])
+     xright = top_right_gkr[1], ytop = top_right_gkr[2],
+     border = "white", lwd = 2)
 # right net
 rect(xleft = bot_left_netr[1], ybottom = bot_left_netr[2],
-     xright = top_right_netr[1], ytop = top_right_netr[2])
+     xright = top_right_netr[1], ytop = top_right_netr[2],
+     border = oi_colors[9], lwd = 2)
 # half-line
 lines(x = c(top_halfline[1], bot_halfline[1]),
-      y = c(top_halfline[2], bot_halfline[2]))
+      y = c(top_halfline[2], bot_halfline[2]),
+      col = "white", lwd = 2)
 # left half-circle 
-lines(x = left_halfcirc$x, y = left_halfcirc$y)
+lines(x = left_halfcirc$x, y = left_halfcirc$y, lwd = 2, col = "white")
+# right half-circle
+lines(x = right_halfcirc$x, y = right_halfcirc$y, lwd = 2, col = "white")
+
+polygon(x = c(shot$location.x, top_postr[1], bot_postr[1], shot$location.x),
+        y = c(shot$location.y, top_postr[2], bot_postr[2], shot$location.y),
+        col = adjustcolor(oi_colors[6], alpha.f = 0.5),
+        border = oi_colors[6])
+
+points(shot$location.x, shot$location.y, 
+       pch = 16, cex = 1.8, col = "white")
+
+for(i in 1:nrow(ff)){
+  points(ff$location[i][[1]][1], ff$location[i][[1]][2], pch = 16, cex = 1,
+         col = ifelse(ff$teammate[i], "white", oi_colors[5]))
+}
+mtext("Beth Mead Goal Against Sweden", side = 3, line = 1)
+mtext("Created with free data from StatsBomb\n https://github.com/statsbomb/open-data",
+      side = 1, line = 1)
 ```
-
-
-
 
 ## Idealized Computation
 
@@ -442,10 +516,11 @@ lines(x = left_halfcirc$x, y = left_halfcirc$y)
   - Compute proportion of goals among the slice with $\mathbf{\boldsymbol{X}} = \mathbf{\boldsymbol{x}}$
 
 . . . 
-- Can we mimick this with our observed data?
+
+- Can we mimic this with our observed data?
 
 ## Practical Challenges
-- Accounting for body part, technique, and # defenders in cone
+- Adjust for body part, technique, and # defenders in cone
 ```{r}
 wi_shots |>
   dplyr::group_by(shot.body_part.name, shot.technique.name, DefendersInCone) |>
@@ -455,14 +530,11 @@ wi_shots |>
 ```
 
 
-## Estimating XG with statistical models{.smaller}
+## Model-based XG
 - "Binning-and-averaging" not viable w/ many features due to small sample sizes
 - *Statistical models* overcome these challenges by "borrowing strength"
-- $\textrm{XG}(\boldsymbol{\mathbf{x}})$ informed by
-  - Data with $\boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}$
-  - Data with $\boldsymbol{\mathbf{X}}$ values *close* to $\boldsymbol{\mathbf{x}}$
+- $\textrm{XG}(\boldsymbol{\mathbf{x}})$ informed by shots with $\boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}$ and $\boldsymbol{\mathbf{X}} \approx \boldsymbol{\mathbf{x}}$
 - How a model "borrows strength" depends on its underlying assumptions
-  - E.g. $\log{\frac{\mathbb{P}(Y = 1)}{\mathbb{P}(Y = 0)}} = \beta_{0} + \beta_{1} \times \textrm{Distance}$
 
 . . .  
 
@@ -474,9 +546,12 @@ wi_shots |>
 
 ## StatsBomb's XG Estimates
 - `shot.statsbomb_xg` records proprietary XG estimate
+- Goal against Sweden had smallest XG and is, therefore, the most impressive
 ```{r}
 mead_shots |>
-  dplyr::select(OpposingTeam, minute, Y, shot.statsbomb_xg) |>
+  dplyr::select(OpposingTeam, minute, XG1, XG2, shot.statsbomb_xg) |>
+  dplyr::mutate(XG1 = round(XG1, digits = 3), XG2 = round(XG2, digits = 3), 
+                shot.statsbomb_xg = round(shot.statsbomb_xg, digits = 3)) |>
   dplyr::slice(c(1,4,14))
 
 ```
@@ -484,4 +559,41 @@ mead_shots |>
 
 # Goals Over Expected
 
+## Did Mead Outperform Expectations?
+- How to interpret the difference $Y_{i} - \textrm{XG}_{i}$ when it is
+  - Large & positive
+  - Large & negative
+  - Close to 0
 
+. . .
+
+- Beth Mead scored 2.89 more goals than expected
+```{r}
+#| label: mead-goe
+#| eval: true
+#| echo: true
+sum(mead_shots$Y - mead_shots$shot.statsbomb_xg)
+```
+
+## Assessing All EURO2022 Players
+```{r}
+#| label: euro2022-goe
+#| echo: true
+#| eval: true
+
+goe <- 
+  euro2022_shots |>
+  dplyr::mutate(diff = Y - shot.statsbomb_xg) |>
+  dplyr::group_by(player.name) |>
+  dplyr::summarise(GOE = sum(diff), Goals = sum(Y), n_shots = dplyr::n()) |>
+  dplyr::arrange(dplyr::desc(GOE)) 
+goe |> dplyr::slice(c(1:5, (dplyr::n()-4):dplyr::n()))
+
+
+```
+
+## Looking Ahead
+- I **Strongly** recommend you work through code yourself
+  - Full code available [here](../../lectures/lecture02.qmd)
+  - Try more binning-and-averaging XG estimates w/ other features
+  - Try to replicate goals over expected with EURO 2025 data

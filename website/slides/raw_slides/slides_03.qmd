@@ -1,0 +1,419 @@
+---
+title: "STAT 479: Lecture 3"
+subtitle: Fitting More Complex XG Models
+format: revealjs
+execute:
+  cache: true
+  
+---
+
+## Recap
+
+- In [Lecture 2](../../lectures/lecture02.qmd), fit two XG models
+  - Model 1 accounte for body part
+  - Model 2 accounted for body part + technique
+- Which model is better?
+
+```{r}
+#| label: load-data
+#| eval: true
+#| echo: true
+#| output: false
+#| message: false
+#| warning: false
+wi_shots <-
+  StatsBombR::FreeCompetitions() |> 
+  dplyr::filter(competition_gender == "female" & competition_international)|> 
+  StatsBombR::FreeMatches() |> 
+  StatsBombR::free_allevents() |> 
+  StatsBombR::allclean() |> 
+  StatsBombR::get.opposingteam() |>
+  dplyr::filter(type.name == "Shot" & shot.body_part.name != "Other") |>  
+  dplyr::mutate(Y = ifelse(shot.outcome.name == "Goal", 1, 0)) 
+```
+
+## Our Simple XG Models
+
+:::{.panel-tabset}
+
+### Model 1
+```{r}
+#| label: xg-model1
+#| eval: true
+#| echo: true
+xg_model1 <- 
+  wi_shots |>
+  dplyr::group_by(shot.body_part.name) |>
+  dplyr::summarise(XG1 = mean(Y))
+```
+### Model 2
+```{r}
+#| label: xg-model2
+#| eval: true
+#| echo: true
+xg_model2 <-
+  wi_shots |>
+  dplyr::group_by(shot.body_part.name, shot.technique.name) |>
+  dplyr::summarise(XG2 = mean(Y), .groups = "drop") 
+```
+### Concatenating Predictions
+```{r}
+#| label: concatenate-simple
+#| eval: true
+#| echo: true
+simple_preds <-
+  wi_shots |>
+  dplyr::select(Y, shot.body_part.name, shot.technique.name) |>
+  dplyr::left_join(y = xg_model1, by = c("shot.body_part.name")) |>
+  dplyr::left_join(y = xg_model2, by = c("shot.body_part.name", "shot.technique.name"))
+```
+:::
+
+## Qualitative Comparisons
+
+- Consider two shots:
+  - [Right-footed half-volley](https://youtu.be/lVGiGZN2gdw?t=148) by Beth Mead against Sweden
+  - [Right-footed backheel](https://youtu.be/rsuLFOJCCUA?t=7) by Alessia Russo
+```{r}
+simple_preds |>
+  dplyr::filter(shot.body_part.name == "Right Foot" & 
+                  shot.technique.name %in% c("Half Volley", "Backheel")) |>
+  dplyr::select(shot.body_part.name, shot.technique.name, XG1, XG2) |>
+  dplyr::mutate(XG1 = round(XG1, digits = 3), XG2 = round(XG2, digits = 3)) |>
+  unique()
+```
+
+. . .
+
+- Model 2 accounts for more factors
+- Intuitively expect it is more accurate
+
+## Setup & Notation
+- Data: $n$ shots represented by pairs $(\boldsymbol{\mathbf{x}}_{1}, y_{1}), \ldots, (\boldsymbol{\mathbf{x}}_{n}, y_{n})$
+  - Outcomes: $y_{i} = 1$ if shot $i$ results in a goal & 0 otherwise
+  - Feature vector: $\boldsymbol{\mathbf{x}}_{i}$
+- Assumption: Data is a representative sample from an infinite super-population of shots
+$$
+\textrm{XG}(\boldsymbol{\mathbf{x}}) = \mathbb{E}[Y \vert \boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}]
+$$
+
+. . .
+
+- $\hat{p}_{i}$: predicted $\textrm{XG}$ for shot $i$ from fitted model
+- How close is $\hat{p}_{i}$ to $y_{i}$?
+
+## Misclassification Rate (Definition)
+
+- $\hat{p}_{i} > 0.5:$ model predicts $y_{i} = 1$ more likely than $y_{i} = 0$
+- Concerning if too many $\hat{p}_{i}$'s on wrong-side of 50%
+
+. . .
+
+$$
+\textrm{MISS} = n^{-1}\sum_{i = 1}^{n}{\mathbb{I}(y_{i} \neq \mathbb{I}(\hat{p}_{i} \geq 0.5))},
+$$
+
+## Misclassification Rate (Example)
+
+```{r}
+#| label: misclass-code
+#| eval: false
+#| echo: true
+misclass <- function(y, phat){ 
+  return( mean( (y != 1*(phat >= 0.5))))
+}
+misclass(simple_preds$Y, simple_preds$XG1)
+misclass(simple_preds$Y, simple_preds$XG2)
+```
+
+. . .
+
+```{r}
+#| label: misclass-eval
+#| eval: true
+#| echo: false
+misclass <- function(y, phat){ # <1>
+  return( mean( (y != 1*(phat >= 0.5))))
+}
+
+cat("Model 1 misclassification", #<2>
+    round(misclass(simple_preds$Y, simple_preds$XG1), digits = 3), "\n")
+cat("Model 2 misclassificaiton", 
+    round(misclass(simple_preds$Y, simple_preds$XG2), digits = 3), "\n")
+```
+
+. . .
+
+- Why do Models 1 & 2 have the same misclassification rate???
+
+
+## Brier Score (Definition)
+- Misclassification gives same penalty for
+  - Forecasting a goal w/ $\hat{p} = 0.501$
+  - Forecasting a goal w/ $\hat{p} = 0.001$
+- Brier Score penalizes distance b/w forecast $\hat{p}$ & $Y$
+$$
+\text{Brier} = n^{-1}\sum_{i = 1}^{n}{(y_{i} - \hat{p}_{i})^2}.
+$$
+- Just Mean Square Error applied to binary outcomes
+
+## Brier Score (Example)
+```{r}
+#| label: brier-code
+#| eval: false
+#| echo: true
+
+brier <- function(y, phat){
+  return(mean( (y - phat)^2 ))
+}
+
+brier(simple_preds$Y, simple_preds$XG1)
+brier(simple_preds$Y, simple_preds$XG2)
+```
+
+
+```{r}
+#| label: brier-eval
+#| eval: true
+#| echo: false
+brier <- function(y, phat){
+  return(mean( (y - phat)^2 ))
+}
+
+cat("Model 1 Brier Score:", 
+    round(brier(simple_preds$Y, simple_preds$XG1), digits = 3), "\n")
+cat("Model 2 Brier Score:", 
+    round(brier(simple_preds$Y, simple_preds$XG2) , digits = 3), "\n")
+```
+
+
+
+## Log-Loss (Definition)
+- Like Brier Score but penalizes extreme mistakes more severely
+- Theoretically unbounded
+- But in practice, truncate $\hat{p}$ to $[\epsilon,1-\epsilon]$ to avoid $\log(0)$
+$$
+\textrm{LogLoss} = -1 \times \sum_{i = 1}^{n}{\left[ y_{i} \times \log(\hat{p}_{i}) + (1 - y_{i})\times\log(1-\hat{p}_{i})\right]}.
+$$
+- Also known as cross-entropy loss in ML literature
+
+## Log-Loss Score (Example)
+```{r}
+#| label: logloss-code
+#| eval: false
+#| echo: true
+#| code-line-numbers: "2-3|"
+
+logloss <- function(y, phat){
+  if(any(phat < 1e-12)) phat[phat < 1e-12] <- 1e-12
+  if(any(phat > 1-1e-12)) phat[phat > 1-1e-12] <- 1e-12
+  return(-1 * mean( y * log(phat) + (1-y) * log(1-phat)))
+}
+
+logloss(simple_preds$Y, simple_preds$XG1)
+logloss(simple_preds$Y, simple_preds$XG2)
+```
+
+. . . 
+
+```{r}
+#| label: logloss-eval
+#| eval: true
+#| echo: false
+logloss <- function(y, phat){
+  if(any(phat < 1e-12)) phat[phat < 1e-12] <- 1e-12 # <1>
+  if(any(phat > 1-1e-12)) phat[phat > 1-1e-12] <- 1e-12
+  return(-1 * mean( y * log(phat) + (1-y) * log(1-phat)))
+}
+
+cat("Model 1 Log-Loss:", 
+    round(logloss(simple_preds$Y, simple_preds$XG1), digits = 3), "\n")
+cat("Model 2 Log-Loss:", 
+    round(logloss(simple_preds$Y, simple_preds$XG2) , digits = 3), "\n")
+```
+
+
+# Estimating Out-of-Sample Error
+
+## In-sample Error
+- Recall our setup:
+  - Data is a sample from super-population $\mathcal{P}$
+  - Fit model to *estimate* $\mathbb{E}[Y \vert \boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}]$
+  - Fitted model returns predictions $\hat{p}(\boldsymbol{\mathbf{x}})$
+
+. . .
+
+- So far, checked whether $\hat{p}(\boldsymbol{\mathbf{x}}_{i}) = \hat{p}_{i}$ close to $y_{i}$
+  - I.e., does model fit **observed** data well?
+- How well does model predict *new*, previously unseen data?
+
+  
+## Out-of-Sample Error
+- Thought experiment: say we repeatedly
+  - Draw a new point $(\boldsymbol{\mathbf{x}}^{\star}, y^{\star})$ from $\mathcal{P}$
+  - Measure loss b/w $\hat{p}(\boldsymbol{\mathbf{x}}^{\star})$ to $y^{\star}$?
+- The average loss is **out-of-sample** loss 
+
+. . .
+
+- Problem: we don't have access to $\mathcal{P}$
+
+. . .
+- Solution: create *random* training/testing split
+  - Train on a random subset containing 75% of the data
+  - Evaluate using the remaining held-out portion
+
+## The Training/Testing Paradigm{.scrollable}
+
+  
+:::{.panel-tabset}
+
+
+### Create Split
+```{r}
+#| label: create-split
+#| eval: true
+#| echo: true
+#| code-line-numbers: "1-3|5|8-10|13|7|"
+n <- nrow(wi_shots)
+n_train <- floor(0.75 * n) # <1>
+n_test <- n - n_train
+
+wi_shots <- wi_shots |> dplyr::mutate(id = 1:n) # <2>
+
+set.seed(479)
+train_data <-
+  wi_shots |>
+  dplyr::slice_sample(n = n_train) 
+test_data <-
+  wi_shots |>
+  dplyr::anti_join(y = train_data, by = "id")
+```
+### Fit Models
+```{r}
+#| label: single-fold-simple-train
+#| eval: true
+#| echo: true
+#| code-line-numbers: "|2,6|9-12"
+model1 <- 
+  train_data |>
+  dplyr::group_by(shot.body_part.name) |>
+  dplyr::summarise(XG1 = mean(Y))
+model2 <-
+  train_data |>
+  dplyr::group_by(shot.body_part.name, shot.technique.name) |>
+  dplyr::summarise(XG2 = mean(Y), .groups = "drop")
+train_preds <-
+  train_data |>
+  dplyr::inner_join(y = model1, by = c("shot.body_part.name")) |>
+  dplyr::inner_join(y = model2, by = c("shot.body_part.name", "shot.technique.name"))
+```
+
+### Evaluate Models
+```{r}
+#| label: single-fold-simple-test-code
+#| eval: false
+#| echo: true
+test_preds <-
+  test_data |>
+  dplyr::inner_join(y = model1, by = c("shot.body_part.name")) |>
+  dplyr::inner_join(y = model2, by = c("shot.body_part.name", "shot.technique.name"))
+
+logloss(train_preds$Y, train_preds$XG1)
+logloss(test_preds$Y, test_preds$XG1)
+
+logloss(train_preds$Y, train_preds$XG2)
+logloss(test_preds$Y, test_preds$XG2)
+```
+
+. . .
+
+```{r}
+#| label: single-fold-simple-test-eval
+#| eval: true
+#| echo: false
+test_preds <-
+  test_data |>
+  dplyr::inner_join(y = model1, by = c("shot.body_part.name")) |>
+  dplyr::inner_join(y = model2, by = c("shot.body_part.name", "shot.technique.name"))
+
+cat("BodyPart train log-loss:",
+    round(logloss(train_preds$Y, train_preds$XG1), digits = 3), 
+    "test log-loss:",
+    round(logloss(test_preds$Y, test_preds$XG1), digits = 3), "\n")
+
+cat("BodyPart+Technique train log-loss:",
+    round(logloss(train_preds$Y, train_preds$XG2), digits = 3), 
+    "test log-loss:",
+    round(logloss(test_preds$Y, test_preds$XG2), digits = 3), "\n")
+```
+
+:::
+
+## Multiple Splits
+
+- Generally, good practice to consider multiple train/test splits
+```{r}
+#| label: cv-simple
+#| eval: true
+#| echo: false
+n_sims <- 100
+train_logloss <- 
+  matrix(nrow = 2, ncol = n_sims,
+         dimnames = list(c("XG1","XG2"), c()))
+test_logloss <- 
+  matrix(nrow = 2, ncol = n_sims,
+         dimnames = list(c("XG1","XG2"), c()))
+
+for(r in 1:n_sims){
+  set.seed(479+r) 
+  train_data <-
+    wi_shots |>
+    dplyr::slice_sample(n = n_train) 
+  test_data <-
+    wi_shots |>
+    dplyr::anti_join(y = train_data, by = "id") 
+  
+  model1 <- 
+    train_data |>
+    dplyr::group_by(shot.body_part.name) |>
+    dplyr::summarise(XG1 = mean(Y))
+  
+  model2 <-
+    train_data |>
+    dplyr::group_by(shot.body_part.name, shot.technique.name) |>
+    dplyr::summarise(XG2 = mean(Y), .groups = "drop")
+
+  train_preds <-
+    train_data |>
+    dplyr::inner_join(y = model1, by = c("shot.body_part.name")) |>
+    dplyr::inner_join(y = model2, by = c("shot.body_part.name", "shot.technique.name"))
+
+  test_preds <-
+    test_data |>
+    dplyr::inner_join(y = model1, by = c("shot.body_part.name")) |>
+    dplyr::inner_join(y = model2, by = c("shot.body_part.name", "shot.technique.name"))
+  
+  train_logloss["XG1", r] <- logloss(train_preds$Y, train_preds$XG1) # <3>
+  train_logloss["XG2",r] <- logloss(train_preds$Y, train_preds$XG2)
+  
+  test_logloss["XG1", r] <- logloss(test_preds$Y, test_preds$XG1)
+  test_logloss["XG2",r] <- logloss(test_preds$Y, test_preds$XG2)
+}
+cat("Model 1 training logloss:", round(mean(train_logloss["XG1",]), digits = 3), "\n") # <4>
+cat("Model 2 training logloss:", round(mean(train_logloss["XG2",]), digits = 3), "\n")
+
+cat("Model 1 test logloss:", round(mean(test_logloss["XG1",]), digits = 3), "\n")
+cat("Model 2 test logloss:", round(mean(test_logloss["XG2",]), digits = 3), "\n")
+```
+- Simpler model appaers to have slightly smaller out-of-sample log-loss!
+
+# Logistic Regression
+
+## Logistic Regression Overview
+$$
+\log\left(\frac{\mathbb{P}(Y= 1 \vert \boldsymbol{\mathbf{X}})}{\mathbb{P}(Y = 0 \vert \boldsymbol{\mathbf{X}})}\right) = \beta_{0} + \beta_{1}X_{1} + \cdots + \beta_{p}X_{p}.
+$$
+
+# Random Forests
+

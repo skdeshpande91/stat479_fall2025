@@ -254,7 +254,11 @@ window.Quarto = {
   </li>  
         <li>
     <a class="dropdown-item" href="../slides/lecture02.html">
- <span class="dropdown-text">Lecture 2</span></a>
+ <span class="dropdown-text">Lecture 2: Expected Goals</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture03.html">
+ <span class="dropdown-text">Lecture 3: Estimating XG</span></a>
   </li>  
     </ul>
   </li>
@@ -441,7 +445,7 @@ Figure&nbsp;1: Screenshot of the competitions covered in the public data
 </figcaption>
 </figure>
 </div>
-<p>Each competition and season have unique id and we can also see whether it was a men’s or women’s competition. To see which matches from selected competitions have publicly available data, we can pass the corresponding rows of this table to the function <code>StatsBombR::FreeMatches()</code>. For instance, hereare the first few rows and some selected columns from the matches from EURO 2022. StatsBomb graciously provided data for all the matches in the tournament. Figure 2 shows the table of matches from the 2022 EURO Competition; StatsBomb graciously provided data for all matches from the tournament, which can be obtained using the code below.</p>
+<p>Each competition and season have unique id and we can also see whether it was a men’s or women’s competition. To see which matches from selected competitions have publicly available data, we can pass the corresponding rows of this table to the function <code>StatsBombR::FreeMatches()</code>. For instance, here are the first few rows and some selected columns from the matches from EURO 2022. StatsBomb graciously provided data for all the matches in the tournament. Here is a table of matches from the 2022 EURO Competition; StatsBomb graciously provided data for all matches from the tournament, which can be obtained using the code below.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>StatsBombR<span class="sc">::</span><span class="fu">FreeCompetitions</span>() <span class="sc">|&gt;</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(competition_id <span class="sc">==</span> <span class="dv">53</span> <span class="sc">&amp;</span> season_id <span class="sc">==</span> <span class="dv">106</span>) <span class="sc">|&gt;</span> </span>
@@ -604,33 +608,23 @@ Generalization
 <p>A key assumption of all XG models is that the observed data is a random sample drawn from the super-population. The only women’s internationals matches for which StatsBomb data were from the 2019 and 2023 World Cup and the 2022 EURO tournaments. These matches are arguably <strong>not</strong> highly representative of all women’s international matches, meaning that we should exercise some caution when using models fitted to these data to analyze matches from other competitions (e.g., an international friendly or a match in a domestic league).</p>
 </div>
 </div>
-<p>We can now create a table of just Beth Mead’s shots from EURO 2022 and add a column with the XG for each shot. To do this, we first filter our table <code>wi_shots</code> using the player name (note, StatsBomb uses her full name!). Then, for every left-footed shot Mead attempted, we want to copy over the corresponding value from the table <code>xg_model1</code>, which in this case is 0.113. Similarly, we want to copy over the corresponding values for right-footed shots and headers from <code>xg_model1</code> into our table for Mead’s shots. We can do this using an <a href="https://r4ds.hadley.nz/joins.html#sec-mutating-joins">left join</a>. In the code below, we actually create a temporary version of <code>xg_model1</code> that drops the column recording the overall counts of the body part used for the shots in <code>wi_shots</code>. This way, when we perform the join, we don’t create a new column with these counts.</p>
+<p>We can now create a table of just Beth Mead’s shots from EURO 2022 and add a column with the XG for each shot. To do this, we first filter our table <code>wi_shots</code> using the player name (note, StatsBomb uses her full name!). Then, for every left-footed shot Mead attempted, we want to copy over the corresponding value from the table <code>xg_model1</code>, which in this case is 0.114. Similarly, we want to copy over the corresponding values for right-footed shots and headers from <code>xg_model1</code> into our table for Mead’s shots. We can do this using an <a href="https://r4ds.hadley.nz/joins.html#sec-mutating-joins">left join</a>. In the code below, we actually create a temporary version of <code>xg_model1</code> that drops the column recording the overall counts of the body part used for the shots in <code>wi_shots</code>. This way, when we perform the join, we don’t create a new column with these counts.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="annotated-cell-8"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="1">1</button><span id="annotated-cell-8-1" class="code-annotation-target"><a href="#annotated-cell-8-1" aria-hidden="true" tabindex="-1"></a>tmp_xg1 <span class="ot">&lt;-</span> xg_model1 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">!</span>n)</span>
-<span id="annotated-cell-8-2"><a href="#annotated-cell-8-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-8-3"><a href="#annotated-cell-8-3" aria-hidden="true" tabindex="-1"></a>mead_shots <span class="ot">&lt;-</span></span>
-<span id="annotated-cell-8-4"><a href="#annotated-cell-8-4" aria-hidden="true" tabindex="-1"></a>  euro2022_shots <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-8-5"><a href="#annotated-cell-8-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(player.name <span class="sc">==</span> <span class="st">"Bethany Mead"</span>) <span class="sc">|&gt;</span></span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="2">2</button><span id="annotated-cell-8-6" class="code-annotation-target"><a href="#annotated-cell-8-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> tmp_xg1, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>))</span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="3">3</button><span id="annotated-cell-8-7" class="code-annotation-target"><a href="#annotated-cell-8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(tmp_xg1)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-8"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-8-1"><a href="#annotated-cell-8-1" aria-hidden="true" tabindex="-1"></a>mead_shots <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-8-2"><a href="#annotated-cell-8-2" aria-hidden="true" tabindex="-1"></a>  euro2022_shots <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-8-3"><a href="#annotated-cell-8-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(player.name <span class="sc">==</span> <span class="st">"Bethany Mead"</span>) <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-8" data-target-annotation="1">1</button><span id="annotated-cell-8-4" class="code-annotation-target"><a href="#annotated-cell-8-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> xg_model1 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(shot.body_part.name, XG1),</span>
+<span id="annotated-cell-8-5"><a href="#annotated-cell-8-5" aria-hidden="true" tabindex="-1"></a>                   <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-hidden code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-8" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-8" data-code-lines="1" data-code-annotation="1">A temporary copy of <code>xg_model1</code> that doesn’t include the column <code>n</code></span>
-</dd>
-<dt data-target-cell="annotated-cell-8" data-target-annotation="2">2</dt>
-<dd>
-<span data-code-cell="annotated-cell-8" data-code-lines="6" data-code-annotation="2">Create a column with estimated XG corresponding to the body part used for each shot</span>
-</dd>
-<dt data-target-cell="annotated-cell-8" data-target-annotation="3">3</dt>
-<dd>
-<span data-code-cell="annotated-cell-8" data-code-lines="7" data-code-annotation="3">Remove the temporary copy</span>
+<span data-code-cell="annotated-cell-8" data-code-lines="4" data-code-annotation="1">No need to include <code>n</code> when joining the tables</span>
 </dd>
 </dl>
 </div>
 </div>
-<p>We can now look at the what our model says about the three goals from above. The first, against Austria in the 15th minute; the second, against Norway in the 37th minute, and the third against Sweden in the 33rd minute. When These turn out to be in rows 1, 4, and 14 of the table <code>mead_shots</code></p>
+<p>We can now look at the what our model says about the three goals from above. The first, against Austria in the 15th minute; the second, against Norway in the 37th minute, and the third against Sweden in the 33rd minute. These turn out to be in rows 1, 4, and 14 of the table <code>mead_shots</code></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>mead_shots <span class="sc">|&gt;</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(OpposingTeam, minute, shot.body_part.name, Y, XG1) <span class="sc">|&gt;</span></span>
@@ -644,7 +638,7 @@ Generalization
 3 Sweden Women's      33 Right Foot              1 0.111</code></pre>
 </div>
 </div>
-<p>According to our first model, these impressiveness of these goals is pretty similar: our model put the respective chances of each shot resulting in a goal at about 10%, 11%, and 10%. But, watching the videos a bit more closely, this conclusion is <strong>not</strong> especially satisfying: Mead scored the first goal in a one-on-one situation but had to shoot through several defenders on the second and third goal. The discrepancy between our qualitative comparisons and our quantitative modeling results stems from the fact that we only conditioned on the body part and did not account for the other ways that the shots are different. In other words, our initial XG model is much too coarse to quantify the differences between the three chances that we believe are important.</p>
+<p>According to our first model, the “impressiveness” of these goals is pretty similar: our model put the respective chances of each shot resulting in a goal at about 11%. But, watching the videos a bit more closely, this conclusion is <strong>not</strong> especially satisfying: Mead scored the first goal in a one-on-one situation but had to shoot through several defenders on the second and third goal. The discrepancy between our qualitative comparisons and our quantitative modeling results stems from the fact that we only conditioned on the body part and did not account for the other ways that the shots are different. In other words, our initial XG model is much too coarse to quantify the differences between the three chances that we believe are important.</p>
 </section>
 <section id="sec-addtl-features" class="level2">
 <h2 class="anchored" data-anchor-id="sec-addtl-features">Conditioning On Additional Features</h2>
@@ -666,11 +660,11 @@ Overhead Kick        Volley
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(shot.body_part.name, shot.technique.name) <span class="sc">|&gt;</span></span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">XG2 =</span> <span class="fu">mean</span>(Y), <span class="at">n =</span> dplyr<span class="sc">::</span><span class="fu">n</span>(), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
 <span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>tmp_xg2 <span class="ot">&lt;-</span> xg_model2 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>n)</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>mead_shots <span class="ot">&lt;-</span></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  mead_shots <span class="sc">|&gt;</span></span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> xg_model2, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>, <span class="st">"shot.technique.name"</span>))</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(tmp_xg2)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>mead_shots <span class="ot">&lt;-</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  mead_shots <span class="sc">|&gt;</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> xg_model2 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>n), </span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>, <span class="st">"shot.technique.name"</span>))</span>
 <span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>mead_shots <span class="sc">|&gt;</span></span>
 <span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(OpposingTeam, minute, shot.body_part.name, shot.technique.name, Y, XG2) <span class="sc">|&gt;</span></span>

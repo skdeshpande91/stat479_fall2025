@@ -234,7 +234,11 @@ window.Quarto = {
   </li>  
         <li>
     <a class="dropdown-item" href="../slides/lecture02.html">
- <span class="dropdown-text">Lecture 2</span></a>
+ <span class="dropdown-text">Lecture 2: Expected Goals</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture03.html">
+ <span class="dropdown-text">Lecture 3: Estimating XG</span></a>
   </li>  
     </ul>
   </li>
@@ -501,19 +505,19 @@ window.Quarto = {
 </dl>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>BodyPart misclassification 0.112 
-BodyPart+Technique misclassificaiton 0.112 </code></pre>
+<pre><code>BodyPart misclassification 0.107 
+BodyPart+Technique misclassificaiton 0.107 </code></pre>
 </div>
 </div>
 <p>Our two simple models have identical misclassification rates of about 10.7%. At first glance this is a bit surprising because the two models return different predicted XG values</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Unique XG1 values:"</span>, <span class="fu">sort</span>(<span class="fu">unique</span>(simple_preds<span class="sc">$</span>XG1)), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Unique XG1 values: 0.1113281 0.1119565 0.1140625 </code></pre>
+<pre><code>Unique XG1 values: 0.1015056 0.1118336 0.1132812 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Unique XG2 values:"</span>, <span class="fu">sort</span>(<span class="fu">unique</span>(simple_preds<span class="sc">$</span>XG2)), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Unique XG2 values: 0 0.06372549 0.06756757 0.07142857 0.08920188 0.1034483 0.1131868 0.1207729 0.1214361 0.1632653 0.2083333 </code></pre>
+<pre><code>Unique XG2 values: 0 0.04117647 0.06770833 0.08011869 0.08333333 0.1108898 0.113307 0.1213333 0.1363636 0.1621622 0.3333333 </code></pre>
 </div>
 </div>
 <p>On closer inspection, we find that the two simple models both output predicted XG values that are all less than 0.5. So, the thresholded values <span class="math inline">\(\mathbb{I}(\hat{p}_{i} \geq 0.5)\)</span> are identical for both models’ <span class="math inline">\(\hat{p}_{i}\)</span>’s. Just for comparison’s sake, let’s compute the misclassification rate of the proprietary StatsBomb XG model</p>
@@ -794,10 +798,10 @@ StatsBomb LogLoss: 0.264 </code></pre>
 </dl>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>XG1 training logloss: 0.351 
-XG2 training logloss: 0.348 
-XG1 test logloss: 0.352 
-XG2 test logloss: 0.356 </code></pre>
+<pre><code>XG1 training logloss: 0.34 
+XG2 training logloss: 0.336 
+XG1 test logloss: 0.339 
+XG2 test logloss: 0.345 </code></pre>
 </div>
 </div>
 <p>Based on this analysis, we conclude that the simpler model provides better out-of-sample predictions than the more complex model. In other words, the more complex model appears to <em>over-fit</em> the data!</p>
@@ -835,16 +839,16 @@ glm(formula = Y ~ DistToGoal, family = binomial("logit"), data = train_data)
 
 Coefficients:
              Estimate Std. Error z value Pr(&gt;|z|)    
-(Intercept) -0.134174   0.128410  -1.045    0.296    
-DistToGoal  -0.127023   0.009115 -13.935   &lt;2e-16 ***
+(Intercept) -0.429695   0.144511  -2.973  0.00294 ** 
+DistToGoal  -0.112567   0.009972 -11.288  &lt; 2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
-    Null deviance: 2549.7  on 3569  degrees of freedom
-Residual deviance: 2290.7  on 3568  degrees of freedom
-AIC: 2294.7
+    Null deviance: 1930.9  on 2888  degrees of freedom
+Residual deviance: 1765.3  on 2887  degrees of freedom
+AIC: 1769.3
 
 Number of Fisher Scoring iterations: 6</code></pre>
 </div>
@@ -890,11 +894,11 @@ Extrapolation
 <span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist training logloss:"</span>, <span class="fu">round</span>(<span class="fu">logloss</span>(train_data<span class="sc">$</span>Y, train_pred1), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Dist training logloss: 0.321 </code></pre>
+<pre><code>Dist training logloss: 0.306 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist testing logloss:"</span>, <span class="fu">round</span>(<span class="fu">logloss</span>(test_data<span class="sc">$</span>Y, test_pred1), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Dist testing logloss: 0.305 </code></pre>
+<pre><code>Dist testing logloss: 0.307 </code></pre>
 </div>
 </div>
 <p>At least for this training/testing split, the logistic regression model that conditions on distance is a bit more accurate than the simpler models. Before concluding that this model indeed is more accurate than the body-part based model, we will repeat the above calculations using 100 training/testing splits.</p>
@@ -1248,8 +1252,8 @@ Number of Fisher Scoring iterations: 6</code></pre>
 </dl>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.1135258
-[1] 0.2522654</code></pre>
+<pre><code>[1] 0.106593
+[1] 0.2697499</code></pre>
 </div>
 </div>
 <p>At least for this training/testing split, our in-sample log-loss is <strong>much</strong> smaller than our out-of-sample log-loss. This is not at all surprising: flexible regression models like random forests are trained to predict the in-sample data and so we should expect to see smaller training errors than testing errors.</p>
@@ -1298,11 +1302,11 @@ Number of Fisher Scoring iterations: 6</code></pre>
 <span id="cb54-41"><a href="#cb54-41" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb54-42"><a href="#cb54-42" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"RandomForest training logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(train_logloss), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>RandomForest training logloss: 0.1135 </code></pre>
+<pre><code>RandomForest training logloss: 0.1061 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"RandomForest testing logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(test_logloss), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>RandomForest testing logloss: 0.2523 </code></pre>
+<pre><code>RandomForest testing logloss: 0.2517 </code></pre>
 </div>
 </div>
 </section>

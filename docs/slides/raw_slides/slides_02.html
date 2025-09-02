@@ -6,11 +6,11 @@
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="../../site_libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
 <link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
 <link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.7.31">
+  <meta name="generator" content="quarto-1.7.32">
 
   <title>STAT479 – STAT 479 Lecture 2</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -212,37 +212,42 @@
 <ul>
 <li>Beth Mead scored 6 goals in EURO 2022. Which was more impressive?
 <ul>
-<li>Goal against Austria (<a href="https://youtube.com/clip/UgkxnOKsnw4W3h-BqV5kyh-tOVnnTgBEc9u5?si=zpQB7OF43gt3yiwK">video link</a>)</li>
-<li>Goal against Norway <a href="https://youtube.com/clip/UgkxqZ03bRBGCr4vS0M4yTMtHMOHsA6kkTHw?si=2IlC7AVi2CQotunG">link</a></li>
-<li>Goal against Sweden <a href="https://youtube.com/clip/UgkxwW9N1bXUv4G9HoSHVvYy_rk_aSjkrgwO?si=O90nkbgNd2FTv3e_">link</a></li>
+<li>Goal in 15th minute against Austria <a href="https://youtube.com/clip/UgkxnOKsnw4W3h-BqV5kyh-tOVnnTgBEc9u5?si=zpQB7OF43gt3yiwK">link</a></li>
+<li>Goal in 37th minute against Norway <a href="https://youtube.com/clip/UgkxqZ03bRBGCr4vS0M4yTMtHMOHsA6kkTHw?si=2IlC7AVi2CQotunG">link</a></li>
+<li>Goal in 33rd minute against Sweden <a href="https://youtube.com/clip/UgkxwW9N1bXUv4G9HoSHVvYy_rk_aSjkrgwO?si=O90nkbgNd2FTv3e_">link</a></li>
 </ul></li>
 </ul>
 <div class="fragment">
 <ul>
 <li>We can argue endlessly about <em>qualitative</em> differences
 <ul>
-<li>One-on-one vs shot through traffic</li>
-<li>Left or right foot, shot technique</li>
-<li>Score, time,</li>
+<li>One-on-one vs in-traffic; left or right foot;</li>
+<li>Type of shot; time; score; …</li>
 </ul></li>
-<li>How can we provide a quantiative answer?</li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li>Goal: <strong>quantitative</strong> comparison</li>
 </ul>
 </div>
 </section>
 <section id="a-thought-experiment" class="slide level2">
-<h2>A thought experiment</h2>
+<h2>A Thought Experiment</h2>
 <ul>
 <li>What if we could replay each shot over and over again?</li>
 <li>How often would she score?</li>
 </ul>
-</section></section>
-<section>
-<section id="conditional-expectations" class="title-slide slide level1 center">
-<h1>Conditional Expectations</h1>
-
-</section>
-<section id="notation-definition" class="slide level2">
-<h2>Notation &amp; definition</h2>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><a href="mead_sweden.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img data-src="mead_sweden.png" class="quarto-figure quarto-figure-center" style="width:60.0%"></a></p>
+</figure>
+</div>
+<div class="fragment">
+<ul>
+<li>This long-run frequency is Expected Goals (XG)</li>
+</ul>
+</div>
 </section></section>
 <section>
 <section id="soccer-event-data" class="title-slide slide level1 center">
@@ -251,53 +256,495 @@
 </section>
 <section id="statsbomb-hudl" class="slide level2">
 <h2>StatsBomb &amp; Hudl</h2>
-<div class="columns">
-<div class="column" style="width:50%;">
 <ul>
 <li>Player location data for all events
 <ul>
-<li>Computer vision + human annotation</li>
+<li>Computer vision + input from 5 human annotators</li>
 <li>Humans log events (shots, tackles, passes, etc.)</li>
-<li>CV to extra location</li>
+<li>Computer vision to extra location information</li>
 </ul></li>
 <li>Locations mapped to fixed coordinate system</li>
-<li>Offensive action moves left-to-right</li>
+<li><strong>StatsBombR</strong> package: available via GitHub</li>
 </ul>
-</div><div class="column" style="width:50%;">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"statsbomb/StatsBombR"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="statsbomb-coordinates" class="slide level2">
+<h2>StatsBomb Coordinates</h2>
+<ul>
+<li>Offensive action moves left-to-right</li>
+<li>Vertical coordinate increases as you move top-to-bottom</li>
+</ul>
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><a href="statsbomb_coordinates.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="StatsBomb Coordinates"><img data-src="statsbomb_coordinates.png" style="width:50.0%" alt="StatsBomb Coordinates"></a></p>
+<p><a href="statsbomb_coordinates.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="StatsBomb Coordinates"><img data-src="statsbomb_coordinates.png" style="width:65.0%" data-fig-asp="0.75," alt="StatsBomb Coordinates"></a></p>
 <figcaption>StatsBomb Coordinates</figcaption>
 </figure>
 </div>
-</div></div>
 </section>
-<section id="visualization" class="slide level2">
-<h2>Visualization</h2>
-<!--
-  Visualize Mead's goal against sweden
--->
-</section>
-<section id="accessing-data-in-r" class="slide level2">
-<h2>Accessing data in R</h2>
+<section id="free-competitions" class="slide level2">
+<h2>Free Competitions</h2>
 <ul>
-<li>Get all publicly available event data for women’s internationals w/ the <strong>StatsBombR</strong> package</li>
+<li><code>FreeCompetitions()</code> returns table of available competitions</li>
 </ul>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "Whilst we are keen to share data and facilitate research, we also urge you to be responsible with the data. Please credit StatsBomb as your data source when using the data and visit https://statsbomb.com/media-pack/ to obtain our logos for public use."
-[1] "Whilst we are keen to share data and facilitate research, we also urge you to be responsible with the data. Please credit StatsBomb as your data source when using the data and visit https://statsbomb.com/media-pack/ to obtain our logos for public use."
-[1] "Whilst we are keen to share data and facilitate research, we also urge you to be responsible with the data. Please credit StatsBomb as your data source when using the data and visit https://statsbomb.com/media-pack/ to obtain our logos for public use."</code></pre>
+<pre><code>[1] "Whilst we are keen to share data and facilitate research, we also urge you to be responsible with the data. Please credit StatsBomb as your data source when using the data and visit https://statsbomb.com/media-pack/ to obtain our logos for public use."</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   competition_id season_id      competition_name season_name
+1              16       276      Champions League   1970/1971
+2              16        76      Champions League   1999/2000
+3               2        44        Premier League   2003/2004
+4             116        68 North American League        1977
+5              11         1               La Liga   2017/2018
+6              43        51        FIFA World Cup        1974
+7              53       106     UEFA Women's Euro        2022
+8               7       235               Ligue 1   2022/2023
+9              11        37               La Liga   2004/2005
+10             35        75    UEFA Europa League   1988/1989</code></pre>
 </div>
 </div>
 </section>
-<section id="focusing-on-shots" class="slide level2">
-<h2>Focusing on shots</h2>
+<section id="free-matches" class="slide level2">
+<h2>Free Matches</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2" data-code-line-numbers="3|4|"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a></a>wi_shots <span class="ot">&lt;-</span></span>
-<span id="cb2-2"><a></a>  wi_events <span class="sc">|&gt;</span></span>
-<span id="cb2-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(type.name <span class="sc">==</span> <span class="st">"Shot"</span> <span class="sc">&amp;</span> shot.body_part.name <span class="sc">!=</span> <span class="st">"Other"</span>) <span class="sc">|&gt;</span>  </span>
-<span id="cb2-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">Y =</span> <span class="fu">ifelse</span>(shot.outcome.name <span class="sc">==</span> <span class="st">"Goal"</span>, <span class="dv">1</span>, <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4" data-code-line-numbers="|1|2|3|5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a></a>StatsBombR<span class="sc">::</span><span class="fu">FreeCompetitions</span>() <span class="sc">|&gt;</span></span>
+<span id="cb4-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(competition_id <span class="sc">==</span> <span class="dv">53</span> <span class="sc">&amp;</span> season_id <span class="sc">==</span> <span class="dv">106</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb4-3"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeMatches</span>() <span class="sc">|&gt;</span></span>
+<span id="cb4-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(match_id, home_team.home_team_name, away_team.away_team_name, home_score, away_score) <span class="sc">|&gt;</span></span>
+<span id="cb4-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="fragment">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 5
+  match_id home_team.home_team_name away_team.away_team_…¹ home_score away_score
+     &lt;int&gt; &lt;chr&gt;                    &lt;chr&gt;                       &lt;int&gt;      &lt;int&gt;
+1  3845506 England Women's          Sweden Women's                  4          0
+2  3835326 Belgium Women's          Iceland Women's                 1          1
+3  3835330 Germany Women's          Spain Women's                   2          0
+4  3845507 Germany Women's          France Women's                  2          1
+5  3835322 Germany Women's          Denmark Women's                 4          0
+# ℹ abbreviated name: ¹​away_team.away_team_name</code></pre>
+</div>
+</div>
+</div>
+</section>
+<section id="event-data" class="slide level2">
+<h2>Event Data</h2>
+<div class="panel-tabset">
+<ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-1-1">Get EURO2022 Events</a></li><li><a href="#tabset-1-2">Extract All Shots</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6" data-code-line-numbers="|2|3|4-6|"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a>euro2022_events <span class="ot">&lt;-</span></span>
+<span id="cb6-2"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeCompetitions</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb6-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(competition_id <span class="sc">==</span> <span class="dv">53</span> <span class="sc">&amp;</span> season_id <span class="sc">==</span> <span class="dv">106</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb6-4"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeMatches</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb6-5"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">free_allevents</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb6-6"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">allclean</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb6-7"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">get.opposingteam</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-1-2">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a>euro2022_shots <span class="ot">&lt;-</span></span>
+<span id="cb7-2"><a></a>  euro2022_events <span class="sc">|&gt;</span></span>
+<span id="cb7-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(type.name <span class="sc">==</span> <span class="st">"Shot"</span> <span class="sc">&amp;</span> shot.body_part.name <span class="sc">!=</span> <span class="st">"Other"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">Y =</span> <span class="fu">ifelse</span>(shot.outcome.name <span class="sc">==</span> <span class="st">"Goal"</span>, <span class="dv">1</span>, <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="meads-shots" class="slide level2">
+<h2>Mead’s Shots</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a>mead_shots <span class="ot">&lt;-</span></span>
+<span id="cb8-2"><a></a>  euro2022_shots <span class="sc">|&gt;</span></span>
+<span id="cb8-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(player.name <span class="sc">==</span> <span class="st">"Bethany Mead"</span>)</span>
+<span id="cb8-4"><a></a></span>
+<span id="cb8-5"><a></a>mead_shots <span class="sc">|&gt;</span></span>
+<span id="cb8-6"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(OpposingTeam, minute, shot.body_part.name, shot.technique.name, Y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 15 × 5
+   OpposingTeam     minute shot.body_part.name shot.technique.name     Y
+   &lt;chr&gt;             &lt;int&gt; &lt;chr&gt;               &lt;chr&gt;               &lt;dbl&gt;
+ 1 Austria Women's      15 Right Foot          Lob                     1
+ 2 Norway Women's       29 Right Foot          Normal                  0
+ 3 Norway Women's       33 Head                Normal                  1
+ 4 Norway Women's       37 Left Foot           Normal                  1
+ 5 Norway Women's       52 Right Foot          Volley                  0
+ 6 Norway Women's       80 Left Foot           Volley                  1
+ 7 Northern Ireland      5 Head                Normal                  0
+ 8 Northern Ireland     15 Right Foot          Half Volley             0
+ 9 Northern Ireland     43 Left Foot           Normal                  1
+10 Northern Ireland     56 Right Foot          Normal                  0
+11 Northern Ireland     83 Right Foot          Normal                  0
+12 Sweden Women's        4 Head                Normal                  0
+13 Sweden Women's       19 Left Foot           Normal                  0
+14 Sweden Women's       33 Right Foot          Half Volley             1
+15 Sweden Women's       46 Left Foot           Normal                  0</code></pre>
+</div>
+</div>
+</section></section>
+<section>
+<section id="conditional-expectations" class="title-slide slide level1 center">
+<h1>Conditional Expectations</h1>
+
+</section>
+<section id="thought-experiment-repeating-shots" class="slide level2">
+<h2>Thought Experiment: Repeating Shots</h2>
+<ul>
+<li>What proportion of repetitions result in goals?</li>
+<li>Across all repetitions, conditions kept the same</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><a href="mead_sweden.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img data-src="mead_sweden.png" class="quarto-figure quarto-figure-center" style="width:60.0%"></a></p>
+</figure>
+</div>
+</section>
+<section id="setup-notation" class="slide level2">
+<h2>Setup &amp; Notation</h2>
+<ul>
+<li>Suppose our data set contains <span class="math inline">\(n\)</span> shots</li>
+<li>For shot <span class="math inline">\(i = 1, \ldots, n,\)</span> we observe
+<ul>
+<li><span class="math inline">\(Y_{i}\)</span>: indicator shot resutled in goal (<span class="math inline">\(Y = 1\)</span>) or not (<span class="math inline">\(Y = 0\)</span>)</li>
+<li><span class="math inline">\(\boldsymbol{\mathbf{X}}_{i}\)</span>: vector of <span class="math inline">\(p\)</span> features about the shot</li>
+</ul></li>
+<li>Features could include things like
+<ul>
+<li>Body part used &amp; shot technique</li>
+<li>Dist. to nearest defenders</li>
+</ul></li>
+</ul>
+</section>
+<section id="conditional-probability" class="slide level2">
+<h2>Conditional Probability</h2>
+<ul>
+<li>Assumption: data are a representative sample from an infinite <em>super-population</em> of shots</li>
+<li>Each shot in super-population characterized by pair <span class="math inline">\((\boldsymbol{\mathbf{X}}, Y)\)</span></li>
+<li>Repeating shot with features <span class="math inline">\(\boldsymbol{\mathbf{x}}\)</span> equivalent to sampling from <em>slice</em> of super-population with <span class="math inline">\(\boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}.\)</span></li>
+</ul>
+<div class="fragment">
+<p><span class="math display">\[
+\textrm{XG}(\boldsymbol{\mathbf{x}}) = \mathbb{E}[Y \vert \boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}] = \mathbb{P}(Y = 1 \vert \boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}})
+\]</span></p>
+</div>
+</section></section>
+<section>
+<section id="two-basic-xg-models" class="title-slide slide level1 center">
+<h1>Two Basic XG Models</h1>
+
+</section>
+<section id="defining-the-super-population" class="slide level2">
+<h2>Defining The Super-population</h2>
+<ul>
+<li>Ultimate goal is to assess Mead’s performance in EURO 2022
+<ul>
+<li>Focus on women’s internationals</li>
+<li>Focus on shots attempted w/ foot or head</li>
+</ul></li>
+</ul>
+<div class="panel-tabset">
+<ul id="tabset-2" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-2-1">Get Events</a></li><li><a href="#tabset-2-2">Extract Shots</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a>wi_events <span class="ot">&lt;-</span></span>
+<span id="cb10-2"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeCompetitions</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb10-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(competition_gender <span class="sc">==</span> <span class="st">"female"</span> <span class="sc">&amp;</span> competition_international) <span class="sc">|&gt;</span></span>
+<span id="cb10-4"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeMatches</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb10-5"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">free_allevents</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb10-6"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">allclean</span>() <span class="sc">|&gt;</span></span>
+<span id="cb10-7"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">get.opposingteam</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-2-2">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a>wi_shots <span class="ot">&lt;-</span></span>
+<span id="cb11-2"><a></a>  wi_events <span class="sc">|&gt;</span></span>
+<span id="cb11-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(type.name <span class="sc">==</span> <span class="st">"Shot"</span> <span class="sc">&amp;</span> shot.body_part.name <span class="sc">!=</span> <span class="st">"Other"</span>) <span class="sc">|&gt;</span>  </span>
+<span id="cb11-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">Y =</span> <span class="fu">ifelse</span>(shot.outcome.name <span class="sc">==</span> <span class="st">"Goal"</span>, <span class="dv">1</span>, <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="idealized-calculation" class="slide level2">
+<h2>Idealized Calculation</h2>
+<ul>
+<li>Suppose our only feature is <code>shot.body_part.name</code></li>
+</ul>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>
+      Head  Left Foot Right Foot 
+       920       1280       2560 </code></pre>
+</div>
+</div>
+<ul>
+<li>If we could access infinite super-population, compute <span class="math inline">\(\textrm{XG}(\text{right-footed shot})\)</span> by
+<ul>
+<li>Forming subgroup containing only right-footed shots</li>
+<li>Calculating proportion of goals score</li>
+</ul></li>
+</ul>
+</section>
+<section id="practical-calculation" class="slide level2">
+<h2>Practical Calculation</h2>
+<ul>
+<li>Since we cannot access infinite super-population, we must <strong>estimate</strong> XG from data</li>
+<li>We do so by mimicking idealized calculation
+<ol type="1">
+<li>Divide data into subgroups based on <code>shot.body_part.name</code></li>
+<li>Compute proportion of goals within subgroups</li>
+</ol></li>
+<li>Rely on <strong>dplyr</strong>’s <code>group_by()</code> functionality to do this</li>
+</ul>
+</section>
+<section id="estimating-xgbody-part" class="slide level2">
+<h2>Estimating XG(body part)</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13" data-code-line-numbers="|3|4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a>xg_model1 <span class="ot">&lt;-</span></span>
+<span id="cb13-2"><a></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb13-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(shot.body_part.name) <span class="sc">|&gt;</span></span>
+<span id="cb13-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">XG1 =</span> <span class="fu">mean</span>(Y), <span class="at">n =</span> dplyr<span class="sc">::</span><span class="fu">n</span>())</span>
+<span id="cb13-5"><a></a>xg_model1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="fragment">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 3
+  shot.body_part.name   XG1     n
+  &lt;chr&gt;               &lt;dbl&gt; &lt;int&gt;
+1 Head                0.112   920
+2 Left Foot           0.114  1280
+3 Right Foot          0.111  2560</code></pre>
+</div>
+</div>
+</div>
+</section>
+<section id="assessing-beth-meads-performance" class="slide level2">
+<h2>Assessing Beth Mead’s Performance</h2>
+<ul>
+<li>Append XG estimates to <code>mead_shots</code> w/ <code>left_join</code></li>
+<li>Based on bodypart, each goal is about equally impressive:</li>
+<li>Model suggests 11% of repeated shots would result in goals</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15" data-code-line-numbers="|2|3|4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a>mead_shots <span class="ot">&lt;-</span> mead_shots <span class="sc">|&gt;</span></span>
+<span id="cb15-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> xg_model1 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(shot.body_part.name, XG1),</span>
+<span id="cb15-3"><a></a>                   <span class="at">by =</span> <span class="st">"shot.body_part.name"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="fragment">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 5
+  OpposingTeam    minute shot.body_part.name     Y   XG1
+  &lt;chr&gt;            &lt;int&gt; &lt;chr&gt;               &lt;dbl&gt; &lt;dbl&gt;
+1 Austria Women's     15 Right Foot              1 0.111
+2 Norway Women's      37 Left Foot               1 0.114
+3 Sweden Women's      33 Right Foot              1 0.111</code></pre>
+</div>
+</div>
+</div>
+</section>
+<section id="accounting-for-shot-technique" class="slide level2">
+<h2>Accounting For Shot Technique</h2>
+<ul>
+<li>Each goal was scored off a different type of shot</li>
+<li>What if we condition body part &amp; shot technique?</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a><span class="fu">table</span>(wi_shots <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">pull</span>(shot.technique.name))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+     Backheel Diving Header   Half Volley           Lob        Normal 
+           35            10           648            28          3720 
+Overhead Kick        Volley 
+           17           302 </code></pre>
+</div>
+</div>
+</section>
+<section id="new-xg-estimates" class="slide level2">
+<h2>New XG Estimates</h2>
+<div class="panel-tabset">
+<ul id="tabset-3" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-3-1">XG Estimates</a></li><li><a href="#tabset-3-2">Mead’s Performance</a></li></ul>
+<div class="tab-content">
+<div id="tabset-3-1">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19" data-code-line-numbers="3|4|"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a></a>xg_model2 <span class="ot">&lt;-</span></span>
+<span id="cb19-2"><a></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb19-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(shot.body_part.name, shot.technique.name) <span class="sc">|&gt;</span></span>
+<span id="cb19-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">XG2 =</span> <span class="fu">mean</span>(Y), <span class="at">n =</span> dplyr<span class="sc">::</span><span class="fu">n</span>(), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb19-5"><a></a>xg_model2 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(XG2))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 14 × 4
+   shot.body_part.name shot.technique.name    XG2     n
+   &lt;chr&gt;               &lt;chr&gt;                &lt;dbl&gt; &lt;int&gt;
+ 1 Right Foot          Lob                 0.208     24
+ 2 Left Foot           Volley              0.163     98
+ 3 Left Foot           Normal              0.121    947
+ 4 Right Foot          Normal              0.121   1863
+ 5 Head                Normal              0.113    910
+ 6 Right Foot          Backheel            0.103     29
+ 7 Right Foot          Half Volley         0.0892   426
+ 8 Right Foot          Overhead Kick       0.0714    14
+ 9 Left Foot           Half Volley         0.0676   222
+10 Right Foot          Volley              0.0637   204
+11 Head                Diving Header       0         10
+12 Left Foot           Backheel            0          6
+13 Left Foot           Lob                 0          4
+14 Left Foot           Overhead Kick       0          3</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-3-2">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a>mead_shots <span class="ot">&lt;-</span></span>
+<span id="cb21-2"><a></a>  mead_shots <span class="sc">|&gt;</span></span>
+<span id="cb21-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(</span>
+<span id="cb21-4"><a></a>    <span class="at">y =</span> xg_model2 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>n), </span>
+<span id="cb21-5"><a></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>, <span class="st">"shot.technique.name"</span>))</span>
+<span id="cb21-6"><a></a></span>
+<span id="cb21-7"><a></a>mead_shots <span class="sc">|&gt;</span></span>
+<span id="cb21-8"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(OpposingTeam, minute, shot.body_part.name, shot.technique.name, Y, XG2) <span class="sc">|&gt;</span></span>
+<span id="cb21-9"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">14</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 6
+  OpposingTeam    minute shot.body_part.name shot.technique.name     Y    XG2
+  &lt;chr&gt;            &lt;int&gt; &lt;chr&gt;               &lt;chr&gt;               &lt;dbl&gt;  &lt;dbl&gt;
+1 Austria Women's     15 Right Foot          Lob                     1 0.208 
+2 Norway Women's      37 Left Foot           Normal                  1 0.121 
+3 Sweden Women's      33 Right Foot          Half Volley             1 0.0892</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="accounting-for-more-features" class="slide level2 smaller">
+<h2>Accounting for more features</h2>
+<ul>
+<li>Our 2-feature model is still too coarse
+<ul>
+<li>Doesn’t account for distance of shot</li>
+<li>Doesn’t account for defenders and keeper</li>
+</ul></li>
+<li>StatsBomb records many more features about shots</li>
+</ul>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "shot.type.name"      "shot.technique.name" "shot.body_part.name"
+ [4] "DistToGoal"          "DistToKeeper"        "AngleToGoal"        
+ [7] "AngleToKeeper"       "AngleDeviation"      "avevelocity"        
+[10] "density"             "density.incone"      "distance.ToD1"      
+[13] "distance.ToD2"       "AttackersBehindBall" "DefendersBehindBall"
+[16] "DefendersInCone"     "InCone.GK"           "DefArea"            </code></pre>
+</div>
+</div>
+<ul>
+<li>How can we adjust for these in our XG model?</li>
+</ul>
+</section>
+<section id="digression-what-is-the-cone" class="slide level2">
+<h2>Digression: What is the cone?</h2>
+<ul>
+<li>Cone: area between shot location &amp; goalposts <!-- visualize this; ideally with defenders on --></li>
+</ul>
+<div class="cell" data-layout-align="center" data-fig-caption="Only one defender and the goalkeeper are in the &quot;cone&quot;">
+<div class="cell-output-display">
+<div id="fig-mead-sweden" class="quarto-float quarto-figure quarto-figure-center" data-fig-align="center" width="768">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-mead-sweden-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="slides_02_files/figure-revealjs/fig-mead-sweden-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;1: "><img data-src="slides_02_files/figure-revealjs/fig-mead-sweden-1.png" id="fig-mead-sweden" class="quarto-figure quarto-figure-center" width="768"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-mead-sweden-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="idealized-computation" class="slide level2">
+<h2>Idealized Computation</h2>
+<ul>
+<li>If we could access super-population, easy to condition on more features
+<ul>
+<li>Slice population along <span class="math inline">\(\mathbf{\boldsymbol{x}}\)</span></li>
+<li>Compute proportion of goals among the slice with <span class="math inline">\(\mathbf{\boldsymbol{X}} = \mathbf{\boldsymbol{x}}\)</span></li>
+</ul></li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Can we mimic this with our observed data?</li>
+</ul>
+</div>
+</section>
+<section id="practical-challenges" class="slide level2">
+<h2>Practical Challenges</h2>
+<ul>
+<li>Adjust for body part, technique, and # defenders in cone</li>
+</ul>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 5
+   shot.body_part.name shot.technique.name DefendersInCone    XG     n
+   &lt;chr&gt;               &lt;chr&gt;                         &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;
+ 1 Left Foot           Normal                            7 1         1
+ 2 Right Foot          Lob                               2 1         1
+ 3 Right Foot          Normal                           10 1         1
+ 4 Left Foot           Volley                            0 0.343    35
+ 5 Right Foot          Overhead Kick                     0 0.333     3
+ 6 Right Foot          Overhead Kick                     4 0         2
+ 7 Right Foot          Overhead Kick                     6 0         1
+ 8 Right Foot          Volley                            5 0        12
+ 9 Right Foot          Volley                            6 0         9
+10 Right Foot          Volley                            7 0         1</code></pre>
+</div>
+</div>
+</section>
+<section id="model-based-xg" class="slide level2">
+<h2>Model-based XG</h2>
+<ul>
+<li>“Binning-and-averaging” not viable w/ many features due to small sample sizes</li>
+<li><em>Statistical models</em> overcome these challenges by “borrowing strength”</li>
+<li><span class="math inline">\(\textrm{XG}(\boldsymbol{\mathbf{x}})\)</span> informed by shots with <span class="math inline">\(\boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}\)</span> and <span class="math inline">\(\boldsymbol{\mathbf{X}} \approx \boldsymbol{\mathbf{x}}\)</span></li>
+<li>How a model “borrows strength” depends on its underlying assumptions</li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Several challenges:
+<ul>
+<li><span class="math inline">\(\mathbf{\boldsymbol{X}}\)</span> may be high-dimensional</li>
+<li><span class="math inline">\(\textrm{XG}\)</span> likely depends on many interactions</li>
+<li><span class="math inline">\(\textrm{XG}\)</span> likely highly non-linear</li>
+</ul></li>
+<li>StatsBomb has a proprietary model</li>
+</ul>
+</div>
+</section>
+<section id="statsbombs-xg-estimates" class="slide level2">
+<h2>StatsBomb’s XG Estimates</h2>
+<ul>
+<li><code>shot.statsbomb_xg</code> records proprietary XG estimate</li>
+<li>Goal against Sweden had smallest XG and is, therefore, the most impressive</li>
+</ul>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 5
+  OpposingTeam    minute   XG1   XG2 shot.statsbomb_xg
+  &lt;chr&gt;            &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;             &lt;dbl&gt;
+1 Austria Women's     15 0.111 0.208             0.361
+2 Norway Women's      37 0.114 0.121             0.444
+3 Sweden Women's      33 0.111 0.089             0.091</code></pre>
+</div>
 </div>
 </section></section>
 <section>
@@ -305,8 +752,65 @@
 <h1>Goals Over Expected</h1>
 
 </section>
-<section id="goals-over-expected-1" class="slide level2">
-<h2>Goals Over Expected</h2>
+<section id="did-mead-outperform-expectations" class="slide level2">
+<h2>Did Mead Outperform Expectations?</h2>
+<ul>
+<li>How to interpret the difference <span class="math inline">\(Y_{i} - \textrm{XG}_{i}\)</span> when it is
+<ul>
+<li>Large &amp; positive</li>
+<li>Large &amp; negative</li>
+<li>Close to 0</li>
+</ul></li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Beth Mead scored 2.89 more goals than expected</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a></a><span class="fu">sum</span>(mead_shots<span class="sc">$</span>Y <span class="sc">-</span> mead_shots<span class="sc">$</span>shot.statsbomb_xg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2.896323</code></pre>
+</div>
+</div>
+</div>
+</section>
+<section id="assessing-all-euro2022-players" class="slide level2">
+<h2>Assessing All EURO2022 Players</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a></a>goe <span class="ot">&lt;-</span> </span>
+<span id="cb28-2"><a></a>  euro2022_shots <span class="sc">|&gt;</span></span>
+<span id="cb28-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">diff =</span> Y <span class="sc">-</span> shot.statsbomb_xg) <span class="sc">|&gt;</span></span>
+<span id="cb28-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(player.name) <span class="sc">|&gt;</span></span>
+<span id="cb28-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">GOE =</span> <span class="fu">sum</span>(diff), <span class="at">Goals =</span> <span class="fu">sum</span>(Y), <span class="at">n_shots =</span> dplyr<span class="sc">::</span><span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb28-6"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(GOE)) </span>
+<span id="cb28-7"><a></a>goe <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, (dplyr<span class="sc">::</span><span class="fu">n</span>()<span class="sc">-</span><span class="dv">4</span>)<span class="sc">:</span>dplyr<span class="sc">::</span><span class="fu">n</span>()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 4
+   player.name                GOE Goals n_shots
+   &lt;chr&gt;                    &lt;dbl&gt; &lt;dbl&gt;   &lt;int&gt;
+ 1 Alexandra Popp           3.34      6      16
+ 2 Bethany Mead             2.90      6      15
+ 3 Alessia Russo            1.79      4      12
+ 4 Francesca Kirby          1.79      2       5
+ 5 Lina Magull              1.70      3      14
+ 6 Ada Stolsmo Hegerberg   -0.829     0       8
+ 7 Nadia Nadim             -0.886     0       6
+ 8 Lauren Hemp             -1.26      1      11
+ 9 Emma Stina Blackstenius -2.15      1      17
+10 Wendie Renard           -2.39      0      17</code></pre>
+</div>
+</div>
+</section>
+<section id="looking-ahead" class="slide level2">
+<h2>Looking Ahead</h2>
+<ul>
+<li>I <strong>Strongly</strong> recommend you work through code yourself
+<ul>
+<li>Full code available <a href="../../lectures/lecture02.html">here</a></li>
+<li>Try more binning-and-averaging XG estimates w/ other features</li>
+<li>Try to replicate goals over expected with EURO 2025 data</li>
+</ul></li>
+</ul>
 
 
 </section></section>
