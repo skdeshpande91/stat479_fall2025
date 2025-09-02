@@ -170,7 +170,7 @@ When computing log-loss in practice, it's common to truncate probabilities close
 logloss <- function(y, phat){
   
   if(any(phat < 1e-12)) phat[phat < 1e-12] <- 1e-12 # <1>
-  if(any(phat > 1-1e-12)) phat[phat > 1-1e-12] <- 1e-12
+  if(any(phat > 1-1e-12)) phat[phat > 1-1e-12] <- 1-1e-12
   return(-1 * mean( y * log(phat) + (1-y) * log(1-phat)))
 }
 
@@ -400,9 +400,13 @@ $$
 ### Logistic Regression with One Feature {#sec-simple-logistic}
 
 We begin by fitting a model that only conditions on distance to the goal using the function `glm()`.
-<!--
-  Explain the arguments!
--->
+This function works a lot like `lm` in that we specify the model using R's formula interface.
+Whereas `lm()` is used only to fit linear models via the method least squares, `glm()` can be used to fit a much wider range of models[^glm].
+So, we use the `family` argument to tell `glm()` exactly what model we want to fit.
+
+
+[^glm]: These are known as *genearlized linear models* and include things like logistic regression and Poisson regression. See [Chatper 5](https://bookdown.org/roback/bookdown-BeyondMLR/ch-glms.html) of *Beyond Multiple Linear Regression* for a nice overview. 
+
 ```{r}
 #| label: dist2goal-fit
 set.seed(479)
@@ -413,8 +417,13 @@ test_data <-
   wi_shots |>
   dplyr::anti_join(y = train_data, by = "id") 
 
-fit1 <- glm(Y~DistToGoal, data = train_data, family = binomial("logit"))
+fit1 <- glm(formula = Y~DistToGoal, #<1>
+            data = train_data,  #<2>
+            family = binomial("logit")) #<3>
 ```
+1. In the `formula` argument, the outcome goes on the left-hand side of the `~` and predictors go on the right-hand side
+2. Like `lm`, the function `glm` takes a `data` argument. Every term appearing in the formula must appear as a column in the data frame passed via `data`.
+3. The specification `binomial("logit")` signals to `glm` that we want to fit a logistic regression model.
 
 The `summary` function provides a snapshot about the fitted model, showing the individual parameter estimates, their associated standard errors, and whether or not they are statistically significantly different than zero.
 ```{r}
@@ -509,12 +518,13 @@ This immediately raises the question "how much more accurate would predictions b
 
 It turns out to be relatively straightforward to answer this question with a logistic regression model fit using `glm()`.
 Specifically, we can include more variables in the `formula` argument.
-Note that we first convert the variables `shot.body_part.name` and `shot.technique.name` to factors.
+Note that we first convert the variables `shot.body_part.name` to a factor.
 ```{r}
 #| label: model3
 wi_shots <-
   wi_shots |>
-  dplyr::mutate(shot.body_part.name = factor(shot.body_part.name))
+  dplyr::mutate(
+    shot.body_part.name = factor(shot.body_part.name))
 
 set.seed(479)
 train_data <-
@@ -534,13 +544,13 @@ Looking at the output of `summary(fit)`, we see that the model includes several 
 There is a slope associated with left-footed and right-footed shots.
 Internally, `glm()` has [*one-hot-encoded*](https://en.wikipedia.org/wiki/One-hot#Machine_learning_and_statistics) the categorical predictor `shot.body_part.name` and decomposed the log-odds of a goal as
 $$
-\beta_{0} + \beta_{1}\times \textrm{DistToGoal} + \beta_{LeftFoot}\times \mathbb{I}(\textrm{LeftFoot}) + \beta_{RightFoot} \times \mathbb{I}(\textrm{RightFoot})
+\beta_{0} + \beta_{1}\times \textrm{DistToGoal} + \beta_{\textrm{LeftFoot}}\times \mathbb{I}(\textrm{LeftFoot}) + \beta_{\textrm{RightFoot}} \times \mathbb{I}(\textrm{RightFoot})
 $$
 
 To understand what's going on, suppose that a shot is taken from distance $d.$
 The model makes different predictions based on the body part used to attempt the shot:
 
-  * If the shot was taken with a header then the log-odds of a goal is $\beta_{0} + \beta_{1}d$
+  * If the shot was a header then the log-odds of a goal is $\beta_{0} + \beta_{1}d$
   * If the shot was taken with the left foot, then the log-odds of a goal is $\beta_{0} + \beta_{1}d + \beta_{\textrm{LeftFoot}}$ 
   * If the shot was taken with the right foot, then the log-odds of a goal is $\beta_{0} + \beta_{1}d + \beta_{\textrm{RightFoot}}$
 
@@ -726,12 +736,12 @@ Moreover, it becomes increasingly difficult to specify interactions, especially 
 
 **Random forests** is a powerful regression approach that avoids specifying functional forms and allows for high-order interactions.
 At a high-level, a random forest model approximates a regression function $\mathbb{E}[Y \vert \boldsymbol{\mathbf{X}}]$ using the sum of several piece-wise constant step functions.
-<!-- include some more information about random forests -->
 
+<!--
 ### Regression Trees & Ensembles #{sec-tree-background}
 
 
-<!--
+
   Fact: just about every function of $p$ inputs can be approximated arbitrarily well
   using a piecewise constant step-function
   Sums-of-trees

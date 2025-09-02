@@ -6,8 +6,11 @@
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="../../site_libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.7.32">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.7.31">
 
   <title>STAT479 – STAT 479: Lecture 3</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -204,22 +207,15 @@
 <ul>
 <li>In <a href="../../lectures/lecture02.html">Lecture 2</a>, fit two XG models
 <ul>
-<li>Model 1 accounte for body part</li>
+<li>Model 1 accounted for body part</li>
 <li>Model 2 accounted for body part + technique</li>
 </ul></li>
-<li>Which model is better?</li>
+<li>Which model is better?
+<ul>
+<li>Which fits the observed data best?</li>
+<li>Which will predict new data best?</li>
+</ul></li>
 </ul>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a>wi_shots <span class="ot">&lt;-</span></span>
-<span id="cb1-2"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeCompetitions</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb1-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(competition_gender <span class="sc">==</span> <span class="st">"female"</span> <span class="sc">&amp;</span> competition_international)<span class="sc">|&gt;</span> </span>
-<span id="cb1-4"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeMatches</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb1-5"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">free_allevents</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb1-6"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">allclean</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb1-7"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">get.opposingteam</span>() <span class="sc">|&gt;</span></span>
-<span id="cb1-8"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(type.name <span class="sc">==</span> <span class="st">"Shot"</span> <span class="sc">&amp;</span> shot.body_part.name <span class="sc">!=</span> <span class="st">"Other"</span>) <span class="sc">|&gt;</span>  </span>
-<span id="cb1-9"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">Y =</span> <span class="fu">ifelse</span>(shot.outcome.name <span class="sc">==</span> <span class="st">"Goal"</span>, <span class="dv">1</span>, <span class="dv">0</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
 </section>
 <section id="our-simple-xg-models" class="slide level2">
 <h2>Our Simple XG Models</h2>
@@ -228,27 +224,27 @@
 <div class="tab-content">
 <div id="tabset-1-1">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a></a>xg_model1 <span class="ot">&lt;-</span> </span>
-<span id="cb2-2"><a></a>  wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb2-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(shot.body_part.name) <span class="sc">|&gt;</span></span>
-<span id="cb2-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">XG1 =</span> <span class="fu">mean</span>(Y))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a>xg_model1 <span class="ot">&lt;-</span> </span>
+<span id="cb1-2"><a></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb1-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(shot.body_part.name) <span class="sc">|&gt;</span></span>
+<span id="cb1-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">XG1 =</span> <span class="fu">mean</span>(Y))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div id="tabset-1-2">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a>xg_model2 <span class="ot">&lt;-</span></span>
-<span id="cb3-2"><a></a>  wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb3-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(shot.body_part.name, shot.technique.name) <span class="sc">|&gt;</span></span>
-<span id="cb3-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">XG2 =</span> <span class="fu">mean</span>(Y), <span class="at">.groups =</span> <span class="st">"drop"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a></a>xg_model2 <span class="ot">&lt;-</span></span>
+<span id="cb2-2"><a></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb2-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(shot.body_part.name, shot.technique.name) <span class="sc">|&gt;</span></span>
+<span id="cb2-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">XG2 =</span> <span class="fu">mean</span>(Y), <span class="at">.groups =</span> <span class="st">"drop"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div id="tabset-1-3">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a></a>simple_preds <span class="ot">&lt;-</span></span>
-<span id="cb4-2"><a></a>  wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb4-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Y, shot.body_part.name, shot.technique.name) <span class="sc">|&gt;</span></span>
-<span id="cb4-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> xg_model1, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb4-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> xg_model2, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>, <span class="st">"shot.technique.name"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a>simple_preds <span class="ot">&lt;-</span></span>
+<span id="cb3-2"><a></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb3-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Y, shot.body_part.name, shot.technique.name) <span class="sc">|&gt;</span></span>
+<span id="cb3-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> xg_model1, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb3-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> xg_model2, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>, <span class="st">"shot.technique.name"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
@@ -302,7 +298,8 @@
 <h2>Misclassification Rate (Definition)</h2>
 <ul>
 <li><span class="math inline">\(\hat{p}_{i} &gt; 0.5:\)</span> model predicts <span class="math inline">\(y_{i} = 1\)</span> more likely than <span class="math inline">\(y_{i} = 0\)</span></li>
-<li>Concerning if too many <span class="math inline">\(\hat{p}_{i}\)</span>’s on wrong-side of 50%</li>
+<li>Ideal: <span class="math inline">\(\hat{p}_{i} &gt; 0.5\)</span> when <span class="math inline">\(y_{i} = 1\)</span> and <span class="math inline">\(\hat{p}_{i} &lt; 0.5\)</span> when <span class="math inline">\(y_{i} = 0\)</span></li>
+<li>If too many <span class="math inline">\(\hat{p}_{i}\)</span>’s on wrong-side of 50%, model is badly calibrated.</li>
 </ul>
 <div class="fragment">
 <p><span class="math display">\[
@@ -313,11 +310,11 @@
 <section id="misclassification-rate-example" class="slide level2">
 <h2>Misclassification Rate (Example)</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a>misclass <span class="ot">&lt;-</span> <span class="cf">function</span>(y, phat){ </span>
-<span id="cb6-2"><a></a>  <span class="fu">return</span>( <span class="fu">mean</span>( (y <span class="sc">!=</span> <span class="dv">1</span><span class="sc">*</span>(phat <span class="sc">&gt;=</span> <span class="fl">0.5</span>))))</span>
-<span id="cb6-3"><a></a>}</span>
-<span id="cb6-4"><a></a><span class="fu">misclass</span>(simple_preds<span class="sc">$</span>Y, simple_preds<span class="sc">$</span>XG1)</span>
-<span id="cb6-5"><a></a><span class="fu">misclass</span>(simple_preds<span class="sc">$</span>Y, simple_preds<span class="sc">$</span>XG2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a>misclass <span class="ot">&lt;-</span> <span class="cf">function</span>(y, phat){ </span>
+<span id="cb5-2"><a></a>  <span class="fu">return</span>( <span class="fu">mean</span>( (y <span class="sc">!=</span> <span class="dv">1</span><span class="sc">*</span>(phat <span class="sc">&gt;=</span> <span class="fl">0.5</span>))))</span>
+<span id="cb5-3"><a></a>}</span>
+<span id="cb5-4"><a></a><span class="fu">misclass</span>(simple_preds<span class="sc">$</span>Y, simple_preds<span class="sc">$</span>XG1)</span>
+<span id="cb5-5"><a></a><span class="fu">misclass</span>(simple_preds<span class="sc">$</span>Y, simple_preds<span class="sc">$</span>XG2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="fragment">
 <div class="cell">
@@ -336,26 +333,30 @@ Model 2 misclassificaiton 0.112 </code></pre>
 <section id="brier-score-definition" class="slide level2">
 <h2>Brier Score (Definition)</h2>
 <ul>
-<li>Misclassification gives same penalty for
+<li>MISS only cares whether <span class="math inline">\(\hat{p}_{i}\)</span> is on the wrong-side of 50%
 <ul>
-<li>Forecasting a goal w/ <span class="math inline">\(\hat{p} = 0.501\)</span></li>
-<li>Forecasting a goal w/ <span class="math inline">\(\hat{p} = 0.001\)</span></li>
+<li>Forecasting <span class="math inline">\(\hat{p} = 0.501\)</span> and <span class="math inline">\(\hat{p} = 0.999\)</span> have same loss when <span class="math inline">\(y = 0\)</span></li>
+<li>Doesn’t penalize how <strong>far</strong> <span class="math inline">\(\hat{p}\)</span> is from <span class="math inline">\(Y\)</span></li>
 </ul></li>
+</ul>
+<div class="fragment">
+<ul>
 <li>Brier Score penalizes distance b/w forecast <span class="math inline">\(\hat{p}\)</span> &amp; <span class="math inline">\(Y\)</span> <span class="math display">\[
 \text{Brier} = n^{-1}\sum_{i = 1}^{n}{(y_{i} - \hat{p}_{i})^2}.
 \]</span></li>
 <li>Just Mean Square Error applied to binary outcomes</li>
 </ul>
+</div>
 </section>
 <section id="brier-score-example" class="slide level2">
 <h2>Brier Score (Example)</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a>brier <span class="ot">&lt;-</span> <span class="cf">function</span>(y, phat){</span>
-<span id="cb8-2"><a></a>  <span class="fu">return</span>(<span class="fu">mean</span>( (y <span class="sc">-</span> phat)<span class="sc">^</span><span class="dv">2</span> ))</span>
-<span id="cb8-3"><a></a>}</span>
-<span id="cb8-4"><a></a></span>
-<span id="cb8-5"><a></a><span class="fu">brier</span>(simple_preds<span class="sc">$</span>Y, simple_preds<span class="sc">$</span>XG1)</span>
-<span id="cb8-6"><a></a><span class="fu">brier</span>(simple_preds<span class="sc">$</span>Y, simple_preds<span class="sc">$</span>XG2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a>brier <span class="ot">&lt;-</span> <span class="cf">function</span>(y, phat){</span>
+<span id="cb7-2"><a></a>  <span class="fu">return</span>(<span class="fu">mean</span>( (y <span class="sc">-</span> phat)<span class="sc">^</span><span class="dv">2</span> ))</span>
+<span id="cb7-3"><a></a>}</span>
+<span id="cb7-4"><a></a></span>
+<span id="cb7-5"><a></a><span class="fu">brier</span>(simple_preds<span class="sc">$</span>Y, simple_preds<span class="sc">$</span>XG1)</span>
+<span id="cb7-6"><a></a><span class="fu">brier</span>(simple_preds<span class="sc">$</span>Y, simple_preds<span class="sc">$</span>XG2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
@@ -370,24 +371,29 @@ Model 2 misclassificaiton 0.112 </code></pre>
 <h2>Log-Loss (Definition)</h2>
 <ul>
 <li>Like Brier Score but penalizes extreme mistakes more severely</li>
-<li>Theoretically unbounded</li>
-<li>But in practice, truncate <span class="math inline">\(\hat{p}\)</span> to <span class="math inline">\([\epsilon,1-\epsilon]\)</span> to avoid <span class="math inline">\(\log(0)\)</span> <span class="math display">\[
+</ul>
+<p><span class="math display">\[
 \textrm{LogLoss} = -1 \times \sum_{i = 1}^{n}{\left[ y_{i} \times \log(\hat{p}_{i}) + (1 - y_{i})\times\log(1-\hat{p}_{i})\right]}.
-\]</span></li>
+\]</span></p>
+<div class="fragment">
+<ul>
+<li>Theoretically, can be infinite (when <span class="math inline">\(\hat{p} = 1-y\)</span>)</li>
+<li>In practice, truncate <span class="math inline">\(\hat{p}\)</span> to <span class="math inline">\([\epsilon,1-\epsilon]\)</span> to avoid <span class="math inline">\(\log(0)\)</span></li>
 <li>Also known as cross-entropy loss in ML literature</li>
 </ul>
+</div>
 </section>
 <section id="log-loss-score-example" class="slide level2">
 <h2>Log-Loss Score (Example)</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11" data-code-line-numbers="2-3|"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a>logloss <span class="ot">&lt;-</span> <span class="cf">function</span>(y, phat){</span>
-<span id="cb11-2"><a></a>  <span class="cf">if</span>(<span class="fu">any</span>(phat <span class="sc">&lt;</span> <span class="fl">1e-12</span>)) phat[phat <span class="sc">&lt;</span> <span class="fl">1e-12</span>] <span class="ot">&lt;-</span> <span class="fl">1e-12</span></span>
-<span id="cb11-3"><a></a>  <span class="cf">if</span>(<span class="fu">any</span>(phat <span class="sc">&gt;</span> <span class="dv">1</span><span class="fl">-1e-12</span>)) phat[phat <span class="sc">&gt;</span> <span class="dv">1</span><span class="fl">-1e-12</span>] <span class="ot">&lt;-</span> <span class="fl">1e-12</span></span>
-<span id="cb11-4"><a></a>  <span class="fu">return</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> <span class="fu">mean</span>( y <span class="sc">*</span> <span class="fu">log</span>(phat) <span class="sc">+</span> (<span class="dv">1</span><span class="sc">-</span>y) <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">1</span><span class="sc">-</span>phat)))</span>
-<span id="cb11-5"><a></a>}</span>
-<span id="cb11-6"><a></a></span>
-<span id="cb11-7"><a></a><span class="fu">logloss</span>(simple_preds<span class="sc">$</span>Y, simple_preds<span class="sc">$</span>XG1)</span>
-<span id="cb11-8"><a></a><span class="fu">logloss</span>(simple_preds<span class="sc">$</span>Y, simple_preds<span class="sc">$</span>XG2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10" data-code-line-numbers="2-3|"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a>logloss <span class="ot">&lt;-</span> <span class="cf">function</span>(y, phat){</span>
+<span id="cb10-2"><a></a>  <span class="cf">if</span>(<span class="fu">any</span>(phat <span class="sc">&lt;</span> <span class="fl">1e-12</span>)) phat[phat <span class="sc">&lt;</span> <span class="fl">1e-12</span>] <span class="ot">&lt;-</span> <span class="fl">1e-12</span></span>
+<span id="cb10-3"><a></a>  <span class="cf">if</span>(<span class="fu">any</span>(phat <span class="sc">&gt;</span> <span class="dv">1</span><span class="fl">-1e-12</span>)) phat[phat <span class="sc">&gt;</span> <span class="dv">1</span><span class="fl">-1e-12</span>] <span class="ot">&lt;-</span> <span class="dv">1</span><span class="fl">-1e-12</span></span>
+<span id="cb10-4"><a></a>  <span class="fu">return</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> <span class="fu">mean</span>( y <span class="sc">*</span> <span class="fu">log</span>(phat) <span class="sc">+</span> (<span class="dv">1</span><span class="sc">-</span>y) <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">1</span><span class="sc">-</span>phat)))</span>
+<span id="cb10-5"><a></a>}</span>
+<span id="cb10-6"><a></a></span>
+<span id="cb10-7"><a></a><span class="fu">logloss</span>(simple_preds<span class="sc">$</span>Y, simple_preds<span class="sc">$</span>XG1)</span>
+<span id="cb10-8"><a></a><span class="fu">logloss</span>(simple_preds<span class="sc">$</span>Y, simple_preds<span class="sc">$</span>XG2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="fragment">
 <div class="cell">
@@ -412,13 +418,11 @@ Model 2 Log-Loss: 0.348 </code></pre>
 <li>Fit model to <em>estimate</em> <span class="math inline">\(\mathbb{E}[Y \vert \boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}]\)</span></li>
 <li>Fitted model returns predictions <span class="math inline">\(\hat{p}(\boldsymbol{\mathbf{x}})\)</span></li>
 </ul></li>
+<li>Computed <span class="math inline">\(\textrm{MISS}, \textrm{Brier},\)</span> and <span class="math inline">\(\textrm{LogLoss}\)</span> w/ same data used to fit model</li>
+<li>This only checks whether model fits <strong>observed</strong> data well?</li>
 </ul>
 <div class="fragment">
 <ul>
-<li>So far, checked whether <span class="math inline">\(\hat{p}(\boldsymbol{\mathbf{x}}_{i}) = \hat{p}_{i}\)</span> close to <span class="math inline">\(y_{i}\)</span>
-<ul>
-<li>I.e., does model fit <strong>observed</strong> data well?</li>
-</ul></li>
 <li>How well does model predict <em>new</em>, previously unseen data?</li>
 </ul>
 </div>
@@ -426,18 +430,35 @@ Model 2 Log-Loss: 0.348 </code></pre>
 <section id="out-of-sample-error" class="slide level2">
 <h2>Out-of-Sample Error</h2>
 <ul>
-<li>Thought experiment: say we repeatedly
+<li>Say we had a second dataset <span class="math inline">\((\boldsymbol{\mathbf{x}}_{1}^{\star}, y_{1}^{\star}), \ldots, (\boldsymbol{\mathbf{x}}_{m}^{\star}, y_{M}^{\star})\)</span> from <span class="math inline">\(\mathcal{P}\)</span></li>
+<li>Compute predictions <span class="math inline">\(\hat{p}^{\star}_{m}:= \hat{p}(\boldsymbol{\mathbf{x}}_{m}^{\star})\)</span>
 <ul>
-<li>Draw a new point <span class="math inline">\((\boldsymbol{\mathbf{x}}^{\star}, y^{\star})\)</span> from <span class="math inline">\(\mathcal{P}\)</span></li>
-<li>Measure loss b/w <span class="math inline">\(\hat{p}(\boldsymbol{\mathbf{x}}^{\star})\)</span> to <span class="math inline">\(y^{\star}\)</span>?</li>
+<li>Important: <span class="math inline">\((\boldsymbol{\mathbf{x}}_{m}^{\star}, y_{m}^{\star})\)</span>’s not used to fit the model</li>
 </ul></li>
-<li>The average loss is <strong>out-of-sample</strong> loss</li>
 </ul>
 <div class="fragment">
 <ul>
-<li>Problem: we don’t have access to <span class="math inline">\(\mathcal{P}\)</span></li>
+<li>Assess how close <span class="math inline">\(\hat{p}^{\star}_{m}\)</span>’s are to <span class="math inline">\(y^{\star}_{m}\)</span>’s
+<ul>
+<li>Could use misclassification rate, Brier score, or log-loss</li>
+<li>Result is the out-of-sample loss</li>
+</ul></li>
 </ul>
-<p>. . . - Solution: create <em>random</em> training/testing split - Train on a random subset containing 75% of the data - Evaluate using the remaining held-out portion</p>
+</div>
+</section>
+<section id="cross-validation" class="slide level2">
+<h2>Cross-Validation</h2>
+<ul>
+<li>Problem: we don’t have access to a second dataset</li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Solution: create <em>random</em> training/testing split
+<ul>
+<li>Train on a random subset containing 75% of the data</li>
+<li>Evaluate using the remaining held-out portion</li>
+</ul></li>
+</ul>
 </div>
 </section>
 <section id="the-trainingtesting-paradigm" class="slide level2 scrollable">
@@ -447,19 +468,19 @@ Model 2 Log-Loss: 0.348 </code></pre>
 <div class="tab-content">
 <div id="tabset-2-1">
 <div class="cell">
-<div class="sourceCode cell-code" id="annotated-cell-13" data-code-line-numbers="1-3|5|8-10|13|7|"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy"><code class="sourceCode r"><span id="annotated-cell-13-1"><a href="#annotated-cell-13-1"></a>n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(wi_shots)</span>
-<span id="annotated-cell-13-2"><a href="#annotated-cell-13-2"></a>n_train <span class="ot">&lt;-</span> <span class="fu">floor</span>(<span class="fl">0.75</span> <span class="sc">*</span> n)</span>
-<span id="annotated-cell-13-3"><a href="#annotated-cell-13-3"></a>n_test <span class="ot">&lt;-</span> n <span class="sc">-</span> n_train</span>
-<span id="annotated-cell-13-4"><a href="#annotated-cell-13-4"></a></span>
-<span id="annotated-cell-13-5"><a href="#annotated-cell-13-5"></a>wi_shots <span class="ot">&lt;-</span> wi_shots <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">id =</span> <span class="dv">1</span><span class="sc">:</span>n)</span>
-<span id="annotated-cell-13-6"><a href="#annotated-cell-13-6"></a></span>
-<span id="annotated-cell-13-7"><a href="#annotated-cell-13-7"></a><span class="fu">set.seed</span>(<span class="dv">479</span>)</span>
-<span id="annotated-cell-13-8"><a href="#annotated-cell-13-8"></a>train_data <span class="ot">&lt;-</span></span>
-<span id="annotated-cell-13-9"><a href="#annotated-cell-13-9"></a>  wi_shots <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-13-10"><a href="#annotated-cell-13-10"></a>  dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n =</span> n_train) </span>
-<span id="annotated-cell-13-11"><a href="#annotated-cell-13-11"></a>test_data <span class="ot">&lt;-</span></span>
-<span id="annotated-cell-13-12"><a href="#annotated-cell-13-12"></a>  wi_shots <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-13-13"><a href="#annotated-cell-13-13"></a>  dplyr<span class="sc">::</span><span class="fu">anti_join</span>(<span class="at">y =</span> train_data, <span class="at">by =</span> <span class="st">"id"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12" data-code-line-numbers="1-3|5|8-10|11-13|7|"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a></a>n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(wi_shots)</span>
+<span id="cb12-2"><a></a>n_train <span class="ot">&lt;-</span> <span class="fu">floor</span>(<span class="fl">0.75</span> <span class="sc">*</span> n)</span>
+<span id="cb12-3"><a></a>n_test <span class="ot">&lt;-</span> n <span class="sc">-</span> n_train</span>
+<span id="cb12-4"><a></a></span>
+<span id="cb12-5"><a></a>wi_shots <span class="ot">&lt;-</span> wi_shots <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">id =</span> <span class="dv">1</span><span class="sc">:</span>n)</span>
+<span id="cb12-6"><a></a></span>
+<span id="cb12-7"><a></a><span class="fu">set.seed</span>(<span class="dv">479</span>)</span>
+<span id="cb12-8"><a></a>train_data <span class="ot">&lt;-</span></span>
+<span id="cb12-9"><a></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb12-10"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n =</span> n_train) </span>
+<span id="cb12-11"><a></a>test_data <span class="ot">&lt;-</span></span>
+<span id="cb12-12"><a></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb12-13"><a></a>  dplyr<span class="sc">::</span><span class="fu">anti_join</span>(<span class="at">y =</span> train_data, <span class="at">by =</span> <span class="st">"id"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div id="tabset-2-2">
@@ -507,7 +528,7 @@ Model 2 Log-Loss: 0.348 </code></pre>
 <section id="multiple-splits" class="slide level2">
 <h2>Multiple Splits</h2>
 <ul>
-<li>Generally, good practice to consider multiple train/test splits</li>
+<li>Recommend averaging over many train/test splits (e.g., 100)</li>
 </ul>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
@@ -517,26 +538,497 @@ Model 1 test logloss: 0.352
 Model 2 test logloss: 0.356 </code></pre>
 </div>
 </div>
+<div class="fragment">
 <ul>
 <li>Simpler model appaers to have slightly smaller out-of-sample log-loss!</li>
 </ul>
+</div>
 </section></section>
 <section>
 <section id="logistic-regression" class="title-slide slide level1 center">
 <h1>Logistic Regression</h1>
 
 </section>
-<section id="logistic-regression-overview" class="slide level2">
-<h2>Logistic Regression Overview</h2>
-<p><span class="math display">\[
+<section id="motivation-accounting-for-distance" class="slide level2">
+<h2>Motivation: Accounting for Distance</h2>
+<ul>
+<li>Model 1 gives same prediction for
+<ul>
+<li>A header from 1m away</li>
+<li>A header from 15m away</li>
+</ul></li>
+<li>How to account for continuous feature like <code>DistToGoal</code>?</li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Idea: Divide into discrete bins and then average within bins
+<ul>
+<li>Problem: sensitivity to bin sizes (1m , 3m, 10m)</li>
+<li>Problem: potential small sample issues</li>
+</ul></li>
+</ul>
+</div>
+</section>
+<section id="logistic-regression-1" class="slide level2 smaller">
+<h2>Logistic Regression</h2>
+<ul>
+<li><p>Binary outcome <span class="math inline">\(Y\)</span> and numerical predictors <span class="math inline">\(X_{1}, \ldots, X_{p}\)</span>: <span class="math display">\[
 \log\left(\frac{\mathbb{P}(Y= 1 \vert \boldsymbol{\mathbf{X}})}{\mathbb{P}(Y = 0 \vert \boldsymbol{\mathbf{X}})}\right) = \beta_{0} + \beta_{1}X_{1} + \cdots + \beta_{p}X_{p}.
+\]</span></p></li>
+<li><p>Keeping all other predictors constant, a one unit change in <span class="math inline">\(X_{j}\)</span> associated with a <span class="math inline">\(\beta_{j}\)</span> change in the log-odds</p></li>
+<li><p>Say <span class="math inline">\(\beta_{j} = 1\)</span>. Increasing <span class="math inline">\(X_{j}\)</span> by 1 unit moves <span class="math inline">\(\mathbb{P}(Y = 1)\)</span></p>
+<ul>
+<li>From 4.7% to 11.2% (log-odds from -3 to -2)</li>
+<li>From 37.8% to 62.2% (log-odds from -0.5 to 0.5)</li>
+<li>From 73.1% to 88.1% (log-odds from 1 to 2)</li>
+</ul></li>
+</ul>
+</section>
+<section id="logistic-inverse-logistic-functions" class="slide level2">
+<h2>Logistic &amp; Inverse Logistic Functions</h2>
+<ul>
+<li>Logistic function: <span class="math inline">\(f(t) = [1 + e^{-t}]^{-1}\)</span></li>
+<li>Inverse logistic: <span class="math inline">\(f^{-1}(p) = \log{p/(1-p)}\)</span></li>
+</ul>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-logistic" class="quarto-float quarto-figure quarto-figure-center" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-logistic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="slides_03_files/figure-revealjs/fig-logistic-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: Logistic and inverse logistic functions"><img data-src="slides_03_files/figure-revealjs/fig-logistic-1.png" class="quarto-figure quarto-figure-center" width="576"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-logistic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Logistic and inverse logistic functions
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="an-initial-model" class="slide level2 scrollable">
+<h2>An Initial Model</h2>
+<ul>
+<li><span class="math inline">\(X_{1}\)</span>: distance from shot to goal (<code>DistToGoal</code>)</li>
+<li><span class="math inline">\(\log\left(\frac{\mathbb{P}(Y = 1)}{\mathbb{P}(Y = 0)} \right) = \beta_{0} + \beta_{1} X_{1}\)</span></li>
+</ul>
+<div class="panel-tabset">
+<ul id="tabset-3" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-3-1">Model Fitting</a></li><li><a href="#tabset-3-2">Model Summary</a></li></ul>
+<div class="tab-content">
+<div id="tabset-3-1">
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-22" data-code-line-numbers="1-7|8-10|"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy"><code class="sourceCode r"><span id="annotated-cell-22-1"><a href="#annotated-cell-22-1"></a><span class="fu">set.seed</span>(<span class="dv">479</span>)</span>
+<span id="annotated-cell-22-2"><a href="#annotated-cell-22-2"></a>train_data <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-22-3"><a href="#annotated-cell-22-3"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-22-4"><a href="#annotated-cell-22-4"></a>  dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n =</span> n_train)</span>
+<span id="annotated-cell-22-5"><a href="#annotated-cell-22-5"></a>test_data <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-22-6"><a href="#annotated-cell-22-6"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-22-7"><a href="#annotated-cell-22-7"></a>  dplyr<span class="sc">::</span><span class="fu">anti_join</span>(<span class="at">y =</span> train_data, <span class="at">by =</span> <span class="st">"id"</span>) </span>
+<span id="annotated-cell-22-8"><a href="#annotated-cell-22-8"></a></span>
+<span id="annotated-cell-22-9"><a href="#annotated-cell-22-9"></a>fit1 <span class="ot">&lt;-</span> <span class="fu">glm</span>(<span class="at">formula =</span> Y<span class="sc">~</span>DistToGoal, <span class="at">data =</span> train_data,  </span>
+<span id="annotated-cell-22-10"><a href="#annotated-cell-22-10"></a>            <span class="at">family =</span> <span class="fu">binomial</span>(<span class="st">"logit"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-3-2">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a><span class="fu">summary</span>(fit1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = Y ~ DistToGoal, family = binomial("logit"), data = train_data)
+
+Coefficients:
+             Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept) -0.134174   0.128410  -1.045    0.296    
+DistToGoal  -0.127023   0.009115 -13.935   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 2549.7  on 3569  degrees of freedom
+Residual deviance: 2290.7  on 3568  degrees of freedom
+AIC: 2294.7
+
+Number of Fisher Scoring iterations: 6</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="assessing-model-performance" class="slide level2 smaller">
+<h2>Assessing Model Performance</h2>
+<ul>
+<li>Use <code>predict()</code> to make test set predictions</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20" data-code-line-numbers="|3,7|4,8|"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a>train_pred1 <span class="ot">&lt;-</span> </span>
+<span id="cb20-2"><a></a>  <span class="fu">predict</span>(<span class="at">object =</span> fit1,</span>
+<span id="cb20-3"><a></a>          <span class="at">newdata =</span> train_data,</span>
+<span id="cb20-4"><a></a>          <span class="at">type =</span> <span class="st">"response"</span>) </span>
+<span id="cb20-5"><a></a>test_pred1 <span class="ot">&lt;-</span></span>
+<span id="cb20-6"><a></a>  <span class="fu">predict</span>(<span class="at">object =</span> fit1,</span>
+<span id="cb20-7"><a></a>          <span class="at">newdata =</span> test_data,</span>
+<span id="cb20-8"><a></a>          <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb20-9"><a></a></span>
+<span id="cb20-10"><a></a><span class="fu">logloss</span>(train_data<span class="sc">$</span>Y, train_pred1)</span>
+<span id="cb20-11"><a></a><span class="fu">logloss</span>(test_data<span class="sc">$</span>Y, test_pred1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="fragment">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Dist training logloss: 0.321 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Dist testing logloss: 0.305 </code></pre>
+</div>
+</div>
+</div>
+<div class="fragment">
+<ul>
+<li>Averaging across 100 train/test splits: distance-based model better than body-part-based model</li>
+</ul>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Dist*BodyPart training logloss: 0.3167 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Dist*BodyPart testing logloss: 0.3173 </code></pre>
+</div>
+</div>
+</div>
+</section>
+<section id="including-multiple-predictors" class="slide level2 smaller">
+<h2>Including Multiple Predictors</h2>
+<ul>
+<li>Distance-based model is more accurate than body-part based model</li>
+<li>What if we account for body part and distance?</li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Body part is a categorical predictor</li>
+</ul>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>
+      Head  Left Foot Right Foot 
+       920       1280       2560 </code></pre>
+</div>
+</div>
+<ul>
+<li>Convert to <code>factor</code> type and one-hot encode</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a></a>wi_shots <span class="ot">&lt;-</span> wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb26-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">shot.body_part.name =</span> <span class="fu">factor</span>(shot.body_part.name))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</section>
+<section id="model-specification" class="slide level2">
+<h2>Model Specification</h2>
+<p><span class="math display">\[
+\beta_{0} + \beta_{1}\times \textrm{DistToGoal} + \\ \beta_{\textrm{LeftFoot}}\times \mathbb{I}(\textrm{LeftFoot}) + \beta_{\textrm{RightFoot}} \times \mathbb{I}(\textrm{RightFoot})
 \]</span></p>
+<ul>
+<li><p>Different predictions based on the body part used to attempt the shot</p></li>
+<li><p>For a shot taken at distance <span class="math inline">\(d\)</span>:</p>
+<ul>
+<li>Header: log-odds $ = <em>{0} + </em>{1}d$</li>
+<li>Left-footed shot: $ = <em>{0} + </em>{1}d + _{}$</li>
+<li>Right-footed shot: $ = <em>{0} + </em>{1}d + _{}$</li>
+</ul></li>
+</ul>
+</section>
+<section id="fitted-model" class="slide level2 scrollable">
+<h2>Fitted Model</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a></a>fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(<span class="at">formula =</span> Y<span class="sc">~</span>DistToGoal <span class="sc">+</span> shot.body_part.name, </span>
+<span id="cb27-2"><a></a>           <span class="at">data =</span> train_data, <span class="at">family =</span> <span class="fu">binomial</span>(<span class="st">"logit"</span>))</span>
+<span id="cb27-3"><a></a><span class="fu">summary</span>(fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = Y ~ DistToGoal + shot.body_part.name, family = binomial("logit"), 
+    data = train_data)
+
+Coefficients:
+                              Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)                   -0.49847    0.15504  -3.215   0.0013 ** 
+DistToGoal                    -0.17501    0.01081 -16.187  &lt; 2e-16 ***
+shot.body_part.nameLeft Foot   1.28091    0.17286   7.410 1.26e-13 ***
+shot.body_part.nameRight Foot  1.30351    0.15711   8.297  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 2533.3  on 3569  degrees of freedom
+Residual deviance: 2167.4  on 3566  degrees of freedom
+AIC: 2175.4
+
+Number of Fisher Scoring iterations: 6</code></pre>
+</div>
+</div>
+</section>
+<section id="interactions" class="slide level2 smaller">
+<h2>Interactions</h2>
+<ul>
+<li>Model assumes effect of distance is the same regardless of body part</li>
+<li>Interactions allow the effect of one factor to vary based on the value of another. <span class="math display">\[
+\begin{align}
+&amp;\beta_{0} + \beta_{\textrm{LeftFoot}} \times \mathbb{I}(\textrm{LeftFoot}) + \beta_{\textrm{RightFoot}} * \mathbb{I}(\textrm{RightFoot}) +  \\
+&amp;+[\beta_{\textrm{Dist}} + \beta_{\textrm{Dist:LeftFoot}}*\mathbb{I}(\textrm{LeftFoot}) + \beta_{\textrm{Dist:RightFoot}}\mathbb{I}(\textrm{RightFoot})] \times \textrm{Dist}   
+\end{align}
+\]</span></li>
+</ul>
+</section>
+<section id="fitting-interactive-model" class="slide level2 scrollable">
+<h2>Fitting Interactive Model</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29" data-code-line-numbers="|2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a></a>fit <span class="ot">&lt;-</span> </span>
+<span id="cb29-2"><a></a>  <span class="fu">glm</span>(<span class="at">formula =</span> Y<span class="sc">~</span>DistToGoal <span class="sc">*</span> shot.body_part.name, </span>
+<span id="cb29-3"><a></a>      <span class="at">data =</span> train_data, <span class="at">family =</span> <span class="fu">binomial</span>(<span class="st">"logit"</span>))</span>
+<span id="cb29-4"><a></a><span class="fu">summary</span>(fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = Y ~ DistToGoal * shot.body_part.name, family = binomial("logit"), 
+    data = train_data)
+
+Coefficients:
+                                         Estimate Std. Error z value Pr(&gt;|z|)
+(Intercept)                               1.04701    0.41889   2.499  0.01244
+DistToGoal                               -0.34422    0.05092  -6.761 1.37e-11
+shot.body_part.nameLeft Foot             -0.21195    0.50881  -0.417  0.67700
+shot.body_part.nameRight Foot            -0.82193    0.46059  -1.785  0.07434
+DistToGoal:shot.body_part.nameLeft Foot   0.16418    0.05457   3.009  0.00263
+DistToGoal:shot.body_part.nameRight Foot  0.20871    0.05233   3.988 6.66e-05
+                                            
+(Intercept)                              *  
+DistToGoal                               ***
+shot.body_part.nameLeft Foot                
+shot.body_part.nameRight Foot            .  
+DistToGoal:shot.body_part.nameLeft Foot  ** 
+DistToGoal:shot.body_part.nameRight Foot ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 2549.7  on 3569  degrees of freedom
+Residual deviance: 2214.5  on 3564  degrees of freedom
+AIC: 2226.5
+
+Number of Fisher Scoring iterations: 6</code></pre>
+</div>
+</div>
+</section>
+<section id="cross-validation-1" class="slide level2 smaller">
+<h2>Cross-Validation</h2>
+<ul>
+<li>Fit &amp; assess models w/ 100 train/test splits</li>
+<li>Model w/ interactions is slightly better than others</li>
+</ul>
+<div class="panel-tabset">
+<ul id="tabset-4" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-4-1">Simple Models</a></li><li><a href="#tabset-4-2">Distance Only</a></li><li><a href="#tabset-4-3">Distance + BodyPart</a></li><li><a href="#tabset-4-4">Distance*Body Part</a></li></ul>
+<div class="tab-content">
+<div id="tabset-4-1">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>BodyPart training logloss: 0.351 
+BodyPart+Technique training logloss: 0.348 
+BodyPart test logloss: 0.352 
+BodyPart+Technique test logloss: 0.356 </code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-4-2">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Dist*BodyPart training logloss: 0.3167 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Dist*BodyPart testing logloss: 0.3173 </code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-4-3">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Dist*BodyPart training logloss: 0.3069 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Dist*BodyPart testing logloss: 0.308 </code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-4-4">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Dist*BodyPart training logloss: 0.3047 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Dist*BodyPart testing logloss: 0.3066 </code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
 </section></section>
+<section>
 <section id="random-forests" class="title-slide slide level1 center">
 <h1>Random Forests</h1>
 
-
 </section>
+<section id="including-even-more-features" class="slide level2">
+<h2>Including Even More Features</h2>
+<ul>
+<li>StatsBomb records many potentially important features</li>
+</ul>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "shot.type.name"      "shot.technique.name" "shot.body_part.name"
+ [4] "DistToGoal"          "DistToKeeper"        "AngleToGoal"        
+ [7] "AngleToKeeper"       "AngleDeviation"      "avevelocity"        
+[10] "density"             "density.incone"      "distance.ToD1"      
+[13] "distance.ToD2"       "AttackersBehindBall" "DefendersBehindBall"
+[16] "DefendersInCone"     "InCone.GK"           "DefArea"            </code></pre>
+</div>
+</div>
+<div class="fragment">
+<ul>
+<li>How much more predictive accuracy can we gain by accounting for these?</li>
+<li>Challenge: hard to specify nonlinearities &amp; interactions correctly in <code>glm()</code></li>
+</ul>
+</div>
+</section>
+<section id="regression-trees-i" class="slide level2 smaller">
+<h2>Regression Trees I</h2>
+<div class="columns">
+<div class="column" style="width:48%;">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><a href="regression_tree.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img data-src="regression_tree.png" class="quarto-figure quarto-figure-center"></a></p>
+</figure>
+</div>
+</div><div class="column" style="width:48%;">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><a href="partition.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img data-src="partition.png" class="quarto-figure quarto-figure-center"></a></p>
+</figure>
+</div>
+</div></div>
+<ul>
+<li>Regression trees can elegantly model interactions and non-linearities</li>
+<li>Regression trees are just step-functions</li>
+</ul>
+</section>
+<section id="regression-trees-ii" class="slide level2">
+<h2>Regression Trees II</h2>
+<p><a href="tree_appx_wide.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4"><img data-src="tree_appx_wide.png"></a></p>
+<ul>
+<li>Regression trees can approximate functions arbitrarily well</li>
+<li>But often need very deep and complicated trees</li>
+</ul>
+</section>
+<section id="tree-ensembles" class="slide level2">
+<h2>Tree Ensembles</h2>
+<p><a href="sum_of_trees.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5"><img data-src="sum_of_trees.png"></a></p>
+<ul>
+<li>Complicated trees can be written as sums of shallow trees!</li>
+</ul>
+</section>
+<section id="random-forests-1" class="slide level2">
+<h2>Random Forests</h2>
+<ul>
+<li>Approximate <span class="math inline">\(\mathbb{E}[Y \vert \boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}]\)</span> w/ tree ensemble</li>
+<li>No need to pre-specify functional form or interactions</li>
+<li>Scales nicely even if <span class="math inline">\(\boldsymbol{\mathbf{X}}\)</span> is high-dimensional</li>
+<li>We will use implementation in <strong>ranger</strong> package</li>
+</ul>
+</section>
+<section id="fitting-a-random-forests-model" class="slide level2 scrollable">
+<h2>Fitting a Random Forests Model</h2>
+<div class="panel-tabset">
+<ul id="tabset-5" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-5-1">Data Preparation</a></li><li><a href="#tabset-5-2">Model Fitting</a></li><li><a href="#tabset-5-3">Assessing Predictions</a></li></ul>
+<div class="tab-content">
+<div id="tabset-5-1">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a></a>shot_vars <span class="ot">&lt;-</span></span>
+<span id="cb39-2"><a></a>  <span class="fu">c</span>(<span class="st">"Y"</span>,</span>
+<span id="cb39-3"><a></a>    <span class="st">"shot.type.name"</span>, </span>
+<span id="cb39-4"><a></a>    <span class="st">"shot.technique.name"</span>, <span class="st">"shot.body_part.name"</span>,</span>
+<span id="cb39-5"><a></a>    <span class="st">"DistToGoal"</span>, <span class="st">"DistToKeeper"</span>, <span class="co"># dist. to keeper is distance from GK to goal</span></span>
+<span id="cb39-6"><a></a>    <span class="st">"AngleToGoal"</span>, <span class="st">"AngleToKeeper"</span>,</span>
+<span id="cb39-7"><a></a>    <span class="st">"AngleDeviation"</span>, </span>
+<span id="cb39-8"><a></a>    <span class="st">"avevelocity"</span>,<span class="st">"density"</span>, <span class="st">"density.incone"</span>,</span>
+<span id="cb39-9"><a></a>    <span class="st">"distance.ToD1"</span>, <span class="st">"distance.ToD2"</span>,</span>
+<span id="cb39-10"><a></a>    <span class="st">"AttackersBehindBall"</span>, <span class="st">"DefendersBehindBall"</span>,</span>
+<span id="cb39-11"><a></a>    <span class="st">"DefendersInCone"</span>, <span class="st">"InCone.GK"</span>, <span class="st">"DefArea"</span>)</span>
+<span id="cb39-12"><a></a></span>
+<span id="cb39-13"><a></a>wi_shots <span class="ot">&lt;-</span></span>
+<span id="cb39-14"><a></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb39-15"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb39-16"><a></a>    <span class="at">shot.type.name =</span> <span class="fu">factor</span>(shot.type.name),</span>
+<span id="cb39-17"><a></a>    <span class="at">shot.body_part.name =</span> shot.body_part.name,</span>
+<span id="cb39-18"><a></a>    <span class="at">shot.technique.name =</span> shot.technique.name)</span>
+<span id="cb39-19"><a></a></span>
+<span id="cb39-20"><a></a><span class="fu">set.seed</span>(<span class="dv">479</span>)</span>
+<span id="cb39-21"><a></a>train_data <span class="ot">&lt;-</span></span>
+<span id="cb39-22"><a></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb39-23"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n =</span> n_train) <span class="sc">|&gt;</span></span>
+<span id="cb39-24"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(dplyr<span class="sc">::</span><span class="fu">all_of</span>(<span class="fu">c</span>(<span class="st">"id"</span>,shot_vars)))</span>
+<span id="cb39-25"><a></a></span>
+<span id="cb39-26"><a></a>test_data <span class="ot">&lt;-</span></span>
+<span id="cb39-27"><a></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb39-28"><a></a>  dplyr<span class="sc">::</span><span class="fu">anti_join</span>(<span class="at">y =</span> train_data, <span class="at">by =</span> <span class="st">"id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb39-29"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(dplyr<span class="sc">::</span><span class="fu">all_of</span>(<span class="fu">c</span>(<span class="st">"id"</span>, shot_vars)))</span>
+<span id="cb39-30"><a></a></span>
+<span id="cb39-31"><a></a>y_train <span class="ot">&lt;-</span> train_data<span class="sc">$</span>Y</span>
+<span id="cb39-32"><a></a>y_test <span class="ot">&lt;-</span> test_data<span class="sc">$</span>Y</span>
+<span id="cb39-33"><a></a></span>
+<span id="cb39-34"><a></a>train_data <span class="ot">&lt;-</span></span>
+<span id="cb39-35"><a></a>  train_data <span class="sc">|&gt;</span></span>
+<span id="cb39-36"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">Y =</span> <span class="fu">factor</span>(Y, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb39-37"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>id)</span>
+<span id="cb39-38"><a></a>test_data <span class="ot">&lt;-</span></span>
+<span id="cb39-39"><a></a>  test_data <span class="sc">|&gt;</span></span>
+<span id="cb39-40"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">Y =</span> <span class="fu">factor</span>(Y, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb39-41"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>id)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-5-2">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a></a><span class="fu">library</span>(ranger)</span>
+<span id="cb40-2"><a></a>fit <span class="ot">&lt;-</span> <span class="fu">ranger</span>(<span class="at">formula =</span> Y<span class="sc">~</span>., </span>
+<span id="cb40-3"><a></a>  <span class="at">data =</span> train_data, <span class="at">probability =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-5-3">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a></a>train_preds <span class="ot">&lt;-</span> </span>
+<span id="cb41-2"><a></a>  <span class="fu">predict</span>(<span class="at">object =</span> fit,</span>
+<span id="cb41-3"><a></a>          <span class="at">data =</span> train_data)<span class="sc">$</span>predictions[,<span class="dv">2</span>] </span>
+<span id="cb41-4"><a></a></span>
+<span id="cb41-5"><a></a>test_preds <span class="ot">&lt;-</span> </span>
+<span id="cb41-6"><a></a>  <span class="fu">predict</span>(<span class="at">object =</span> fit,</span>
+<span id="cb41-7"><a></a>          <span class="at">data =</span> test_data)<span class="sc">$</span>predictions[,<span class="dv">2</span>]</span>
+<span id="cb41-8"><a></a></span>
+<span id="cb41-9"><a></a><span class="fu">logloss</span>(y_train, train_preds)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.1135258</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a></a><span class="fu">logloss</span>(y_test, test_preds)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.2522654</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+</section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <div class="footer footer-default">
@@ -1109,6 +1601,38 @@ Model 2 test logloss: 0.356 </code></pre>
         }
       });
       </script>
+    <script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+    (function() {
+      let previousOnload = window.onload;
+      window.onload = () => {
+        if (previousOnload) {
+          previousOnload();
+        }
+        lightboxQuarto.on('slide_before_load', (data) => {
+          const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+          const href = trigger.getAttribute('href');
+          if (href !== null) {
+            const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+            if (imgEl !== null) {
+              const srcAttr = imgEl.getAttribute("src");
+              if (srcAttr && srcAttr.startsWith("data:")) {
+                slideConfig.href = srcAttr;
+              }
+            }
+          } 
+        });
+      
+        lightboxQuarto.on('slide_after_load', (data) => {
+          const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(slideNode);
+          }
+        });
+      
+      };
+      
+    })();
+              </script>
     
 
 </body></html>

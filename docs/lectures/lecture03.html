@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.7.31">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -71,7 +71,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-4bfb630b09c0e164834af1bb3207dbff.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -371,7 +371,6 @@ window.Quarto = {
   </ul></li>
   <li><a href="#sec-rf" id="toc-sec-rf" class="nav-link" data-scroll-target="#sec-rf">Random Forests</a>
   <ul class="collapse">
-  <li><a href="#regression-trees-ensembles-sec-tree-background" id="toc-regression-trees-ensembles-sec-tree-background" class="nav-link" data-scroll-target="#regression-trees-ensembles-sec-tree-background">Regression Trees &amp; Ensembles #{sec-tree-background}</a></li>
   <li><a href="#sec-fit-rf" id="toc-sec-fit-rf" class="nav-link" data-scroll-target="#sec-fit-rf">Fitting Random Forests Models</a></li>
   <li><a href="#sec-comparison" id="toc-sec-comparison" class="nav-link" data-scroll-target="#sec-comparison">Comparison to StatsBomb’s XG Model</a></li>
   </ul></li>
@@ -505,19 +504,19 @@ window.Quarto = {
 </dl>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>BodyPart misclassification 0.107 
-BodyPart+Technique misclassificaiton 0.107 </code></pre>
+<pre><code>BodyPart misclassification 0.112 
+BodyPart+Technique misclassificaiton 0.112 </code></pre>
 </div>
 </div>
 <p>Our two simple models have identical misclassification rates of about 10.7%. At first glance this is a bit surprising because the two models return different predicted XG values</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Unique XG1 values:"</span>, <span class="fu">sort</span>(<span class="fu">unique</span>(simple_preds<span class="sc">$</span>XG1)), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Unique XG1 values: 0.1015056 0.1118336 0.1132812 </code></pre>
+<pre><code>Unique XG1 values: 0.1113281 0.1119565 0.1140625 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Unique XG2 values:"</span>, <span class="fu">sort</span>(<span class="fu">unique</span>(simple_preds<span class="sc">$</span>XG2)), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Unique XG2 values: 0 0.04117647 0.06770833 0.08011869 0.08333333 0.1108898 0.113307 0.1213333 0.1363636 0.1621622 0.3333333 </code></pre>
+<pre><code>Unique XG2 values: 0 0.06372549 0.06756757 0.07142857 0.08920188 0.1034483 0.1131868 0.1207729 0.1214361 0.1632653 0.2083333 </code></pre>
 </div>
 </div>
 <p>On closer inspection, we find that the two simple models both output predicted XG values that are all less than 0.5. So, the thresholded values <span class="math inline">\(\mathbb{I}(\hat{p}_{i} \geq 0.5)\)</span> are identical for both models’ <span class="math inline">\(\hat{p}_{i}\)</span>’s. Just for comparison’s sake, let’s compute the misclassification rate of the proprietary StatsBomb XG model</p>
@@ -565,7 +564,7 @@ BodyPart+Technique misclassificaiton 0.107 </code></pre>
 <div class="sourceCode cell-code" id="annotated-cell-10"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-10-1"><a href="#annotated-cell-10-1" aria-hidden="true" tabindex="-1"></a>logloss <span class="ot">&lt;-</span> <span class="cf">function</span>(y, phat){</span>
 <span id="annotated-cell-10-2"><a href="#annotated-cell-10-2" aria-hidden="true" tabindex="-1"></a>  </span>
 <button class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="1">1</button><span id="annotated-cell-10-3" class="code-annotation-target"><a href="#annotated-cell-10-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="fu">any</span>(phat <span class="sc">&lt;</span> <span class="fl">1e-12</span>)) phat[phat <span class="sc">&lt;</span> <span class="fl">1e-12</span>] <span class="ot">&lt;-</span> <span class="fl">1e-12</span></span>
-<span id="annotated-cell-10-4"><a href="#annotated-cell-10-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="fu">any</span>(phat <span class="sc">&gt;</span> <span class="dv">1</span><span class="fl">-1e-12</span>)) phat[phat <span class="sc">&gt;</span> <span class="dv">1</span><span class="fl">-1e-12</span>] <span class="ot">&lt;-</span> <span class="fl">1e-12</span></span>
+<span id="annotated-cell-10-4"><a href="#annotated-cell-10-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="fu">any</span>(phat <span class="sc">&gt;</span> <span class="dv">1</span><span class="fl">-1e-12</span>)) phat[phat <span class="sc">&gt;</span> <span class="dv">1</span><span class="fl">-1e-12</span>] <span class="ot">&lt;-</span> <span class="dv">1</span><span class="fl">-1e-12</span></span>
 <span id="annotated-cell-10-5"><a href="#annotated-cell-10-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> <span class="fu">mean</span>( y <span class="sc">*</span> <span class="fu">log</span>(phat) <span class="sc">+</span> (<span class="dv">1</span><span class="sc">-</span>y) <span class="sc">*</span> <span class="fu">log</span>(<span class="dv">1</span><span class="sc">-</span>phat)))</span>
 <span id="annotated-cell-10-6"><a href="#annotated-cell-10-6" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="annotated-cell-10-7"><a href="#annotated-cell-10-7" aria-hidden="true" tabindex="-1"></a></span>
@@ -798,10 +797,10 @@ StatsBomb LogLoss: 0.264 </code></pre>
 </dl>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>XG1 training logloss: 0.34 
-XG2 training logloss: 0.336 
-XG1 test logloss: 0.339 
-XG2 test logloss: 0.345 </code></pre>
+<pre><code>XG1 training logloss: 0.351 
+XG2 training logloss: 0.348 
+XG1 test logloss: 0.352 
+XG2 test logloss: 0.356 </code></pre>
 </div>
 </div>
 <p>Based on this analysis, we conclude that the simpler model provides better out-of-sample predictions than the more complex model. In other words, the more complex model appears to <em>over-fit</em> the data!</p>
@@ -815,23 +814,39 @@ XG2 test logloss: 0.345 </code></pre>
 \]</span></p>
 <section id="sec-simple-logistic" class="level3">
 <h3 class="anchored" data-anchor-id="sec-simple-logistic">Logistic Regression with One Feature</h3>
-<p>We begin by fitting a model that only conditions on distance to the goal using the function <code>glm()</code>. <!--
-  Explain the arguments!
---></p>
+<p>We begin by fitting a model that only conditions on distance to the goal using the function <code>glm()</code>. This function works a lot like <code>lm</code> in that we specify the model using R’s formula interface. Whereas <code>lm()</code> is used only to fit linear models via the method least squares, <code>glm()</code> can be used to fit a much wider range of models<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>. So, we use the <code>family</code> argument to tell <code>glm()</code> exactly what model we want to fit.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">479</span>)</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span></span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n =</span> n_train)</span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>test_data <span class="ot">&lt;-</span></span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">anti_join</span>(<span class="at">y =</span> train_data, <span class="at">by =</span> <span class="st">"id"</span>) </span>
-<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>fit1 <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y<span class="sc">~</span>DistToGoal, <span class="at">data =</span> train_data, <span class="at">family =</span> <span class="fu">binomial</span>(<span class="st">"logit"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-18"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-18-1"><a href="#annotated-cell-18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">479</span>)</span>
+<span id="annotated-cell-18-2"><a href="#annotated-cell-18-2" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-18-3"><a href="#annotated-cell-18-3" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-18-4"><a href="#annotated-cell-18-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n =</span> n_train)</span>
+<span id="annotated-cell-18-5"><a href="#annotated-cell-18-5" aria-hidden="true" tabindex="-1"></a>test_data <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-18-6"><a href="#annotated-cell-18-6" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-18-7"><a href="#annotated-cell-18-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">anti_join</span>(<span class="at">y =</span> train_data, <span class="at">by =</span> <span class="st">"id"</span>) </span>
+<span id="annotated-cell-18-8"><a href="#annotated-cell-18-8" aria-hidden="true" tabindex="-1"></a></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-18" data-target-annotation="1">1</button><span id="annotated-cell-18-9" class="code-annotation-target"><a href="#annotated-cell-18-9" aria-hidden="true" tabindex="-1"></a>fit1 <span class="ot">&lt;-</span> <span class="fu">glm</span>(<span class="at">formula =</span> Y<span class="sc">~</span>DistToGoal,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-18" data-target-annotation="2">2</button><span id="annotated-cell-18-10" class="code-annotation-target"><a href="#annotated-cell-18-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">data =</span> train_data,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-18" data-target-annotation="3">3</button><span id="annotated-cell-18-11" class="code-annotation-target"><a href="#annotated-cell-18-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">family =</span> <span class="fu">binomial</span>(<span class="st">"logit"</span>))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-18" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-18" data-code-lines="9" data-code-annotation="1">In the <code>formula</code> argument, the outcome goes on the left-hand side of the <code>~</code> and predictors go on the right-hand side</span>
+</dd>
+<dt data-target-cell="annotated-cell-18" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-18" data-code-lines="10" data-code-annotation="2">Like <code>lm</code>, the function <code>glm</code> takes a <code>data</code> argument. Every term appearing in the formula must appear as a column in the data frame passed via <code>data</code>.</span>
+</dd>
+<dt data-target-cell="annotated-cell-18" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-18" data-code-lines="11" data-code-annotation="3">The specification <code>binomial("logit")</code> signals to <code>glm</code> that we want to fit a logistic regression model.</span>
+</dd>
+</dl>
+</div>
 </div>
 <p>The <code>summary</code> function provides a snapshot about the fitted model, showing the individual parameter estimates, their associated standard errors, and whether or not they are statistically significantly different than zero.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -839,16 +854,16 @@ glm(formula = Y ~ DistToGoal, family = binomial("logit"), data = train_data)
 
 Coefficients:
              Estimate Std. Error z value Pr(&gt;|z|)    
-(Intercept) -0.429695   0.144511  -2.973  0.00294 ** 
-DistToGoal  -0.112567   0.009972 -11.288  &lt; 2e-16 ***
+(Intercept) -0.134174   0.128410  -1.045    0.296    
+DistToGoal  -0.127023   0.009115 -13.935   &lt;2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
-    Null deviance: 1930.9  on 2888  degrees of freedom
-Residual deviance: 1765.3  on 2887  degrees of freedom
-AIC: 1769.3
+    Null deviance: 2549.7  on 3569  degrees of freedom
+Residual deviance: 2290.7  on 3568  degrees of freedom
+AIC: 2294.7
 
 Number of Fisher Scoring iterations: 6</code></pre>
 </div>
@@ -856,7 +871,7 @@ Number of Fisher Scoring iterations: 6</code></pre>
 <p>We see that the estimate of <span class="math inline">\(\beta_{1},\)</span> the coefficient capturing <code>DistToGoal</code>’s effect on the log-odds of a goal, is negative (-0.11) and that this is statistically significantly different than 0 (the associated p-value is &lt;2e-16). This is reassuring as we might intuitively expect the probability of a goal to decrease the further away a shot is from the goal. Recall that the intercept term <span class="math inline">\(\beta_{0}\)</span> quantifies the log-odds of a goal when <code>DistToGoal = 0</code> (i.e., when a shot is taken from the middle of the goal line). Our model estimates this intercept to about -0.43, which, on the probability scale is about 39%. On the face of it, this doesn’t make a ton of sense: surely shots taken essentially from the middle of the goal line should go in <strong>much</strong> more frequently.</p>
 <p>We can resolve this apparent contradiction by taking a closer look at the range of <code>DistToGoal</code> values in our dataset:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">range</span>(train_data<span class="sc">$</span>DistToGoal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">range</span>(train_data<span class="sc">$</span>DistToGoal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1]  1.860108 92.800862</code></pre>
 </div>
@@ -883,61 +898,61 @@ Extrapolation
 </ol>
 <p>In the code below, we obtain predictions for both the training and testing observations and then compute the average log-loss for this training/testing split.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>train_pred1 <span class="ot">&lt;-</span> </span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict</span>(<span class="at">object =</span> fit1,</span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">newdata =</span> train_data,</span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">type =</span> <span class="st">"response"</span>) </span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>test_pred1 <span class="ot">&lt;-</span></span>
-<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict</span>(<span class="at">object =</span> fit1,</span>
-<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>          <span class="at">newdata =</span> test_data,</span>
-<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>          <span class="at">type =</span> <span class="st">"response"</span>)</span>
-<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist training logloss:"</span>, <span class="fu">round</span>(<span class="fu">logloss</span>(train_data<span class="sc">$</span>Y, train_pred1), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>train_pred1 <span class="ot">&lt;-</span> </span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict</span>(<span class="at">object =</span> fit1,</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">newdata =</span> train_data,</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">type =</span> <span class="st">"response"</span>) </span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>test_pred1 <span class="ot">&lt;-</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict</span>(<span class="at">object =</span> fit1,</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>          <span class="at">newdata =</span> test_data,</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>          <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist training logloss:"</span>, <span class="fu">round</span>(<span class="fu">logloss</span>(train_data<span class="sc">$</span>Y, train_pred1), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Dist training logloss: 0.306 </code></pre>
+<pre><code>Dist training logloss: 0.321 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist testing logloss:"</span>, <span class="fu">round</span>(<span class="fu">logloss</span>(test_data<span class="sc">$</span>Y, test_pred1), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist testing logloss:"</span>, <span class="fu">round</span>(<span class="fu">logloss</span>(test_data<span class="sc">$</span>Y, test_pred1), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Dist testing logloss: 0.307 </code></pre>
+<pre><code>Dist testing logloss: 0.305 </code></pre>
 </div>
 </div>
 <p>At least for this training/testing split, the logistic regression model that conditions on distance is a bit more accurate than the simpler models. Before concluding that this model indeed is more accurate than the body-part based model, we will repeat the above calculations using 100 training/testing splits.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>n_sims <span class="ot">&lt;-</span> <span class="dv">100</span></span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>train_logloss <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims)</span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>test_logloss <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims)</span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(r <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_sims){</span>
-<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">479</span><span class="sc">+</span>r)</span>
-<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>  train_data <span class="ot">&lt;-</span></span>
-<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>    wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n =</span> n_train)</span>
-<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>  test_data <span class="ot">&lt;-</span></span>
-<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>    wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">anti_join</span>(<span class="at">y =</span> train_data, <span class="at">by =</span> <span class="st">"id"</span>) </span>
-<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y<span class="sc">~</span>DistToGoal, <span class="at">data =</span> train_data, <span class="at">family =</span> <span class="fu">binomial</span>(<span class="st">"logit"</span>))</span>
-<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>  train_preds <span class="ot">&lt;-</span></span>
-<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">predict</span>(<span class="at">object =</span> fit,</span>
-<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>            <span class="at">newdata =</span> train_data,</span>
-<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>            <span class="at">type =</span> <span class="st">"response"</span>)</span>
-<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>  test_preds <span class="ot">&lt;-</span></span>
-<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">predict</span>(<span class="at">object =</span> fit,</span>
-<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a>            <span class="at">newdata =</span> test_data,</span>
-<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a>            <span class="at">type =</span> <span class="st">"response"</span>)</span>
-<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a>  train_logloss[r] <span class="ot">&lt;-</span></span>
-<span id="cb36-27"><a href="#cb36-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logloss</span>(train_data<span class="sc">$</span>Y, train_preds)</span>
-<span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a>  test_logloss[r] <span class="ot">&lt;-</span></span>
-<span id="cb36-29"><a href="#cb36-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logloss</span>(test_data<span class="sc">$</span>Y, test_preds)</span>
-<span id="cb36-30"><a href="#cb36-30" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb36-31"><a href="#cb36-31" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist training logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(train_logloss), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>n_sims <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>train_logloss <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims)</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>test_logloss <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims)</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(r <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_sims){</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">479</span><span class="sc">+</span>r)</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>  train_data <span class="ot">&lt;-</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>    wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n =</span> n_train)</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>  test_data <span class="ot">&lt;-</span></span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>    wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">anti_join</span>(<span class="at">y =</span> train_data, <span class="at">by =</span> <span class="st">"id"</span>) </span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y<span class="sc">~</span>DistToGoal, <span class="at">data =</span> train_data, <span class="at">family =</span> <span class="fu">binomial</span>(<span class="st">"logit"</span>))</span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>  train_preds <span class="ot">&lt;-</span></span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">predict</span>(<span class="at">object =</span> fit,</span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>            <span class="at">newdata =</span> train_data,</span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>            <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>  test_preds <span class="ot">&lt;-</span></span>
+<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">predict</span>(<span class="at">object =</span> fit,</span>
+<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a>            <span class="at">newdata =</span> test_data,</span>
+<span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a>            <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb35-25"><a href="#cb35-25" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb35-26"><a href="#cb35-26" aria-hidden="true" tabindex="-1"></a>  train_logloss[r] <span class="ot">&lt;-</span></span>
+<span id="cb35-27"><a href="#cb35-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logloss</span>(train_data<span class="sc">$</span>Y, train_preds)</span>
+<span id="cb35-28"><a href="#cb35-28" aria-hidden="true" tabindex="-1"></a>  test_logloss[r] <span class="ot">&lt;-</span></span>
+<span id="cb35-29"><a href="#cb35-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logloss</span>(test_data<span class="sc">$</span>Y, test_preds)</span>
+<span id="cb35-30"><a href="#cb35-30" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb35-31"><a href="#cb35-31" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist training logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(train_logloss), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Dist training logloss: 0.317 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist testing logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(test_logloss), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist testing logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(test_logloss), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Dist testing logloss: 0.317 </code></pre>
 </div>
@@ -946,25 +961,26 @@ Extrapolation
 </section>
 <section id="sec-addtl-preds" class="level3">
 <h3 class="anchored" data-anchor-id="sec-addtl-preds">Accounting for Multiple Predictors</h3>
-<p>It turns out to be relatively straightforward to answer this question with a logistic regression model fit using <code>glm()</code>. Specifically, we can include more variables in the <code>formula</code> argument. Note that we first convert the variables <code>shot.body_part.name</code> and <code>shot.technique.name</code> to factors.</p>
+<p>It turns out to be relatively straightforward to answer this question with a logistic regression model fit using <code>glm()</code>. Specifically, we can include more variables in the <code>formula</code> argument. Note that we first convert the variables <code>shot.body_part.name</code> to a factor.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>wi_shots <span class="ot">&lt;-</span></span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">shot.body_part.name =</span> <span class="fu">factor</span>(shot.body_part.name))</span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">479</span>)</span>
-<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span></span>
-<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n =</span> n_train)</span>
-<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>test_data <span class="ot">&lt;-</span></span>
-<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">anti_join</span>(<span class="at">y =</span> train_data, <span class="at">by =</span> <span class="st">"id"</span>) </span>
-<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> </span>
-<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glm</span>(<span class="at">formula =</span> Y<span class="sc">~</span>DistToGoal <span class="sc">+</span> shot.body_part.name, </span>
-<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">data =</span> train_data, <span class="at">family =</span> <span class="fu">binomial</span>(<span class="st">"logit"</span>))</span>
-<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>wi_shots <span class="ot">&lt;-</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">shot.body_part.name =</span> <span class="fu">factor</span>(shot.body_part.name))</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">479</span>)</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span></span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n =</span> n_train)</span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>test_data <span class="ot">&lt;-</span></span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">anti_join</span>(<span class="at">y =</span> train_data, <span class="at">by =</span> <span class="st">"id"</span>) </span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> </span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glm</span>(<span class="at">formula =</span> Y<span class="sc">~</span>DistToGoal <span class="sc">+</span> shot.body_part.name, </span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a>      <span class="at">data =</span> train_data, <span class="at">family =</span> <span class="fu">binomial</span>(<span class="st">"logit"</span>))</span>
+<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -990,53 +1006,53 @@ Number of Fisher Scoring iterations: 6</code></pre>
 </div>
 </div>
 <p>Looking at the output of <code>summary(fit)</code>, we see that the model includes several more parameters. There is a slope associated with left-footed and right-footed shots. Internally, <code>glm()</code> has <a href="https://en.wikipedia.org/wiki/One-hot#Machine_learning_and_statistics"><em>one-hot-encoded</em></a> the categorical predictor <code>shot.body_part.name</code> and decomposed the log-odds of a goal as <span class="math display">\[
-\beta_{0} + \beta_{1}\times \textrm{DistToGoal} + \beta_{LeftFoot}\times \mathbb{I}(\textrm{LeftFoot}) + \beta_{RightFoot} \times \mathbb{I}(\textrm{RightFoot})
+\beta_{0} + \beta_{1}\times \textrm{DistToGoal} + \beta_{\textrm{LeftFoot}}\times \mathbb{I}(\textrm{LeftFoot}) + \beta_{\textrm{RightFoot}} \times \mathbb{I}(\textrm{RightFoot})
 \]</span></p>
 <p>To understand what’s going on, suppose that a shot is taken from distance <span class="math inline">\(d.\)</span> The model makes different predictions based on the body part used to attempt the shot:</p>
 <ul>
-<li>If the shot was taken with a header then the log-odds of a goal is <span class="math inline">\(\beta_{0} + \beta_{1}d\)</span></li>
+<li>If the shot was a header then the log-odds of a goal is <span class="math inline">\(\beta_{0} + \beta_{1}d\)</span></li>
 <li>If the shot was taken with the left foot, then the log-odds of a goal is <span class="math inline">\(\beta_{0} + \beta_{1}d + \beta_{\textrm{LeftFoot}}\)</span></li>
 <li>If the shot was taken with the right foot, then the log-odds of a goal is <span class="math inline">\(\beta_{0} + \beta_{1}d + \beta_{\textrm{RightFoot}}\)</span></li>
 </ul>
 <p>Reassuringly, the estimates for <span class="math inline">\(\beta_{\textrm{RightFoot}}\)</span> and <span class="math inline">\(\beta_{\textrm{LeftFoot}}\)</span> are positive, indicating that for a fixed distance, the log-odds of scoring a goal on a left- or right-footed shot is higher than headers.</p>
 <p>By repeatedly fitting and assessing our new model using 100 random training/testing splits, we discover that accounting for both body part and shot distance results in even more accurate predictions.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>n_sims <span class="ot">&lt;-</span> <span class="dv">100</span></span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>train_logloss <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims)</span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>test_logloss <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims)</span>
-<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(r <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_sims){</span>
-<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">479</span><span class="sc">+</span>r)</span>
-<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>  train_data <span class="ot">&lt;-</span></span>
-<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>    wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n =</span> n_train)</span>
-<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>  test_data <span class="ot">&lt;-</span></span>
-<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>    wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">anti_join</span>(<span class="at">y =</span> train_data, <span class="at">by =</span> <span class="st">"id"</span>) </span>
-<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y<span class="sc">~</span>DistToGoal <span class="sc">+</span> shot.body_part.name, </span>
-<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a>             <span class="at">data =</span> train_data, <span class="at">family =</span> <span class="fu">binomial</span>(<span class="st">"logit"</span>))</span>
-<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb42-17"><a href="#cb42-17" aria-hidden="true" tabindex="-1"></a>  train_preds <span class="ot">&lt;-</span></span>
-<span id="cb42-18"><a href="#cb42-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">predict</span>(<span class="at">object =</span> fit,</span>
-<span id="cb42-19"><a href="#cb42-19" aria-hidden="true" tabindex="-1"></a>            <span class="at">newdata =</span> train_data,</span>
-<span id="cb42-20"><a href="#cb42-20" aria-hidden="true" tabindex="-1"></a>            <span class="at">type =</span> <span class="st">"response"</span>)</span>
-<span id="cb42-21"><a href="#cb42-21" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb42-22"><a href="#cb42-22" aria-hidden="true" tabindex="-1"></a>  test_preds <span class="ot">&lt;-</span></span>
-<span id="cb42-23"><a href="#cb42-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">predict</span>(<span class="at">object =</span> fit,</span>
-<span id="cb42-24"><a href="#cb42-24" aria-hidden="true" tabindex="-1"></a>            <span class="at">newdata =</span> test_data,</span>
-<span id="cb42-25"><a href="#cb42-25" aria-hidden="true" tabindex="-1"></a>            <span class="at">type =</span> <span class="st">"response"</span>)</span>
-<span id="cb42-26"><a href="#cb42-26" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb42-27"><a href="#cb42-27" aria-hidden="true" tabindex="-1"></a>  train_logloss[r] <span class="ot">&lt;-</span></span>
-<span id="cb42-28"><a href="#cb42-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logloss</span>(train_data<span class="sc">$</span>Y, train_preds)</span>
-<span id="cb42-29"><a href="#cb42-29" aria-hidden="true" tabindex="-1"></a>  test_logloss[r] <span class="ot">&lt;-</span></span>
-<span id="cb42-30"><a href="#cb42-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logloss</span>(test_data<span class="sc">$</span>Y, test_preds)</span>
-<span id="cb42-31"><a href="#cb42-31" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb42-32"><a href="#cb42-32" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist+BodyPart training logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(train_logloss), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>n_sims <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>train_logloss <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims)</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>test_logloss <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims)</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(r <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_sims){</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">479</span><span class="sc">+</span>r)</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>  train_data <span class="ot">&lt;-</span></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>    wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n =</span> n_train)</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>  test_data <span class="ot">&lt;-</span></span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>    wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">anti_join</span>(<span class="at">y =</span> train_data, <span class="at">by =</span> <span class="st">"id"</span>) </span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y<span class="sc">~</span>DistToGoal <span class="sc">+</span> shot.body_part.name, </span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a>             <span class="at">data =</span> train_data, <span class="at">family =</span> <span class="fu">binomial</span>(<span class="st">"logit"</span>))</span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a>  train_preds <span class="ot">&lt;-</span></span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">predict</span>(<span class="at">object =</span> fit,</span>
+<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a>            <span class="at">newdata =</span> train_data,</span>
+<span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a>            <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb41-21"><a href="#cb41-21" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb41-22"><a href="#cb41-22" aria-hidden="true" tabindex="-1"></a>  test_preds <span class="ot">&lt;-</span></span>
+<span id="cb41-23"><a href="#cb41-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">predict</span>(<span class="at">object =</span> fit,</span>
+<span id="cb41-24"><a href="#cb41-24" aria-hidden="true" tabindex="-1"></a>            <span class="at">newdata =</span> test_data,</span>
+<span id="cb41-25"><a href="#cb41-25" aria-hidden="true" tabindex="-1"></a>            <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb41-26"><a href="#cb41-26" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb41-27"><a href="#cb41-27" aria-hidden="true" tabindex="-1"></a>  train_logloss[r] <span class="ot">&lt;-</span></span>
+<span id="cb41-28"><a href="#cb41-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logloss</span>(train_data<span class="sc">$</span>Y, train_preds)</span>
+<span id="cb41-29"><a href="#cb41-29" aria-hidden="true" tabindex="-1"></a>  test_logloss[r] <span class="ot">&lt;-</span></span>
+<span id="cb41-30"><a href="#cb41-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logloss</span>(test_data<span class="sc">$</span>Y, test_preds)</span>
+<span id="cb41-31"><a href="#cb41-31" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb41-32"><a href="#cb41-32" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist+BodyPart training logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(train_logloss), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Dist+BodyPart training logloss: 0.307 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist+BodyPart testing logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(test_logloss), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist+BodyPart testing logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(test_logloss), <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Dist+BodyPart testing logloss: 0.308 </code></pre>
 </div>
@@ -1047,18 +1063,18 @@ Number of Fisher Scoring iterations: 6</code></pre>
 <p>Our most accurate model so far accounts for both shot distance and the body part used to attempt the shot. Taking a closer look at the assumed log-odds of a goal, however, reveals a potentially important limitation: the effect of distance is assumed to be the same for all shot-types. That is, the model assume that moving one yard further away decreases the log-odds of a goal of a right-footed shot by exactly the same amount as it would a header.</p>
 <p>Interactions between features in a regression model allow the effect of one factor to vary based on the value of another features. Using R’s formula interface, we can introduce interactions between two variables using <code>*</code>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">479</span>)</span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span></span>
-<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n =</span> n_train)</span>
-<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>test_data <span class="ot">&lt;-</span></span>
-<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">anti_join</span>(<span class="at">y =</span> train_data, <span class="at">by =</span> <span class="st">"id"</span>) </span>
-<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> </span>
-<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glm</span>(<span class="at">formula =</span> Y<span class="sc">~</span>DistToGoal <span class="sc">*</span> shot.body_part.name, </span>
-<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">data =</span> train_data, <span class="at">family =</span> <span class="fu">binomial</span>(<span class="st">"logit"</span>))</span>
-<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">479</span>)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n =</span> n_train)</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>test_data <span class="ot">&lt;-</span></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">anti_join</span>(<span class="at">y =</span> train_data, <span class="at">by =</span> <span class="st">"id"</span>) </span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> </span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glm</span>(<span class="at">formula =</span> Y<span class="sc">~</span>DistToGoal <span class="sc">*</span> shot.body_part.name, </span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">data =</span> train_data, <span class="at">family =</span> <span class="fu">binomial</span>(<span class="st">"logit"</span>))</span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -1105,42 +1121,42 @@ Number of Fisher Scoring iterations: 6</code></pre>
 <li><span class="math inline">\(\beta_{0} + \beta_{\textrm{RightFoot}} + (\beta_{\textrm{DistToGoal}} + \beta_{\textrm{DistToGoal:RightFoot}}) * d\)</span> if the shot was taken with the right foot.</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>n_sims <span class="ot">&lt;-</span> <span class="dv">100</span></span>
-<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>train_logloss <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims)</span>
-<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>test_logloss <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims)</span>
-<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(r <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_sims){</span>
-<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">479</span><span class="sc">+</span>r)</span>
-<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>  train_data <span class="ot">&lt;-</span></span>
-<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>    wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n =</span> n_train)</span>
-<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>  test_data <span class="ot">&lt;-</span></span>
-<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>    wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">anti_join</span>(<span class="at">y =</span> train_data, <span class="at">by =</span> <span class="st">"id"</span>) </span>
-<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y<span class="sc">~</span>DistToGoal<span class="sc">*</span>shot.body_part.name, </span>
-<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a>             <span class="at">data =</span> train_data, <span class="at">family =</span> <span class="fu">binomial</span>(<span class="st">"logit"</span>))</span>
-<span id="cb48-16"><a href="#cb48-16" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb48-17"><a href="#cb48-17" aria-hidden="true" tabindex="-1"></a>  train_preds <span class="ot">&lt;-</span></span>
-<span id="cb48-18"><a href="#cb48-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">predict</span>(<span class="at">object =</span> fit,</span>
-<span id="cb48-19"><a href="#cb48-19" aria-hidden="true" tabindex="-1"></a>            <span class="at">newdata =</span> train_data,</span>
-<span id="cb48-20"><a href="#cb48-20" aria-hidden="true" tabindex="-1"></a>            <span class="at">type =</span> <span class="st">"response"</span>)</span>
-<span id="cb48-21"><a href="#cb48-21" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb48-22"><a href="#cb48-22" aria-hidden="true" tabindex="-1"></a>  test_preds <span class="ot">&lt;-</span></span>
-<span id="cb48-23"><a href="#cb48-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">predict</span>(<span class="at">object =</span> fit,</span>
-<span id="cb48-24"><a href="#cb48-24" aria-hidden="true" tabindex="-1"></a>            <span class="at">newdata =</span> test_data,</span>
-<span id="cb48-25"><a href="#cb48-25" aria-hidden="true" tabindex="-1"></a>            <span class="at">type =</span> <span class="st">"response"</span>)</span>
-<span id="cb48-26"><a href="#cb48-26" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb48-27"><a href="#cb48-27" aria-hidden="true" tabindex="-1"></a>  train_logloss[r] <span class="ot">&lt;-</span></span>
-<span id="cb48-28"><a href="#cb48-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logloss</span>(train_data<span class="sc">$</span>Y, train_preds)</span>
-<span id="cb48-29"><a href="#cb48-29" aria-hidden="true" tabindex="-1"></a>  test_logloss[r] <span class="ot">&lt;-</span></span>
-<span id="cb48-30"><a href="#cb48-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logloss</span>(test_data<span class="sc">$</span>Y, test_preds)</span>
-<span id="cb48-31"><a href="#cb48-31" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb48-32"><a href="#cb48-32" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist*BodyPart training logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(train_logloss), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>n_sims <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>train_logloss <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims)</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>test_logloss <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims)</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(r <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_sims){</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">479</span><span class="sc">+</span>r)</span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>  train_data <span class="ot">&lt;-</span></span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>    wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n =</span> n_train)</span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>  test_data <span class="ot">&lt;-</span></span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>    wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">anti_join</span>(<span class="at">y =</span> train_data, <span class="at">by =</span> <span class="st">"id"</span>) </span>
+<span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-14"><a href="#cb47-14" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(Y<span class="sc">~</span>DistToGoal<span class="sc">*</span>shot.body_part.name, </span>
+<span id="cb47-15"><a href="#cb47-15" aria-hidden="true" tabindex="-1"></a>             <span class="at">data =</span> train_data, <span class="at">family =</span> <span class="fu">binomial</span>(<span class="st">"logit"</span>))</span>
+<span id="cb47-16"><a href="#cb47-16" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb47-17"><a href="#cb47-17" aria-hidden="true" tabindex="-1"></a>  train_preds <span class="ot">&lt;-</span></span>
+<span id="cb47-18"><a href="#cb47-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">predict</span>(<span class="at">object =</span> fit,</span>
+<span id="cb47-19"><a href="#cb47-19" aria-hidden="true" tabindex="-1"></a>            <span class="at">newdata =</span> train_data,</span>
+<span id="cb47-20"><a href="#cb47-20" aria-hidden="true" tabindex="-1"></a>            <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb47-21"><a href="#cb47-21" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb47-22"><a href="#cb47-22" aria-hidden="true" tabindex="-1"></a>  test_preds <span class="ot">&lt;-</span></span>
+<span id="cb47-23"><a href="#cb47-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">predict</span>(<span class="at">object =</span> fit,</span>
+<span id="cb47-24"><a href="#cb47-24" aria-hidden="true" tabindex="-1"></a>            <span class="at">newdata =</span> test_data,</span>
+<span id="cb47-25"><a href="#cb47-25" aria-hidden="true" tabindex="-1"></a>            <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb47-26"><a href="#cb47-26" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb47-27"><a href="#cb47-27" aria-hidden="true" tabindex="-1"></a>  train_logloss[r] <span class="ot">&lt;-</span></span>
+<span id="cb47-28"><a href="#cb47-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logloss</span>(train_data<span class="sc">$</span>Y, train_preds)</span>
+<span id="cb47-29"><a href="#cb47-29" aria-hidden="true" tabindex="-1"></a>  test_logloss[r] <span class="ot">&lt;-</span></span>
+<span id="cb47-30"><a href="#cb47-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logloss</span>(test_data<span class="sc">$</span>Y, test_preds)</span>
+<span id="cb47-31"><a href="#cb47-31" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb47-32"><a href="#cb47-32" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist*BodyPart training logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(train_logloss), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Dist*BodyPart training logloss: 0.3047 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist*BodyPart testing logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(test_logloss), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Dist*BodyPart testing logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(test_logloss), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Dist*BodyPart testing logloss: 0.3066 </code></pre>
 </div>
@@ -1150,7 +1166,7 @@ Number of Fisher Scoring iterations: 6</code></pre>
 </section>
 <section id="sec-rf" class="level2">
 <h2 class="anchored" data-anchor-id="sec-rf">Random Forests</h2>
-<p>Remember how we used the function <code>StatsBombR::allclean()</code> to apply some of StatsBomb’s suggested pre-processing? It turns out that this function creates several features related to shot attempt including<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>:</p>
+<p>Remember how we used the function <code>StatsBombR::allclean()</code> to apply some of StatsBomb’s suggested pre-processing? It turns out that this function creates several features related to shot attempt including<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>:</p>
 <ul>
 <li>Distances from the shot the center of the goal line (<code>DistToGoal</code>); from the shot to the goal keeper (<code>DistSGK</code>); from the goalkeeper to the center of the goal line (<code>DistToGK</code>)</li>
 <li>The horizontal angles between the shot and goalkeeper to the center of the goal line (<code>AngleToGoal</code> &amp; <code>AngleToKeeper</code>) and the difference between these angles (<code>AngleDeviation</code>)</li>
@@ -1161,53 +1177,55 @@ Number of Fisher Scoring iterations: 6</code></pre>
 </ul>
 <p>The code below pulls out several of these features and creates a training/testing split</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>shot_vars <span class="ot">&lt;-</span></span>
-<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">"Y"</span>,</span>
-<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"shot.type.name"</span>, </span>
-<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"shot.technique.name"</span>, <span class="st">"shot.body_part.name"</span>,</span>
-<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"DistToGoal"</span>, <span class="st">"DistToKeeper"</span>, <span class="co"># dist. to keeper is distance from GK to goal</span></span>
-<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"AngleToGoal"</span>, <span class="st">"AngleToKeeper"</span>,</span>
-<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"AngleDeviation"</span>, </span>
-<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"avevelocity"</span>,<span class="st">"density"</span>, <span class="st">"density.incone"</span>,</span>
-<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"distance.ToD1"</span>, <span class="st">"distance.ToD2"</span>,</span>
-<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"AttackersBehindBall"</span>, <span class="st">"DefendersBehindBall"</span>,</span>
-<span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"DefendersInCone"</span>, <span class="st">"InCone.GK"</span>, <span class="st">"DefArea"</span>)</span>
-<span id="cb52-12"><a href="#cb52-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-13"><a href="#cb52-13" aria-hidden="true" tabindex="-1"></a>wi_shots <span class="ot">&lt;-</span></span>
-<span id="cb52-14"><a href="#cb52-14" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb52-15"><a href="#cb52-15" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb52-16"><a href="#cb52-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">shot.type.name =</span> <span class="fu">factor</span>(shot.type.name),</span>
-<span id="cb52-17"><a href="#cb52-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">shot.body_part.name =</span> shot.body_part.name,</span>
-<span id="cb52-18"><a href="#cb52-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">shot.technique.name =</span> shot.technique.name)</span>
-<span id="cb52-19"><a href="#cb52-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-20"><a href="#cb52-20" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">479</span>)</span>
-<span id="cb52-21"><a href="#cb52-21" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span></span>
-<span id="cb52-22"><a href="#cb52-22" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb52-23"><a href="#cb52-23" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n =</span> n_train) <span class="sc">|&gt;</span></span>
-<span id="cb52-24"><a href="#cb52-24" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(dplyr<span class="sc">::</span><span class="fu">all_of</span>(<span class="fu">c</span>(<span class="st">"id"</span>,shot_vars)))</span>
-<span id="cb52-25"><a href="#cb52-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-26"><a href="#cb52-26" aria-hidden="true" tabindex="-1"></a>test_data <span class="ot">&lt;-</span></span>
-<span id="cb52-27"><a href="#cb52-27" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb52-28"><a href="#cb52-28" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">anti_join</span>(<span class="at">y =</span> train_data, <span class="at">by =</span> <span class="st">"id"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb52-29"><a href="#cb52-29" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(dplyr<span class="sc">::</span><span class="fu">all_of</span>(<span class="fu">c</span>(<span class="st">"id"</span>, shot_vars)))</span>
-<span id="cb52-30"><a href="#cb52-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-31"><a href="#cb52-31" aria-hidden="true" tabindex="-1"></a>y_train <span class="ot">&lt;-</span> train_data<span class="sc">$</span>Y</span>
-<span id="cb52-32"><a href="#cb52-32" aria-hidden="true" tabindex="-1"></a>y_test <span class="ot">&lt;-</span> test_data<span class="sc">$</span>Y</span>
-<span id="cb52-33"><a href="#cb52-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-34"><a href="#cb52-34" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span></span>
-<span id="cb52-35"><a href="#cb52-35" aria-hidden="true" tabindex="-1"></a>  train_data <span class="sc">|&gt;</span></span>
-<span id="cb52-36"><a href="#cb52-36" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">Y =</span> <span class="fu">factor</span>(Y, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>))) <span class="sc">|&gt;</span></span>
-<span id="cb52-37"><a href="#cb52-37" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>id)</span>
-<span id="cb52-38"><a href="#cb52-38" aria-hidden="true" tabindex="-1"></a>test_data <span class="ot">&lt;-</span></span>
-<span id="cb52-39"><a href="#cb52-39" aria-hidden="true" tabindex="-1"></a>  test_data <span class="sc">|&gt;</span></span>
-<span id="cb52-40"><a href="#cb52-40" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">Y =</span> <span class="fu">factor</span>(Y, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>))) <span class="sc">|&gt;</span></span>
-<span id="cb52-41"><a href="#cb52-41" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>id)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>shot_vars <span class="ot">&lt;-</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">"Y"</span>,</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"shot.type.name"</span>, </span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"shot.technique.name"</span>, <span class="st">"shot.body_part.name"</span>,</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"DistToGoal"</span>, <span class="st">"DistToKeeper"</span>, <span class="co"># dist. to keeper is distance from GK to goal</span></span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"AngleToGoal"</span>, <span class="st">"AngleToKeeper"</span>,</span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"AngleDeviation"</span>, </span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"avevelocity"</span>,<span class="st">"density"</span>, <span class="st">"density.incone"</span>,</span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"distance.ToD1"</span>, <span class="st">"distance.ToD2"</span>,</span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"AttackersBehindBall"</span>, <span class="st">"DefendersBehindBall"</span>,</span>
+<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"DefendersInCone"</span>, <span class="st">"InCone.GK"</span>, <span class="st">"DefArea"</span>)</span>
+<span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-13"><a href="#cb51-13" aria-hidden="true" tabindex="-1"></a>wi_shots <span class="ot">&lt;-</span></span>
+<span id="cb51-14"><a href="#cb51-14" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb51-15"><a href="#cb51-15" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb51-16"><a href="#cb51-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">shot.type.name =</span> <span class="fu">factor</span>(shot.type.name),</span>
+<span id="cb51-17"><a href="#cb51-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">shot.body_part.name =</span> shot.body_part.name,</span>
+<span id="cb51-18"><a href="#cb51-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">shot.technique.name =</span> shot.technique.name)</span>
+<span id="cb51-19"><a href="#cb51-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-20"><a href="#cb51-20" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">479</span>)</span>
+<span id="cb51-21"><a href="#cb51-21" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span></span>
+<span id="cb51-22"><a href="#cb51-22" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb51-23"><a href="#cb51-23" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n =</span> n_train) <span class="sc">|&gt;</span></span>
+<span id="cb51-24"><a href="#cb51-24" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(dplyr<span class="sc">::</span><span class="fu">all_of</span>(<span class="fu">c</span>(<span class="st">"id"</span>,shot_vars)))</span>
+<span id="cb51-25"><a href="#cb51-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-26"><a href="#cb51-26" aria-hidden="true" tabindex="-1"></a>test_data <span class="ot">&lt;-</span></span>
+<span id="cb51-27"><a href="#cb51-27" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb51-28"><a href="#cb51-28" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">anti_join</span>(<span class="at">y =</span> train_data, <span class="at">by =</span> <span class="st">"id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb51-29"><a href="#cb51-29" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(dplyr<span class="sc">::</span><span class="fu">all_of</span>(<span class="fu">c</span>(<span class="st">"id"</span>, shot_vars)))</span>
+<span id="cb51-30"><a href="#cb51-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-31"><a href="#cb51-31" aria-hidden="true" tabindex="-1"></a>y_train <span class="ot">&lt;-</span> train_data<span class="sc">$</span>Y</span>
+<span id="cb51-32"><a href="#cb51-32" aria-hidden="true" tabindex="-1"></a>y_test <span class="ot">&lt;-</span> test_data<span class="sc">$</span>Y</span>
+<span id="cb51-33"><a href="#cb51-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-34"><a href="#cb51-34" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span></span>
+<span id="cb51-35"><a href="#cb51-35" aria-hidden="true" tabindex="-1"></a>  train_data <span class="sc">|&gt;</span></span>
+<span id="cb51-36"><a href="#cb51-36" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">Y =</span> <span class="fu">factor</span>(Y, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb51-37"><a href="#cb51-37" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>id)</span>
+<span id="cb51-38"><a href="#cb51-38" aria-hidden="true" tabindex="-1"></a>test_data <span class="ot">&lt;-</span></span>
+<span id="cb51-39"><a href="#cb51-39" aria-hidden="true" tabindex="-1"></a>  test_data <span class="sc">|&gt;</span></span>
+<span id="cb51-40"><a href="#cb51-40" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">Y =</span> <span class="fu">factor</span>(Y, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb51-41"><a href="#cb51-41" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>id)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>How much more predictive accuracy can we squeeze out of an XG model when we account for all these variables? While it is tempting to continue fitting logistic regression models, these models make fairly strong assumptions about how the log-odds of a goal change as we vary the features. Moreover, it becomes increasingly difficult to specify interactions, especially between continuous/numerical factors.</p>
-<p><strong>Random forests</strong> is a powerful regression approach that avoids specifying functional forms and allows for high-order interactions. At a high-level, a random forest model approximates a regression function <span class="math inline">\(\mathbb{E}[Y \vert \boldsymbol{\mathbf{X}}]\)</span> using the sum of several piece-wise constant step functions. <!-- include some more information about random forests --></p>
-<section id="regression-trees-ensembles-sec-tree-background" class="level3">
-<h3 class="anchored" data-anchor-id="regression-trees-ensembles-sec-tree-background">Regression Trees &amp; Ensembles #{sec-tree-background}</h3>
+<p><strong>Random forests</strong> is a powerful regression approach that avoids specifying functional forms and allows for high-order interactions. At a high-level, a random forest model approximates a regression function <span class="math inline">\(\mathbb{E}[Y \vert \boldsymbol{\mathbf{X}}]\)</span> using the sum of several piece-wise constant step functions.</p>
 <!--
+### Regression Trees & Ensembles #{sec-tree-background}
+
+
+
   Fact: just about every function of $p$ inputs can be approximated arbitrarily well
   using a piecewise constant step-function
   Sums-of-trees
@@ -1215,7 +1233,6 @@ Number of Fisher Scoring iterations: 6</code></pre>
   RF is one way to do this; technical details are beyond the scope of this course 
  
 -->
-</section>
 <section id="sec-fit-rf" class="level3">
 <h3 class="anchored" data-anchor-id="sec-fit-rf">Fitting Random Forests Models</h3>
 <p>In this course, we will fit random forests models using the <a href="http://imbs-hl.github.io/ranger/"><strong>ranger</strong> package</a>. The main function of that package is called <code>ranger()</code>. Its syntax is somewhat similar to <code>glm()</code> insofar as both functions require us to specify a formula and pass our data in as a data frame (or tibble). Unlike <code>glm()</code>, which required us to specify the argument <code>family = binomial("logit")</code> to fit binary outcomes, <code>ranger()</code> requires us to specify the argument <code>probability=TRUE</code>. This signals to the function that we want predictions on the probability scale and not the <span class="math inline">\(\{0,1\}\)</span>-outcome scale.</p>
@@ -1252,61 +1269,61 @@ Number of Fisher Scoring iterations: 6</code></pre>
 </dl>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.106593
-[1] 0.2697499</code></pre>
+<pre><code>[1] 0.1135258
+[1] 0.2522654</code></pre>
 </div>
 </div>
 <p>At least for this training/testing split, our in-sample log-loss is <strong>much</strong> smaller than our out-of-sample log-loss. This is not at all surprising: flexible regression models like random forests are trained to predict the in-sample data and so we should expect to see smaller training errors than testing errors.</p>
 <p>Repeating these calculations over 100 training/testing splits, we can conclude that our more flexible random forest model, which accounts for many more features and can accommodate many more interaction terms than our simple logistic regression model, out-performs the logistic regression models.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>n_sims <span class="ot">&lt;-</span> <span class="dv">100</span></span>
-<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>train_logloss <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims)</span>
-<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>test_logloss <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims)</span>
-<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(r <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_sims){</span>
-<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">479</span>)</span>
-<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>  train_data <span class="ot">&lt;-</span></span>
-<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>    wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n =</span> n_train) <span class="sc">|&gt;</span></span>
-<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(dplyr<span class="sc">::</span><span class="fu">all_of</span>(<span class="fu">c</span>(<span class="st">"id"</span>,shot_vars)))</span>
-<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-12"><a href="#cb54-12" aria-hidden="true" tabindex="-1"></a>  test_data <span class="ot">&lt;-</span></span>
-<span id="cb54-13"><a href="#cb54-13" aria-hidden="true" tabindex="-1"></a>    wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb54-14"><a href="#cb54-14" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">anti_join</span>(<span class="at">y =</span> train_data, <span class="at">by =</span> <span class="st">"id"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb54-15"><a href="#cb54-15" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(dplyr<span class="sc">::</span><span class="fu">all_of</span>(<span class="fu">c</span>(<span class="st">"id"</span>, shot_vars)))</span>
-<span id="cb54-16"><a href="#cb54-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-17"><a href="#cb54-17" aria-hidden="true" tabindex="-1"></a>  y_train <span class="ot">&lt;-</span> train_data<span class="sc">$</span>Y</span>
-<span id="cb54-18"><a href="#cb54-18" aria-hidden="true" tabindex="-1"></a>  y_test <span class="ot">&lt;-</span> test_data<span class="sc">$</span>Y</span>
-<span id="cb54-19"><a href="#cb54-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-20"><a href="#cb54-20" aria-hidden="true" tabindex="-1"></a>  train_data <span class="ot">&lt;-</span></span>
-<span id="cb54-21"><a href="#cb54-21" aria-hidden="true" tabindex="-1"></a>    train_data <span class="sc">|&gt;</span></span>
-<span id="cb54-22"><a href="#cb54-22" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">Y =</span> <span class="fu">factor</span>(Y, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>))) <span class="sc">|&gt;</span></span>
-<span id="cb54-23"><a href="#cb54-23" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>id)</span>
-<span id="cb54-24"><a href="#cb54-24" aria-hidden="true" tabindex="-1"></a>  test_data <span class="ot">&lt;-</span></span>
-<span id="cb54-25"><a href="#cb54-25" aria-hidden="true" tabindex="-1"></a>    test_data <span class="sc">|&gt;</span></span>
-<span id="cb54-26"><a href="#cb54-26" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">Y =</span> <span class="fu">factor</span>(Y, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>))) <span class="sc">|&gt;</span></span>
-<span id="cb54-27"><a href="#cb54-27" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>id)</span>
-<span id="cb54-28"><a href="#cb54-28" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb54-29"><a href="#cb54-29" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> ranger<span class="sc">::</span><span class="fu">ranger</span>(</span>
-<span id="cb54-30"><a href="#cb54-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">formula =</span> Y<span class="sc">~</span>.,</span>
-<span id="cb54-31"><a href="#cb54-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> train_data, </span>
-<span id="cb54-32"><a href="#cb54-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">probability =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb54-33"><a href="#cb54-33" aria-hidden="true" tabindex="-1"></a>  train_preds <span class="ot">&lt;-</span> </span>
-<span id="cb54-34"><a href="#cb54-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">predict</span>(<span class="at">object =</span> fit, <span class="at">data =</span> train_data)<span class="sc">$</span>predictions[,<span class="dv">2</span>]</span>
-<span id="cb54-35"><a href="#cb54-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-36"><a href="#cb54-36" aria-hidden="true" tabindex="-1"></a>  test_preds <span class="ot">&lt;-</span> </span>
-<span id="cb54-37"><a href="#cb54-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">predict</span>(<span class="at">object =</span> fit, <span class="at">data =</span> test_data)<span class="sc">$</span>predictions[,<span class="dv">2</span>]</span>
-<span id="cb54-38"><a href="#cb54-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-39"><a href="#cb54-39" aria-hidden="true" tabindex="-1"></a>  train_logloss[r] <span class="ot">&lt;-</span> <span class="fu">logloss</span>(y_train, train_preds)</span>
-<span id="cb54-40"><a href="#cb54-40" aria-hidden="true" tabindex="-1"></a>  test_logloss[r] <span class="ot">&lt;-</span> <span class="fu">logloss</span>(y_test, test_preds)</span>
-<span id="cb54-41"><a href="#cb54-41" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb54-42"><a href="#cb54-42" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"RandomForest training logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(train_logloss), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>n_sims <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>train_logloss <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims)</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>test_logloss <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims)</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(r <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_sims){</span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">479</span>)</span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>  train_data <span class="ot">&lt;-</span></span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>    wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n =</span> n_train) <span class="sc">|&gt;</span></span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(dplyr<span class="sc">::</span><span class="fu">all_of</span>(<span class="fu">c</span>(<span class="st">"id"</span>,shot_vars)))</span>
+<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-12"><a href="#cb53-12" aria-hidden="true" tabindex="-1"></a>  test_data <span class="ot">&lt;-</span></span>
+<span id="cb53-13"><a href="#cb53-13" aria-hidden="true" tabindex="-1"></a>    wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb53-14"><a href="#cb53-14" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">anti_join</span>(<span class="at">y =</span> train_data, <span class="at">by =</span> <span class="st">"id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb53-15"><a href="#cb53-15" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(dplyr<span class="sc">::</span><span class="fu">all_of</span>(<span class="fu">c</span>(<span class="st">"id"</span>, shot_vars)))</span>
+<span id="cb53-16"><a href="#cb53-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-17"><a href="#cb53-17" aria-hidden="true" tabindex="-1"></a>  y_train <span class="ot">&lt;-</span> train_data<span class="sc">$</span>Y</span>
+<span id="cb53-18"><a href="#cb53-18" aria-hidden="true" tabindex="-1"></a>  y_test <span class="ot">&lt;-</span> test_data<span class="sc">$</span>Y</span>
+<span id="cb53-19"><a href="#cb53-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-20"><a href="#cb53-20" aria-hidden="true" tabindex="-1"></a>  train_data <span class="ot">&lt;-</span></span>
+<span id="cb53-21"><a href="#cb53-21" aria-hidden="true" tabindex="-1"></a>    train_data <span class="sc">|&gt;</span></span>
+<span id="cb53-22"><a href="#cb53-22" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">Y =</span> <span class="fu">factor</span>(Y, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb53-23"><a href="#cb53-23" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>id)</span>
+<span id="cb53-24"><a href="#cb53-24" aria-hidden="true" tabindex="-1"></a>  test_data <span class="ot">&lt;-</span></span>
+<span id="cb53-25"><a href="#cb53-25" aria-hidden="true" tabindex="-1"></a>    test_data <span class="sc">|&gt;</span></span>
+<span id="cb53-26"><a href="#cb53-26" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">Y =</span> <span class="fu">factor</span>(Y, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb53-27"><a href="#cb53-27" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>id)</span>
+<span id="cb53-28"><a href="#cb53-28" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb53-29"><a href="#cb53-29" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> ranger<span class="sc">::</span><span class="fu">ranger</span>(</span>
+<span id="cb53-30"><a href="#cb53-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">formula =</span> Y<span class="sc">~</span>.,</span>
+<span id="cb53-31"><a href="#cb53-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> train_data, </span>
+<span id="cb53-32"><a href="#cb53-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">probability =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb53-33"><a href="#cb53-33" aria-hidden="true" tabindex="-1"></a>  train_preds <span class="ot">&lt;-</span> </span>
+<span id="cb53-34"><a href="#cb53-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">predict</span>(<span class="at">object =</span> fit, <span class="at">data =</span> train_data)<span class="sc">$</span>predictions[,<span class="dv">2</span>]</span>
+<span id="cb53-35"><a href="#cb53-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-36"><a href="#cb53-36" aria-hidden="true" tabindex="-1"></a>  test_preds <span class="ot">&lt;-</span> </span>
+<span id="cb53-37"><a href="#cb53-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">predict</span>(<span class="at">object =</span> fit, <span class="at">data =</span> test_data)<span class="sc">$</span>predictions[,<span class="dv">2</span>]</span>
+<span id="cb53-38"><a href="#cb53-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-39"><a href="#cb53-39" aria-hidden="true" tabindex="-1"></a>  train_logloss[r] <span class="ot">&lt;-</span> <span class="fu">logloss</span>(y_train, train_preds)</span>
+<span id="cb53-40"><a href="#cb53-40" aria-hidden="true" tabindex="-1"></a>  test_logloss[r] <span class="ot">&lt;-</span> <span class="fu">logloss</span>(y_test, test_preds)</span>
+<span id="cb53-41"><a href="#cb53-41" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb53-42"><a href="#cb53-42" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"RandomForest training logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(train_logloss), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>RandomForest training logloss: 0.1061 </code></pre>
+<pre><code>RandomForest training logloss: 0.1135 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"RandomForest testing logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(test_logloss), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"RandomForest testing logloss:"</span>, <span class="fu">round</span>(<span class="fu">mean</span>(test_logloss), <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>RandomForest testing logloss: 0.2517 </code></pre>
+<pre><code>RandomForest testing logloss: 0.2523 </code></pre>
 </div>
 </div>
 </section>
@@ -1314,20 +1331,20 @@ Number of Fisher Scoring iterations: 6</code></pre>
 <h3 class="anchored" data-anchor-id="sec-comparison">Comparison to StatsBomb’s XG Model</h3>
 <p>Now that we have a much more predictive model, we can compare our model estimates to those from StatsBomb’s proprietary model. In the code below, we re-fit a random forests model to the whole dataset. We then plot our XG estimates against StatsBomb’s.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span></span>
-<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(dplyr<span class="sc">::</span><span class="fu">all_of</span>(<span class="fu">c</span>(<span class="st">"id"</span>,shot_vars)))</span>
-<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>full_rf_fit <span class="ot">&lt;-</span></span>
-<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a>  ranger<span class="sc">::</span><span class="fu">ranger</span>(<span class="at">formula =</span> Y<span class="sc">~</span>.,<span class="at">data =</span> train_data, <span class="at">probability =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a>preds <span class="ot">&lt;-</span> <span class="fu">predict</span>(<span class="at">object =</span> fit, <span class="at">data =</span> train_data)<span class="sc">$</span>predictions[,<span class="dv">2</span>]</span>
-<span id="cb58-9"><a href="#cb58-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb58-10"><a href="#cb58-10" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>), <span class="at">mgp =</span> <span class="fu">c</span>(<span class="fl">1.8</span>, <span class="fl">0.5</span>, <span class="dv">0</span>))</span>
-<span id="cb58-11"><a href="#cb58-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(wi_shots<span class="sc">$</span>shot.statsbomb_xg, preds,</span>
-<span id="cb58-12"><a href="#cb58-12" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">cex =</span> <span class="fl">0.5</span>, <span class="at">col =</span> <span class="fu">rgb</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>, <span class="fl">0.25</span>),</span>
-<span id="cb58-13"><a href="#cb58-13" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
-<span id="cb58-14"><a href="#cb58-14" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"StatsBomb's XG"</span>, <span class="at">ylab =</span> <span class="st">"Our XG"</span>, <span class="at">main =</span> <span class="st">'Comparison of XG estimates'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>train_data <span class="ot">&lt;-</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(dplyr<span class="sc">::</span><span class="fu">all_of</span>(<span class="fu">c</span>(<span class="st">"id"</span>,shot_vars)))</span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>full_rf_fit <span class="ot">&lt;-</span></span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>  ranger<span class="sc">::</span><span class="fu">ranger</span>(<span class="at">formula =</span> Y<span class="sc">~</span>.,<span class="at">data =</span> train_data, <span class="at">probability =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a>preds <span class="ot">&lt;-</span> <span class="fu">predict</span>(<span class="at">object =</span> fit, <span class="at">data =</span> train_data)<span class="sc">$</span>predictions[,<span class="dv">2</span>]</span>
+<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>), <span class="at">mgp =</span> <span class="fu">c</span>(<span class="fl">1.8</span>, <span class="fl">0.5</span>, <span class="dv">0</span>))</span>
+<span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(wi_shots<span class="sc">$</span>shot.statsbomb_xg, preds,</span>
+<span id="cb57-12"><a href="#cb57-12" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">cex =</span> <span class="fl">0.5</span>, <span class="at">col =</span> <span class="fu">rgb</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>, <span class="fl">0.25</span>),</span>
+<span id="cb57-13"><a href="#cb57-13" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),</span>
+<span id="cb57-14"><a href="#cb57-14" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"StatsBomb's XG"</span>, <span class="at">ylab =</span> <span class="st">"Our XG"</span>, <span class="at">main =</span> <span class="st">'Comparison of XG estimates'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -1359,7 +1376,8 @@ Number of Fisher Scoring iterations: 6</code></pre>
 <ol>
 <li id="fn1"><p>Our notation nods to the fact that predicted XG is just a predicted <strong>p</strong>robability<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>We often convert <em>categorical</em> features like <code>shot.body_part.name</code> or <code>shot.technique.name</code> into several numerical features using <a href="https://en.wikipedia.org/wiki/One-hot#Machine_learning_and_statistics">one-hot encoding</a>.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>see <a href="https://github.com/statsbomb/open-data/issues/3#issuecomment-436116159">this issue in the StatsBomb’s opendata GitHub repo</a> for more information about the variable definitions. The code to compute these values is available <a href="https://github.com/statsbomb/StatsBombR/blob/master/R/shotinfo.R#L8-L16">here</a>. Note that in the StatsBomb coordinate system, the center of the goal line is at (120,4).<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>These are known as <em>genearlized linear models</em> and include things like logistic regression and Poisson regression. See <a href="https://bookdown.org/roback/bookdown-BeyondMLR/ch-glms.html">Chatper 5</a> of <em>Beyond Multiple Linear Regression</em> for a nice overview.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>see <a href="https://github.com/statsbomb/open-data/issues/3#issuecomment-436116159">this issue in the StatsBomb’s opendata GitHub repo</a> for more information about the variable definitions. The code to compute these values is available <a href="https://github.com/statsbomb/StatsBombR/blob/master/R/shotinfo.R#L8-L16">here</a>. Note that in the StatsBomb coordinate system, the center of the goal line is at (120,4).<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
