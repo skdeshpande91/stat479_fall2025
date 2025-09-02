@@ -735,23 +735,53 @@ While it is tempting to continue fitting logistic regression models, these model
 Moreover, it becomes increasingly difficult to specify interactions, especially between continuous/numerical factors.
 
 **Random forests** is a powerful regression approach that avoids specifying functional forms and allows for high-order interactions.
-At a high-level, a random forest model approximates a regression function $\mathbb{E}[Y \vert \boldsymbol{\mathbf{X}}]$ using the sum of several piece-wise constant step functions.
+At a high-level, a random forest model approximates a regression function $\mathbb{E}[Y \vert \boldsymbol{\mathbf{X}}]$ using the sum of several *regression trees* (which are just piece-wise constant step functions).
 
-<!--
-### Regression Trees & Ensembles #{sec-tree-background}
+### Regression Trees & Ensembles
 
+@fig-tree shows an example of a regression tree defined over the space $[0,1]^{2}$.
+Regression trees represent piece-wise constant step-functions (@fig-partition).
+To see this, imagine taking a point $\boldsymbol{\mathbf{x}} = (x_{1}, \ldots, x_{p})$ and tracing a path from the root of the tree --- that is, the node at the very top --- down to one of the terminal leaf nodes by following the decision rules.
+Specifically, when the path encounters an interior node associated with the rule $\{X_{j} < c\}$, the path proceeds to the left child if $x_{j} < c$ and the right child otherwise.
+When the path reaches a leaf $\ell$, we output the associated scalar $\mu_{\ell}.$
+For instance, in the case of @fig-partition, the path associated with every point in the yellow rectangle terminates in the yellow leaf node in @fig-tree
 
+:::{#fig-regression-tree layout-ncol=2}
+![Regression tree](figures/regression_tree.png){#fig-tree}
+![Step function represented by the tree](figures/partition.png){#fig-partition}
 
-  Fact: just about every function of $p$ inputs can be approximated arbitrarily well
-  using a piecewise constant step-function
-  Sums-of-trees
-  
-  RF is one way to do this; technical details are beyond the scope of this course 
- 
--->
+Regression trees are piecewise-constant step-functions
+:::
+
+It turns out that regression trees are *universal function approximators*: for just about every function with $p$ inputs, there is a regression tree that can approximate the function to an arbitrarily small tolerance.
+@fig-tree-approx illustrates this: the true function is shown in pink and various tree approximations are shown in green.
+
+![As the number of leaves increases (i.e., tree becomes deeper), we obtain more accurate approximations](figures/tree_appx_wide.png)
+So, at least conceptually, this makes regression trees a very powerful tool in Statistics: rather than trying to pre-specify the functional form of $\mathbb{E}[Y \vert \boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}]$ --- that is, manually specifying non-linearities or high-order interactions in a (generalized) linear model --- we can instead focus on learning a regression trees[^treelearn] that fits the data well. 
+
+[^treelearn]: That is, learn the number and arrangement of the interior and leaf nodes as well as the decision rules and leaf outputs
+
+As suggested by @fig-tree-approx, we often need a very deep tree with lots of leaves to get a good approximation.
+Luckily, it turns out that very complicated trees can be decomposed into sums of simpler trees.
+In @fig-sum-trees, we write the somewhat complex tree on the left as a sum of three simpler trees on the right[^transparency].
+We typically refer to a collection of simple regression trees as an ensemble.
+Methods that make predictions using ensembles of regression trees often out-perform more complicated deep-learning and neural-network models[^tabular]
+
+[^tabular]: The canonical reference is @Grinsztajn2022 ([link](https://arxiv.org/abs/2207.08815)).
+
+![Complex trees can be represented as sums of simpler trees](figures/sum_of_trees.png)
+
+[^transparency]: To verify this decomposition is correct, imagine stacking the three partitions on top of each other. 
 
 
 ### Fitting Random Forests Models {#sec-fit-rf}
+@Brieman2001 introduced the random forests algorithm for estimating a collection of regression trees that, when added up, provided a good approximation to an unknown regression function[^rfpaper].
+The technical details of this algorithm are beyond the score of this course[^443]
+
+[^rfpaper]: You can read the full paper [here](https://link.springer.com/article/10.1023/A:1010933404324)
+
+[^443]: If you want to learn more about regression trees, consider taking STAT 443. 
+
 In this course, we will fit random forests models using the [**ranger** package](http://imbs-hl.github.io/ranger/).
 The main function of that package is called `ranger()`.
 Its syntax is somewhat similar to `glm()` insofar as both functions require us to specify a formula and pass our data in as a data frame (or tibble).

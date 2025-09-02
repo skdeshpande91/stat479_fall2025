@@ -55,7 +55,27 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -371,6 +391,7 @@ window.Quarto = {
   </ul></li>
   <li><a href="#sec-rf" id="toc-sec-rf" class="nav-link" data-scroll-target="#sec-rf">Random Forests</a>
   <ul class="collapse">
+  <li><a href="#regression-trees-ensembles" id="toc-regression-trees-ensembles" class="nav-link" data-scroll-target="#regression-trees-ensembles">Regression Trees &amp; Ensembles</a></li>
   <li><a href="#sec-fit-rf" id="toc-sec-fit-rf" class="nav-link" data-scroll-target="#sec-fit-rf">Fitting Random Forests Models</a></li>
   <li><a href="#sec-comparison" id="toc-sec-comparison" class="nav-link" data-scroll-target="#sec-comparison">Comparison to StatsBomb’s XG Model</a></li>
   </ul></li>
@@ -1220,21 +1241,37 @@ Number of Fisher Scoring iterations: 6</code></pre>
 <span id="cb51-41"><a href="#cb51-41" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>id)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>How much more predictive accuracy can we squeeze out of an XG model when we account for all these variables? While it is tempting to continue fitting logistic regression models, these models make fairly strong assumptions about how the log-odds of a goal change as we vary the features. Moreover, it becomes increasingly difficult to specify interactions, especially between continuous/numerical factors.</p>
-<p><strong>Random forests</strong> is a powerful regression approach that avoids specifying functional forms and allows for high-order interactions. At a high-level, a random forest model approximates a regression function <span class="math inline">\(\mathbb{E}[Y \vert \boldsymbol{\mathbf{X}}]\)</span> using the sum of several piece-wise constant step functions.</p>
-<!--
-### Regression Trees & Ensembles #{sec-tree-background}
-
-
-
-  Fact: just about every function of $p$ inputs can be approximated arbitrarily well
-  using a piecewise constant step-function
-  Sums-of-trees
-  
-  RF is one way to do this; technical details are beyond the scope of this course 
- 
--->
+<p><strong>Random forests</strong> is a powerful regression approach that avoids specifying functional forms and allows for high-order interactions. At a high-level, a random forest model approximates a regression function <span class="math inline">\(\mathbb{E}[Y \vert \boldsymbol{\mathbf{X}}]\)</span> using the sum of several <em>regression trees</em> (which are just piece-wise constant step functions).</p>
+<section id="regression-trees-ensembles" class="level3">
+<h3 class="anchored" data-anchor-id="regression-trees-ensembles">Regression Trees &amp; Ensembles</h3>
+<p><strong>?@fig-tree</strong> shows an example of a regression tree defined over the space <span class="math inline">\([0,1]^{2}\)</span>. Regression trees represent piece-wise constant step-functions (<strong>?@fig-partition</strong>). To see this, imagine taking a point <span class="math inline">\(\boldsymbol{\mathbf{x}} = (x_{1}, \ldots, x_{p})\)</span> and tracing a path from the root of the tree — that is, the node at the very top — down to one of the terminal leaf nodes by following the decision rules. Specifically, when the path encounters an interior node associated with the rule <span class="math inline">\(\{X_{j} &lt; c\}\)</span>, the path proceeds to the left child if <span class="math inline">\(x_{j} &lt; c\)</span> and the right child otherwise. When the path reaches a leaf <span class="math inline">\(\ell\)</span>, we output the associated scalar <span class="math inline">\(\mu_{\ell}.\)</span> For instance, in the case of <strong>?@fig-partition</strong>, the path associated with every point in the yellow rectangle terminates in the yellow leaf node in <strong>?@fig-tree</strong></p>
+<div id="fig-regression-tree" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-regression-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<a href="figures/regression_tree.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: Regression trees are piecewise-constant step-functions"><img src="figures/regression_tree.png" id="fig-tree" class="img-fluid figure-img"></a>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-regression-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Regression trees are piecewise-constant step-functions
+</figcaption>
+</figure>
+</div>
+<p>It turns out that regression trees are <em>universal function approximators</em>: for just about every function with <span class="math inline">\(p\)</span> inputs, there is a regression tree that can approximate the function to an arbitrarily small tolerance. <strong>?@fig-tree-approx</strong> illustrates this: the true function is shown in pink and various tree approximations are shown in green.</p>
+<p><img src="figures/tree_appx_wide.png" class="img-fluid" alt="As the number of leaves increases (i.e., tree becomes deeper), we obtain more accurate approximations"> So, at least conceptually, this makes regression trees a very powerful tool in Statistics: rather than trying to pre-specify the functional form of <span class="math inline">\(\mathbb{E}[Y \vert \boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}]\)</span> — that is, manually specifying non-linearities or high-order interactions in a (generalized) linear model — we can instead focus on learning a regression trees<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> that fits the data well.</p>
+<p>As suggested by <strong>?@fig-tree-approx</strong>, we often need a very deep tree with lots of leaves to get a good approximation. Luckily, it turns out that very complicated trees can be decomposed into sums of simpler trees. In <strong>?@fig-sum-trees</strong>, we write the somewhat complex tree on the left as a sum of three simpler trees on the right<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>. We typically refer to a collection of simple regression trees as an ensemble. Methods that make predictions using ensembles of regression trees often out-perform more complicated deep-learning and neural-network models<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="figures/sum_of_trees.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Complex trees can be represented as sums of simpler trees"><img src="figures/sum_of_trees.png" class="img-fluid figure-img" alt="Complex trees can be represented as sums of simpler trees"></a></p>
+<figcaption>Complex trees can be represented as sums of simpler trees</figcaption>
+</figure>
+</div>
+</section>
 <section id="sec-fit-rf" class="level3">
 <h3 class="anchored" data-anchor-id="sec-fit-rf">Fitting Random Forests Models</h3>
+<p><span class="citation" data-cites="Brieman2001">Breiman (<a href="#ref-Brieman2001" role="doc-biblioref">2001</a>)</span> introduced the random forests algorithm for estimating a collection of regression trees that, when added up, provided a good approximation to an unknown regression function<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a>. The technical details of this algorithm are beyond the score of this course<a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a></p>
 <p>In this course, we will fit random forests models using the <a href="http://imbs-hl.github.io/ranger/"><strong>ranger</strong> package</a>. The main function of that package is called <code>ranger()</code>. Its syntax is somewhat similar to <code>glm()</code> insofar as both functions require us to specify a formula and pass our data in as a data frame (or tibble). Unlike <code>glm()</code>, which required us to specify the argument <code>family = binomial("logit")</code> to fit binary outcomes, <code>ranger()</code> requires us to specify the argument <code>probability=TRUE</code>. This signals to the function that we want predictions on the probability scale and not the <span class="math inline">\(\{0,1\}\)</span>-outcome scale.</p>
 <p>We can also use <code>predict()</code> to get predictions from a model fitted with <code>ranger().</code> But this also involves slightly different syntax: instead of using the argument <code>newdata</code>, we need to use the argument <code>data</code>. Additionally, when making predictions based on a <code>ranger</code> model with <code>probability = TRUE</code>, the function <code>predict</code> returns a named list. One element of that list is called <code>predictions</code> and it is a matrix whose rows correspond to the rows of <code>data</code> and whose columns contain the probabilities <span class="math inline">\(\mathbb{P}(Y = 0)\)</span> and <span class="math inline">\(\mathbb{P}(Y = 1).\)</span> So, to get the predicting XG values, we need to look at the 2nd column of this matrix.</p>
 <div class="cell">
@@ -1348,7 +1385,7 @@ Number of Fisher Scoring iterations: 6</code></pre>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="lecture03_files/figure-html/compare-statsbomb-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="lecture03_files/figure-html/compare-statsbomb-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="384"></a></p>
+<p><a href="lecture03_files/figure-html/compare-statsbomb-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="lecture03_files/figure-html/compare-statsbomb-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="384"></a></p>
 </figure>
 </div>
 </div>
@@ -1368,16 +1405,29 @@ Number of Fisher Scoring iterations: 6</code></pre>
 </ol>
 
 
+
 </section>
 
 
-<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-Brieman2001" class="csl-entry" role="listitem">
+Breiman, Leo. 2001. <span>“Random Forests.”</span> <em>Machine Learning</em> 45: 5–23.
+</div>
+<div id="ref-Grinsztajn2022" class="csl-entry" role="listitem">
+Grinsztajn, Léo, Edouard Oyallaon, and Gaël Varoquaux. 2022. <span>“Why Do Tree-Based Models Still Outperfom Deep Learning on Tabular Data?”</span>
+</div>
+</div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
 <li id="fn1"><p>Our notation nods to the fact that predicted XG is just a predicted <strong>p</strong>robability<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>We often convert <em>categorical</em> features like <code>shot.body_part.name</code> or <code>shot.technique.name</code> into several numerical features using <a href="https://en.wikipedia.org/wiki/One-hot#Machine_learning_and_statistics">one-hot encoding</a>.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn3"><p>These are known as <em>genearlized linear models</em> and include things like logistic regression and Poisson regression. See <a href="https://bookdown.org/roback/bookdown-BeyondMLR/ch-glms.html">Chatper 5</a> of <em>Beyond Multiple Linear Regression</em> for a nice overview.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn4"><p>see <a href="https://github.com/statsbomb/open-data/issues/3#issuecomment-436116159">this issue in the StatsBomb’s opendata GitHub repo</a> for more information about the variable definitions. The code to compute these values is available <a href="https://github.com/statsbomb/StatsBombR/blob/master/R/shotinfo.R#L8-L16">here</a>. Note that in the StatsBomb coordinate system, the center of the goal line is at (120,4).<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>That is, learn the number and arrangement of the interior and leaf nodes as well as the decision rules and leaf outputs<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>To verify this decomposition is correct, imagine stacking the three partitions on top of each other.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>The canonical reference is <span class="citation" data-cites="Grinsztajn2022">Grinsztajn, Oyallaon, and Varoquaux (<a href="#ref-Grinsztajn2022" role="doc-biblioref">2022</a>)</span> (<a href="https://arxiv.org/abs/2207.08815">link</a>).<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p>You can read the full paper <a href="https://link.springer.com/article/10.1023/A:1010933404324">here</a><a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p>If you want to learn more about regression trees, consider taking STAT 443.<a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
