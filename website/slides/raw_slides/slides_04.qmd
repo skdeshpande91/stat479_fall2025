@@ -1,0 +1,448 @@
+---
+title: "STAT 479: Lecture 4"
+subtitle: Adjusted Plus/Minus
+format: revealjs
+execute:
+  cache: true
+---
+
+## Motivation{.smaller}
+
+- How do NBA players help their teams win?
+- How do we quantify contributions?
+
+. . .
+
+- Idea: use metrics recorded in box score
+  - Points, rebounds, assists, steals, blocks, turnovers
+- Advantage: easy to collect, sort, and explain
+
+. . .
+
+- Problem: fails to account for roles
+- Problem: should some stats weight more heavily than others?
+
+. . . 
+
+- Bigger problem: Not everything appears in the box score
+  - Setting screens, rotating on defense, communicating
+  - Good shot selection, diving for loose balls
+  - The "little things"
+
+## Plus/Minus
+
+:::{.callout-note icon=false}
+## Definition: Plus/Minus
+
+A player's **plus/minus** is the point differential that a player's team accrues while they are on the court.
+:::
+
+- Intuition: if your team outscores opponent while you're on the court, you must be doing something right
+
+- To compute, must know who is on the court at all times
+
+## Play-by-Play NBA Data{.smaller}
+
+![](nba_pbp_screenshot.png){fig-align="center" width="60%"}
+
+- Entry created when player does something tracked by scorekeeper
+- Can use the **hoopR** package to scrape play-by-play data into R
+
+## Stint-Level Data{.smaller}
+
+- Stint: period of play b/w substitutions where the same 10 players remain on the court.
+
+- Can form a data table from play-by-play log where
+  - Rows correspond to stints
+  - Columns for game context: start & end scores, length in minutes, etc.
+  - Column for every player's *signed on-court indicator*
+  
+- Signed on-court indicators:
+  - +1 if on-court and playing at home
+  - -1 if on-court and playing on the road
+  - 0 if not on court
+
+## Data Snapshot{.smaller}
+
+- Context columns: 
+  - Game & Stint ID; num. possessions; duration; 
+  - Start & end scores & times; point differential
+- 569 columns of signed on-court indicators
+
+:::{.panel-tabset}
+### Context
+```{r}
+#| label: rapm-context-snapshot
+#| eval: true
+#| echo: false
+load("../../lectures/nba_rapm_2024_2025.RData")
+rapm_data <- nba_rapm_2024_2025
+rapm_data |>
+  dplyr::select(stint_id, n_pos, start_minutes, minutes, home_points, away_points, pts_diff) |>
+  dplyr::slice_head(n=5)
+```
+### On-Court Indicators
+```{r}
+#| label: rapm-indicators-snapshot
+#| eval: true
+#| echo: false
+rapm_data |>
+  dplyr::select(stint_id, `201143`, `201950`, `1627759`, `1628369`, `1628436`, `1630202`) |>
+  dplyr::slice_head(n=5)
+```
+
+### Player IDs
+```{r}
+#| label: rapm-player-lookup
+#| eval: true
+#| echo: true
+#| code-line-numbers: "|6"
+player_table <-
+  hoopR::nba_commonallplayers()[["CommonAllPlayers"]] |>
+  dplyr::select(PERSON_ID, DISPLAY_FIRST_LAST) |>
+  dplyr::rename(id = PERSON_ID, FullName = DISPLAY_FIRST_LAST) |>
+  dplyr::mutate(
+    Name = stringi::stri_trans_general(FullName, "Latin-ASCII")) 
+
+player_table |>
+  dplyr::filter(id %in% c("201143", "201950", "1627759")) |>
+  dplyr::pull(FullName)
+```
+
+:::
+
+# Plus/Minus
+
+## Computing Individual +/- (Concept)
+
+- Consider Shai Gilgeous-Alexander (2024-25 MVP)
+- To compute SGA's +/-:
+
+  1. Sum the home team point differentials for all stints where SGA was on the court and playing at home.
+  2. Sum the *negative* of the home team point differentials for all shifts where SGA was on the court and playing on the road.
+  3. Add the two totals from Steps 1 and 2.
+
+
+## Computing Individual +/- (Formula)
+- $\Delta_{i}$: home team point differential in shift $i$
+- $x_{i, \textrm{SGA}}$: SGA's signed on-court indicator:
+  - $x_{i, \textrm{SGA}} = 0$ if SGA off-court in stint $i$
+  - $x_{i, \textrm{SGA}} = 1(-1)$  if SGA on-court at home (away) in stint $i$
+- SGA's +/- is just
+$$
+\sum_{i = 1}^{n}{x_{i,\textrm{SGA}} \times \Delta_{i}}.
+$$
+
+## Computing Individual +/- (Code)
+
+- When SGA was on the floor, Thunder outscored opponents by 888 pts
+- When Jokic was on the floor, Nuggets outscored opponents by 452
+
+:::{.panel-tabset}
+
+### SGA
+```{r}
+#| label: shai-pm-code
+#| echo: true
+#| eval: false
+#| code-line-numbers: "|1-2|3-4|5|"
+shai_id <- player_table |>
+  dplyr::filter(Name == "Shai Gilgeous-Alexander") |> dplyr::pull(id) 
+shai_x <- rapm_data |> dplyr::pull(shai_id) 
+delta <- rapm_data |> dplyr::pull(pts_diff) 
+sum(shai_x * delta)
+```
+
+:::{.fragment}
+```{r}
+#| label: shai-pm-eval
+#| echo: false
+#| eval: true
+shai_id <- player_table |>
+  dplyr::filter(Name == "Shai Gilgeous-Alexander") |> dplyr::pull(id) 
+shai_x <- rapm_data |> dplyr::pull(shai_id) 
+delta <- rapm_data |> dplyr::pull(pts_diff) 
+sum(shai_x * delta)
+```
+:::
+
+### Jokic
+```{r}
+#| label: jokic-pm-eval
+#| echo: true
+#| eval: true
+jokic_id <-
+  player_table |>
+  dplyr::filter(Name == "Nikola Jokic") |>
+  dplyr::pull(id)
+
+jokic_x <- rapm_data |> dplyr::pull(jokic_id) 
+sum(jokic_x * delta) 
+```
+:::
+
+# Digression: Matrix Computation
+
+## Notation{.smaller}
+
+- $n$: total number of stints in the season
+- $p$: total number of players
+- For each stint $i = 1, \ldots, n$ and player $j = 1, \ldots, p$: 
+  - $x_{ij} = 1$ if player $j$ on-court at home in stint $i$
+  - $x_{ij} = -1$ if player $j$ on-court on road in stint $i$
+  - $x_{ij} = 0$
+- $\Delta_{i}$: home-team differential in stint $i$
+. . .
+
+- Player $j$'s +/-: $\sum_{i}{x_{ij}\Delta_{i}}$
+
+## Stint Design Matrix{.smaller}
+- Arrange $x_{ij}$'s into an $n \times p$ matrix
+
+$$
+\boldsymbol{\mathbf{X}} = 
+\begin{pmatrix}
+x_{1,1} & \cdots & x_{1,p} \\
+\vdots & & \vdots \\
+x_{n,1} & \cdots & x_{n,p}
+\end{pmatrix}
+$$
+
+. . .
+
+- Collect all $n$ $\Delta_{i}$'s into a vector of length $n$
+$$
+\boldsymbol{\Delta} = \begin{pmatrix} \Delta_{1} \\ \vdots \\ \Delta_{n} \end{pmatrix}
+$$
+
+## Computing all +/-'s
+- Can compute **all** player's w/ matrix-vector multiplication $\boldsymbol{\mathbf{X}}^{\top}\boldsymbol{\Delta}$
+$$
+\begin{pmatrix}
+x_{1,1} & \cdots & x_{n,1} \\
+\vdots & & \vdots \\
+x_{1,p} & \cdots & x_{n,p}
+\end{pmatrix}
+\begin{pmatrix} \Delta_{1} \\ \vdots \\ \Delta_{n} \end{pmatrix}
+= 
+\begin{pmatrix}
+x_{1,1}\Delta_{1} + x_{2,1}\Delta_{2} + \cdots + x_{n,1}\Delta_{n}\\
+\vdots \\
+x_{1,p}\Delta_{1} + x_{2,p}\Delta_{2} + \cdots + x_{n,p}\Delta_{n}
+\end{pmatrix}
+$$
+
+## Computing Plus/Minus
+
+:::{.panel-tabset}
+
+### Building $\boldsymbol{\mathbf{X}}$
+```{r}
+#| label: build-X-full
+#| echo: true
+#| eval: true
+context_vars <- #<1>
+  c("game_id", "stint_id", "n_pos", 
+    "start_home_score", "start_away_score", "start_minutes",
+    "end_home_score", "end_away_score", "end_minutes",
+    "home_points", "away_points", "minutes",
+    "pts_diff", "margin")
+
+X_full <- as.matrix( 
+    rapm_data |> dplyr::select(- tidyr::all_of(context_vars))) 
+```
+
+### Computing Plus/Minus
+```{r}
+#| label: compute-pm
+#| eval: true
+#| echo: true
+#| code-line-numbers: "|4|5-6|1-2|7-9|"
+pm <-
+  data.frame( 
+    id = colnames(X_full), 
+    pm = crossprod(x = X_full, y = rapm_data |> dplyr::pull(pts_diff)), 
+    n_pos = crossprod(abs(X_full), y = rapm_data |> dplyr::pull(n_pos)), 
+    minutes = crossprod(abs(X_full), y = rapm_data |> dplyr::pull(minutes))) |> 
+  dplyr::inner_join(y = player_table |> dplyr::select(id, Name), by = "id") |> 
+  dplyr::select(id, Name, pm, n_pos, minutes) |> 
+  dplyr::arrange(dplyr::desc(pm))
+```
+
+### Selected Players
+```{r}
+#| label: pm-selected
+#| echo: false
+#| eval: true
+selected_players <- 
+  c("Shai Gilgeous-Alexander", 
+    "Jayson Tatum",
+    "Nikola Jokic",
+    "Giannis Antetokounmpo",
+    "Luka Doncic",
+    "Anthony Davis", 
+    "LeBron James")
+pm |> dplyr::filter(Name %in% selected_players) |> dplyr::select(Name, pm)
+```
+
+:::
+
+## Visualizing SGA's Dominance
+
+```{r}
+#| label: fig-pm
+#| fig-width: 8
+#| fit-asp: 0.5625
+#| fig-align: center
+#| fig-cap: Large gap b/w SGA and rest of the league
+
+oi_colors <- palette.colors(palette = "Okabe-Ito")
+n <- nrow(X_full)
+p <- ncol(X_full) 
+y_lim <- max(abs(pm$pm)) * c(-1.01, 1.01) 
+
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+plot(1, type = "n", #<4>
+     xlim = c(0, p+1), ylim = y_lim, 
+     xlab = "", xaxt = "n", 
+     ylab = "+/-", main = "Plus-Minus") 
+
+for(i in 1:p){
+  lines(x = c(p+1-i,p+1-i), y = c(0, pm$pm[i]), 
+        col = oi_colors[9], lwd = 0.25) 
+  if(pm$Name[i] %in% selected_players){
+    points(x = p+1-i, y = pm$pm[i], pch = 16, cex = 0.7, col = oi_colors[3])
+  } else{
+    points(x = p+1-i, y = pm$pm[i], pch = 16, cex = 0.25, col = oi_colors[9])
+  }
+}
+abline(h = 0, col = oi_colors[8])
+```
+
+## Plus/Minus and Possessions
+
+
+```{r}
+#| label: fig-pm-poss
+#| fig-width: 6
+#| fig-asp: 0.5625
+#| fig-align: center
+#| fig-cap: Variability in +/- increases with number of possessions!
+
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+plot(pm$n_pos, pm$pm, 
+     pch = 16, cex = 0.5, col = oi_colors[9],
+     xlab = "Possessions played", ylab = "+/-",
+     main = "Plus-Minus vs Possessions")
+abline(h = 0, col = oi_colors[8])
+```
+
+## Issues with Plus/Minus{.smaller}
+
+```{r}
+#| label: pm-top
+#| echo: true
+#| eval: true
+pm |> dplyr::slice_head(n=10)
+```
+- Is Lou Dort really better than Jayson Tatum???
+
+. . .
+
+- Differences in +/- could be a result of
+  - Differences in skill
+  - Differences in playing time
+  - Differences in teammate & opponent quality
+
+# Adjusted Plus/Minus
+
+## From points to points/possession
+
+- Comparing totals favors players with more playing time
+- APM works with rates: point different per 100 possessions
+```{r}
+rapm_data |> dplyr::select(stint_id, pts_diff, n_pos, margin) |> dplyr::slice_head(n=10)
+```
+## An Initial APM Model
+- Associate each player $j$ with a latent strength $\alpha_{j}$
+- $\alpha_{j}$'s are **unknown**: they must be estimated from data
+- $Y_{i}$: point differential per 100 possessions in stint $i$ 
+- $h_{1}(i), \ldots, h_{5}(i)$ & $a_{1}(i), \ldots, a_{5}(i)$: identities of players on court in stint $i$
+
+. . .
+
+$$
+\begin{align}
+Y_{i} &= \alpha_{0} + \alpha_{h_{1}(i)} + \alpha_{h_{2}(i)} + \alpha_{h_{3}(i)} + \alpha_{h_{4}(i)} + \alpha_{h_{5}(i)} \\
+~&~~~~~~~~~~- \alpha_{a_{1}(i)} - \alpha_{a_{2}(i)} - \alpha_{a_{3}(i)} - \alpha_{a_{4}(i)} - \alpha_{a_{5}(i)} + \epsilon_{i},
+\end{align}
+$$
+
+## Interpretation
+- Individual $\alpha_{j}$'s are meaningless!
+- $\alpha_{j}$ captures change in point differential per 100 possessions between
+  - Playing 5-on-5 with player $j$ on the court
+  - Playing 5-on-4 with player $j$ off the court
+- Differences (or *contrasts*) like $\alpha_{j}-\alpha_{j'}$ are much more useful
+
+## Example{.smaller}
+
+* Dec 23, 2024 game Dallas Mavericks (away) at Golden State Warriors (home):
+  * DAL: Luka Doncic, Dereck Lively II, Kyrie Irving, P.J. Washington, and Klay Thompson
+  * GSW: Stephen Curry, Buddy Hield, Andrew Wiggins, Jonathan Kuminga, and Kevon Looney.
+
+* Per 100 possessions, with these lineups DAL expects to outscore GSW by
+$$
+-1 \times (\alpha_{0} + \alpha_{SC} + \alpha_{BH} + \alpha_{AW} + \alpha_{JK} + \alpha_{KL}) +(\alpha_{LD} + \alpha_{KI} + \alpha_{DL} + \alpha_{PW} + \alpha_{KT}).
+$$
+
+. . .
+
+- Now imagine that you replaced Doncic w/ Anthony Davis.
+- Per 100 possessions, DAL expects to outscore GSW by
+$$
+-1 \times (\alpha_{0} + \alpha_{SC} + \alpha_{BH} + \alpha_{AW} + \alpha_{JK} + \alpha_{KL}) +(\alpha_{AD} + \alpha_{KI} + \alpha_{DL} + \alpha_{PW} + \alpha_{KT}).
+$$
+
+. . .
+
+- DAL expects to score $\alpha_{\textrm{AD}} - \alpha_{\textrm{LD}}$ more points per 100 possessions with Davis than Doncic, **all else being equal**
+
+
+## APM Via Linear Models
+
+* Append a column of 1's to $\boldsymbol{\mathbf{X}}$ to form $n \times (p+1)$ matrix $\boldsymbol{\mathbf{Z}}$
+* Let $\boldsymbol{\mathbf{z}}_{i}$ be the $i$-th row of $\boldsymbol{\mathbf{Z}}$
+* APM asserts: $Y_{i} = \boldsymbol{\mathbf{z}}_{i}^{\top}\boldsymbol{\alpha} + \epsilon_{i}.$
+
+. . .
+
+* Tempting to estimate $\boldsymbol{\alpha}$ with least squares
+$$
+\sum_{i = 1}^{n}{\left( Y_{i} - \boldsymbol{\mathbf{z}}_{i}^{\top}\boldsymbol{\alpha} \right)^{2}} .
+$$
+
+## Singularity{.smaller}
+* Least squares problem does not have a unique solution!
+* Columns of $\boldsymbol{\mathbf{Z}}$ are linearly dependent
+    * The first element in each row is equal to 1 (for intercept)
+  * 5 entries equal to 1 (for home players)
+  * 5 entries equal to -1 (for away players)
+* If you know all but one column, you can perfectly determine that column
+* $\boldsymbol{\mathbf{Z}}^{\top}\boldsymbol{\mathbf{Z}}$ not invertible
+
+
+
+## Introducing a Baseline
+- Classify some players as "baseline"-level
+- **Assumption**: all baseline-level players have common value $\mu$
+- Say first $p'$ players are non-baseline. For $j = 1, \ldots, p'$ let $\beta_{j} = \alpha_{j} - \mu$
+
+<!-- introduce tilde Z -->
+. . .
+
+$$
+\tilde{\boldsymbol{\mathbf{Z}}}\boldsymbol{\beta} = \boldsymbol{\mathbf{Z}}\boldsymbol{\alpha}
+$$
+
+# Weighted Adjusted Plus/Minus

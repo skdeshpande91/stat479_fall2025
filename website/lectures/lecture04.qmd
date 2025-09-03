@@ -22,24 +22,26 @@ In today's lecture, we introduce two now-classical approaches to player evaluati
 At a high-level, plus/minus is simply the total point differential that a player's team accrues when he is on the court.
 Adjusted plus/minus measures how much more a player contributes to his team's point differential per 100 after accounting than a baseline-level player, after accounting for the relative contributions of his teammates and opponents. 
 
-### Stint-level NBA Data {#sec-data-prep}
-
+## Stint-Level NBA Data {#sec-data-prep}
 
 :::{.callout-note icon=false}
 
-##Definition: Stint
+## Definition: Stint
 A *stint* is a period of play between substitutions during which the same 10 players remain on the court.
+
 :::
 
 To compute plus/minus and adjusted plus/minus, we need to build a data table in which rows correspond to stints within individual games.
 In addition to recording the identities of the home and away team players on the court during each stint, the data table needs to include game-state information about each stint including both teams' scores and the amount of time left at the start and end of each stint and the number of possessions in each stint. 
+Such a table can be built using play-by-play data.
 
 
-The NBA posts a play-by-play for every game that contains the time-stamp and a short description of important events during a game.
+The NBA posts a play-by-play for every game containing the time-stamp and a short description of important events during a game.
 Basically, whenever a player does something tracked by the scorekeepers or reported in the box-score (e.g., attempt a shot, steal the ball, commit a foul, etc.), an entry is added to the play-by-play log.
 [Here](https://www.nba.com/game/dal-vs-min-0042300312/play-by-play?period=All) is an example from a game from a few years ago between the Dallas Mavericks and Minnesota Timberwolves[^luka].
 
-[^luka]: It is the game in which Luka Dončić ~~embarassed~~ hit a step-back 3 pointer over Rudy Goert to win the game ([link](https://www.nba.com/stats/events?CFID=&CFPARAMS=&GameEventID=682&GameID=0042300312&Season=2023-24&flag=1&title=Doncic%2025%27%203PT%20Step%20Back%20Jump%20Shot%20(32%20PTS))).
+[^luka]: It is the game in which Luka Dončić ~~embarrassed Rudy Gobert~~ hit a step-back 3 pointer over Rudy Gobert to win the game ([link](https://www.nba.com/stats/events?CFID=&CFPARAMS=&GameEventID=682&GameID=0042300312&Season=2023-24&flag=1&title=Doncic%2025%27%203PT%20Step%20Back%20Jump%20Shot%20(32%20PTS))).
+
 
 We can scrap play-by-play data into R using the [[**hoopR**]](https://hoopr.sportsdataverse.org) package, which can be installed using the code:
 ```{r}
@@ -59,7 +61,7 @@ It takes about 30 minutes to download all single season's worth of play-by-play 
 #| label: get-stint-data
 #| eval: false
 #| code-fold: true
-#| code-summary: "Show code to get stinte data"
+#| code-summary: "Show code to get stint data"
 
 get_game_stint_data <- function(game_i) { #<1>
   
@@ -275,9 +277,9 @@ rapm_data <- nba_rapm_2024_2025
 The first 14 columns of `rapm_data` record: 
 
   * Numeric identifiers for the game (`game_id`) and stint (`stint_id`).
-  * Both teams' scores and the amount of time remaining at the start of a shift: `start_home_score`, `start_away_score`, and  `start_minutes`.
-  * Both teams' scores and the amount of time remaining at the end of each shift: `end_home_score`, `end_away_score`, and `end_minutes`.
-  * The length of a shift (`minutes`), the number of points scored by the home (`home_points`) and away team (`away_points`), and the number of possessions (`n_pos`).
+  * Both teams' scores and the amount of time remaining at the start of a stint: `start_home_score`, `start_away_score`, and  `start_minutes`.
+  * Both teams' scores and the amount of time remaining at the end of each stint: `end_home_score`, `end_away_score`, and `end_minutes`.
+  * The length of a stint (`minutes`), the number of points scored by the home (`home_points`) and away team (`away_points`), and the number of possessions (`n_pos`).
   * The score differential `pts_diff = home_points - away_points`.
   * The score differential per 100 possessions, `margin = pts_diff/n_pos * 100`.
 
@@ -312,12 +314,12 @@ Similarly, a large, negative +/- value indicates that a player's team was outsco
 As an example, let's compute the plus/minus values for Shai Gilgeous-Alexander (SGA), who was recognized as the league's Most Valuable Player (MVP) in the 2024-25 regular season.
 To compute SGA's +/-, we need to 
 
-  1. Sum the home team point differentials (i.e., the values in the column `pts_diff`) for all shifts where SGA was on the court and playing at home.
-  2. Sum the *negative* of the home team point differentials for all shifts where SGA was on the court and playing on the road.
+  1. Sum the home team point differentials (i.e., the values in the column `pts_diff`) for all stints where SGA was on the court and playing at home.
+  2. Sum the *negative* of the home team point differentials for all stints where SGA was on the court and playing on the road.
   3. Add the two totals from Steps 1 and 2.
 
-Mathematically, for every stint $i$ in our data table, let $\Delta_{i}$ be the home team's point differential during that shift.
-Additionally, let $x_{i, \textrm{SGA}}$ be the *signed on-court indicator* that is equal to 1 if SGA is on the court and playing at home during shift $i$; -1 if Shai is on the court and playing on the road during shift $i$; and 0 if SGA is not on the court during shift $i.$
+Mathematically, for every stint $i$ in our data table, let $\Delta_{i}$ be the home team's point differential during that stint.
+Additionally, let $x_{i, \textrm{SGA}}$ be the *signed on-court indicator* that is equal to 1 if SGA is on the court and playing at home during stint $i$; -1 if Shai is on the court and playing on the road during stint $i$; and 0 if SGA is not on the court during stint $i.$
 Then, SGA's +/- is equal to
 $$
 \sum_{i = 1}^{n}{x_{i,\textrm{SGA}} \times \Delta_{i}}.
@@ -339,7 +341,7 @@ sum(shai_x * delta) #<5>
 1. Find the row in our look-up table corresponding to SGA
 2. Since there is only one row corresponding to SGA, this saves SGA's identifier as `shai_id`
 3. Extracts the vector of SGA's signed on-court indicators from the corresponding column of `rapm_data`
-4. Extracts the vector of home team point differentials across all shifts from `rapm_data`
+4. Extracts the vector of home team point differentials across all stints from `rapm_data`
 5. Computes SGA's +/-
 
 We now repeat this calculation for Nikola Jokic, who finished second in the MVP voting in the 2024-25 regular season.
@@ -363,15 +365,15 @@ Repeating this calculation for all players one at a time is exceptionally tediou
 Luckily, with a bit of matrix algebra, we can compute the +/- for *all* players in one shot.
 
 To this end, let $n$ be the total number of stints in our data table and let $p$ be the total number of players.
-Just like we did for SGA and Jokic in @sec-individual-pm, for each shift $i = 1, \ldots, n$ and for each player $j = 1, \ldots, p,$ let $x_{ij}$ be the signed on-court indicator for player $j$ during shift $i.$
-So, $x_{ij}$ is equal to 0 if player $j$ is not on the court during shift $i$ and is equal to 1 (resp. -1) if player $j$ is on the court and playing at home (resp. on the road) during shift $i.$
+Just like we did for SGA and Jokic in @sec-individual-pm, for each stint $i = 1, \ldots, n$ and for each player $j = 1, \ldots, p,$ let $x_{ij}$ be the signed on-court indicator for player $j$ during stint $i.$
+So, $x_{ij}$ is equal to 0 if player $j$ is not on the court during stint $i$ and is equal to 1 (resp. -1) if player $j$ is on the court and playing at home (resp. on the road) during stint $i.$
 Player $j$'s overall +/- is given by 
 $$
 \sum_{i = 1}^{n}{x_{ij}\Delta_{i}}.
 $$
 We can arrange the $x_{ij}$ values into an $n \times p$ matrix $\boldsymbol{\mathbf{X}}$ so that $x_{ij}$ appears in in the $j-th$ column of the $i$-th row (i.e., $x_{ij}$ is the $(i,j)$ entry of $\boldsymbol{\mathbf{X}}$[^index]).
-This way, the rows (resp. columns) of $\boldsymbol{\mathbf{X}}$ correspond to shifts (resp. players).
-Let $\boldsymbol{\Delta}$ be the vector of length $n$ whose $i$-th entry is $\Delta_{i},$ the home-team point differential in shift $i.$
+This way, the rows (resp. columns) of $\boldsymbol{\mathbf{X}}$ correspond to stints (resp. players).
+Let $\boldsymbol{\Delta}$ be the vector of length $n$ whose $i$-th entry is $\Delta_{i},$ the home-team point differential in stint $i.$
 
 [^index]: See [this Wikipedia entry](https://en.wikipedia.org/wiki/Index_notation#Two-dimensional_arrays) for background on on index notation for two-dimensional arrays.
 
@@ -731,7 +733,7 @@ wapm_df <-
       .default = 1 - (start_diff-10)/20)) |> #<4>
   dplyr::select(tidyr::all_of(c("margin", "w", nonbaseline_id)))
 ```
-1. Create a variable recording the lead at the start of the shift
+1. Create a variable recording the lead at the start of the stint
 2. Set weight = 1 if the starting lead is less than 10 points
 3. Set weight = 0 if starting lead exceeds 30 points
 4. Assign a weight between 0 and 1 if the starting lead is between 10 and 30 points

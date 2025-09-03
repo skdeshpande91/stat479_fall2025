@@ -12,7 +12,7 @@
 <link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.7.32">
 
-  <title>STAT479 – STAT 479 Lecture 1</title>
+  <title>STAT479 – STAT 479: Lecture 4</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -195,665 +195,532 @@
     <div class="slides">
 
 <section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">STAT 479 Lecture 1</h1>
-  <p class="subtitle">Course Overview</p>
+  <h1 class="title">STAT 479: Lecture 4</h1>
+  <p class="subtitle">Adjusted Plus/Minus</p>
 
 <div class="quarto-title-authors">
 </div>
 
 </section>
-<section>
-<section id="logistics" class="title-slide slide level1 center">
-<h1>Logistics</h1>
-
-</section>
-<section id="lectures-office-hours" class="slide level2">
-<h2>Lectures &amp; Office Hours</h2>
+<section id="motivation" class="slide level2 smaller">
+<h2>Motivation</h2>
 <ul>
-<li>Lectures: Tuesdays &amp; Thursday 11am-12:15pm (Morgridge Hall 1514)</li>
-<li>Instructor: Sameer Deshpande
+<li>How do NBA players help their teams win?</li>
+<li>How do we quantify contributions?</li>
+</ul>
+<div class="fragment">
 <ul>
-<li>Mondays: 11am - 12pm (Morgridge Hall 5586)</li>
-<li>Wednesdays: 4pm - 5pm (Morgridge Hall 5586)</li>
-<li>Fridays: 3pm - 4:30pm (Morgridge Hall 3610)</li>
+<li>Idea: use metrics recorded in box score
+<ul>
+<li>Points, rebounds, assists, steals, blocks, turnovers</li>
 </ul></li>
-<li>TA: Zhexuan Liu
+<li>Advantage: easy to collect, sort, and explain</li>
+</ul>
+</div>
+<div class="fragment">
 <ul>
-<li>Tuesdays &amp; Thursdays 9:15am-10:45am (Morgridge Hall 2515)</li>
+<li>Problem: fails to account for roles</li>
+<li>Problem: should some stats weight more heavily than others?</li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li>Bigger problem: Not everything appears in the box score
+<ul>
+<li>Setting screens, rotating on defense, communicating</li>
+<li>Good shot selection, diving for loose balls</li>
+<li>The “little things”</li>
 </ul></li>
 </ul>
+</div>
 </section>
-<section id="course-learning-outcomes" class="slide level2">
-<h2>Course Learning Outcomes</h2>
-<ol type="1">
-<li>Implement appropriate statistical methods to assess player and team performance</li>
-<li>Work with play-by-play and high-resolution tracking data</li>
-<li>Provide constructive and actionable feedback on your peers’ analytic reports</li>
-<li>Build a personal portfolio of sports data analyses</li>
-</ol>
-<div class="fragment">
-<div class="callout callout-note callout-titled callout-style-default">
+<section id="plusminus" class="slide level2">
+<h2>Plus/Minus</h2>
+<div class="callout callout-note no-icon callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Unofficial Goal</strong></p>
+<p><strong>Definition: Plus/Minus</strong></p>
 </div>
 <div class="callout-content">
-<p><strong>Practice</strong> the skills needed to work for professional teams</p>
+<p>A player’s <strong>plus/minus</strong> is the point differential that a player’s team accrues while they are on the court.</p>
 </div>
 </div>
 </div>
-</div>
-</section>
-<section id="requisites" class="slide level2">
-<h2>Requisites</h2>
 <ul>
-<li>STAT 333 or 340
-<ul>
-<li>Random variables, expectations, probability</li>
-<li>Fitting linear models &amp; interpreting outputs</li>
-</ul></li>
+<li><p>Intuition: if your team outscores opponent while you’re on the court, you must be doing something right</p></li>
+<li><p>To compute, must know who is on the court at all times</p></li>
 </ul>
-<div class="fragment">
-<ul>
-<li>Prior experience with R
-<ul>
-<li>Assignment, scripting, loops, control flow</li>
-<li>Saving objects, installing &amp; loading packages.</li>
-<li>Data wrangling and manipulation with <strong>dplyr</strong> and other <strong>tidyverse</strong> packages.</li>
-<li>Creating visualizations</li>
-</ul></li>
-</ul>
-</div>
 </section>
-<section id="course-website" class="slide level2">
-<h2>Course Website</h2>
+<section id="play-by-play-nba-data" class="slide level2 smaller">
+<h2>Play-by-Play NBA Data</h2>
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><a href="stat479_f25_qr.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img data-src="stat479_f25_qr.png" class="quarto-figure quarto-figure-center"></a></p>
+<p><a href="nba_pbp_screenshot.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img data-src="nba_pbp_screenshot.png" class="quarto-figure quarto-figure-center" style="width:60.0%"></a></p>
 </figure>
 </div>
-<p>Also <a href="https://canvas.wisc.edu/courses/476839">Canvas</a> &amp; <a href="https://canvas.wisc.edu/courses/476839">Piazza</a></p>
+<ul>
+<li>Entry created when player does something tracked by scorekeeper</li>
+<li>Can use the <strong>hoopR</strong> package to scrape play-by-play data into R</li>
+</ul>
 </section>
-<section id="assignments-grading" class="slide level2">
-<h2>Assignments &amp; Grading</h2>
+<section id="stint-level-data" class="slide level2 smaller">
+<h2>Stint-Level Data</h2>
 <ul>
-<li>3 Group Projects (900 pts): Due on 10/10, 11/7, and 12/5
+<li><p>Stint: period of play b/w substitutions where the same 10 players remain on the court.</p></li>
+<li><p>Can form a data table from play-by-play log where</p>
 <ul>
-<li>Written Report (100 pts) &amp; Presentation (100 pts)</li>
-<li>Peer Reviews (60 pts)</li>
-<li>Team Accountability Survey (40 pts)</li>
+<li>Rows correspond to stints</li>
+<li>Columns for game context: start &amp; end scores, length in minutes, etc.</li>
+<li>Column for every player’s <em>signed on-court indicator</em></li>
+</ul></li>
+<li><p>Signed on-court indicators:</p>
+<ul>
+<li>+1 if on-court and playing at home</li>
+<li>-1 if on-court and playing on the road</li>
+<li>0 if not on court</li>
 </ul></li>
 </ul>
-<div class="fragment">
+</section>
+<section id="data-snapshot" class="slide level2 smaller">
+<h2>Data Snapshot</h2>
 <ul>
-<li>Participation (100 pts): Assessed holistically
+<li>Context columns:
 <ul>
-<li>Regularly attend lectures &amp; office hours</li>
-<li>Contribute to Piazza discussions</li>
+<li>Game &amp; Stint ID; num. possessions; duration;</li>
+<li>Start &amp; end scores &amp; times; point differential</li>
 </ul></li>
+<li>569 columns of signed on-court indicators</li>
 </ul>
-</div>
-<div class="fragment">
-<ul>
-<li>Final grade based on how many of the 1000 points earned</li>
-</ul>
-</div>
-</section>
-<section id="projects" class="slide level2">
-<h2>Projects</h2>
-<ul>
-<li>Work in groups of up to 4
-<ul>
-<li>Form groups by Friday September 12</li>
-<li>Use Piazza to find teammates &amp; sign up on Canvas</li>
-</ul></li>
-<li>Course projects can
-<ul>
-<li>Modify or extend analysis from lecture (e.g., to new sport)</li>
-<li>Answer a new question not covered in lecture</li>
-</ul></li>
-<li>Ideally jump-start a portfolio that you can show teams</li>
-</ul>
-</section>
-<section id="project-report" class="slide level2">
-<h2>Project Report</h2>
-<ul>
-<li>Executive Summary:
-<ul>
-<li><strong>Non-technical</strong> overview of goals, methods, and results</li>
-<li>Audience: front office executive, coach, or player</li>
-</ul></li>
-<li>Technical Report:
-<ul>
-<li>Include <em>all</em> code needed to reproduce findings</li>
-<li>Tightly integrate code &amp; output w/ written exposition</li>
-<li>Audience: fellow data scientists</li>
-</ul></li>
-</ul>
-<div class="fragment">
-<p>I <strong>highly</strong> recommend using Quarto or RMarkdown</p>
-</div>
-</section>
-<section id="project-presentation" class="slide level2">
-<h2>Project Presentation</h2>
-<ul>
-<li>Record &amp; upload a 8–10 minute presentation</li>
-<li>Every group member must speak</li>
-</ul>
-<div class="fragment">
-<ul>
-<li>I will select 5-6 groups to present in-class on final day (12/9)</li>
-<li>Like all good competitions, there’ll be prize(s)</li>
-</ul>
-</div>
-</section>
-<section id="project-peer-review" class="slide level2">
-<h2>Project Peer Review</h2>
-<ul>
-<li>Provide feedback on 3 presentations &amp; 3 reports
-<ul>
-<li>Rubrics will be available</li>
-<li>Fill out rubric + leave <em>constructive</em> comments</li>
-</ul></li>
-<li>Due 1 weeks after projects: 10/17, 11/14, and 12/12</li>
-</ul>
-</section>
-<section id="team-accountability-survey" class="slide level2">
-<h2>Team Accountability Survey</h2>
-<ul>
-<li>Assign score from 0 (least) to 10 (most) for
-<ul>
-<li>Participation, Preparation, and Respectfulness</li>
-</ul></li>
-<li>Rate every group member (including yourself)</li>
-<li>Ratings and comments will be kept anonymous</li>
-<li>Course staff may give warnings for low peer score</li>
-</ul>
-</section></section>
-<section>
-<section id="what-is-sports-analytics" class="title-slide slide level1 center">
-<h1>What is Sports Analytics?</h1>
-
-</section>
-<section id="statistics-vs-analytics" class="slide level2">
-<h2>Statistics vs Analytics</h2>
-<ul>
-<li>Sports statistics refer to counts and rates that <em>summarize</em> performance:
-<ul>
-<li>Number of rebounds, wins, games played</li>
-<li>Free throw percentage, batting average</li>
-</ul></li>
-</ul>
-<div class="fragment">
-<ul>
-<li>Analytics refers to the use of statistical <em>modeling</em> to help gain competitive advantage
-<ul>
-<li>Analytics makes use of basic statistics &amp; creates new ones</li>
-<li>Analytics uses data to answer <strong>substantive sports questions</strong></li>
-</ul></li>
-</ul>
-</div>
-</section>
-<section id="bestnba-shooting-performances" class="slide level2">
-<h2>“Best”NBA Shooting Performances</h2>
-<ul>
-<li>What is the best single-season shooting performance in the NBA?</li>
-</ul>
-<div class="fragment">
-<ul>
-<li>How should we define best?
-<ul>
-<li>Made the most shots? Highest proportion of made shots?</li>
-<li>Should 2- and 3-point shots count the same?</li>
-</ul></li>
-</ul>
-</div>
-<div class="fragment">
-<ul>
-<li>Data: box scores from each game since 2002-03</li>
-<li>Available from the <strong>hoopR</strong> package</li>
-</ul>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a>raw_box <span class="ot">&lt;-</span></span>
-<span id="cb1-2"><a></a>  hoopR<span class="sc">::</span><span class="fu">load_nba_player_box</span>(</span>
-<span id="cb1-3"><a></a>    <span class="at">seasons =</span> <span class="dv">2002</span><span class="sc">:</span>(hoopR<span class="sc">::</span><span class="fu">most_recent_nba_season</span>()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-</section>
-<section id="data-snapshot" class="slide level2">
-<h2>Data snapshot</h2>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2" data-code-line-numbers="1|2-3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a></a>raw_box <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(game_date <span class="sc">==</span> <span class="st">"2011-06-12"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb2-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(athlete_display_name, </span>
-<span id="cb2-3"><a></a>         field_goals_made, field_goals_attempted)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="fragment">
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 30 × 3
-   athlete_display_name field_goals_made field_goals_attempted
-   &lt;chr&gt;                           &lt;int&gt;                 &lt;int&gt;
- 1 Dirk Nowitzki                       9                    27
- 2 Tyson Chandler                      2                     4
- 3 Jason Kidd                          2                     4
- 4 Shawn Marion                        4                    10
- 5 J.J. Barea                          7                    12
- 6 Brian Cardinal                      1                     1
- 7 Caron Butler                       NA                    NA
- 8 Ian Mahinmi                         2                     3
- 9 Rodrigue Beaubois                  NA                    NA
-10 DeShawn Stevenson                   3                     5
-# ℹ 20 more rows</code></pre>
-</div>
-</div>
-</div>
-</section>
-<section id="isolating-regular-season-games" class="slide level2">
-<h2>Isolating regular season games</h2>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb4" data-code-line-numbers="1-7|9-10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a></a>allstar_dates <span class="ot">&lt;-</span> lubridate<span class="sc">::</span><span class="fu">date</span>(<span class="fu">c</span>(<span class="st">"2002-02-10"</span>, <span class="st">"2003-02-09"</span>, </span>
-<span id="cb4-2"><a></a>    <span class="st">"2004-02-15"</span>,<span class="st">"2005-02-20"</span>, <span class="st">"2006-02-19"</span>, <span class="st">"2007-02-18"</span>, </span>
-<span id="cb4-3"><a></a>    <span class="st">"2008-02-17"</span>, <span class="st">"2009-02-15"</span>, <span class="st">"2010-02-14"</span>,<span class="st">"2011-02-20"</span>, </span>
-<span id="cb4-4"><a></a>    <span class="st">"2012-02-26"</span>, <span class="st">"2013-02-17"</span>, <span class="st">"2014-02-16"</span>, <span class="st">"2015-02-15"</span>, </span>
-<span id="cb4-5"><a></a>    <span class="st">"2016-02-14"</span>,<span class="st">"2017-02-19"</span>, <span class="st">"2018-02-18"</span>, <span class="st">"2019-02-17"</span>,</span>
-<span id="cb4-6"><a></a>    <span class="st">"2020-02-16"</span>, <span class="st">"2021-03-07"</span>, <span class="st">"2022-02-20"</span>,<span class="st">"2023-02-19"</span>, </span>
-<span id="cb4-7"><a></a>    <span class="st">"2024-02-18"</span>, <span class="st">"2025-02-16"</span>))</span>
-<span id="cb4-8"><a></a>reg_box <span class="ot">&lt;-</span> raw_box <span class="sc">|&gt;</span></span>
-<span id="cb4-9"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(season_type <span class="sc">==</span> <span class="dv">2</span> <span class="sc">&amp;</span> </span>
-<span id="cb4-10"><a></a>      <span class="sc">!</span>did_not_play <span class="sc">&amp;</span> <span class="sc">!</span>game_date <span class="sc">%in%</span> allstar_dates)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
-<section id="further-preprocessing" class="slide level2">
-<h2>Further preprocessing</h2>
-<ul>
-<li>Rename columns &amp; set defaults for players with no minutes</li>
-</ul>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb5" data-code-line-numbers="1-2|3-7|8-11|"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a>reg_box <span class="ot">&lt;-</span></span>
-<span id="cb5-2"><a></a>  reg_box <span class="sc">|&gt;</span></span>
-<span id="cb5-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(</span>
-<span id="cb5-4"><a></a>    <span class="at">Player =</span> athlete_display_name, </span>
-<span id="cb5-5"><a></a>    <span class="at">FGM =</span> field_goals_made, <span class="at">FGA =</span> field_goals_attempted,</span>
-<span id="cb5-6"><a></a>    <span class="at">TPM =</span> three_point_field_goals_made,<span class="at">TPA =</span> three_point_field_goals_attempted,</span>
-<span id="cb5-7"><a></a>    <span class="at">FTM =</span> free_throws_made, <span class="at">FTA =</span> free_throws_attempted) <span class="sc">|&gt;</span></span>
-<span id="cb5-8"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb5-9"><a></a>    <span class="at">FGM =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(minutes), <span class="dv">0</span>, FGM), <span class="at">FGA =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(minutes), <span class="dv">0</span>, FGA),</span>
-<span id="cb5-10"><a></a>    <span class="at">TPM =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(minutes), <span class="dv">0</span>, TPM),<span class="at">TPA =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(minutes), <span class="dv">0</span>, TPA),</span>
-<span id="cb5-11"><a></a>    <span class="at">FTM =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(minutes), <span class="dv">0</span>, FTM),<span class="at">FTA =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(minutes), <span class="dv">0</span>, FTA)) <span class="sc">|&gt;</span></span>
-<span id="cb5-12"><a></a>  tidyr<span class="sc">::</span><span class="fu">replace_na</span>(<span class="fu">list</span>(<span class="at">minutes =</span> <span class="dv">0</span>))         </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
-<section id="player-season-totals" class="slide level2">
-<h2>Player-season totals</h2>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb6" data-code-line-numbers="3|4-6|"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a>season_box <span class="ot">&lt;-</span></span>
-<span id="cb6-2"><a></a>  reg_box <span class="sc">|&gt;</span></span>
-<span id="cb6-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(Player, season) <span class="sc">|&gt;</span></span>
-<span id="cb6-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">FGM =</span> <span class="fu">sum</span>(FGM),<span class="at">FGA =</span> <span class="fu">sum</span>(FGA),</span>
-<span id="cb6-5"><a></a>    <span class="at">TPM =</span> <span class="fu">sum</span>(TPM),<span class="at">TPA =</span> <span class="fu">sum</span>(TPA),<span class="at">FTM =</span> <span class="fu">sum</span>(FTM),<span class="at">FTA =</span> <span class="fu">sum</span>(FTA),</span>
-<span id="cb6-6"><a></a>    <span class="at">minutes =</span> <span class="fu">sum</span>(minutes), <span class="at">n_games =</span> dplyr<span class="sc">::</span><span class="fu">n</span>(),<span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
-<span id="cb6-7"><a></a>season_box <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(Player <span class="sc">==</span> <span class="st">"Dirk Nowitzki"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="fragment">
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 18 × 10
-   Player        season   FGM   FGA   TPM   TPA   FTM   FTA minutes n_games
-   &lt;chr&gt;          &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;   &lt;int&gt;
- 1 Dirk Nowitzki   2002   600  1258   139   350   440   516    2891      76
- 2 Dirk Nowitzki   2003   690  1489   148   390   483   548    3117      80
- 3 Dirk Nowitzki   2004   605  1310    99   290   371   423    2915      77
- 4 Dirk Nowitzki   2005   663  1445    91   228   615   708    3020      78
- 5 Dirk Nowitzki   2006   751  1564   110   271   539   598    3086      81
- 6 Dirk Nowitzki   2007   673  1341    72   173   498   551    2819      80
- 7 Dirk Nowitzki   2008   630  1314    79   220   478   544    2769      81
- 8 Dirk Nowitzki   2009   774  1616    61   170   485   545    3051      82
- 9 Dirk Nowitzki   2010   720  1496    51   121   536   586    3041      82
-10 Dirk Nowitzki   2011   610  1179    66   168   395   443    2505      82
-11 Dirk Nowitzki   2012   473  1034    78   212   318   355    2078      66
-12 Dirk Nowitzki   2013   332   707    63   151   164   191    1628      52
-13 Dirk Nowitzki   2014   633  1273   131   329   338   376    2625      80
-14 Dirk Nowitzki   2015   487  1062   104   274   255   289    2285      77
-15 Dirk Nowitzki   2016   498  1112   126   342   250   280    2362      75
-16 Dirk Nowitzki   2017   296   678    79   209    98   112    1421      54
-17 Dirk Nowitzki   2018   346   758   138   337    97   108    1901      77
-18 Dirk Nowitzki   2019   135   376    64   205    39    50     794      51</code></pre>
-</div>
-</div>
-</div>
-</section>
-<section id="who-made-the-most-shots" class="slide level2">
-<h2>Who made the most shots?</h2>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a>season_box <span class="sc">|&gt;</span></span>
-<span id="cb8-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(FGM)) <span class="sc">|&gt;</span></span>
-<span id="cb8-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Player, season, FGM, FGA, minutes, n_games) <span class="sc">|&gt;</span> </span>
-<span id="cb8-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 5 × 6
-  Player                  season   FGM   FGA minutes n_games
-  &lt;chr&gt;                    &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;   &lt;int&gt;
-1 Kobe Bryant               2006   949  2109    3184      78
-2 LeBron James              2006   875  1823    3361      82
-3 Kobe Bryant               2003   868  1924    3401      82
-4 Shai Gilgeous-Alexander   2025   868  1680    2633      77
-5 LeBron James              2018   857  1580    3024      82</code></pre>
-</div>
-</div>
-<div class="fragment">
-<p>Is Kobe’s 2002-03 performance really better than SGA’s 2024-25 performance???</p>
-</div>
-</section>
-<section id="field-goal-percentage" class="slide level2 scrollable">
-<h2>Field Goal Percentage</h2>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a>season_box <span class="ot">&lt;-</span></span>
-<span id="cb10-2"><a></a>  season_box <span class="sc">|&gt;</span></span>
-<span id="cb10-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">FGP =</span> <span class="fu">ifelse</span>(FGA <span class="sc">&gt;</span> <span class="dv">0</span>, FGM<span class="sc">/</span>FGA, <span class="cn">NA_real_</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="fragment">
 <div class="panel-tabset">
-<ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-1-1">FGP Leaders</a></li><li><a href="#tabset-1-2">Another look</a></li><li><a href="#tabset-1-3">Restricted Leaders</a></li></ul>
+<ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-1-1">Context</a></li><li><a href="#tabset-1-2">On-Court Indicators</a></li><li><a href="#tabset-1-3">Player IDs</a></li></ul>
 <div class="tab-content">
 <div id="tabset-1-1">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a>season_box <span class="sc">|&gt;</span> </span>
-<span id="cb11-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(FGP)) <span class="sc">|&gt;</span></span>
-<span id="cb11-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">5</span>) <span class="sc">|&gt;</span></span>
-<span id="cb11-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Player, season, FGP)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 5 × 3
-  Player           season   FGP
-  &lt;chr&gt;             &lt;int&gt; &lt;dbl&gt;
-1 Ahmad Caver        2022     1
-2 Alondes Williams   2025     1
-3 Andris Biedrins    2014     1
-4 Anthony Brown      2018     1
-5 Braxton Key        2023     1</code></pre>
+<pre><code># A tibble: 5 × 7
+  stint_id n_pos start_minutes minutes home_points away_points pts_diff
+     &lt;dbl&gt; &lt;dbl&gt;         &lt;dbl&gt;   &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;    &lt;dbl&gt;
+1        1    14          0      5.42           18          12        6
+2        2     5          5.42   1.51            2           2        0
+3        3     1          6.93   0.220           0           2       -2
+4        4     4          7.15   2.17            9           1        8
+5        5    13          9.32   4.13           13          11        2</code></pre>
 </div>
 </div>
 </div>
 <div id="tabset-1-2">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a>season_box <span class="sc">|&gt;</span> </span>
-<span id="cb13-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(FGP)) <span class="sc">|&gt;</span></span>
-<span id="cb13-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">5</span>) <span class="sc">|&gt;</span></span>
-<span id="cb13-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Player, season, FGP, FGA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 5 × 4
-  Player           season   FGP   FGA
-  &lt;chr&gt;             &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;
-1 Ahmad Caver        2022     1     1
-2 Alondes Williams   2025     1     2
-3 Andris Biedrins    2014     1     1
-4 Anthony Brown      2018     1     1
-5 Braxton Key        2023     1     1</code></pre>
+<pre><code># A tibble: 5 × 7
+  stint_id `201143` `201950` `1627759` `1628369` `1628436` `1630202`
+     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+1        1        1        1         1         1         0         0
+2        2        1        0         0         1         1         1
+3        3        1        0         0         1         1         1
+4        4        0        0         0         1         1         1
+5        5        0        1         0         1         1         1</code></pre>
 </div>
 </div>
 </div>
 <div id="tabset-1-3">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a>season_box <span class="sc">|&gt;</span> </span>
-<span id="cb15-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(FGA <span class="sc">&gt;=</span> <span class="dv">400</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb15-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(FGP)) <span class="sc">|&gt;</span></span>
-<span id="cb15-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Player, season, FGP, FGA) <span class="sc">|&gt;</span></span>
-<span id="cb15-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3" data-code-line-numbers="|6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a>player_table <span class="ot">&lt;-</span></span>
+<span id="cb3-2"><a></a>  hoopR<span class="sc">::</span><span class="fu">nba_commonallplayers</span>()[[<span class="st">"CommonAllPlayers"</span>]] <span class="sc">|&gt;</span></span>
+<span id="cb3-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(PERSON_ID, DISPLAY_FIRST_LAST) <span class="sc">|&gt;</span></span>
+<span id="cb3-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">id =</span> PERSON_ID, <span class="at">FullName =</span> DISPLAY_FIRST_LAST) <span class="sc">|&gt;</span></span>
+<span id="cb3-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb3-6"><a></a>    <span class="at">Name =</span> stringi<span class="sc">::</span><span class="fu">stri_trans_general</span>(FullName, <span class="st">"Latin-ASCII"</span>)) </span>
+<span id="cb3-7"><a></a></span>
+<span id="cb3-8"><a></a>player_table <span class="sc">|&gt;</span></span>
+<span id="cb3-9"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(id <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"201143"</span>, <span class="st">"201950"</span>, <span class="st">"1627759"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb3-10"><a></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(FullName)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 5 × 4
-  Player         season   FGP   FGA
-  &lt;chr&gt;           &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;
-1 Daniel Gafford   2024 0.725   480
-2 Walker Kessler   2023 0.720   414
-3 DeAndre Jordan   2017 0.714   577
-4 Rudy Gobert      2022 0.713   508
-5 DeAndre Jordan   2015 0.710   534</code></pre>
-</div>
+<pre><code>[1] "Jaylen Brown" "Jrue Holiday" "Al Horford"  </code></pre>
 </div>
 </div>
 </div>
 </div>
 </div>
 </section>
-<section id="effective-field-goal-percentage" class="slide level2 scrollable">
-<h2>Effective Field Goal Percentage</h2>
+<section>
+<section id="plusminus-1" class="title-slide slide level1 center">
+<h1>Plus/Minus</h1>
+
+</section>
+<section id="computing-individual---concept" class="slide level2">
+<h2>Computing Individual +/- (Concept)</h2>
 <ul>
-<li>FGP treats 2- and 3-point shots the same!</li>
-<li><span class="math inline">\(\textrm{eFGP} = (\textrm{FGM} + 0.5 \times \textrm{TPM})/\textrm{FGA}\)</span></li>
+<li><p>Consider Shai Gilgeous-Alexander (2024-25 MVP)</p></li>
+<li><p>To compute SGA’s +/-:</p>
+<ol type="1">
+<li>Sum the home team point differentials for all stints where SGA was on the court and playing at home.</li>
+<li>Sum the <em>negative</em> of the home team point differentials for all shifts where SGA was on the court and playing on the road.</li>
+<li>Add the two totals from Steps 1 and 2.</li>
+</ol></li>
 </ul>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a>season_box <span class="ot">&lt;-</span> </span>
-<span id="cb17-2"><a></a>  season_box <span class="sc">|&gt;</span> </span>
-<span id="cb17-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">eFGP =</span> (FGM <span class="sc">+</span> <span class="fl">0.5</span> <span class="sc">*</span> TPM)<span class="sc">/</span>FGA) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="fragment">
+</section>
+<section id="computing-individual---formula" class="slide level2">
+<h2>Computing Individual +/- (Formula)</h2>
+<ul>
+<li><span class="math inline">\(\Delta_{i}\)</span>: home team point differential in shift <span class="math inline">\(i\)</span></li>
+<li><span class="math inline">\(x_{i, \textrm{SGA}}\)</span>: SGA’s signed on-court indicator:
+<ul>
+<li><span class="math inline">\(x_{i, \textrm{SGA}} = 0\)</span> if SGA off-court in stint <span class="math inline">\(i\)</span></li>
+<li><span class="math inline">\(x_{i, \textrm{SGA}} = 1(-1)\)</span> if SGA on-court at home (away) in stint <span class="math inline">\(i\)</span></li>
+</ul></li>
+<li>SGA’s +/- is just <span class="math display">\[
+\sum_{i = 1}^{n}{x_{i,\textrm{SGA}} \times \Delta_{i}}.
+\]</span></li>
+</ul>
+</section>
+<section id="computing-individual---code" class="slide level2">
+<h2>Computing Individual +/- (Code)</h2>
+<ul>
+<li>When SGA was on the floor, Thunder outscored opponents by 888 pts</li>
+<li>When Jokic was on the floor, Nuggets outscored opponents by 452</li>
+</ul>
 <div class="panel-tabset">
-<ul id="tabset-2" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-2-1">Raw eFGP Leaders</a></li><li><a href="#tabset-2-2">Restricted Leaders</a></li></ul>
+<ul id="tabset-2" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-2-1">SGA</a></li><li><a href="#tabset-2-2">Jokic</a></li></ul>
 <div class="tab-content">
 <div id="tabset-2-1">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a>season_box <span class="sc">|&gt;</span></span>
-<span id="cb18-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(FGA <span class="sc">&gt;=</span> <span class="dv">400</span>) <span class="sc">|&gt;</span></span>
-<span id="cb18-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(eFGP), dplyr<span class="sc">::</span><span class="fu">desc</span>(FGP)) <span class="sc">|&gt;</span></span>
-<span id="cb18-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Player, season, eFGP, FGP, TPA, n_games) <span class="sc">|&gt;</span></span>
-<span id="cb18-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5" data-code-line-numbers="|1-2|3-4|5|"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a>shai_id <span class="ot">&lt;-</span> player_table <span class="sc">|&gt;</span></span>
+<span id="cb5-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(Name <span class="sc">==</span> <span class="st">"Shai Gilgeous-Alexander"</span>) <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">pull</span>(id) </span>
+<span id="cb5-3"><a></a>shai_x <span class="ot">&lt;-</span> rapm_data <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">pull</span>(shai_id) </span>
+<span id="cb5-4"><a></a>delta <span class="ot">&lt;-</span> rapm_data <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">pull</span>(pts_diff) </span>
+<span id="cb5-5"><a></a><span class="fu">sum</span>(shai_x <span class="sc">*</span> delta)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="fragment">
+<div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 5 × 6
-  Player         season  eFGP   FGP   TPA n_games
-  &lt;chr&gt;           &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;int&gt;
-1 Daniel Gafford   2024 0.725 0.725     0      74
-2 Walker Kessler   2023 0.721 0.720     3      74
-3 DeAndre Jordan   2017 0.714 0.714     2      81
-4 Rudy Gobert      2022 0.713 0.713     4      66
-5 DeAndre Jordan   2015 0.711 0.710     4      82</code></pre>
+<pre><code>[1] 888</code></pre>
+</div>
 </div>
 </div>
 </div>
 <div id="tabset-2-2">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a>season_box <span class="sc">|&gt;</span></span>
-<span id="cb20-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(FGA <span class="sc">&gt;=</span> <span class="dv">400</span> <span class="sc">&amp;</span> TPA <span class="sc">&gt;=</span> <span class="dv">100</span>) <span class="sc">|&gt;</span></span>
-<span id="cb20-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(eFGP), dplyr<span class="sc">::</span><span class="fu">desc</span>(FGP)) <span class="sc">|&gt;</span></span>
-<span id="cb20-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Player, season, eFGP, FGP, TPA, n_games) <span class="sc">|&gt;</span></span>
-<span id="cb20-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a>jokic_id <span class="ot">&lt;-</span></span>
+<span id="cb7-2"><a></a>  player_table <span class="sc">|&gt;</span></span>
+<span id="cb7-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(Name <span class="sc">==</span> <span class="st">"Nikola Jokic"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(id)</span>
+<span id="cb7-5"><a></a></span>
+<span id="cb7-6"><a></a>jokic_x <span class="ot">&lt;-</span> rapm_data <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">pull</span>(jokic_id) </span>
+<span id="cb7-7"><a></a><span class="fu">sum</span>(jokic_x <span class="sc">*</span> delta) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 5 × 6
-  Player          season  eFGP   FGP   TPA n_games
-  &lt;chr&gt;            &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;int&gt;
-1 Kyle Korver       2015 0.671 0.487   449      75
-2 Duncan Robinson   2020 0.667 0.470   606      73
-3 Obi Toppin        2024 0.660 0.571   260      83
-4 Nikola Jokic      2023 0.660 0.632   149      69
-5 Joe Harris        2021 0.655 0.502   427      69</code></pre>
+<pre><code>[1] 452</code></pre>
 </div>
 </div>
 </div>
 </div>
 </div>
-</div>
-</section>
-<section id="takeaways" class="slide level2">
-<h2>Takeaways</h2>
-<ul>
-<li>No one way to define “best”</li>
-<li>FGM, FGP, and eFGP each have pros &amp; cons . . .</li>
-<li>Analytics involves <strong>motivating</strong> and <strong>justifying</strong> choices
-<ul>
-<li>Why this specific question?</li>
-<li>Why these data?</li>
-<li>Specific modeling choices . . .</li>
-</ul></li>
-<li>We’ll consider questions more nuanced than who’s the best</li>
-</ul>
-<!--
-## Summary
-
-- FGM, FGP, eFGP are just  *statistics*
-- Analytics tries to answer substantive questions w/ data
-- Q: which player had best shooting season?
-  - No one way to define "best"
-  - Must *motivate* whichever def. we choose
-- How can these statistics help competitive advantage?
-  - Season-to-season stability?
-  - How to predict future performance (esp. w/ small sample sizes)?
--->
 </section></section>
 <section>
-<section id="topic-list" class="title-slide slide level1 center">
-<h1>Topic List</h1>
+<section id="digression-matrix-computation" class="title-slide slide level1 center">
+<h1>Digression: Matrix Computation</h1>
 
 </section>
-<section id="unit-1-quantifying-individual-performances" class="slide level2">
-<h2>Unit 1: Quantifying Individual Performances</h2>
+<section id="notation" class="slide level2 smaller">
+<h2>Notation</h2>
 <ul>
-<li>Expected vs actual performance</li>
-<li>Value of a game state</li>
-<li>Performance above “replacement” level</li>
-<li>Case Studies:
+<li><p><span class="math inline">\(n\)</span>: total number of stints in the season</p></li>
+<li><p><span class="math inline">\(p\)</span>: total number of players</p></li>
+<li><p>For each stint <span class="math inline">\(i = 1, \ldots, n\)</span> and player <span class="math inline">\(j = 1, \ldots, p\)</span>:</p>
 <ul>
-<li>Expected goals in soccer (Lectures 2 &amp; 3)</li>
-<li>Adjusted plus/minus in the NBA (Lectures 4 &amp; 5)</li>
-<li>Run expectancy &amp; WAR in baseball (Lectures 6–8)</li>
-<li>WAR for the NFL (Lectures 9 &amp; 10)</li>
-<li>Pitch Framing in baseball (Lecture 11)</li>
+<li><span class="math inline">\(x_{ij} = 1\)</span> if player <span class="math inline">\(j\)</span> on-court at home in stint <span class="math inline">\(i\)</span></li>
+<li><span class="math inline">\(x_{ij} = -1\)</span> if player <span class="math inline">\(j\)</span> on-court on road in stint <span class="math inline">\(i\)</span></li>
+<li><span class="math inline">\(x_{ij} = 0\)</span></li>
 </ul></li>
+<li><p><span class="math inline">\(\Delta_{i}\)</span>: home-team differential in stint <span class="math inline">\(i\)</span> . . .</p></li>
+<li><p>Player <span class="math inline">\(j\)</span>’s +/-: <span class="math inline">\(\sum_{i}{x_{ij}\Delta_{i}}\)</span></p></li>
 </ul>
 </section>
-<section id="project-1" class="slide level2 smaller">
-<h2>Project 1</h2>
+<section id="stint-design-matrix" class="slide level2 smaller">
+<h2>Stint Design Matrix</h2>
 <ul>
-<li>Use box-score or play-by-play data</li>
-<li>Introduce a new metric &amp; show it has favorable properties
+<li>Arrange <span class="math inline">\(x_{ij}\)</span>’s into an <span class="math inline">\(n \times p\)</span> matrix</li>
+</ul>
+<p><span class="math display">\[
+\boldsymbol{\mathbf{X}} =
+\begin{pmatrix}
+x_{1,1} &amp; \cdots &amp; x_{1,p} \\
+\vdots &amp; &amp; \vdots \\
+x_{n,1} &amp; \cdots &amp; x_{n,p}
+\end{pmatrix}
+\]</span></p>
+<div class="fragment">
 <ul>
-<li>Season-to-season stability</li>
-<li>Ability to predict match- or season-level outcomes</li>
-<li>Reveal new insight about player valuation</li>
-</ul></li>
-<li>Extend case study from lecture
+<li>Collect all <span class="math inline">\(n\)</span> <span class="math inline">\(\Delta_{i}\)</span>’s into a vector of length <span class="math inline">\(n\)</span> <span class="math display">\[
+\boldsymbol{\Delta} = \begin{pmatrix} \Delta_{1} \\ \vdots \\ \Delta_{n} \end{pmatrix}
+\]</span></li>
+</ul>
+</div>
+</section>
+<section id="computing-all--s" class="slide level2">
+<h2>Computing all +/-’s</h2>
 <ul>
-<li>Construct analogs for another sport</li>
-<li>Examine season-to-season variability</li>
-</ul></li>
+<li>Can compute <strong>all</strong> player’s w/ matrix-vector multiplication <span class="math inline">\(\boldsymbol{\mathbf{X}}^{\top}\boldsymbol{\Delta}\)</span> <span class="math display">\[
+\begin{pmatrix}
+x_{1,1} &amp; \cdots &amp; x_{n,1} \\
+\vdots &amp; &amp; \vdots \\
+x_{1,p} &amp; \cdots &amp; x_{n,p}
+\end{pmatrix}
+\begin{pmatrix} \Delta_{1} \\ \vdots \\ \Delta_{n} \end{pmatrix}
+=
+\begin{pmatrix}
+x_{1,1}\Delta_{1} + x_{2,1}\Delta_{2} + \cdots + x_{n,1}\Delta_{n}\\
+\vdots \\
+x_{1,p}\Delta_{1} + x_{2,p}\Delta_{2} + \cdots + x_{n,p}\Delta_{n}
+\end{pmatrix}
+\]</span></li>
 </ul>
 </section>
-<section id="unit-2-rankings-simulation" class="slide level2">
-<h2>Unit 2: Rankings &amp; Simulation</h2>
-<ul>
-<li>Use models to <em>simulate</em> games, tournaments, drafts, etc.</li>
-<li>Case Studies:
-<ul>
-<li>NCAA Volleyball &amp; Hockey Tournaments (Lectures 12 &amp; 13)</li>
-<li>Markov chain simulations (Lecture 14 &amp; 15)</li>
-<li>Building a consensus mock draft (Lecture 16)</li>
-<li>Estimating impact of a rule change (Lecture 17)</li>
-</ul></li>
-</ul>
+<section id="computing-plusminus" class="slide level2">
+<h2>Computing Plus/Minus</h2>
+<div class="panel-tabset">
+<ul id="tabset-3" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-3-1">Building <span class="math inline">\(\boldsymbol{\mathbf{X}}\)</span></a></li><li><a href="#tabset-3-2">Computing Plus/Minus</a></li><li><a href="#tabset-3-3">Selected Players</a></li></ul>
+<div class="tab-content">
+<div id="tabset-3-1">
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-10"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy"><code class="sourceCode r"><span id="annotated-cell-10-1"><a href="#annotated-cell-10-1"></a>context_vars <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-10-2"><a href="#annotated-cell-10-2"></a>  <span class="fu">c</span>(<span class="st">"game_id"</span>, <span class="st">"stint_id"</span>, <span class="st">"n_pos"</span>, </span>
+<span id="annotated-cell-10-3"><a href="#annotated-cell-10-3"></a>    <span class="st">"start_home_score"</span>, <span class="st">"start_away_score"</span>, <span class="st">"start_minutes"</span>,</span>
+<span id="annotated-cell-10-4"><a href="#annotated-cell-10-4"></a>    <span class="st">"end_home_score"</span>, <span class="st">"end_away_score"</span>, <span class="st">"end_minutes"</span>,</span>
+<span id="annotated-cell-10-5"><a href="#annotated-cell-10-5"></a>    <span class="st">"home_points"</span>, <span class="st">"away_points"</span>, <span class="st">"minutes"</span>,</span>
+<span id="annotated-cell-10-6"><a href="#annotated-cell-10-6"></a>    <span class="st">"pts_diff"</span>, <span class="st">"margin"</span>)</span>
+<span id="annotated-cell-10-7"><a href="#annotated-cell-10-7"></a></span>
+<span id="annotated-cell-10-8"><a href="#annotated-cell-10-8"></a>X_full <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>( </span>
+<span id="annotated-cell-10-9"><a href="#annotated-cell-10-9"></a>    rapm_data <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span> tidyr<span class="sc">::</span><span class="fu">all_of</span>(context_vars))) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-3-2">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9" data-code-line-numbers="|4|5-6|1-2|7-9|"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a>pm <span class="ot">&lt;-</span></span>
+<span id="cb9-2"><a></a>  <span class="fu">data.frame</span>( </span>
+<span id="cb9-3"><a></a>    <span class="at">id =</span> <span class="fu">colnames</span>(X_full), </span>
+<span id="cb9-4"><a></a>    <span class="at">pm =</span> <span class="fu">crossprod</span>(<span class="at">x =</span> X_full, <span class="at">y =</span> rapm_data <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">pull</span>(pts_diff)), </span>
+<span id="cb9-5"><a></a>    <span class="at">n_pos =</span> <span class="fu">crossprod</span>(<span class="fu">abs</span>(X_full), <span class="at">y =</span> rapm_data <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">pull</span>(n_pos)), </span>
+<span id="cb9-6"><a></a>    <span class="at">minutes =</span> <span class="fu">crossprod</span>(<span class="fu">abs</span>(X_full), <span class="at">y =</span> rapm_data <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">pull</span>(minutes))) <span class="sc">|&gt;</span> </span>
+<span id="cb9-7"><a></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> player_table <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(id, Name), <span class="at">by =</span> <span class="st">"id"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb9-8"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(id, Name, pm, n_pos, minutes) <span class="sc">|&gt;</span> </span>
+<span id="cb9-9"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(pm))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-3-3">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>                     Name  pm
+1 Shai Gilgeous-Alexander 888
+2            Jayson Tatum 474
+3            Nikola Jokic 452
+4   Giannis Antetokounmpo 331
+5             Luka Doncic 276
+6           Anthony Davis -78
+7            LeBron James -88</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
 </section>
-<section id="project-2" class="slide level2">
-<h2>Project 2</h2>
-<ul>
-<li>Fit a model to estimate latent team- or player- strength</li>
-<li>Use model estimates to simulate play, games, tournament, drafts, etc.</li>
-<li>Compute probabilities based on simulation
-<ul>
-<li>Prob. of winning tournament or making it past 1st round</li>
-<li>Prob. football drive ends in a touchdown</li>
-<li>Prob. of winning a cricket test</li>
-<li>Chance player available in 2nd round of draft</li>
-</ul></li>
-</ul>
+<section id="visualizing-sgas-dominance" class="slide level2">
+<h2>Visualizing SGA’s Dominance</h2>
+<div class="cell" data-layout-align="center" data-fit-asp="0.5625">
+<div class="cell-output-display">
+<div id="fig-pm" class="quarto-float quarto-figure quarto-figure-center" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-pm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="slides_04_files/figure-revealjs/fig-pm-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;1: Large gap b/w SGA and rest of the league"><img data-src="slides_04_files/figure-revealjs/fig-pm-1.png" class="quarto-figure quarto-figure-center" width="768"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Large gap b/w SGA and rest of the league
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
 </section>
-<section id="unit-3-tracking-data" class="slide level2">
-<h2>Unit 3: Tracking Data</h2>
-<ul>
-<li>Currently the hottest area of sports analytics
-<ul>
-<li>Trackman + Statcast in baseball</li>
-<li>NFL: player positions 10 times per second</li>
-<li>Hawkeye for tennis, Hudl for soccer, …</li>
-</ul></li>
-<li>Tracking data opens up many possibilities
-<ul>
-<li>Incorporating spatial info. into prediction models</li>
-<li>Creating new metrics using tracking data</li>
-<li>Space ownership &amp; predicting trajectories</li>
-</ul></li>
-</ul>
+<section id="plusminus-and-possessions" class="slide level2">
+<h2>Plus/Minus and Possessions</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-pm-poss" class="quarto-float quarto-figure quarto-figure-center" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-pm-poss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="slides_04_files/figure-revealjs/fig-pm-poss-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;2: Variability in +/- increases with number of possessions!"><img data-src="slides_04_files/figure-revealjs/fig-pm-poss-1.png" class="quarto-figure quarto-figure-center" width="576"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pm-poss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Variability in +/- increases with number of possessions!
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
 </section>
-<section id="project-3" class="slide level2">
-<h2>Project 3</h2>
+<section id="issues-with-plusminus" class="slide level2 smaller">
+<h2>Issues with Plus/Minus</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a>pm <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        id                    Name  pm n_pos minutes
+1  1628983 Shai Gilgeous-Alexander 888  8159 2837.31
+2  1629652           Luguentz Dort 561  5584 1955.17
+3  1630198              Isaiah Joe 552  4896 1715.11
+4  1628401           Derrick White 509  6129 2327.72
+5  1630596             Evan Mobley 508  5944 2049.43
+6  1630598           Aaron Wiggins 507  4868 1683.08
+7  1628378        Donovan Mitchell 491  6101 2106.53
+8  1628369            Jayson Tatum 474  7498 2840.95
+9  1628386           Jarrett Allen 459  6163 2142.82
+10  203999            Nikola Jokic 452  7907 2707.97</code></pre>
+</div>
+</div>
 <ul>
-<li>Leverage tracking data</li>
-<li>NFL’s Big Data Bowl is a great opportunity
+<li>Is Lou Dort really better than Jayson Tatum???</li>
+</ul>
+<div class="fragment">
 <ul>
-<li>Best way into the field (even for non-football sports)</li>
-<li>Cash prizes &amp; chance to present at Combine</li>
-<li>Highly encourage you to use BDB submissions for Project 3</li>
-<li>More info will be posted on Piazza</li>
+<li>Differences in +/- could be a result of
+<ul>
+<li>Differences in skill</li>
+<li>Differences in playing time</li>
+<li>Differences in teammate &amp; opponent quality</li>
 </ul></li>
 </ul>
+</div>
 </section></section>
 <section>
-<section id="final-reminders" class="title-slide slide level1 center">
-<h1>Final Reminders</h1>
+<section id="adjusted-plusminus" class="title-slide slide level1 center">
+<h1>Adjusted Plus/Minus</h1>
 
 </section>
-<section id="course-expectations" class="slide level2">
-<h2>Course Expectations</h2>
+<section id="from-points-to-pointspossession" class="slide level2">
+<h2>From points to points/possession</h2>
 <ul>
-<li><p>Respect diverse backgrounds</p>
+<li>Comparing totals favors players with more playing time</li>
+<li>APM works with rates: point different per 100 possessions</li>
+</ul>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 4
+   stint_id pts_diff n_pos margin
+      &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
+ 1        1        6    14   42.9
+ 2        2        0     5    0  
+ 3        3       -2     1 -200  
+ 4        4        8     4  200  
+ 5        5        2    13   15.4
+ 6        6        4     8   50  
+ 7        8        6     9   66.7
+ 8        9        5    29   17.2
+ 9       10        0     6    0  
+10       11       -2     5  -40  </code></pre>
+</div>
+</div>
+</section>
+<section id="an-initial-apm-model" class="slide level2">
+<h2>An Initial APM Model</h2>
 <ul>
-<li>Not everyone may knows as much about a sport or method as You</li>
-<li>You may not know as much about a sport or method as someone else</li>
+<li>Associate each player <span class="math inline">\(j\)</span> with a latent strength <span class="math inline">\(\alpha_{j}\)</span></li>
+<li><span class="math inline">\(\alpha_{j}\)</span>’s are <strong>unknown</strong>: they must be estimated from data</li>
+<li><span class="math inline">\(Y_{i}\)</span>: point differential per 100 possessions in stint <span class="math inline">\(i\)</span></li>
+<li><span class="math inline">\(h_{1}(i), \ldots, h_{5}(i)\)</span> &amp; <span class="math inline">\(a_{1}(i), \ldots, a_{5}(i)\)</span>: identities of players on court in stint <span class="math inline">\(i\)</span></li>
+</ul>
+<div class="fragment">
+<p><span class="math display">\[
+\begin{align}
+Y_{i} &amp;= \alpha_{0} + \alpha_{h_{1}(i)} + \alpha_{h_{2}(i)} + \alpha_{h_{3}(i)} + \alpha_{h_{4}(i)} + \alpha_{h_{5}(i)} \\
+~&amp;~~~~~~~~~~- \alpha_{a_{1}(i)} - \alpha_{a_{2}(i)} - \alpha_{a_{3}(i)} - \alpha_{a_{4}(i)} - \alpha_{a_{5}(i)} + \epsilon_{i},
+\end{align}
+\]</span></p>
+</div>
+</section>
+<section id="interpretation" class="slide level2">
+<h2>Interpretation</h2>
+<ul>
+<li>Individual <span class="math inline">\(\alpha_{j}\)</span>’s are meaningless!</li>
+<li><span class="math inline">\(\alpha_{j}\)</span> captures change in point differential per 100 possessions between
+<ul>
+<li>Playing 5-on-5 with player <span class="math inline">\(j\)</span> on the court</li>
+<li>Playing 5-on-4 with player <span class="math inline">\(j\)</span> off the court</li>
 </ul></li>
-<li><p>Don’t hesitate to ask for and to provide help!</p></li>
-<li><p>Take care of yourselves &amp; each outer</p></li>
+<li>Differences (or <em>contrasts</em>) like <span class="math inline">\(\alpha_{j}-\alpha_{j'}\)</span> are much more useful</li>
 </ul>
 </section>
-<section id="generative-ai-expectations-1" class="slide level2">
-<h2>Generative AI Expectations 1</h2>
+<section id="example" class="slide level2 smaller">
+<h2>Example</h2>
 <ul>
-<li>You have the right to the full benefit of my expertise and engagement in this course.</li>
-<li>I will therefore <strong>never</strong> use AI to
+<li>Dec 23, 2024 game Dallas Mavericks (away) at Golden State Warriors (home):
 <ul>
-<li>To provide feedback on assignments</li>
-<li>To prepare any course content (e.g., slides, code, assignment flavor-text, etc.)</li>
-<li>To mediate or assist any communications with you</li>
+<li>DAL: Luka Doncic, Dereck Lively II, Kyrie Irving, P.J. Washington, and Klay Thompson</li>
+<li>GSW: Stephen Curry, Buddy Hield, Andrew Wiggins, Jonathan Kuminga, and Kevon Looney.</li>
 </ul></li>
-<li>Everything you see in the course was created by me without the aid of generative AI</li>
+<li>Per 100 possessions, with these lineups DAL expects to outscore GSW by <span class="math display">\[
+-1 \times (\alpha_{0} + \alpha_{SC} + \alpha_{BH} + \alpha_{AW} + \alpha_{JK} + \alpha_{KL}) +(\alpha_{LD} + \alpha_{KI} + \alpha_{DL} + \alpha_{PW} + \alpha_{KT}).
+\]</span></li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Now imagine that you replaced Doncic w/ Anthony Davis.</li>
+<li>Per 100 possessions, DAL expects to outscore GSW by <span class="math display">\[
+-1 \times (\alpha_{0} + \alpha_{SC} + \alpha_{BH} + \alpha_{AW} + \alpha_{JK} + \alpha_{KL}) +(\alpha_{AD} + \alpha_{KI} + \alpha_{DL} + \alpha_{PW} + \alpha_{KT}).
+\]</span></li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li>DAL expects to score <span class="math inline">\(\alpha_{\textrm{AD}} - \alpha_{\textrm{LD}}\)</span> more points per 100 possessions with Davis than Doncic, <strong>all else being equal</strong></li>
+</ul>
+</div>
+</section>
+<section id="apm-via-linear-models" class="slide level2">
+<h2>APM Via Linear Models</h2>
+<ul>
+<li>Append a column of 1’s to <span class="math inline">\(\boldsymbol{\mathbf{X}}\)</span> to form <span class="math inline">\(n \times (p+1)\)</span> matrix <span class="math inline">\(\boldsymbol{\mathbf{Z}}\)</span></li>
+<li>Let <span class="math inline">\(\boldsymbol{\mathbf{z}}_{i}\)</span> be the <span class="math inline">\(i\)</span>-th row of <span class="math inline">\(\boldsymbol{\mathbf{Z}}\)</span></li>
+<li>APM asserts: <span class="math inline">\(Y_{i} = \boldsymbol{\mathbf{z}}_{i}^{\top}\boldsymbol{\alpha} + \epsilon_{i}.\)</span></li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Tempting to estimate <span class="math inline">\(\boldsymbol{\alpha}\)</span> with least squares <span class="math display">\[
+\sum_{i = 1}^{n}{\left( Y_{i} - \boldsymbol{\mathbf{z}}_{i}^{\top}\boldsymbol{\alpha} \right)^{2}} .
+\]</span></li>
+</ul>
+</div>
+</section>
+<section id="singularity" class="slide level2 smaller">
+<h2>Singularity</h2>
+<ul>
+<li>Least squares problem does not have a unique solution!</li>
+<li>Columns of <span class="math inline">\(\boldsymbol{\mathbf{Z}}\)</span> are linearly dependent
+<ul>
+<li>The first element in each row is equal to 1 (for intercept)</li>
+<li>5 entries equal to 1 (for home players)</li>
+<li>5 entries equal to -1 (for away players)</li>
+</ul></li>
+<li>If you know all but one column, you can perfectly determine that column</li>
+<li><span class="math inline">\(\boldsymbol{\mathbf{Z}}^{\top}\boldsymbol{\mathbf{Z}}\)</span> not invertible</li>
 </ul>
 </section>
-<section id="generative-ai-expectations-2" class="slide level2">
-<h2>Generative AI Expectations 2</h2>
+<section id="introducing-a-baseline" class="slide level2">
+<h2>Introducing a Baseline</h2>
 <ul>
-<li>A core theme of this class is <em>practice</em>
-<ul>
-<li>It is OK to make mistakes or not know an answer</li>
-<li><em>Process</em> is more important than results</li>
-</ul></li>
-<li>Generative AI short-circuits the intended learning process &amp; its use is expressly prohibited</li>
+<li>Classify some players as “baseline”-level</li>
+<li><strong>Assumption</strong>: all baseline-level players have common value <span class="math inline">\(\mu\)</span></li>
+<li>Say first <span class="math inline">\(p'\)</span> players are non-baseline. For <span class="math inline">\(j = 1, \ldots, p'\)</span> let <span class="math inline">\(\beta_{j} = \alpha_{j} - \mu\)</span></li>
 </ul>
-</section>
-<section id="warning" class="slide level2">
-<h2>Warning</h2>
-<div class="callout callout-important callout-titled callout-style-default">
-<div class="callout-body">
-<div class="callout-title">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
+<!-- introduce tilde Z -->
+<div class="fragment">
+<p><span class="math display">\[
+\tilde{\boldsymbol{\mathbf{Z}}}\boldsymbol{\beta} = \boldsymbol{\mathbf{Z}}\boldsymbol{\alpha}
+\]</span></p>
 </div>
-<p><strong>Peer Review</strong></p>
-</div>
-<div class="callout-content">
-<p>Respect your classmates enough to review their projects yourself. Uploading someone else’s project report or presentation to a generative AI tool (e.g., for summarization) is forbidden and <strong>will result in a failing grade.</strong></p>
-</div>
-</div>
-</div>
-
-
 </section></section>
+<section id="weighted-adjusted-plusminus" class="title-slide slide level1 center">
+<h1>Weighted Adjusted Plus/Minus</h1>
+
+
+</section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <div class="footer footer-default">

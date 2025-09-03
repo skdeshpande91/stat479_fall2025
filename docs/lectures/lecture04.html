@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.31">
+<meta name="generator" content="quarto-1.7.32">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -91,7 +91,7 @@ div.csl-indent {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-4bfb630b09c0e164834af1bb3207dbff.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -260,6 +260,10 @@ window.Quarto = {
     <a class="dropdown-item" href="../slides/lecture03.html">
  <span class="dropdown-text">Lecture 3: Estimating XG</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture04.html">
+ <span class="dropdown-text">Lecture 4: Adjusted Plus/Minus</span></a>
+  </li>  
     </ul>
   </li>
 </ul>
@@ -373,10 +377,8 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#sec-overview" id="toc-sec-overview" class="nav-link active" data-scroll-target="#sec-overview">Overview</a>
-  <ul class="collapse">
-  <li><a href="#sec-data-prep" id="toc-sec-data-prep" class="nav-link" data-scroll-target="#sec-data-prep">Stint-level NBA Data</a></li>
-  </ul></li>
+  <li><a href="#sec-overview" id="toc-sec-overview" class="nav-link active" data-scroll-target="#sec-overview">Overview</a></li>
+  <li><a href="#sec-data-prep" id="toc-sec-data-prep" class="nav-link" data-scroll-target="#sec-data-prep">Stint-Level NBA Data</a></li>
   <li><a href="#sec-pm" id="toc-sec-pm" class="nav-link" data-scroll-target="#sec-pm">Plus/Minus</a>
   <ul class="collapse">
   <li><a href="#sec-individual-pm" id="toc-sec-individual-pm" class="nav-link" data-scroll-target="#sec-individual-pm">Computing Individual +/-’s</a></li>
@@ -421,24 +423,25 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="sec-overview">Overview</h2>
 <p>Which NBA players do the most to help their teams win? And how might we quantify that contribution? One option is to rely on box score statistics like points, rebounds, assists, steals, blocks, and turnovers. Underlying this approach is the assumption that the “best” or players with the most impact are the ones that record extreme values of these statistics. That is, they are the ones who score the most points, grab the most rebounds, commit the fewest turnovers, etc?</p>
 <p>While this approach seems natural, it quickly runs into problems. As <a href="https://www.82games.com/ilardi1.htm">Ilardi 2007</a> notes, it is not obvious whether all of these statistics should count the same or whether some should be weighted more heavily than others. It is also difficult to compare players who play different roles: is a guard who records 10 assists per game more valuable than a center who grabs 10 rebounds per game? More subtley, players do many things during the course of a game (e.g., setting screens, rotating on defense, dive for loose balls, etc.) that impact the outcome of a play or the game but do not appear in the box score. How should those contributions be valued?</p>
-<p>In today’s lecture, we introduce two now-classical approaches to player evaluation: <em>plus/minus</em> (<a href="#sec-pm" class="quarto-xref">Section&nbsp;2</a>) and <em>adjusted plus/minus</em> (<a href="#sec-apm-intro" class="quarto-xref">Section&nbsp;3</a>). At a high-level, plus/minus is simply the total point differential that a player’s team accrues when he is on the court. Adjusted plus/minus measures how much more a player contributes to his team’s point differential per 100 after accounting than a baseline-level player, after accounting for the relative contributions of his teammates and opponents.</p>
-<section id="sec-data-prep" class="level3">
-<h3 class="anchored" data-anchor-id="sec-data-prep">Stint-level NBA Data</h3>
+<p>In today’s lecture, we introduce two now-classical approaches to player evaluation: <em>plus/minus</em> (<a href="#sec-pm" class="quarto-xref">Section&nbsp;3</a>) and <em>adjusted plus/minus</em> (<a href="#sec-apm-intro" class="quarto-xref">Section&nbsp;4</a>). At a high-level, plus/minus is simply the total point differential that a player’s team accrues when he is on the court. Adjusted plus/minus measures how much more a player contributes to his team’s point differential per 100 after accounting than a baseline-level player, after accounting for the relative contributions of his teammates and opponents.</p>
+</section>
+<section id="sec-data-prep" class="level2">
+<h2 class="anchored" data-anchor-id="sec-data-prep">Stint-Level NBA Data</h2>
 <div class="callout callout-style-default callout-note no-icon callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Definition: Stint
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>##Definition: Stint A <em>stint</em> is a period of play between substitutions during which the same 10 players remain on the court.</p>
+<p>A <em>stint</em> is a period of play between substitutions during which the same 10 players remain on the court.</p>
 </div>
 </div>
-<p>To compute plus/minus and adjusted plus/minus, we need to build a data table in which rows correspond to stints within individual games. In addition to recording the identities of the home and away team players on the court during each stint, the data table needs to include game-state information about each stint including both teams’ scores and the amount of time left at the start and end of each stint and the number of possessions in each stint.</p>
-<p>The NBA posts a play-by-play for every game that contains the time-stamp and a short description of important events during a game. Basically, whenever a player does something tracked by the scorekeepers or reported in the box-score (e.g., attempt a shot, steal the ball, commit a foul, etc.), an entry is added to the play-by-play log. <a href="https://www.nba.com/game/dal-vs-min-0042300312/play-by-play?period=All">Here</a> is an example from a game from a few years ago between the Dallas Mavericks and Minnesota Timberwolves<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+<p>To compute plus/minus and adjusted plus/minus, we need to build a data table in which rows correspond to stints within individual games. In addition to recording the identities of the home and away team players on the court during each stint, the data table needs to include game-state information about each stint including both teams’ scores and the amount of time left at the start and end of each stint and the number of possessions in each stint. Such a table can be built using play-by-play data.</p>
+<p>The NBA posts a play-by-play for every game containing the time-stamp and a short description of important events during a game. Basically, whenever a player does something tracked by the scorekeepers or reported in the box-score (e.g., attempt a shot, steal the ball, commit a foul, etc.), an entry is added to the play-by-play log. <a href="https://www.nba.com/game/dal-vs-min-0042300312/play-by-play?period=All">Here</a> is an example from a game from a few years ago between the Dallas Mavericks and Minnesota Timberwolves<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
 <p>We can scrap play-by-play data into R using the <a href="https://hoopr.sportsdataverse.org">[<strong>hoopR</strong>]</a> package, which can be installed using the code:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"hoopR"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -459,7 +462,7 @@ Warning
 </div>
 <div class="cell">
 <details class="code-fold">
-<summary>Show code to get stinte data</summary>
+<summary>Show code to get stint data</summary>
 <div class="sourceCode cell-code" id="annotated-cell-2"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1">1</button><span id="annotated-cell-2-1" class="code-annotation-target"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a>get_game_stint_data <span class="ot">&lt;-</span> <span class="cf">function</span>(game_i) {</span>
 <span id="annotated-cell-2-2"><a href="#annotated-cell-2-2" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="annotated-cell-2-3"><a href="#annotated-cell-2-3" aria-hidden="true" tabindex="-1"></a>  game_data <span class="ot">&lt;-</span> hoopR<span class="sc">::</span><span class="fu">nba_pbp</span>(<span class="at">game_id =</span> game_i)</span>
@@ -719,9 +722,9 @@ Warning
 <p>The first 14 columns of <code>rapm_data</code> record:</p>
 <ul>
 <li>Numeric identifiers for the game (<code>game_id</code>) and stint (<code>stint_id</code>).</li>
-<li>Both teams’ scores and the amount of time remaining at the start of a shift: <code>start_home_score</code>, <code>start_away_score</code>, and <code>start_minutes</code>.</li>
-<li>Both teams’ scores and the amount of time remaining at the end of each shift: <code>end_home_score</code>, <code>end_away_score</code>, and <code>end_minutes</code>.</li>
-<li>The length of a shift (<code>minutes</code>), the number of points scored by the home (<code>home_points</code>) and away team (<code>away_points</code>), and the number of possessions (<code>n_pos</code>).</li>
+<li>Both teams’ scores and the amount of time remaining at the start of a stint: <code>start_home_score</code>, <code>start_away_score</code>, and <code>start_minutes</code>.</li>
+<li>Both teams’ scores and the amount of time remaining at the end of each stint: <code>end_home_score</code>, <code>end_away_score</code>, and <code>end_minutes</code>.</li>
+<li>The length of a stint (<code>minutes</code>), the number of points scored by the home (<code>home_points</code>) and away team (<code>away_points</code>), and the number of possessions (<code>n_pos</code>).</li>
 <li>The score differential <code>pts_diff = home_points - away_points</code>.</li>
 <li>The score differential per 100 possessions, <code>margin = pts_diff/n_pos * 100</code>.</li>
 </ul>
@@ -747,7 +750,6 @@ Warning
 </div>
 </div>
 </section>
-</section>
 <section id="sec-pm" class="level2">
 <h2 class="anchored" data-anchor-id="sec-pm">Plus/Minus</h2>
 <p>Intuitively, we expect a team to perform better when a “good” player is on the court than when he is not on the court. Similarly, we expect a team to perform worse when a “bad” player is on the court than when he is not on the court. <em>Plus/Minus</em> (hereafter +/-) attempts to quantify this intuition by computing the total number of points by which a player’s team outscores their opponents when that player is on the floor. If a player has a large, positive +/- value, that means that the player’s team outscored its opponents by a large margin Similarly, a large, negative +/- value indicates that a player’s team was outscored by a wide margin when the player was on the court.</p>
@@ -755,11 +757,11 @@ Warning
 <h3 class="anchored" data-anchor-id="sec-individual-pm">Computing Individual +/-’s</h3>
 <p>As an example, let’s compute the plus/minus values for Shai Gilgeous-Alexander (SGA), who was recognized as the league’s Most Valuable Player (MVP) in the 2024-25 regular season. To compute SGA’s +/-, we need to</p>
 <ol type="1">
-<li>Sum the home team point differentials (i.e., the values in the column <code>pts_diff</code>) for all shifts where SGA was on the court and playing at home.</li>
-<li>Sum the <em>negative</em> of the home team point differentials for all shifts where SGA was on the court and playing on the road.</li>
+<li>Sum the home team point differentials (i.e., the values in the column <code>pts_diff</code>) for all stints where SGA was on the court and playing at home.</li>
+<li>Sum the <em>negative</em> of the home team point differentials for all stints where SGA was on the court and playing on the road.</li>
 <li>Add the two totals from Steps 1 and 2.</li>
 </ol>
-<p>Mathematically, for every stint <span class="math inline">\(i\)</span> in our data table, let <span class="math inline">\(\Delta_{i}\)</span> be the home team’s point differential during that shift. Additionally, let <span class="math inline">\(x_{i, \textrm{SGA}}\)</span> be the <em>signed on-court indicator</em> that is equal to 1 if SGA is on the court and playing at home during shift <span class="math inline">\(i\)</span>; -1 if Shai is on the court and playing on the road during shift <span class="math inline">\(i\)</span>; and 0 if SGA is not on the court during shift <span class="math inline">\(i.\)</span> Then, SGA’s +/- is equal to <span class="math display">\[
+<p>Mathematically, for every stint <span class="math inline">\(i\)</span> in our data table, let <span class="math inline">\(\Delta_{i}\)</span> be the home team’s point differential during that stint. Additionally, let <span class="math inline">\(x_{i, \textrm{SGA}}\)</span> be the <em>signed on-court indicator</em> that is equal to 1 if SGA is on the court and playing at home during stint <span class="math inline">\(i\)</span>; -1 if Shai is on the court and playing on the road during stint <span class="math inline">\(i\)</span>; and 0 if SGA is not on the court during stint <span class="math inline">\(i.\)</span> Then, SGA’s +/- is equal to <span class="math display">\[
 \sum_{i = 1}^{n}{x_{i,\textrm{SGA}} \times \Delta_{i}}.
 \]</span> The data table <code>rapm_data</code> contains a column with the signed on-court indicators for every player. The names of these columns are just the <strong>hoopR</strong> identifiers, which were recorded in the <code>id</code> column of our look-up table <code>player_table</code>. The following code computes Shai’s +/- and uses the function <code>[dplyr::pull()</code>](https://dplyr.tidyverse.org/reference/pull.html) to extract values from specific columns of <code>rapm_data</code>.</p>
 <div class="cell">
@@ -787,7 +789,7 @@ Warning
 </dd>
 <dt data-target-cell="annotated-cell-5" data-target-annotation="4">4</dt>
 <dd>
-<span data-code-cell="annotated-cell-5" data-code-lines="6" data-code-annotation="4">Extracts the vector of home team point differentials across all shifts from <code>rapm_data</code></span>
+<span data-code-cell="annotated-cell-5" data-code-lines="6" data-code-annotation="4">Extracts the vector of home team point differentials across all stints from <code>rapm_data</code></span>
 </dd>
 <dt data-target-cell="annotated-cell-5" data-target-annotation="5">5</dt>
 <dd>
@@ -816,9 +818,9 @@ Warning
 <section id="sec-matrix-pm" class="level3">
 <h3 class="anchored" data-anchor-id="sec-matrix-pm">Matrix-Based Computation</h3>
 <p>Repeating this calculation for all players one at a time is exceptionally tedious. Luckily, with a bit of matrix algebra, we can compute the +/- for <em>all</em> players in one shot.</p>
-<p>To this end, let <span class="math inline">\(n\)</span> be the total number of stints in our data table and let <span class="math inline">\(p\)</span> be the total number of players. Just like we did for SGA and Jokic in <a href="#sec-individual-pm" class="quarto-xref">Section&nbsp;2.1</a>, for each shift <span class="math inline">\(i = 1, \ldots, n\)</span> and for each player <span class="math inline">\(j = 1, \ldots, p,\)</span> let <span class="math inline">\(x_{ij}\)</span> be the signed on-court indicator for player <span class="math inline">\(j\)</span> during shift <span class="math inline">\(i.\)</span> So, <span class="math inline">\(x_{ij}\)</span> is equal to 0 if player <span class="math inline">\(j\)</span> is not on the court during shift <span class="math inline">\(i\)</span> and is equal to 1 (resp. -1) if player <span class="math inline">\(j\)</span> is on the court and playing at home (resp. on the road) during shift <span class="math inline">\(i.\)</span> Player <span class="math inline">\(j\)</span>’s overall +/- is given by <span class="math display">\[
+<p>To this end, let <span class="math inline">\(n\)</span> be the total number of stints in our data table and let <span class="math inline">\(p\)</span> be the total number of players. Just like we did for SGA and Jokic in <a href="#sec-individual-pm" class="quarto-xref">Section&nbsp;3.1</a>, for each stint <span class="math inline">\(i = 1, \ldots, n\)</span> and for each player <span class="math inline">\(j = 1, \ldots, p,\)</span> let <span class="math inline">\(x_{ij}\)</span> be the signed on-court indicator for player <span class="math inline">\(j\)</span> during stint <span class="math inline">\(i.\)</span> So, <span class="math inline">\(x_{ij}\)</span> is equal to 0 if player <span class="math inline">\(j\)</span> is not on the court during stint <span class="math inline">\(i\)</span> and is equal to 1 (resp. -1) if player <span class="math inline">\(j\)</span> is on the court and playing at home (resp. on the road) during stint <span class="math inline">\(i.\)</span> Player <span class="math inline">\(j\)</span>’s overall +/- is given by <span class="math display">\[
 \sum_{i = 1}^{n}{x_{ij}\Delta_{i}}.
-\]</span> We can arrange the <span class="math inline">\(x_{ij}\)</span> values into an <span class="math inline">\(n \times p\)</span> matrix <span class="math inline">\(\boldsymbol{\mathbf{X}}\)</span> so that <span class="math inline">\(x_{ij}\)</span> appears in in the <span class="math inline">\(j-th\)</span> column of the <span class="math inline">\(i\)</span>-th row (i.e., <span class="math inline">\(x_{ij}\)</span> is the <span class="math inline">\((i,j)\)</span> entry of <span class="math inline">\(\boldsymbol{\mathbf{X}}\)</span><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>). This way, the rows (resp. columns) of <span class="math inline">\(\boldsymbol{\mathbf{X}}\)</span> correspond to shifts (resp. players). Let <span class="math inline">\(\boldsymbol{\Delta}\)</span> be the vector of length <span class="math inline">\(n\)</span> whose <span class="math inline">\(i\)</span>-th entry is <span class="math inline">\(\Delta_{i},\)</span> the home-team point differential in shift <span class="math inline">\(i.\)</span></p>
+\]</span> We can arrange the <span class="math inline">\(x_{ij}\)</span> values into an <span class="math inline">\(n \times p\)</span> matrix <span class="math inline">\(\boldsymbol{\mathbf{X}}\)</span> so that <span class="math inline">\(x_{ij}\)</span> appears in in the <span class="math inline">\(j-th\)</span> column of the <span class="math inline">\(i\)</span>-th row (i.e., <span class="math inline">\(x_{ij}\)</span> is the <span class="math inline">\((i,j)\)</span> entry of <span class="math inline">\(\boldsymbol{\mathbf{X}}\)</span><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>). This way, the rows (resp. columns) of <span class="math inline">\(\boldsymbol{\mathbf{X}}\)</span> correspond to stints (resp. players). Let <span class="math inline">\(\boldsymbol{\Delta}\)</span> be the vector of length <span class="math inline">\(n\)</span> whose <span class="math inline">\(i\)</span>-th entry is <span class="math inline">\(\Delta_{i},\)</span> the home-team point differential in stint <span class="math inline">\(i.\)</span></p>
 <p>It turns out<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> that player <span class="math inline">\(j\)</span>’s +/- is the <span class="math inline">\(j\)</span>-th entry of the vector obtained when we multiply the <em>transpose</em>[^transpose] of <span class="math inline">\(\boldsymbol{\mathbf{X}}\)</span> by the vector <span class="math inline">\(\boldsymbol{\Delta}.\)</span> That is, if <span class="math display">\[
 \boldsymbol{\mathbf{pm}} = \boldsymbol{\mathbf{X}}^{\top}\boldsymbol{\Delta},
 \]</span> then the vector <span class="math inline">\(\boldsymbol{\mathbf{pm}}\)</span> contains <span class="math inline">\(p\)</span> entries and its <span class="math inline">\(j\)</span>-th entry is given by <span class="math display">\[
@@ -1188,7 +1190,7 @@ Y_{i} = \boldsymbol{\mathbf{z}}_{i}^{\top}\boldsymbol{\alpha} + \epsilon_{i}.
 <dl class="code-annotation-container-hidden code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-18" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-18" data-code-lines="4" data-code-annotation="1">Create a variable recording the lead at the start of the shift</span>
+<span data-code-cell="annotated-cell-18" data-code-lines="4" data-code-annotation="1">Create a variable recording the lead at the start of the stint</span>
 </dd>
 <dt data-target-cell="annotated-cell-18" data-target-annotation="2">2</dt>
 <dd>
@@ -1290,7 +1292,7 @@ Deshpande, Sameer K., and Shane T. Jensen. 2016. <span>“Estimating an <span>NB
 </div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
-<li id="fn1"><p>It is the game in which Luka Dončić <del>embarassed</del> hit a step-back 3 pointer over Rudy Goert to win the game (<a href="https://www.nba.com/stats/events?CFID=&amp;CFPARAMS=&amp;GameEventID=682&amp;GameID=0042300312&amp;Season=2023-24&amp;flag=1&amp;title=Doncic%2025%27%203PT%20Step%20Back%20Jump%20Shot%20(32%20PTS)">link</a>).<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>It is the game in which Luka Dončić <del>embarrassed Rudy Gobert</del> hit a step-back 3 pointer over Rudy Gobert to win the game (<a href="https://www.nba.com/stats/events?CFID=&amp;CFPARAMS=&amp;GameEventID=682&amp;GameID=0042300312&amp;Season=2023-24&amp;flag=1&amp;title=Doncic%2025%27%203PT%20Step%20Back%20Jump%20Shot%20(32%20PTS)">link</a>).<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>See <a href="https://en.wikipedia.org/wiki/Index_notation#Two-dimensional_arrays">this Wikipedia entry</a> for background on on index notation for two-dimensional arrays.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn3"><p>See <a href="https://en.wikipedia.org/wiki/Matrix_multiplication#Matrix_times_vector">the Wikipedia entry on matrix-vector multiplication</a> for the formula.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn4"><p>As best I can tell, the name <code>margin</code> refers back to the <a href="https://www.82games.com/comm30.htm">original article</a>.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
