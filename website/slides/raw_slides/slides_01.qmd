@@ -8,29 +8,324 @@ execute:
 
 # Logistics
 
-## Lectures & Office Hours
+## Lectures & Office Hours{.smaller}
 
 - Lectures: Tuesdays & Thursday 11am-12:15pm (Morgridge Hall 1514)
 - Instructor: Sameer Deshpande
   - Mondays: 11am - 12pm (Morgridge Hall 5586)
   - Wednesdays: 4pm - 5pm (Morgridge Hall 5586)
   - Fridays: 3pm - 4:30pm (Morgridge Hall 3610)
+
 - TA: Zhexuan Liu 
   - Tuesdays & Thursdays 9:15am-10:45am (Morgridge Hall 2515)
 
-## Course Learning Outcomes
+## What This Course is NOT {.smaller}
 
-  1. Implement appropriate statistical methods to assess player and team performance
-  2. Work with play-by-play and high-resolution tracking data
-  3. Provide constructive and actionable feedback on your peers' analytic reports
-  4. Build a personal portfolio of sports data analyses
-  
+- **NOT** a statistical methods course w/ sports applications
+- Introduce methods *as needed* to answer *substantive* questions
+  - Will not focus on all technical details
+  - I'll try to point to other resources & classes where relevant
+
 . . .
 
+- **NOT** a course on sports betting or fantasy sports
+  - Some material may be relevant ... 
+  - ... but we won't explicitly discuss these topics
+
+. . . 
+
+- **NOT** an excuse to discuss last night's game for credit
+  - This is a serious statistics & data science course
+
+- Unofficial goal: **practice** skills needed to work w/ sports data 
+  - E.g., for a professional team
+
+## Course Learning Outcomes
+:::{.fragment}
+
+1. Implement appropriate statistical methods to assess player and team performance
+2. Work with play-by-play and high-resolution tracking data
+3. Provide constructive and actionable feedback on your peers' analytic reports
+4. Build a personal portfolio of sports data analyses
+  
+:::
+
+:::{.fragment}
+- Key: asking and answering **substantive** sports questions w/ data
+  - We'll go well beyond "who's the best at..."
+
+:::
+<!--
 :::{.callout-note}
 ## Unofficial Goal
 **Practice** the skills needed to work for professional teams
 :::
+-->
+
+# What is Sports Analytics?
+
+## Statistics vs Analytics{.smaller}
+
+- Sports statistics refer to counts and rates that *summarize* performance:
+  - Number of rebounds, wins, games played
+  - Free throw percentage, batting average
+- Analytics refers to the use of statistical *modeling* to help gain competitive advantage
+  - Analytics makes use of basic statistics & creates new ones
+  - Analytics uses data to answer **substantive sports questions**
+
+
+## "Best"NBA Shooting Performances{.smaller}
+
+- Who is the best shooter in NBA history?
+  - What do we mean by "best"?
+  - It's not clear that this can be answered w/ data
+  
+. . .
+
+- A more precise question: which player made the most shots in a single season?
+  - Can be answered by data
+  - We'll assess whether "best" = "made most shots" is satisfactory later
+
+. . .
+
+- Data: box scores from each game since 2002-03
+- Available from the **hoopR** package
+```{r}
+#| label: load-data
+#| eval: true
+#| echo: true
+raw_box <- hoopR::load_nba_player_box(seasons = 2002:(hoopR::most_recent_nba_season()))
+```
+
+## Data Snapshot
+```{r}
+#| eval: false
+#| echo: true
+#| code-line-numbers: "1|2-3"
+raw_box |> dplyr::filter(game_date == "2011-06-12") |>
+  dplyr::select(athlete_display_name, 
+         field_goals_made, field_goals_attempted)
+```
+
+. . .
+
+```{r}
+#| eval: true
+#| echo: false
+raw_box |> 
+  dplyr::filter(game_date == "2011-06-12") |>
+  dplyr::select(athlete_display_name, 
+         field_goals_made, field_goals_attempted)
+```
+
+## Extract Regular Season Data
+```{r}
+#| label: preprocess-1
+#| eval: true
+#| echo: true
+#| code-line-numbers: "1-7|9"
+allstar_dates <- lubridate::date(c("2002-02-10", "2003-02-09", 
+    "2004-02-15","2005-02-20", "2006-02-19", "2007-02-18", 
+    "2008-02-17", "2009-02-15", "2010-02-14","2011-02-20", 
+    "2012-02-26", "2013-02-17", "2014-02-16", "2015-02-15", 
+    "2016-02-14","2017-02-19", "2018-02-18", "2019-02-17",
+    "2020-02-16", "2021-03-07", "2022-02-20","2023-02-19", 
+    "2024-02-18", "2025-02-16"))
+reg_box <- raw_box |>
+  dplyr::filter(season_type == 2 & !did_not_play & !game_date %in% allstar_dates)
+```
+
+## Preprocessing
+- Rename columns & set defaults for players with no minutes
+```{r}
+#| label: preprocess-2
+#| eval: true
+#| echo: true
+#| code-line-numbers: "1-2|3-7|8-11|"
+reg_box <-
+  reg_box |>
+  dplyr::rename(
+    Player = athlete_display_name, 
+    FGM = field_goals_made, FGA = field_goals_attempted,
+    TPM = three_point_field_goals_made,TPA = three_point_field_goals_attempted,
+    FTM = free_throws_made, FTA = free_throws_attempted) |>
+  dplyr::mutate(
+    FGM = ifelse(is.na(minutes), 0, FGM), FGA = ifelse(is.na(minutes), 0, FGA),
+    TPM = ifelse(is.na(minutes), 0, TPM),TPA = ifelse(is.na(minutes), 0, TPA),
+    FTM = ifelse(is.na(minutes), 0, FTM),FTA = ifelse(is.na(minutes), 0, FTA)) |>
+  tidyr::replace_na(list(minutes = 0))         
+```
+
+## Season Totals
+```{r}
+#| label: get-season-totals-code
+#| eval: false
+#| echo: true
+#| code-line-numbers: "3|4-6|"
+season_box <-
+  reg_box |>
+  dplyr::group_by(Player, season) |>
+  dplyr::summarise(FGM = sum(FGM),FGA = sum(FGA),
+    TPM = sum(TPM),TPA = sum(TPA),FTM = sum(FTM),FTA = sum(FTA),
+    minutes = sum(minutes), n_games = dplyr::n(),.groups = "drop")
+season_box |> dplyr::filter(Player == "Dirk Nowitzki") 
+```
+
+. . . 
+
+```{r}
+#| label: get-season-totals-eval
+#| eval: true
+#| echo: false
+season_box <-
+  reg_box |>
+  dplyr::group_by(Player, season) |>
+  dplyr::summarise(FGM = sum(FGM),FGA = sum(FGA),
+    TPM = sum(TPM),TPA = sum(TPA),FTM = sum(FTM),FTA = sum(FTA),
+    minutes = sum(minutes), n_games = dplyr::n(),.groups = "drop")
+season_box |> dplyr::filter(Player == "Dirk Nowitzki") 
+```
+
+## Who Made the Most Shots?
+```{r}
+#| label: arrange-fgm
+#| eval: true
+#| echo: true
+season_box |>
+  dplyr::arrange(dplyr::desc(FGM)) |>
+  dplyr::select(Player, season, FGM, FGA, minutes, n_games) |> 
+  dplyr::slice_head(n=5)
+```
+
+. . .
+
+- Is Kobe's 2002-03 really the same as SGA's 2024-25???
+
+. . .
+
+- Arguably "best" should account for efficiency
+
+## Field Goal Percentage{.scrollable}
+```{r}
+#| label: compute-percentages-code
+#| eval: true
+#| echo: true
+season_box <-
+  season_box |>
+  dplyr::mutate(FGP = ifelse(FGA > 0, FGM/FGA, NA_real_))
+
+```
+
+. . . 
+
+:::{.panel-tabset}
+### FGP Leaders
+```{r}
+#| eval: true
+#| echo: true
+season_box |> 
+  dplyr::arrange(dplyr::desc(FGP)) |>
+  dplyr::slice_head(n=5) |>
+  dplyr::select(Player, season, FGP)
+```
+
+### Another Look
+```{r}
+#| eval: true
+#| echo: true
+season_box |> 
+  dplyr::arrange(dplyr::desc(FGP)) |>
+  dplyr::slice_head(n=5) |>
+  dplyr::select(Player, season, FGP, FGA)
+```
+
+### Restricted Leaders
+```{r}
+#| label: qualify-fgp
+#| eval: true
+#| echo: true
+season_box |> 
+  dplyr::filter(FGA >= 400) |> 
+  dplyr::arrange(dplyr::desc(FGP)) |>
+  dplyr::select(Player, season, FGP, FGA) |>
+  dplyr::slice_head(n = 5)
+```
+:::
+
+
+
+
+## Effective Field Goal Percentage{.smaller}
+- FGP is arguably a better measure of skill than FGM **but**
+  - Extreme values for players w/ few attempts
+  - Doesn't distinguish 2- and 3-point shots
+ 
+. . . 
+
+- $\textrm{eFGP} = (\textrm{FGM} + 0.5 \times \textrm{TPM})/\textrm{FGA}$
+```{r}
+#| label: compute-efgp
+#| eval: true
+#| echo: true
+season_box <- 
+  season_box |> 
+  dplyr::mutate(eFGP = (FGM + 0.5 * TPM)/FGA) 
+```
+
+. . . 
+
+:::{.panel-tabset}
+
+### Raw eFGP Leaders
+
+- eFGP leaders are mostly centers who don't shoot 3's
+```{r}
+#| label: efgp-leaders
+#| echo: false
+#| eval: true
+season_box |>
+  dplyr::filter(FGA >= 400) |>
+  dplyr::arrange(dplyr::desc(eFGP), dplyr::desc(FGP)) |>
+  dplyr::select(Player, season, eFGP, FGP, TPA, n_games) |>
+  dplyr::slice_head(n = 5)
+```
+
+### Restricted Leaders
+- We can restrict to players with $\textrm{FGA} > 400$ and $\textrm{TPA} > 100$
+```{r}
+#| label: efgp-leaders-filter
+#| echo: false
+#| eval: true
+season_box |>
+  dplyr::filter(FGA >= 400 & TPA >= 100) |>
+  dplyr::arrange(dplyr::desc(eFGP), dplyr::desc(FGP)) |>
+  dplyr::select(Player, season, eFGP, FGP, TPA, n_games) |>
+  dplyr::slice_head(n = 5)
+```
+
+:::
+
+
+## Reflection{.smaller}
+
+- eFGP is arguably better than FGP and FGM
+- But it is still highly variable
+
+. . . 
+
+- Refined question: instead of "who's the best", we can ask
+
+"what is the probability that a player makes a shot"
+
+- Later: methods to these probabilities that
+  - Account for contextual factors (e.g., shot location)
+  - Produce stable estimates even w/ small sample sizes
+  - Help rank players w/o imposing arbitrary cut-offs (e.g., $\textrm{FGA} > 400$)
+  - Help calibrate performance against transparent baselines (e.g., "above replacement")
+
+- Analytics involves **motivating** and **justifying** choices 
+
+# More Course Logistics
 
 ## Requisites
 
@@ -69,9 +364,10 @@ Also [Canvas](https://canvas.wisc.edu/courses/476839) & [Piazza](https://canvas.
 
 - Final grade based on how many of the 1000 points earned
 
-## Projects
+## Projects{.smaller}
 - Work in groups of up to 4
-  - Form groups by Friday September 12
+  - Same groups for Projects 1 & 2; can change for Project 3
+  - Form groups by **Friday September 12**
   - Use Piazza to find teammates & sign up on Canvas
 
 - Course projects can
@@ -100,13 +396,18 @@ I **highly** recommend using Quarto or RMarkdown
 
 . . .
 
-- I will select 5-6 groups to present in-class on final day (12/9)
-- Like all good competitions, there'll be prize(s)
+- I'll select 5-6 groups to present in-class on the last day (12/9)
+  - Details to be announced
+  - Presenting on the last day unrelated to course grades
+  - But there'll be prize(s)
+
 
 ## Project Peer Review
+
 - Provide feedback on 3 presentations & 3 reports
   - Rubrics will be available
   - Fill out rubric + leave *constructive* comments
+  
 - Due 1 weeks after projects: 10/17, 11/14, and 12/12
 
 ## Team Accountability Survey
@@ -118,259 +419,10 @@ I **highly** recommend using Quarto or RMarkdown
 - Course staff may give warnings for low peer score
 
 
-# What is Sports Analytics?
-
-## Statistics vs Analytics
-
-- Sports statistics refer to counts and rates that *summarize* performance:
-  - Number of rebounds, wins, games played
-  - Free throw percentage, batting average
-
-. . .
-
-- Analytics refers to the use of statistical *modeling* to help gain competitive advantage
-  - Analytics makes use of basic statistics & creates new ones
-  - Analytics uses data to answer **substantive sports questions**
-
-
-## "Best"NBA Shooting Performances
-
-- What is the best single-season shooting performance in the NBA?
-
-. . .
-
-- How should we define best?
-  - Made the most shots? Highest proportion of made shots?
-  - Should 2- and 3-point shots count the same?
-
-. . .
-
-- Data: box scores from each game since 2002-03
-- Available from the **hoopR** package
-```{r}
-#| label: load-data
-#| eval: true
-#| echo: true
-raw_box <-
-  hoopR::load_nba_player_box(
-    seasons = 2002:(hoopR::most_recent_nba_season()))
-```
-
-## Data snapshot
-```{r}
-#| eval: false
-#| echo: true
-#| code-line-numbers: "1|2-3"
-raw_box |> dplyr::filter(game_date == "2011-06-12") |>
-  dplyr::select(athlete_display_name, 
-         field_goals_made, field_goals_attempted)
-```
-. . .
-```{r}
-#| eval: true
-#| echo: false
-raw_box |> 
-  dplyr::filter(game_date == "2011-06-12") |>
-  dplyr::select(athlete_display_name, 
-         field_goals_made, field_goals_attempted)
-```
-
-## Isolating regular season games
-```{r}
-#| label: preprocess-1
-#| eval: true
-#| echo: true
-#| code-line-numbers: "1-7|9-10"
-allstar_dates <- lubridate::date(c("2002-02-10", "2003-02-09", 
-    "2004-02-15","2005-02-20", "2006-02-19", "2007-02-18", 
-    "2008-02-17", "2009-02-15", "2010-02-14","2011-02-20", 
-    "2012-02-26", "2013-02-17", "2014-02-16", "2015-02-15", 
-    "2016-02-14","2017-02-19", "2018-02-18", "2019-02-17",
-    "2020-02-16", "2021-03-07", "2022-02-20","2023-02-19", 
-    "2024-02-18", "2025-02-16"))
-reg_box <- raw_box |>
-  dplyr::filter(season_type == 2 & 
-      !did_not_play & !game_date %in% allstar_dates)
-```
-
-## Further preprocessing
-- Rename columns & set defaults for players with no minutes
-```{r}
-#| label: preprocess-2
-#| eval: true
-#| echo: true
-#| code-line-numbers: "1-2|3-7|8-11|"
-reg_box <-
-  reg_box |>
-  dplyr::rename(
-    Player = athlete_display_name, 
-    FGM = field_goals_made, FGA = field_goals_attempted,
-    TPM = three_point_field_goals_made,TPA = three_point_field_goals_attempted,
-    FTM = free_throws_made, FTA = free_throws_attempted) |>
-  dplyr::mutate(
-    FGM = ifelse(is.na(minutes), 0, FGM), FGA = ifelse(is.na(minutes), 0, FGA),
-    TPM = ifelse(is.na(minutes), 0, TPM),TPA = ifelse(is.na(minutes), 0, TPA),
-    FTM = ifelse(is.na(minutes), 0, FTM),FTA = ifelse(is.na(minutes), 0, FTA)) |>
-  tidyr::replace_na(list(minutes = 0))         
-```
-
-## Player-season totals
-```{r}
-#| label: get-season-totals-code
-#| eval: false
-#| echo: true
-#| code-line-numbers: "3|4-6|"
-season_box <-
-  reg_box |>
-  dplyr::group_by(Player, season) |>
-  dplyr::summarise(FGM = sum(FGM),FGA = sum(FGA),
-    TPM = sum(TPM),TPA = sum(TPA),FTM = sum(FTM),FTA = sum(FTA),
-    minutes = sum(minutes), n_games = dplyr::n(),.groups = "drop")
-season_box |> dplyr::filter(Player == "Dirk Nowitzki") 
-```
-. . . 
-```{r}
-#| label: get-season-totals-eval
-#| eval: true
-#| echo: false
-season_box <-
-  reg_box |>
-  dplyr::group_by(Player, season) |>
-  dplyr::summarise(FGM = sum(FGM),FGA = sum(FGA),
-    TPM = sum(TPM),TPA = sum(TPA),FTM = sum(FTM),FTA = sum(FTA),
-    minutes = sum(minutes), n_games = dplyr::n(),.groups = "drop")
-season_box |> dplyr::filter(Player == "Dirk Nowitzki") 
-```
-
-## Who made the most shots?
-```{r}
-#| label: arrange-fgm
-#| eval: true
-#| echo: true
-season_box |>
-  dplyr::arrange(dplyr::desc(FGM)) |>
-  dplyr::select(Player, season, FGM, FGA, minutes, n_games) |> 
-  dplyr::slice_head(n=5)
-```
-. . .
-
-Is Kobe's 2002-03 performance really better than SGA's 2024-25 performance???
-
-## Field Goal Percentage{.scrollable}
-```{r}
-#| label: compute-percentages-code
-#| eval: true
-#| echo: true
-season_box <-
-  season_box |>
-  dplyr::mutate(FGP = ifelse(FGA > 0, FGM/FGA, NA_real_))
-
-```
-. . . 
-
-:::{.panel-tabset}
-### FGP Leaders
-```{r}
-#| eval: true
-#| echo: true
-season_box |> 
-  dplyr::arrange(dplyr::desc(FGP)) |>
-  dplyr::slice_head(n=5) |>
-  dplyr::select(Player, season, FGP)
-```
-
-### Another look
-```{r}
-#| eval: true
-#| echo: true
-season_box |> 
-  dplyr::arrange(dplyr::desc(FGP)) |>
-  dplyr::slice_head(n=5) |>
-  dplyr::select(Player, season, FGP, FGA)
-```
-
-### Restricted Leaders
-```{r}
-#| label: qualify-fgp
-#| eval: true
-#| echo: true
-season_box |> 
-  dplyr::filter(FGA >= 400) |> 
-  dplyr::arrange(dplyr::desc(FGP)) |>
-  dplyr::select(Player, season, FGP, FGA) |>
-  dplyr::slice_head(n = 5)
-```
-:::
-
-## Effective Field Goal Percentage{.scrollable}
-- FGP treats 2- and 3-point shots the same!
-- $\textrm{eFGP} = (\textrm{FGM} + 0.5 \times \textrm{TPM})/\textrm{FGA}$
-```{r}
-#| label: compute-efgp
-#| eval: true
-#| echo: true
-season_box <- 
-  season_box |> 
-  dplyr::mutate(eFGP = (FGM + 0.5 * TPM)/FGA) 
-```
-. . . 
-
-:::{.panel-tabset}
-
-### Raw eFGP Leaders
-```{r}
-#| label: efgp-leaders
-#| echo: true
-#| eval: true
-season_box |>
-  dplyr::filter(FGA >= 400) |>
-  dplyr::arrange(dplyr::desc(eFGP), dplyr::desc(FGP)) |>
-  dplyr::select(Player, season, eFGP, FGP, TPA, n_games) |>
-  dplyr::slice_head(n = 5)
-```
-
-### Restricted Leaders
-```{r}
-#| label: efgp-leaders-filter
-#| echo: true
-#| eval: true
-season_box |>
-  dplyr::filter(FGA >= 400 & TPA >= 100) |>
-  dplyr::arrange(dplyr::desc(eFGP), dplyr::desc(FGP)) |>
-  dplyr::select(Player, season, eFGP, FGP, TPA, n_games) |>
-  dplyr::slice_head(n = 5)
-```
-
-:::
-
-## Takeaways
-
-- No one way to define "best"
-- FGM, FGP, and eFGP each have pros & cons
-. . .
-- Analytics involves **motivating** and **justifying** choices
-  - Why this specific question?
-  - Why these data?
-  - Specific modeling choices
-. . .
-- We'll consider questions more nuanced than who's the best
-
-<!--
-## Summary
-
-- FGM, FGP, eFGP are just  *statistics*
-- Analytics tries to answer substantive questions w/ data
-- Q: which player had best shooting season?
-  - No one way to define "best"
-  - Must *motivate* whichever def. we choose
-- How can these statistics help competitive advantage?
-  - Season-to-season stability?
-  - How to predict future performance (esp. w/ small sample sizes)?
--->
-
 # Topic List
 
-## Unit 1: Quantifying Individual Performances
+## Unit 1: Quantifying Performances{.smaller}
+
 - Expected vs actual performance
 - Value of a game state
 - Performance above "replacement" level
@@ -387,12 +439,19 @@ season_box |>
   - Season-to-season stability
   - Ability to predict match- or season-level outcomes
   - Reveal new insight about player valuation
+  
+- Evaluate individual or team performance in a new sport
+  - WAR for volleyball or college football?
+  - Expected goals in hockey? 
+  
 - Extend case study from lecture
   - Construct analogs for another sport
   - Examine season-to-season variability  
- 
+
+- ... 
 
 ## Unit 2: Rankings & Simulation
+
 - Use models to *simulate* games, tournaments, drafts, etc.
 - Case Studies:
   - NCAA Volleyball & Hockey Tournaments (Lectures 12 & 13)
@@ -400,15 +459,15 @@ season_box |>
   - Building a consensus mock draft (Lecture 16)
   - Estimating impact of a rule change (Lecture 17)
   
-## Project 2
+## Project 2{.smaller}
+
 - Fit a model to estimate latent team- or player- strength
-- Use model estimates to simulate play, games, tournament, drafts, etc.
+- Use model estimates to simulate plays, games, tournaments, drafts, etc.
 - Compute probabilities based on simulation
   - Prob. of winning tournament or making it past 1st round
   - Prob. football drive ends in a touchdown
   - Prob. of winning a cricket test 
   - Chance player available in 2nd round of draft
-
 
 ## Unit 3: Tracking Data
 
@@ -416,19 +475,23 @@ season_box |>
   - Trackman + Statcast in baseball
   - NFL: player positions 10 times per second
   - Hawkeye for tennis, Hudl for soccer, ...
+  
 - Tracking data opens up many possibilities
   - Incorporating spatial info. into prediction models
   - Creating new metrics using tracking data
   - Space ownership & predicting trajectories
 
-## Project 3
+## Project 3{.smaller}
 
-- Leverage tracking data
+- Analyze tracking data
+
 - NFL's Big Data Bowl is a great opportunity
-  - Best way into the field (even for non-football sports)
+  - **Best** way into the field (even for non-football sports)
   - Cash prizes & chance to present at Combine
-  - Highly encourage you to use BDB submissions for Project 3
+
+- I highly encourage turning Project 3 into a BDB submission
   - More info will be posted on Piazza
+  - I'll provide additional feedback/input for teams that do submit
 
 
 # Final Reminders
@@ -443,7 +506,7 @@ season_box |>
 
 - Take care of yourselves & each outer
 
-## Generative AI Expectations 1
+## Generative AI Expectations 1{.smaller}
 
 - You have the right to the full benefit of my expertise and engagement in this course.
 - I will therefore **never** use AI  to
@@ -452,17 +515,30 @@ season_box |>
   - To mediate or assist any communications with you
 - Everything you see in the course was created by me without the aid of generative AI
 
-## Generative AI Expectations 2
+## Generative AI Expectations 2{.smaller}
 
 - A core theme of this class is *practice*
   - It is OK to make mistakes or not know an answer
   - *Process* is more important than results
 
-- Generative AI short-circuits the intended learning process & its use is expressly prohibited
+- Generative AI short-circuits the intended learning process 
+- Its use is expressly prohibited
 
-## Warning
 :::{.callout-important}
 # Peer Review
 Respect your classmates enough to review their projects yourself.
-Uploading someone else's project report or presentation to a generative AI tool (e.g., for summarization) is forbidden and **will result in a failing grade.** 
+Uploading someone else's project report or presentation to a generative AI tool (e.g., for creating summaries) is forbidden and **will result in a failing grade.** 
 :::
+
+## Looking Ahead
+
+- Lectures 2 & 3: Expected Goals in Soccer
+- Will use public data provided by Hudl
+- Be sure to install the **StatsBombR** & **ranger** packages
+
+```{r}
+#| eval: false
+#| echo: true
+devtools::install_github("statsbomb/StatsBombR")
+install.packages("ranger")
+```
