@@ -629,10 +629,10 @@ Then, they **assume** that the $\alpha_{j}$'s for all baseline-level players are
 For each non-baseline player $j = 1, \ldots, \tilde{p},$ they introduce the parameter $\beta_{j} = \alpha_{j} - \mu.$
 Unlike the individual $\alpha_{j}$ values, the $\beta_{j}$ parameters for non-baseline players have a sensible interpretation: a team should expect to score $\beta_{j}$ more points per 100 possessions if they replace a baseline-level player with non-baseline player $j$, keeping all other players on the court the same[^prove].
 
-[^prove]: Try proving this for yourself! If you find yourself getting stuck with this, ask your classmates on Piazza or come to the instructor's Friday office hours. 
+[^prove]: Try proving this for yourself! If you find yourself getting stuck with this, ask your classmates on Piazza, or come to the instructor's Friday office hours. 
 
 The $\beta_{j}$'s can also be estimated using the method of least squares.
-Formally, let $\beta_{0} = \alpha_{0};$ $\boldsymbol{\beta} = (\beta_{0}, \beta_{1}, \ldots, \beta_{p'})^{\top}$ be the vector of unknown model parameters; and let $\tilde{\boldsymbol{\mathbf{Z}}}$ be the $n \times (p'+1)$ sub-matrix of $\boldsymbol{\mathbf{Z}}$ formed by removing the columns.
+Formally, let $\beta_{0} = \alpha_{0};$ $\boldsymbol{\beta} = (\beta_{0}, \beta_{1}, \ldots, \beta_{p'})^{\top}$ be the vector of unknown model parameters; and let $\tilde{\boldsymbol{\mathbf{Z}}}$ be the $n \times (p'+1)$ sub-matrix of $\boldsymbol{\mathbf{Z}}$ formed by removing the columns corresponding to baseline players.
 It turns out that[^prove2]
 $$
 \tilde{\boldsymbol{\mathbf{Z}}}\boldsymbol{\beta} = \boldsymbol{\mathbf{Z}}\boldsymbol{\alpha}
@@ -641,7 +641,7 @@ $$
 
 However, unlike the matrix $\boldsymbol{\mathbf{Z}},$ the matrix $\tilde{\boldsymbol{\mathbf{Z}}}$ is full-rank, which means that the minimization problem
 $$
-\sum_{i = 1}^{n}{\left(Y_{i} - \tilde{\boldsymbol{\mathbf{z}}}_{i}^{\top}\boldsymbol{\beta}\right)^{2}}
+\textrm{argmin}\sum_{i = 1}^{n}{\left(Y_{i} - \tilde{\boldsymbol{\mathbf{z}}}_{i}^{\top}\boldsymbol{\beta}\right)^{2}}
 $$
 has a unique solution:
 $$
@@ -668,6 +668,7 @@ Next, we create a data table containing columns for the signed on-court indicato
 differential per 100 possessions.
 Then, we fit the linear model and extract the estimated parameters.
 ```{r}
+#| label: fit-apm
 apm_df <-
   rapm_data |>
   dplyr::select(tidyr::all_of(c("margin", nonbaseline_id)))

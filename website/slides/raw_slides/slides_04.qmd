@@ -13,14 +13,14 @@ execute:
 
 . . .
 
-- Idea: use metrics recorded in box score
+- Idea: good players do things that show up in the box score
   - Points, rebounds, assists, steals, blocks, turnovers
-- Advantage: easy to collect, sort, and explain
+  - Easy to collect, sort, explain
 
 . . .
-
-- Problem: fails to account for roles
-- Problem: should some stats weight more heavily than others?
+- Fails to account for roles
+  - 10 assists for a guard vs 10 rebounds by a center
+- Problem: should some stats weigh more heavily than others?
 
 . . . 
 
@@ -287,7 +287,7 @@ pm |> dplyr::filter(Name %in% selected_players) |> dplyr::select(Name, pm)
 
 :::
 
-## Visualizing SGA's Dominance
+## Visualizing Plus/Minus
 
 ```{r}
 #| label: fig-pm
@@ -356,13 +356,13 @@ pm |> dplyr::slice_head(n=10)
 
 # Adjusted Plus/Minus
 
-## From points to points/possession
-
+## From Totals to Rates{.smaller}
 - Comparing totals favors players with more playing time
-- APM works with rates: point different per 100 possessions
+- APM works with rates: point differential per 100 possessions
 ```{r}
 rapm_data |> dplyr::select(stint_id, pts_diff, n_pos, margin) |> dplyr::slice_head(n=10)
 ```
+
 ## An Initial APM Model
 - Associate each player $j$ with a latent strength $\alpha_{j}$
 - $\alpha_{j}$'s are **unknown**: they must be estimated from data
@@ -380,9 +380,9 @@ $$
 
 ## Interpretation
 - Individual $\alpha_{j}$'s are meaningless!
-- $\alpha_{j}$ captures change in point differential per 100 possessions between
-  - Playing 5-on-5 with player $j$ on the court
-  - Playing 5-on-4 with player $j$ off the court
+- $\alpha_{j}$: change in point differential per 100 possessions b/w
+  - Playing 5-on-5 w/ player $j$ on the court
+  - Playing 5-on-4 w/ player $j$ off the court
 - Differences (or *contrasts*) like $\alpha_{j}-\alpha_{j'}$ are much more useful
 
 ## Example{.smaller}
@@ -409,7 +409,7 @@ $$
 - DAL expects to score $\alpha_{\textrm{AD}} - \alpha_{\textrm{LD}}$ more points per 100 possessions with Davis than Doncic, **all else being equal**
 
 
-## APM Via Linear Models
+## APM As A Linear Model
 
 * Append a column of 1's to $\boldsymbol{\mathbf{X}}$ to form $n \times (p+1)$ matrix $\boldsymbol{\mathbf{Z}}$
 * Let $\boldsymbol{\mathbf{z}}_{i}$ be the $i$-th row of $\boldsymbol{\mathbf{Z}}$
@@ -419,7 +419,7 @@ $$
 
 * Tempting to estimate $\boldsymbol{\alpha}$ with least squares
 $$
-\sum_{i = 1}^{n}{\left( Y_{i} - \boldsymbol{\mathbf{z}}_{i}^{\top}\boldsymbol{\alpha} \right)^{2}} .
+\textrm{argmin} \sum_{i = 1}^{n}{\left( Y_{i} - \boldsymbol{\mathbf{z}}_{i}^{\top}\boldsymbol{\alpha} \right)^{2}} .
 $$
 
 ## Singularity{.smaller}
@@ -431,18 +431,176 @@ $$
 * If you know all but one column, you can perfectly determine that column
 * $\boldsymbol{\mathbf{Z}}^{\top}\boldsymbol{\mathbf{Z}}$ not invertible
 
+## Non-identifiability
+
+- Recall that the model asserts
+$$
+\begin{align}
+Y_{i} &= \alpha_{0} + \alpha_{h_{1}(i)} + \alpha_{h_{2}(i)} + \alpha_{h_{3}(i)} + \alpha_{h_{4}(i)} + \alpha_{h_{5}(i)} \\
+~&~~~~~~~~~~- \alpha_{a_{1}(i)} - \alpha_{a_{2}(i)} - \alpha_{a_{3}(i)} - \alpha_{a_{4}(i)} - \alpha_{a_{5}(i)} + \epsilon_{i},
+\end{align}
+$$
+- Imagine we add 5 to every $\alpha_{j}$: right-hand side remains unchanged
+- So, we can't hope to learn $\alpha_{j}$'s exactly!
 
 
-## Introducing a Baseline
-- Classify some players as "baseline"-level
-- **Assumption**: all baseline-level players have common value $\mu$
-- Say first $p'$ players are non-baseline. For $j = 1, \ldots, p'$ let $\beta_{j} = \alpha_{j} - \mu$
+## Baseline Contrasts{.smaller}
 
-<!-- introduce tilde Z -->
+- Classify certain players as "baseline"-level (e.g., $< 250$ minutes)
+- Re-number players so first $p'$ are non-baseline
+- **Assumption**: $\alpha_{j} = \mu$ for all baseline players $j > p'$
+  - All baseline players **assumed** to have the same underlying skill
+
 . . .
 
+- For non-baseline $j = 1, \ldots, p,$ let $\beta_{j} = \alpha_{j} - \mu$
+- $\beta_{j}$: effect of replacing player $j$ *with a baseline player*
+
+## A Re-parametrized Model
+- $\tilde{\boldsymbol{\mathbf{Z}}}$ be the $n \times (p'+1)$ submatrix of $\boldsymbol{\mathbf{Z}}$ s.t.
+  - First column is all 1's
+  - Remaining columns: signed on-court indicators for non-baseline players
+- Turns out: 
+  - $\tilde{\boldsymbol{\mathbf{Z}}}\boldsymbol{\beta} = \boldsymbol{\mathbf{Z}}\boldsymbol{\alpha}$
+  - $\tilde{\boldsymbol{\mathbf{Z}}}$ 
+  - Can minimize $\sum_{i = 1}^{n}{\left(Y_{i} - \tilde{\boldsymbol{\mathbf{z}}}_{i}^{\top}\boldsymbol{\beta}\right)^{2}}$
+
 $$
-\tilde{\boldsymbol{\mathbf{Z}}}\boldsymbol{\beta} = \boldsymbol{\mathbf{Z}}\boldsymbol{\alpha}
+\hat{\boldsymbol{\beta}} = \left( \tilde{\boldsymbol{\mathbf{Z}}}^{\top}\tilde{\boldsymbol{\mathbf{Z}}}\right)^{-1}\tilde{\boldsymbol{\mathbf{Z}}}^{\top}\boldsymbol{\mathbf{Y}}.
 $$
 
+## Estimating $\boldsymbol{\beta}$
+
+:::{.panel-tabset}
+
+### Defining Baselines
+```{r}
+#| label: nonbaseline-id
+#| eval: true
+#| echo: true
+nonbaseline_id <-
+  pm |>
+  dplyr::filter(minutes >= 250) |>
+  dplyr::pull(id)
+```
+
+### Estimating $\boldsymbol{\beta}$
+
+```{r}
+#| label: fit-apm
+#| echo: true
+#| eval: true
+#| code-line-numbers: "|1-3|4|5-6|"
+apm_df <-
+  rapm_data |>
+  dplyr::select(tidyr::all_of(c("margin", nonbaseline_id)))
+apm_fit <- lm(margin ~ ., data = apm_df) # <1>
+beta0 <- coefficients(apm_fit)[1] #<2>
+beta <- coefficients(apm_fit)[-1] #<3>
+```
+
+### Top-10 APM's
+```{r}
+#| label: view-beta
+#| eval: true
+#| echo: false
+names(beta) <- stringr::str_remove_all(string = names(beta), pattern = "`") #<1>
+apm <-
+  data.frame(id = names(beta), apm = beta) |>
+  dplyr::inner_join(y = player_table, by = "id")
+rownames(apm) <- NULL
+apm |>
+  dplyr::arrange(dplyr::desc(apm)) |>
+  dplyr::slice_head(n = 10) |>
+  dplyr::select(Name, apm)
+```
+:::
+
+
 # Weighted Adjusted Plus/Minus
+
+## Missing Context
+
+- APM does not account for context
+> "can artificially can artificially inflate the importance of performance in low-leverage situations, when the outcome of the game is essentially decided, while simultaneously deflating the importance of high-leverage performance, when the final outcome is still in question. For instance, point diﬀerential-based metrics model the home team’s lead dropping from 5 points to 0 points in the last minute of the first half in exactly the same way that they model the home team’s lead dropping from 30 points to 25 points in the last minute of the second half". 
+
+## A Weighted Version of APM
+- Introduce weight $w_{i}$ for stint $i$
+- Find $\tilde{\boldsymbol{\beta}}$ minimizing $w_{i}\left(Y_{i} - \tilde{\boldsymbol{\mathbf{z}}}_{i}^{\top}\boldsymbol{\beta}\right)^{2}$
+- Solution: $\boldsymbol{\mathbf{W}}$ diagonal matrix w/ entries $w_{i}$
+$$
+\hat{\boldsymbol{\beta}}_{w} = \left( \tilde{\boldsymbol{\mathbf{Z}}}^{\top}\tilde{\boldsymbol{\mathbf{Z}}}\right)^{-1}\tilde{\boldsymbol{\mathbf{Z}}}^{\top}\boldsymbol{\mathbf{W}}\boldsymbol{\mathbf{Y}}
+$$
+
+## Estimating wAPM
+- Example weights: 
+  * $w_{i} = 1$ if lead $< 10$
+  * $w_{i} = 0$ if one team leads by $> 30$ at start of $i$
+  * $w_{i} = 1 - (\textrm{StartDiff} - 10)/20$: if $10 \leq \textrm{lead} \leq 30$
+
+
+
+:::{.panel-tabset}
+
+### Defining Weights
+```{r}
+#| label: define-weights
+#| eval: true
+#| echo: true
+wapm_df <-
+  rapm_data |>
+  dplyr::mutate(
+    start_diff = abs(start_home_score - start_away_score), 
+    w = dplyr::case_when(
+      start_diff < 10 ~ 1, 
+      start_diff > 30 ~ 0, 
+      .default = 1 - (start_diff-10)/20)) |> 
+  dplyr::select(tidyr::all_of(c("margin", "w", nonbaseline_id)))
+```
+
+### Fit wAPM
+
+```{r}
+#| label: fit-wapm
+#| echo: true
+#| eval: true
+#| code-line-numbers: "2-3|"
+wapm_fit <- 
+  lm(formula = margin ~ . - w, 
+     weights = w, 
+     data = wapm_df) 
+```
+
+
+### Top-10 wAPM
+```{r}
+#| label: top10-wapm
+#| echo: false
+#| eval: true
+
+
+wbeta0 <- coefficients(wapm_fit)[1]
+wbeta <- coefficients(wapm_fit)[-1]
+
+names(wbeta) <- stringr::str_remove_all(string = names(wbeta), pattern = "`")
+wapm <-
+  data.frame(id = names(wbeta), wapm = wbeta) |>
+  dplyr::inner_join(y = player_table, by = "id")
+rownames(wapm) <- NULL 
+wapm |>
+  dplyr::arrange(dplyr::desc(wapm)) |>
+  dplyr::slice_head(n = 10) |>
+  dplyr::select(Name, wapm)
+```
+:::
+
+## Looking Ahead
+
+- (w)APM is quite sensitive to certain choices:
+  - Definition of baseline players
+  - Choice of weights
+- Constant baseline skill assumption is highly unsatisfactory
+- Issues due to inability to use least squares
+- Next time: alternative estimation strategy
+  - Avoids having to specify baseline players
+  - Estimates a latent strength for *all* players

@@ -210,18 +210,13 @@
 </ul>
 <div class="fragment">
 <ul>
-<li>Idea: use metrics recorded in box score
+<li>Idea: good players do things that show up in the box score
 <ul>
 <li>Points, rebounds, assists, steals, blocks, turnovers</li>
+<li>Easy to collect, sort, explain</li>
 </ul></li>
-<li>Advantage: easy to collect, sort, and explain</li>
 </ul>
-</div>
-<div class="fragment">
-<ul>
-<li>Problem: fails to account for roles</li>
-<li>Problem: should some stats weight more heavily than others?</li>
-</ul>
+<p>. . . - Fails to account for roles - 10 assists for a guard vs 10 rebounds by a center - Problem: should some stats weigh more heavily than others?</p>
 </div>
 <div class="fragment">
 <ul>
@@ -523,8 +518,8 @@ x_{1,p}\Delta_{1} + x_{2,p}\Delta_{2} + \cdots + x_{n,p}\Delta_{n}
 </div>
 </div>
 </section>
-<section id="visualizing-sgas-dominance" class="slide level2">
-<h2>Visualizing SGA’s Dominance</h2>
+<section id="visualizing-plusminus" class="slide level2">
+<h2>Visualizing Plus/Minus</h2>
 <div class="cell" data-layout-align="center" data-fit-asp="0.5625">
 <div class="cell-output-display">
 <div id="fig-pm" class="quarto-float quarto-figure quarto-figure-center" data-fig-align="center">
@@ -594,11 +589,11 @@ Figure&nbsp;2: Variability in +/- increases with number of possessions!
 <h1>Adjusted Plus/Minus</h1>
 
 </section>
-<section id="from-points-to-pointspossession" class="slide level2">
-<h2>From points to points/possession</h2>
+<section id="from-totals-to-rates" class="slide level2 smaller">
+<h2>From Totals to Rates</h2>
 <ul>
 <li>Comparing totals favors players with more playing time</li>
-<li>APM works with rates: point different per 100 possessions</li>
+<li>APM works with rates: point differential per 100 possessions</li>
 </ul>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
@@ -639,10 +634,10 @@ Y_{i} &amp;= \alpha_{0} + \alpha_{h_{1}(i)} + \alpha_{h_{2}(i)} + \alpha_{h_{3}(
 <h2>Interpretation</h2>
 <ul>
 <li>Individual <span class="math inline">\(\alpha_{j}\)</span>’s are meaningless!</li>
-<li><span class="math inline">\(\alpha_{j}\)</span> captures change in point differential per 100 possessions between
+<li><span class="math inline">\(\alpha_{j}\)</span>: change in point differential per 100 possessions b/w
 <ul>
-<li>Playing 5-on-5 with player <span class="math inline">\(j\)</span> on the court</li>
-<li>Playing 5-on-4 with player <span class="math inline">\(j\)</span> off the court</li>
+<li>Playing 5-on-5 w/ player <span class="math inline">\(j\)</span> on the court</li>
+<li>Playing 5-on-4 w/ player <span class="math inline">\(j\)</span> off the court</li>
 </ul></li>
 <li>Differences (or <em>contrasts</em>) like <span class="math inline">\(\alpha_{j}-\alpha_{j'}\)</span> are much more useful</li>
 </ul>
@@ -673,8 +668,8 @@ Y_{i} &amp;= \alpha_{0} + \alpha_{h_{1}(i)} + \alpha_{h_{2}(i)} + \alpha_{h_{3}(
 </ul>
 </div>
 </section>
-<section id="apm-via-linear-models" class="slide level2">
-<h2>APM Via Linear Models</h2>
+<section id="apm-as-a-linear-model" class="slide level2">
+<h2>APM As A Linear Model</h2>
 <ul>
 <li>Append a column of 1’s to <span class="math inline">\(\boldsymbol{\mathbf{X}}\)</span> to form <span class="math inline">\(n \times (p+1)\)</span> matrix <span class="math inline">\(\boldsymbol{\mathbf{Z}}\)</span></li>
 <li>Let <span class="math inline">\(\boldsymbol{\mathbf{z}}_{i}\)</span> be the <span class="math inline">\(i\)</span>-th row of <span class="math inline">\(\boldsymbol{\mathbf{Z}}\)</span></li>
@@ -683,7 +678,7 @@ Y_{i} &amp;= \alpha_{0} + \alpha_{h_{1}(i)} + \alpha_{h_{2}(i)} + \alpha_{h_{3}(
 <div class="fragment">
 <ul>
 <li>Tempting to estimate <span class="math inline">\(\boldsymbol{\alpha}\)</span> with least squares <span class="math display">\[
-\sum_{i = 1}^{n}{\left( Y_{i} - \boldsymbol{\mathbf{z}}_{i}^{\top}\boldsymbol{\alpha} \right)^{2}} .
+\textrm{argmin} \sum_{i = 1}^{n}{\left( Y_{i} - \boldsymbol{\mathbf{z}}_{i}^{\top}\boldsymbol{\alpha} \right)^{2}} .
 \]</span></li>
 </ul>
 </div>
@@ -702,25 +697,192 @@ Y_{i} &amp;= \alpha_{0} + \alpha_{h_{1}(i)} + \alpha_{h_{2}(i)} + \alpha_{h_{3}(
 <li><span class="math inline">\(\boldsymbol{\mathbf{Z}}^{\top}\boldsymbol{\mathbf{Z}}\)</span> not invertible</li>
 </ul>
 </section>
-<section id="introducing-a-baseline" class="slide level2">
-<h2>Introducing a Baseline</h2>
+<section id="non-identifiability" class="slide level2">
+<h2>Non-identifiability</h2>
 <ul>
-<li>Classify some players as “baseline”-level</li>
-<li><strong>Assumption</strong>: all baseline-level players have common value <span class="math inline">\(\mu\)</span></li>
-<li>Say first <span class="math inline">\(p'\)</span> players are non-baseline. For <span class="math inline">\(j = 1, \ldots, p'\)</span> let <span class="math inline">\(\beta_{j} = \alpha_{j} - \mu\)</span></li>
+<li>Recall that the model asserts <span class="math display">\[
+\begin{align}
+Y_{i} &amp;= \alpha_{0} + \alpha_{h_{1}(i)} + \alpha_{h_{2}(i)} + \alpha_{h_{3}(i)} + \alpha_{h_{4}(i)} + \alpha_{h_{5}(i)} \\
+~&amp;~~~~~~~~~~- \alpha_{a_{1}(i)} - \alpha_{a_{2}(i)} - \alpha_{a_{3}(i)} - \alpha_{a_{4}(i)} - \alpha_{a_{5}(i)} + \epsilon_{i},
+\end{align}
+\]</span></li>
+<li>Imagine we add 5 to every <span class="math inline">\(\alpha_{j}\)</span>: right-hand side remains unchanged</li>
+<li>So, we can’t hope to learn <span class="math inline">\(\alpha_{j}\)</span>’s exactly!</li>
 </ul>
-<!-- introduce tilde Z -->
+</section>
+<section id="baseline-contrasts" class="slide level2 smaller">
+<h2>Baseline Contrasts</h2>
+<ul>
+<li>Classify certain players as “baseline”-level (e.g., <span class="math inline">\(&lt; 250\)</span> minutes)</li>
+<li>Re-number players so first <span class="math inline">\(p'\)</span> are non-baseline</li>
+<li><strong>Assumption</strong>: <span class="math inline">\(\alpha_{j} = \mu\)</span> for all baseline players <span class="math inline">\(j &gt; p'\)</span>
+<ul>
+<li>All baseline players <strong>assumed</strong> to have the same underlying skill</li>
+</ul></li>
+</ul>
 <div class="fragment">
+<ul>
+<li>For non-baseline <span class="math inline">\(j = 1, \ldots, p,\)</span> let <span class="math inline">\(\beta_{j} = \alpha_{j} - \mu\)</span></li>
+<li><span class="math inline">\(\beta_{j}\)</span>: effect of replacing player <span class="math inline">\(j\)</span> <em>with a baseline player</em></li>
+</ul>
+</div>
+</section>
+<section id="a-re-parametrized-model" class="slide level2">
+<h2>A Re-parametrized Model</h2>
+<ul>
+<li><span class="math inline">\(\tilde{\boldsymbol{\mathbf{Z}}}\)</span> be the <span class="math inline">\(n \times (p'+1)\)</span> submatrix of <span class="math inline">\(\boldsymbol{\mathbf{Z}}\)</span> s.t.
+<ul>
+<li>First column is all 1’s</li>
+<li>Remaining columns: signed on-court indicators for non-baseline players</li>
+</ul></li>
+<li>Turns out:
+<ul>
+<li><span class="math inline">\(\tilde{\boldsymbol{\mathbf{Z}}}\boldsymbol{\beta} = \boldsymbol{\mathbf{Z}}\boldsymbol{\alpha}\)</span></li>
+<li><span class="math inline">\(\tilde{\boldsymbol{\mathbf{Z}}}\)</span></li>
+<li>Can minimize <span class="math inline">\(\sum_{i = 1}^{n}{\left(Y_{i} - \tilde{\boldsymbol{\mathbf{z}}}_{i}^{\top}\boldsymbol{\beta}\right)^{2}}\)</span></li>
+</ul></li>
+</ul>
 <p><span class="math display">\[
-\tilde{\boldsymbol{\mathbf{Z}}}\boldsymbol{\beta} = \boldsymbol{\mathbf{Z}}\boldsymbol{\alpha}
+\hat{\boldsymbol{\beta}} = \left( \tilde{\boldsymbol{\mathbf{Z}}}^{\top}\tilde{\boldsymbol{\mathbf{Z}}}\right)^{-1}\tilde{\boldsymbol{\mathbf{Z}}}^{\top}\boldsymbol{\mathbf{Y}}.
 \]</span></p>
+</section>
+<section id="estimating-boldsymbolbeta" class="slide level2">
+<h2>Estimating <span class="math inline">\(\boldsymbol{\beta}\)</span></h2>
+<div class="panel-tabset">
+<ul id="tabset-4" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-4-1">Defining Baselines</a></li><li><a href="#tabset-4-2">Estimating <span class="math inline">\(\boldsymbol{\beta}\)</span></a></li><li><a href="#tabset-4-3">Top-10 APM’s</a></li></ul>
+<div class="tab-content">
+<div id="tabset-4-1">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a></a>nonbaseline_id <span class="ot">&lt;-</span></span>
+<span id="cb14-2"><a></a>  pm <span class="sc">|&gt;</span></span>
+<span id="cb14-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(minutes <span class="sc">&gt;=</span> <span class="dv">250</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(id)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-4-2">
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-16" data-code-line-numbers="|1-3|4|5-6|"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy"><code class="sourceCode r"><span id="annotated-cell-16-1"><a href="#annotated-cell-16-1"></a>apm_df <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-16-2"><a href="#annotated-cell-16-2"></a>  rapm_data <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-16-3"><a href="#annotated-cell-16-3"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(tidyr<span class="sc">::</span><span class="fu">all_of</span>(<span class="fu">c</span>(<span class="st">"margin"</span>, nonbaseline_id)))</span>
+<span id="annotated-cell-16-4"><a href="#annotated-cell-16-4"></a>apm_fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(margin <span class="sc">~</span> ., <span class="at">data =</span> apm_df)</span>
+<span id="annotated-cell-16-5"><a href="#annotated-cell-16-5"></a>beta0 <span class="ot">&lt;-</span> <span class="fu">coefficients</span>(apm_fit)[<span class="dv">1</span>]</span>
+<span id="annotated-cell-16-6"><a href="#annotated-cell-16-6"></a>beta <span class="ot">&lt;-</span> <span class="fu">coefficients</span>(apm_fit)[<span class="sc">-</span><span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-4-3">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>                    Name      apm
+1          Tobias Harris 17.01331
+2         Mouhamed Gueye 16.79320
+3           Devin Carter 16.60148
+4             Trae Young 15.13287
+5  Giannis Antetokounmpo 14.61082
+6            Isaiah Wong 14.50091
+7           Nikola Jokic 14.40837
+8         Alperen Sengun 13.55544
+9        Quenton Jackson 13.13962
+10    Karl-Anthony Towns 13.13714</code></pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 </section></section>
+<section>
 <section id="weighted-adjusted-plusminus" class="title-slide slide level1 center">
 <h1>Weighted Adjusted Plus/Minus</h1>
 
-
 </section>
+<section id="missing-context" class="slide level2">
+<h2>Missing Context</h2>
+<ul>
+<li>APM does not account for context &gt; “can artificially can artificially inflate the importance of performance in low-leverage situations, when the outcome of the game is essentially decided, while simultaneously deflating the importance of high-leverage performance, when the final outcome is still in question. For instance, point diﬀerential-based metrics model the home team’s lead dropping from 5 points to 0 points in the last minute of the first half in exactly the same way that they model the home team’s lead dropping from 30 points to 25 points in the last minute of the second half”.</li>
+</ul>
+</section>
+<section id="a-weighted-version-of-apm" class="slide level2">
+<h2>A Weighted Version of APM</h2>
+<ul>
+<li>Introduce weight <span class="math inline">\(w_{i}\)</span> for stint <span class="math inline">\(i\)</span></li>
+<li>Find <span class="math inline">\(\tilde{\boldsymbol{\beta}}\)</span> minimizing <span class="math inline">\(w_{i}\left(Y_{i} - \tilde{\boldsymbol{\mathbf{z}}}_{i}^{\top}\boldsymbol{\beta}\right)^{2}\)</span></li>
+<li>Solution: <span class="math inline">\(\boldsymbol{\mathbf{W}}\)</span> diagonal matrix w/ entries <span class="math inline">\(w_{i}\)</span> <span class="math display">\[
+\hat{\boldsymbol{\beta}}_{w} = \left( \tilde{\boldsymbol{\mathbf{Z}}}^{\top}\tilde{\boldsymbol{\mathbf{Z}}}\right)^{-1}\tilde{\boldsymbol{\mathbf{Z}}}^{\top}\boldsymbol{\mathbf{W}}\boldsymbol{\mathbf{Y}}
+\]</span></li>
+</ul>
+</section>
+<section id="estimating-wapm" class="slide level2">
+<h2>Estimating wAPM</h2>
+<ul>
+<li>Example weights:
+<ul>
+<li><span class="math inline">\(w_{i} = 1\)</span> if lead <span class="math inline">\(&lt; 10\)</span></li>
+<li><span class="math inline">\(w_{i} = 0\)</span> if one team leads by <span class="math inline">\(&gt; 30\)</span> at start of <span class="math inline">\(i\)</span></li>
+<li><span class="math inline">\(w_{i} = 1 - (\textrm{StartDiff} - 10)/20\)</span>: if <span class="math inline">\(10 \leq \textrm{lead} \leq 30\)</span></li>
+</ul></li>
+</ul>
+<div class="panel-tabset">
+<ul id="tabset-5" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-5-1">Defining Weights</a></li><li><a href="#tabset-5-2">Fit wAPM</a></li><li><a href="#tabset-5-3">Top-10 wAPM</a></li></ul>
+<div class="tab-content">
+<div id="tabset-5-1">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a></a>wapm_df <span class="ot">&lt;-</span></span>
+<span id="cb16-2"><a></a>  rapm_data <span class="sc">|&gt;</span></span>
+<span id="cb16-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb16-4"><a></a>    <span class="at">start_diff =</span> <span class="fu">abs</span>(start_home_score <span class="sc">-</span> start_away_score), </span>
+<span id="cb16-5"><a></a>    <span class="at">w =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb16-6"><a></a>      start_diff <span class="sc">&lt;</span> <span class="dv">10</span> <span class="sc">~</span> <span class="dv">1</span>, </span>
+<span id="cb16-7"><a></a>      start_diff <span class="sc">&gt;</span> <span class="dv">30</span> <span class="sc">~</span> <span class="dv">0</span>, </span>
+<span id="cb16-8"><a></a>      <span class="at">.default =</span> <span class="dv">1</span> <span class="sc">-</span> (start_diff<span class="dv">-10</span>)<span class="sc">/</span><span class="dv">20</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb16-9"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(tidyr<span class="sc">::</span><span class="fu">all_of</span>(<span class="fu">c</span>(<span class="st">"margin"</span>, <span class="st">"w"</span>, nonbaseline_id)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-5-2">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17" data-code-line-numbers="2-3|"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a>wapm_fit <span class="ot">&lt;-</span> </span>
+<span id="cb17-2"><a></a>  <span class="fu">lm</span>(<span class="at">formula =</span> margin <span class="sc">~</span> . <span class="sc">-</span> w, </span>
+<span id="cb17-3"><a></a>     <span class="at">weights =</span> w, </span>
+<span id="cb17-4"><a></a>     <span class="at">data =</span> wapm_df) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-5-3">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>                Name     wapm
+1       Devin Carter 19.48318
+2      Tobias Harris 17.11044
+3    Lauri Markkanen 15.20344
+4     Mouhamed Gueye 14.76474
+5         Trae Young 14.52393
+6       Nikola Jokic 14.14573
+7     Alperen Sengun 14.03023
+8         OG Anunoby 13.96219
+9  Jordan McLaughlin 13.73760
+10      Jericho Sims 13.27850</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="looking-ahead" class="slide level2">
+<h2>Looking Ahead</h2>
+<ul>
+<li>(w)APM is quite sensitive to certain choices:
+<ul>
+<li>Definition of baseline players</li>
+<li>Choice of weights</li>
+</ul></li>
+<li>Constant baseline skill assumption is highly unsatisfactory</li>
+<li>Issues due to inability to use least squares</li>
+<li>Next time: alternative estimation strategy
+<ul>
+<li>Avoids having to specify baseline players</li>
+<li>Estimates a latent strength for <em>all</em> players</li>
+</ul></li>
+</ul>
+
+
+</section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <div class="footer footer-default">
