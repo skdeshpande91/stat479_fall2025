@@ -210,7 +210,7 @@
 <section id="lectures-office-hours" class="slide level2 smaller">
 <h2>Lectures &amp; Office Hours</h2>
 <ul>
-<li>Lectures: Tuesdays &amp; Thursday 11am-12:15pm (Morgridge Hall 1514)</li>
+<li>Lectures: Tuesdays &amp; Thursday 11am-12:15pm (Morgridge Hall 1524)</li>
 <li>Instructor: Sameer Deshpande
 <ul>
 <li>Mondays: 11am - 12pm (Morgridge Hall 5586)</li>
@@ -227,10 +227,11 @@
 <h2>What This Course is NOT</h2>
 <ul>
 <li><strong>NOT</strong> a statistical methods course w/ sports applications</li>
-<li>Introduce methods <em>as needed</em> to answer <em>substantive</em> questions
+<li>Methods introduced <em>as needed</em>
 <ul>
-<li>Will not focus on all technical details</li>
-<li>I’ll try to point to other resources &amp; classes where relevant</li>
+<li>But will not cover all technical details</li>
+<li>I’ll point to relevant resources &amp; classes where relevant</li>
+<li>Main goal: answering substantive sports questions</li>
 </ul></li>
 </ul>
 <div class="fragment">
@@ -244,13 +245,13 @@
 </div>
 <div class="fragment">
 <ul>
-<li><strong>NOT</strong> an excuse to discuss last night’s game for credit
+<li><strong>NOT</strong> a way to discuss last night’s game for credit
 <ul>
 <li>This is a serious statistics &amp; data science course</li>
 </ul></li>
-<li>Unofficial goal: <strong>practice</strong> skills needed to work w/ sports data
+<li>Goal: <strong>practice</strong> skills needed to work w/ sports data (e.g.&nbsp;for a team)
 <ul>
-<li>E.g., for a professional team</li>
+<li>Course design reflects input from leaders in the industry</li>
 </ul></li>
 </ul>
 </div>
@@ -267,18 +268,12 @@
 </div>
 <div class="fragment">
 <ul>
-<li>Key: asking and answering <strong>substantive</strong> sports questions w/ data
+<li>Asking and answering <strong>substantive</strong> sports questions w/ data
 <ul>
 <li>We’ll go well beyond “who’s the best at…”</li>
 </ul></li>
 </ul>
 </div>
-<!--
-:::{.callout-note}
-## Unofficial Goal
-**Practice** the skills needed to work for professional teams
-:::
--->
 </section></section>
 <section>
 <section id="what-is-sports-analytics" class="title-slide slide level1 center">
@@ -293,12 +288,15 @@
 <li>Number of rebounds, wins, games played</li>
 <li>Free throw percentage, batting average</li>
 </ul></li>
-<li>Analytics refers to the use of statistical <em>modeling</em> to help gain competitive advantage
+</ul>
+<div class="fragment">
 <ul>
+<li>Analytics refers to the use of statistical <em>modeling</em> to help gain competitive advantage</li>
 <li>Analytics makes use of basic statistics &amp; creates new ones</li>
 <li>Analytics uses data to answer <strong>substantive sports questions</strong></li>
-</ul></li>
+<li>Many questions can framed in terms of prediction</li>
 </ul>
+</div>
 </section>
 <section id="bestnba-shooting-performances" class="slide level2 smaller">
 <h2>“Best”NBA Shooting Performances</h2>
@@ -330,13 +328,49 @@
 </section>
 <section id="data-snapshot" class="slide level2">
 <h2>Data Snapshot</h2>
+<div class="panel-tabset">
+<ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-1-1">Columns</a></li><li><a href="#tabset-1-2">Single Game</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2" data-code-line-numbers="1|2-3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a></a>raw_box <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(game_date <span class="sc">==</span> <span class="st">"2011-06-12"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb2-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(athlete_display_name, </span>
-<span id="cb2-3"><a></a>         field_goals_made, field_goals_attempted)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "game_id"                           "season"                           
+ [3] "season_type"                       "game_date"                        
+ [5] "game_date_time"                    "athlete_id"                       
+ [7] "athlete_display_name"              "team_id"                          
+ [9] "team_name"                         "team_location"                    
+[11] "team_short_display_name"           "minutes"                          
+[13] "field_goals_made"                  "field_goals_attempted"            
+[15] "three_point_field_goals_made"      "three_point_field_goals_attempted"
+[17] "free_throws_made"                  "free_throws_attempted"            
+[19] "offensive_rebounds"                "defensive_rebounds"               
+[21] "rebounds"                          "assists"                          
+[23] "steals"                            "blocks"                           
+[25] "turnovers"                         "fouls"                            
+[27] "plus_minus"                        "points"                           
+[29] "starter"                           "ejected"                          
+[31] "did_not_play"                      "active"                           
+[33] "athlete_jersey"                    "athlete_short_name"               
+[35] "athlete_headshot_href"             "athlete_position_name"            
+[37] "athlete_position_abbreviation"     "team_display_name"                
+[39] "team_uid"                          "team_slug"                        
+[41] "team_logo"                         "team_abbreviation"                
+[43] "team_color"                        "team_alternate_color"             
+[45] "home_away"                         "team_winner"                      
+[47] "team_score"                        "opponent_team_id"                 
+[49] "opponent_team_name"                "opponent_team_location"           
+[51] "opponent_team_display_name"        "opponent_team_abbreviation"       
+[53] "opponent_team_logo"                "opponent_team_color"              
+[55] "opponent_team_alternate_color"     "opponent_team_score"              
+[57] "reason"                           </code></pre>
 </div>
-<div class="fragment">
+</div>
+</div>
+<div id="tabset-1-2">
 <div class="cell">
+<div class="sourceCode cell-code" id="cb3" data-code-line-numbers="|1|2-3|"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a>raw_box <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(game_date <span class="sc">==</span> <span class="st">"2011-06-12"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(athlete_display_name, </span>
+<span id="cb3-3"><a></a>         field_goals_made, field_goals_attempted)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 30 × 3
    athlete_display_name field_goals_made field_goals_attempted
@@ -355,19 +389,21 @@
 </div>
 </div>
 </div>
+</div>
+</div>
 </section>
 <section id="extract-regular-season-data" class="slide level2">
 <h2>Extract Regular Season Data</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4" data-code-line-numbers="1-7|9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a></a>allstar_dates <span class="ot">&lt;-</span> lubridate<span class="sc">::</span><span class="fu">date</span>(<span class="fu">c</span>(<span class="st">"2002-02-10"</span>, <span class="st">"2003-02-09"</span>, </span>
-<span id="cb4-2"><a></a>    <span class="st">"2004-02-15"</span>,<span class="st">"2005-02-20"</span>, <span class="st">"2006-02-19"</span>, <span class="st">"2007-02-18"</span>, </span>
-<span id="cb4-3"><a></a>    <span class="st">"2008-02-17"</span>, <span class="st">"2009-02-15"</span>, <span class="st">"2010-02-14"</span>,<span class="st">"2011-02-20"</span>, </span>
-<span id="cb4-4"><a></a>    <span class="st">"2012-02-26"</span>, <span class="st">"2013-02-17"</span>, <span class="st">"2014-02-16"</span>, <span class="st">"2015-02-15"</span>, </span>
-<span id="cb4-5"><a></a>    <span class="st">"2016-02-14"</span>,<span class="st">"2017-02-19"</span>, <span class="st">"2018-02-18"</span>, <span class="st">"2019-02-17"</span>,</span>
-<span id="cb4-6"><a></a>    <span class="st">"2020-02-16"</span>, <span class="st">"2021-03-07"</span>, <span class="st">"2022-02-20"</span>,<span class="st">"2023-02-19"</span>, </span>
-<span id="cb4-7"><a></a>    <span class="st">"2024-02-18"</span>, <span class="st">"2025-02-16"</span>))</span>
-<span id="cb4-8"><a></a>reg_box <span class="ot">&lt;-</span> raw_box <span class="sc">|&gt;</span></span>
-<span id="cb4-9"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(season_type <span class="sc">==</span> <span class="dv">2</span> <span class="sc">&amp;</span> <span class="sc">!</span>did_not_play <span class="sc">&amp;</span> <span class="sc">!</span>game_date <span class="sc">%in%</span> allstar_dates)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a>allstar_dates <span class="ot">&lt;-</span> lubridate<span class="sc">::</span><span class="fu">date</span>(<span class="fu">c</span>(<span class="st">"2002-02-10"</span>, <span class="st">"2003-02-09"</span>, </span>
+<span id="cb5-2"><a></a>    <span class="st">"2004-02-15"</span>,<span class="st">"2005-02-20"</span>, <span class="st">"2006-02-19"</span>, <span class="st">"2007-02-18"</span>, </span>
+<span id="cb5-3"><a></a>    <span class="st">"2008-02-17"</span>, <span class="st">"2009-02-15"</span>, <span class="st">"2010-02-14"</span>,<span class="st">"2011-02-20"</span>, </span>
+<span id="cb5-4"><a></a>    <span class="st">"2012-02-26"</span>, <span class="st">"2013-02-17"</span>, <span class="st">"2014-02-16"</span>, <span class="st">"2015-02-15"</span>, </span>
+<span id="cb5-5"><a></a>    <span class="st">"2016-02-14"</span>,<span class="st">"2017-02-19"</span>, <span class="st">"2018-02-18"</span>, <span class="st">"2019-02-17"</span>,</span>
+<span id="cb5-6"><a></a>    <span class="st">"2020-02-16"</span>, <span class="st">"2021-03-07"</span>, <span class="st">"2022-02-20"</span>,<span class="st">"2023-02-19"</span>, </span>
+<span id="cb5-7"><a></a>    <span class="st">"2024-02-18"</span>, <span class="st">"2025-02-16"</span>))</span>
+<span id="cb5-8"><a></a>reg_box <span class="ot">&lt;-</span> raw_box <span class="sc">|&gt;</span></span>
+<span id="cb5-9"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(season_type <span class="sc">==</span> <span class="dv">2</span> <span class="sc">&amp;</span> <span class="sc">!</span>did_not_play <span class="sc">&amp;</span> <span class="sc">!</span>game_date <span class="sc">%in%</span> allstar_dates)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="preprocessing" class="slide level2">
@@ -376,30 +412,30 @@
 <li>Rename columns &amp; set defaults for players with no minutes</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5" data-code-line-numbers="1-2|3-7|8-11|"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a>reg_box <span class="ot">&lt;-</span></span>
-<span id="cb5-2"><a></a>  reg_box <span class="sc">|&gt;</span></span>
-<span id="cb5-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(</span>
-<span id="cb5-4"><a></a>    <span class="at">Player =</span> athlete_display_name, </span>
-<span id="cb5-5"><a></a>    <span class="at">FGM =</span> field_goals_made, <span class="at">FGA =</span> field_goals_attempted,</span>
-<span id="cb5-6"><a></a>    <span class="at">TPM =</span> three_point_field_goals_made,<span class="at">TPA =</span> three_point_field_goals_attempted,</span>
-<span id="cb5-7"><a></a>    <span class="at">FTM =</span> free_throws_made, <span class="at">FTA =</span> free_throws_attempted) <span class="sc">|&gt;</span></span>
-<span id="cb5-8"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb5-9"><a></a>    <span class="at">FGM =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(minutes), <span class="dv">0</span>, FGM), <span class="at">FGA =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(minutes), <span class="dv">0</span>, FGA),</span>
-<span id="cb5-10"><a></a>    <span class="at">TPM =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(minutes), <span class="dv">0</span>, TPM),<span class="at">TPA =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(minutes), <span class="dv">0</span>, TPA),</span>
-<span id="cb5-11"><a></a>    <span class="at">FTM =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(minutes), <span class="dv">0</span>, FTM),<span class="at">FTA =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(minutes), <span class="dv">0</span>, FTA)) <span class="sc">|&gt;</span></span>
-<span id="cb5-12"><a></a>  tidyr<span class="sc">::</span><span class="fu">replace_na</span>(<span class="fu">list</span>(<span class="at">minutes =</span> <span class="dv">0</span>))         </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6" data-code-line-numbers="1-2|3-7|8-11|"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a>reg_box <span class="ot">&lt;-</span></span>
+<span id="cb6-2"><a></a>  reg_box <span class="sc">|&gt;</span></span>
+<span id="cb6-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(</span>
+<span id="cb6-4"><a></a>    <span class="at">Player =</span> athlete_display_name, </span>
+<span id="cb6-5"><a></a>    <span class="at">FGM =</span> field_goals_made, <span class="at">FGA =</span> field_goals_attempted,</span>
+<span id="cb6-6"><a></a>    <span class="at">TPM =</span> three_point_field_goals_made,<span class="at">TPA =</span> three_point_field_goals_attempted,</span>
+<span id="cb6-7"><a></a>    <span class="at">FTM =</span> free_throws_made, <span class="at">FTA =</span> free_throws_attempted) <span class="sc">|&gt;</span></span>
+<span id="cb6-8"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb6-9"><a></a>    <span class="at">FGM =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(minutes), <span class="dv">0</span>, FGM), <span class="at">FGA =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(minutes), <span class="dv">0</span>, FGA),</span>
+<span id="cb6-10"><a></a>    <span class="at">TPM =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(minutes), <span class="dv">0</span>, TPM),<span class="at">TPA =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(minutes), <span class="dv">0</span>, TPA),</span>
+<span id="cb6-11"><a></a>    <span class="at">FTM =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(minutes), <span class="dv">0</span>, FTM),<span class="at">FTA =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(minutes), <span class="dv">0</span>, FTA)) <span class="sc">|&gt;</span></span>
+<span id="cb6-12"><a></a>  tidyr<span class="sc">::</span><span class="fu">replace_na</span>(<span class="fu">list</span>(<span class="at">minutes =</span> <span class="dv">0</span>))         </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="season-totals" class="slide level2">
 <h2>Season Totals</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6" data-code-line-numbers="3|4-6|"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a>season_box <span class="ot">&lt;-</span></span>
-<span id="cb6-2"><a></a>  reg_box <span class="sc">|&gt;</span></span>
-<span id="cb6-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(Player, season) <span class="sc">|&gt;</span></span>
-<span id="cb6-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">FGM =</span> <span class="fu">sum</span>(FGM),<span class="at">FGA =</span> <span class="fu">sum</span>(FGA),</span>
-<span id="cb6-5"><a></a>    <span class="at">TPM =</span> <span class="fu">sum</span>(TPM),<span class="at">TPA =</span> <span class="fu">sum</span>(TPA),<span class="at">FTM =</span> <span class="fu">sum</span>(FTM),<span class="at">FTA =</span> <span class="fu">sum</span>(FTA),</span>
-<span id="cb6-6"><a></a>    <span class="at">minutes =</span> <span class="fu">sum</span>(minutes), <span class="at">n_games =</span> dplyr<span class="sc">::</span><span class="fu">n</span>(),<span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
-<span id="cb6-7"><a></a>season_box <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(Player <span class="sc">==</span> <span class="st">"Dirk Nowitzki"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7" data-code-line-numbers="3|4-6|"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a>season_box <span class="ot">&lt;-</span></span>
+<span id="cb7-2"><a></a>  reg_box <span class="sc">|&gt;</span></span>
+<span id="cb7-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(Player, season) <span class="sc">|&gt;</span></span>
+<span id="cb7-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">FGM =</span> <span class="fu">sum</span>(FGM),<span class="at">FGA =</span> <span class="fu">sum</span>(FGA),</span>
+<span id="cb7-5"><a></a>    <span class="at">TPM =</span> <span class="fu">sum</span>(TPM),<span class="at">TPA =</span> <span class="fu">sum</span>(TPA),<span class="at">FTM =</span> <span class="fu">sum</span>(FTM),<span class="at">FTA =</span> <span class="fu">sum</span>(FTA),</span>
+<span id="cb7-6"><a></a>    <span class="at">minutes =</span> <span class="fu">sum</span>(minutes), <span class="at">n_games =</span> dplyr<span class="sc">::</span><span class="fu">n</span>(),<span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb7-7"><a></a>season_box <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(Player <span class="sc">==</span> <span class="st">"Dirk Nowitzki"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="fragment">
 <div class="cell">
@@ -432,10 +468,10 @@
 <section id="who-made-the-most-shots" class="slide level2">
 <h2>Who Made the Most Shots?</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a>season_box <span class="sc">|&gt;</span></span>
-<span id="cb8-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(FGM)) <span class="sc">|&gt;</span></span>
-<span id="cb8-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Player, season, FGM, FGA, minutes, n_games) <span class="sc">|&gt;</span> </span>
-<span id="cb8-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a>season_box <span class="sc">|&gt;</span></span>
+<span id="cb9-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(FGM)) <span class="sc">|&gt;</span></span>
+<span id="cb9-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Player, season, FGM, FGA, minutes, n_games) <span class="sc">|&gt;</span> </span>
+<span id="cb9-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 × 6
   Player                  season   FGM   FGA minutes n_games
@@ -461,20 +497,20 @@
 <section id="field-goal-percentage" class="slide level2 scrollable">
 <h2>Field Goal Percentage</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a>season_box <span class="ot">&lt;-</span></span>
-<span id="cb10-2"><a></a>  season_box <span class="sc">|&gt;</span></span>
-<span id="cb10-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">FGP =</span> <span class="fu">ifelse</span>(FGA <span class="sc">&gt;</span> <span class="dv">0</span>, FGM<span class="sc">/</span>FGA, <span class="cn">NA_real_</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a>season_box <span class="ot">&lt;-</span></span>
+<span id="cb11-2"><a></a>  season_box <span class="sc">|&gt;</span></span>
+<span id="cb11-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">FGP =</span> <span class="fu">ifelse</span>(FGA <span class="sc">&gt;</span> <span class="dv">0</span>, FGM<span class="sc">/</span>FGA, <span class="cn">NA_real_</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="fragment">
 <div class="panel-tabset">
-<ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-1-1">FGP Leaders</a></li><li><a href="#tabset-1-2">Another Look</a></li><li><a href="#tabset-1-3">Restricted Leaders</a></li></ul>
+<ul id="tabset-2" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-2-1">FGP Leaders</a></li><li><a href="#tabset-2-2">Another Look</a></li><li><a href="#tabset-2-3">Restricted Leaders</a></li></ul>
 <div class="tab-content">
-<div id="tabset-1-1">
+<div id="tabset-2-1">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a>season_box <span class="sc">|&gt;</span> </span>
-<span id="cb11-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(FGP)) <span class="sc">|&gt;</span></span>
-<span id="cb11-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">5</span>) <span class="sc">|&gt;</span></span>
-<span id="cb11-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Player, season, FGP)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a></a>season_box <span class="sc">|&gt;</span> </span>
+<span id="cb12-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(FGP)) <span class="sc">|&gt;</span></span>
+<span id="cb12-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">5</span>) <span class="sc">|&gt;</span></span>
+<span id="cb12-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Player, season, FGP)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 × 3
   Player           season   FGP
@@ -487,12 +523,12 @@
 </div>
 </div>
 </div>
-<div id="tabset-1-2">
+<div id="tabset-2-2">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a>season_box <span class="sc">|&gt;</span> </span>
-<span id="cb13-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(FGP)) <span class="sc">|&gt;</span></span>
-<span id="cb13-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">5</span>) <span class="sc">|&gt;</span></span>
-<span id="cb13-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Player, season, FGP, FGA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a></a>season_box <span class="sc">|&gt;</span> </span>
+<span id="cb14-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(FGP)) <span class="sc">|&gt;</span></span>
+<span id="cb14-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">5</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Player, season, FGP, FGA)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 × 4
   Player           season   FGP   FGA
@@ -505,13 +541,13 @@
 </div>
 </div>
 </div>
-<div id="tabset-1-3">
+<div id="tabset-2-3">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a>season_box <span class="sc">|&gt;</span> </span>
-<span id="cb15-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(FGA <span class="sc">&gt;=</span> <span class="dv">400</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb15-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(FGP)) <span class="sc">|&gt;</span></span>
-<span id="cb15-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Player, season, FGP, FGA) <span class="sc">|&gt;</span></span>
-<span id="cb15-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a></a>season_box <span class="sc">|&gt;</span> </span>
+<span id="cb16-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(FGA <span class="sc">&gt;=</span> <span class="dv">400</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb16-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(FGP)) <span class="sc">|&gt;</span></span>
+<span id="cb16-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Player, season, FGP, FGA) <span class="sc">|&gt;</span></span>
+<span id="cb16-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 × 4
   Player         season   FGP   FGA
@@ -542,16 +578,16 @@
 <li><span class="math inline">\(\textrm{eFGP} = (\textrm{FGM} + 0.5 \times \textrm{TPM})/\textrm{FGA}\)</span></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a>season_box <span class="ot">&lt;-</span> </span>
-<span id="cb17-2"><a></a>  season_box <span class="sc">|&gt;</span> </span>
-<span id="cb17-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">eFGP =</span> (FGM <span class="sc">+</span> <span class="fl">0.5</span> <span class="sc">*</span> TPM)<span class="sc">/</span>FGA) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a>season_box <span class="ot">&lt;-</span> </span>
+<span id="cb18-2"><a></a>  season_box <span class="sc">|&gt;</span> </span>
+<span id="cb18-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">eFGP =</span> (FGM <span class="sc">+</span> <span class="fl">0.5</span> <span class="sc">*</span> TPM)<span class="sc">/</span>FGA) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div class="fragment">
 <div class="panel-tabset">
-<ul id="tabset-2" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-2-1">Raw eFGP Leaders</a></li><li><a href="#tabset-2-2">Restricted Leaders</a></li></ul>
+<ul id="tabset-3" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-3-1">Raw eFGP Leaders</a></li><li><a href="#tabset-3-2">Restricted Leaders</a></li></ul>
 <div class="tab-content">
-<div id="tabset-2-1">
+<div id="tabset-3-1">
 <ul>
 <li>eFGP leaders are mostly centers who don’t shoot 3’s</li>
 </ul>
@@ -568,7 +604,7 @@
 </div>
 </div>
 </div>
-<div id="tabset-2-2">
+<div id="tabset-3-2">
 <ul>
 <li>We can restrict to players with <span class="math inline">\(\textrm{FGA} &gt; 400\)</span> and <span class="math inline">\(\textrm{TPA} &gt; 100\)</span></li>
 </ul>
@@ -601,12 +637,12 @@
 </ul>
 <p>“what is the probability that a player makes a shot”</p>
 <ul>
-<li>Later: methods to these probabilities that
+<li>Later: methods to estimate these probs. that
 <ul>
 <li>Account for contextual factors (e.g., shot location)</li>
 <li>Produce stable estimates even w/ small sample sizes</li>
-<li>Help rank players w/o imposing arbitrary cut-offs (e.g., <span class="math inline">\(\textrm{FGA} &gt; 400\)</span>)</li>
-<li>Help calibrate performance against transparent baselines (e.g., “above replacement”)</li>
+<li>Avoid imposing arbitrary cut-offs (e.g., <span class="math inline">\(\textrm{FGA} &gt; 400\)</span>)</li>
+<li>Calibrate performance against transparent baselines (e.g., “above replacement”)</li>
 </ul></li>
 <li>Analytics involves <strong>motivating</strong> and <strong>justifying</strong> choices</li>
 </ul>
@@ -632,7 +668,7 @@
 <ul>
 <li>Assignment, scripting, loops, control flow</li>
 <li>Saving objects, installing &amp; loading packages.</li>
-<li>Data wrangling and manipulation with <strong>dplyr</strong> and other <strong>tidyverse</strong> packages.</li>
+<li>Data manipulation with <strong>dplyr</strong> and other <strong>tidyverse</strong> packages.</li>
 <li>Creating visualizations</li>
 </ul></li>
 </ul>
@@ -685,6 +721,7 @@
 <ul>
 <li>Modify or extend analysis from lecture (e.g., to new sport)</li>
 <li>Answer a new question not covered in lecture</li>
+<li>…</li>
 </ul></li>
 <li>Ideally jump-start a portfolio that you can show teams</li>
 </ul>
@@ -720,7 +757,7 @@
 <ul>
 <li>Details to be announced</li>
 <li>Presenting on the last day unrelated to course grades</li>
-<li>But there’ll be prize(s)</li>
+<li>But there’ll be prizes</li>
 </ul></li>
 </ul>
 </div>
@@ -862,11 +899,11 @@
 <ul>
 <li><p>Respect diverse backgrounds</p>
 <ul>
-<li>Not everyone may knows as much about a sport or method as You</li>
-<li>You may not know as much about a sport or method as someone else</li>
+<li>Not everyone may know as much about a sport/method as You</li>
+<li>You may not know as much about a sport/method as someone else</li>
 </ul></li>
 <li><p>Don’t hesitate to ask for and to provide help!</p></li>
-<li><p>Take care of yourselves &amp; each outer</p></li>
+<li><p>Take care of yourself &amp; each other</p></li>
 </ul>
 </section>
 <section id="generative-ai-expectations-1" class="slide level2 smaller">
@@ -915,8 +952,8 @@
 <li>Be sure to install the <strong>StatsBombR</strong> &amp; <strong>ranger</strong> packages</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"statsbomb/StatsBombR"</span>)</span>
-<span id="cb20-2"><a></a><span class="fu">install.packages</span>(<span class="st">"ranger"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"statsbomb/StatsBombR"</span>)</span>
+<span id="cb21-2"><a></a><span class="fu">install.packages</span>(<span class="st">"ranger"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 

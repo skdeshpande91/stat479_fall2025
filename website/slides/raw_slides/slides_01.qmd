@@ -10,7 +10,7 @@ execute:
 
 ## Lectures & Office Hours{.smaller}
 
-- Lectures: Tuesdays & Thursday 11am-12:15pm (Morgridge Hall 1514)
+- Lectures: Tuesdays & Thursday 11am-12:15pm (Morgridge Hall 1524)
 - Instructor: Sameer Deshpande
   - Mondays: 11am - 12pm (Morgridge Hall 5586)
   - Wednesdays: 3pm - 4pm (Morgridge Hall 5586)
@@ -22,9 +22,10 @@ execute:
 ## What This Course is NOT {.smaller}
 
 - **NOT** a statistical methods course w/ sports applications
-- Introduce methods *as needed* to answer *substantive* questions
-  - Will not focus on all technical details
-  - I'll try to point to other resources & classes where relevant
+- Methods introduced *as needed* 
+  - But will not cover all technical details
+  - I'll point to relevant resources & classes where relevant
+  - Main goal: answering substantive sports questions
 
 . . .
 
@@ -34,11 +35,11 @@ execute:
 
 . . . 
 
-- **NOT** an excuse to discuss last night's game for credit
+- **NOT** a way to discuss last night's game for credit
   - This is a serious statistics & data science course
 
-- Unofficial goal: **practice** skills needed to work w/ sports data 
-  - E.g., for a professional team
+- Goal: **practice** skills needed to work w/ sports data (e.g. for a team)
+  - Course design reflects input from leaders in the industry
 
 ## Course Learning Outcomes
 :::{.fragment}
@@ -51,16 +52,10 @@ execute:
 :::
 
 :::{.fragment}
-- Key: asking and answering **substantive** sports questions w/ data
+- Asking and answering **substantive** sports questions w/ data
   - We'll go well beyond "who's the best at..."
 
 :::
-<!--
-:::{.callout-note}
-## Unofficial Goal
-**Practice** the skills needed to work for professional teams
-:::
--->
 
 # What is Sports Analytics?
 
@@ -69,9 +64,14 @@ execute:
 - Sports statistics refer to counts and rates that *summarize* performance:
   - Number of rebounds, wins, games played
   - Free throw percentage, batting average
+
+  
+. . .
+
 - Analytics refers to the use of statistical *modeling* to help gain competitive advantage
-  - Analytics makes use of basic statistics & creates new ones
-  - Analytics uses data to answer **substantive sports questions**
+- Analytics makes use of basic statistics & creates new ones
+- Analytics uses data to answer **substantive sports questions**
+- Many questions can framed in terms of prediction
 
 
 ## "Best"NBA Shooting Performances{.smaller}
@@ -98,32 +98,36 @@ raw_box <- hoopR::load_nba_player_box(seasons = 2002:(hoopR::most_recent_nba_sea
 ```
 
 ## Data Snapshot
+
+
+:::{.panel-tabset}
+
+### Columns
 ```{r}
-#| eval: false
+#| label: rawbox-cols
+colnames(raw_box)
+```
+
+### Single Game
+```{r}
+#| eval: true
 #| echo: true
-#| code-line-numbers: "1|2-3"
+#| code-line-numbers: "|1|2-3|"
 raw_box |> dplyr::filter(game_date == "2011-06-12") |>
   dplyr::select(athlete_display_name, 
          field_goals_made, field_goals_attempted)
 ```
 
-. . .
+:::
 
-```{r}
-#| eval: true
-#| echo: false
-raw_box |> 
-  dplyr::filter(game_date == "2011-06-12") |>
-  dplyr::select(athlete_display_name, 
-         field_goals_made, field_goals_attempted)
-```
+
+
 
 ## Extract Regular Season Data
 ```{r}
 #| label: preprocess-1
 #| eval: true
 #| echo: true
-#| code-line-numbers: "1-7|9"
 allstar_dates <- lubridate::date(c("2002-02-10", "2003-02-09", 
     "2004-02-15","2005-02-20", "2006-02-19", "2007-02-18", 
     "2008-02-17", "2009-02-15", "2010-02-14","2011-02-20", 
@@ -317,11 +321,11 @@ season_box |>
 
 "what is the probability that a player makes a shot"
 
-- Later: methods to these probabilities that
+- Later: methods to estimate these probs. that
   - Account for contextual factors (e.g., shot location)
   - Produce stable estimates even w/ small sample sizes
-  - Help rank players w/o imposing arbitrary cut-offs (e.g., $\textrm{FGA} > 400$)
-  - Help calibrate performance against transparent baselines (e.g., "above replacement")
+  - Avoid imposing arbitrary cut-offs (e.g., $\textrm{FGA} > 400$)
+  - Calibrate performance against transparent baselines (e.g., "above replacement")
 
 - Analytics involves **motivating** and **justifying** choices 
 
@@ -338,7 +342,7 @@ season_box |>
 - Prior experience with R
   - Assignment, scripting, loops, control flow
   - Saving objects, installing & loading packages.
-  - Data wrangling and manipulation with **dplyr** and other **tidyverse** packages.
+  - Data manipulation with **dplyr** and other **tidyverse** packages.
   - Creating visualizations
 
 ## Course Website
@@ -373,6 +377,7 @@ Also [Canvas](https://canvas.wisc.edu/courses/476839) & [Piazza](https://canvas.
 - Course projects can
   - Modify or extend analysis from lecture (e.g., to new sport)
   - Answer a new question not covered in lecture
+  - ...
   
 - Ideally jump-start a portfolio that you can show teams
 
@@ -399,7 +404,7 @@ I **highly** recommend using Quarto or RMarkdown
 - I'll select 5-6 groups to present in-class on the last day (12/9)
   - Details to be announced
   - Presenting on the last day unrelated to course grades
-  - But there'll be prize(s)
+  - But there'll be prizes
 
 
 ## Project Peer Review
@@ -499,12 +504,12 @@ I **highly** recommend using Quarto or RMarkdown
 ## Course Expectations
 
 - Respect diverse backgrounds
-  - Not everyone may knows as much about a sport or method as You
-  - You may not know as much about a sport or method as someone else
+  - Not everyone may know as much about a sport/method as You
+  - You may not know as much about a sport/method as someone else
 
 - Don't hesitate to ask for and to provide help!
 
-- Take care of yourselves & each outer
+- Take care of yourself & each other
 
 ## Generative AI Expectations 1{.smaller}
 
