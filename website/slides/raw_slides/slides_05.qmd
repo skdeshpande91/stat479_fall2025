@@ -1,0 +1,506 @@
+---
+title: "STAT 479: Lecture 5"
+subtitle: Regularized Adjusted Plus/Minus
+format: revealjs
+execute:
+  cache: true
+---
+
+# Recap: Adjusted Plus/Minus
+
+## Motivation{.smaller}
+
+- How do NBA players help their teams win?
+- How do we quantify contributions?
+
+. . .
+
+- Plus/Minus: Easy to compute
+  - Hard to separate skill from opportunities
+  - Doesn't adjust for teammate quality
+
+. . .
+
+- Adjusted Plus/Minus:
+  - Regress point differential per 100 possession on signed on-court indicators
+  - Introduces fairly arbitrary baseline
+  - Assumes all baseline players have same underlying skill
+
+
+## The Original Model{.smaller}
+
+- $n$: total number of stints
+- $p$: total number of players
+- $Y_{i}$: point differential per 100 possessions in stint $i$
+
+$$
+\begin{align}
+Y_{i} &= \alpha_{0} + \alpha_{h_{1}(i)} + \alpha_{h_{2}(i)} + \alpha_{h_{3}(i)} + \alpha_{h_{4}(i)} + \alpha_{h_{5}(i)} \\
+~&~~~~~~~~~~- \alpha_{a_{1}(i)} - \alpha_{a_{2}(i)} - \alpha_{a_{3}(i)} - \alpha_{a_{4}(i)} - \alpha_{a_{5}(i)} + \epsilon_{i},
+\end{align}
+$$
+
+
+## Matrix Notation{.smaller}
+- For each stint $i$ and player $j$, signed indicator $x_{ij}$:
+  - $x_{ij} = 1$ if player $j$ on-court at home in stint $i$
+  - $x_{ij} = -1$ if player $j$ on-court and away in stint $i$
+  - $x_{ij} = 0$ if player $j$ off-court in stint $i$
+  
+. . .
+
+- $\boldsymbol{\mathbf{X}}$: $n \times p$ matrix of signed indicators
+  - Rows correspond to stints:
+  - Columns correspond to players
+- $\boldsymbol{\mathbf{Z}}$: $n \times (p+1)$ matrix
+  - First column is all ones; remaining are $\boldsymbol{\mathbf{X}}$
+  - $i$-th row is $\boldsymbol{\mathbf{x}}_{i}$
+
+- $Y_{i} = \boldsymbol{\mathbf{z}}_{i}^{\top}\boldsymbol{\alpha} + \epsilon_{i}$
+
+
+## Problems w/ Original Model{.smaller}
+- Individual $\alpha_{j}$'s are not statistically identifiable
+  - E.g. $\alpha_{j} \rightarrow \alpha_{j}+5$ yields same fit to data
+  
+- $\boldsymbol{\mathbf{Z}}$ is not of full-rank
+  - Can't invert $\boldsymbol{\mathbf{Z}}^{\top}\boldsymbol{\mathbf{Z}}$
+  
+- Can't estimate $\boldsymbol{\alpha}$ with least squares! 
+
+## A Re-parametrized Model{.smaller}
+- Assume $\alpha_{j} = \mu$ for all *baseline players* $j$
+- For all non-baseline players, $\beta_{j} = \alpha_{j} - \mu$
+- $\tilde{\boldsymbol{\mathbf{Z}}}$: drop baseline columns from $\boldsymbol{\mathbf{Z}}$
+- $Y_{i} = \tilde{\boldsymbol{\mathbf{z}}}_{i}^{\top}\boldsymbol{\beta} + \epsilon_{i}$
+- Can estimate $\boldsymbol{\beta}$ with least squares
+
+
+## Problems w/ Re-Parametrized Model
+- 250 minute cut-off for baseline is very arbitrary
+- Restrictive to assume baseline players have same skill
+
+. . .
+
+- Baseline assumption needed to use least squares
+- ... but what if we don't use least squares
+
+# Regularized Regression
+
+## Ridge Regression{.smaller}
+
+- Original APM problem: minimize $\sum_{i = 1}^{n}{\left(Y_{i} - \boldsymbol{\mathbf{z}}_{i}^{\top}\boldsymbol{\alpha}\right)^{2}}
+$
+
+. . .
+
+- Instead for a fixed $\lambda > 0$ let's minimize $\sum_{i = 1}^{n}{(Y_{i} - \boldsymbol{\mathbf{z}}_{i}^{\top}\boldsymbol{\alpha})^{2}} + \lambda \times \sum_{j = 0}^{p}{\alpha_{j}^{2}},$
+
+. . .
+
+- First term: minimized when all $Y_{i} \approx \boldsymbol{\mathbf{z}}_{i}^{\top}\boldsymbol{\alpha}$
+- Second term: *shrinkage penalty* tries to keep all $\alpha_{j}$'s near 0
+- $\lambda$: trades-off these two terms
+
+## Analytic Solution
+- For all $\lambda$, minimizer is $
+\hat{\boldsymbol{\alpha}}(\lambda) = \left(\boldsymbol{\mathbf{Z}}^{\top}\boldsymbol{\mathbf{Z}} + \lambda I \right)^{-1}\boldsymbol{\mathbf{Z}}^{\top}\boldsymbol{\mathbf{Y}}.$
+
+- This is *almost* the OLS solution
+  - Slightly perturb $\mathbf{Z}}^{\top}\boldsymbol{\mathbf{Z}}$ so it becomes invertible
+  - E.g., by adding $\lambda$ to its diagonal
+
+
+## Cross-Validation for $\lambda${.smaller}
+
+- Idea: select $\lambda$ yielding smallest out-of-sample prediction error
+- Problem: don't have a separate validation dataset to compute out-of-sample error
+
+. . .
+
+- Solution: cross-validation to estimate out-of-sample error
+  - Create a grid of $\lambda$ values & several train/test splits
+    - For each $\lambda$ and train/test split:
+      - Compute $\hat{\boldsymbol{\alpha}}(\lambda)$ w/ training data
+      - Evaluate prediction error using testing data
+  - For each $\lambda,$ average testing prediction error across splits
+  - Identify $\hat{\lambda}$ w/ smallest average testing error
+
+. . .
+
+- Compute $\hat{\boldsymbol{\alpha}}(\hat{\lambda})$ w/ all data
+
+## Ridge Regression in Practice{.smaller}
+
+
+- Implemented in the **glmnet** package
+- `cv.glmnet()`: performs cross-validation
+  - Automatically creates grid of $\lambda$
+  - Default: 10 train/test splits
+
+- Important to set `standardize = FALSE`
+
+```{r}
+#| label: load-data
+#| eval: true
+#| echo: false
+load("../../lectures/lecture04_05_data.RData")
+```
+```{r}
+#| label: fit-rapm
+#| eval: true
+#| echo: true
+set.seed(479) 
+library(glmnet) 
+cv_fit <-cv.glmnet(x = X_full, y = Y, 
+            alpha = 0,
+            standardize = FALSE) 
+```
+
+
+## Finding $\hat{\lambda}$
+
+```{r}
+#| label: fig-lambda
+#| eval: true
+#| echo: false
+#| fig-align: center
+#| fig-width: 6.5
+#| fig-asp: 0.5625
+
+par(mar= c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+plot(cv_fit)
+```
+
+```{r}
+#| label: get-lambda
+#| echo: true
+#| eval: true
+lambda_min <- cv_fit$lambda.min
+```
+
+## Regularized Adjusted Plus/Minus
+
+
+:::{.panel-tabset}
+
+### Extract $\boldsymbol{\alpha}(\hat{\lambda})$
+```{r}
+#| label: get-alpha
+#| echo: true
+#| eval: true
+lambda_index <- which(cv_fit$lambda == lambda_min) 
+fit <-glmnet(x = X_full, y = Y, alpha = 0,
+         lambda = cv_fit$lambda, 
+         standardize = FALSE)
+
+alpha_hat <- fit$beta[,lambda_index] 
+```
+
+### Top-10 RAPM
+
+
+```{r}
+#| label: top-10-rapm
+#| echo: true
+#| eval: true
+rapm <- data.frame(id = names(alpha_hat), rapm = alpha_hat) |>
+  dplyr::inner_join(y = player_table |> dplyr::select(id,Name), by = "id")
+```
+```{r}
+#| label: top-10-display
+#| echo: false
+rapm |> dplyr::arrange(desc(alpha_hat)) |> dplyr::slice_head(n=10)
+```
+
+### Dončić vs Davis
+
+- Expect to score 3.4 fewer points per 100 possessions with Davis instead of Dončić
+
+```{r}
+#| label: doncic-davis
+#| eval: true
+#| echo: true
+luka_rapm <- rapm |> dplyr::filter(Name == "Luka Doncic") |> dplyr::pull(rapm)
+ad_rapm <- rapm |> dplyr::filter(Name == "Anthony Davis") |> dplyr::pull(rapm)
+ad_rapm - luka_rapm
+```
+:::
+
+
+## Other Penalties {.smaller}
+- For some $a \in [0,1]$ `glmnet()` and `cv.glmnet()` actually minimize 
+$$
+\sum_{i = 1}^{n}{(Y_{i} - \boldsymbol{\mathbf{z}}_{i}^{\top}\boldsymbol{\alpha})^{2}} + \lambda \times  \sum_{j = 0}^{p}{\left[a \times \lvert\alpha_{j}\rvert + (1-a) \times \alpha_{j}^{2}\right]},
+$$
+- Value of $a$ specified with `alpha` argument.
+
+- `alpha = 0`: penalty is $\sum_{j}{\alpha_{j}^{2}}$
+  - Penalty encourage small (but non-zero) $\alpha_{j}$ values
+  - Ridge regression; $\ell_{2}$ or Tikohonov regularization
+- `alpha = 1`: penalty is $\sum_{j}{\lvert \alpha_{j} \rvert}$
+  - Penalty encourages *sparsity* (i.e., sets many $\alpha_{j} = 0$)
+  - Least Absolute Shrinkage and Selection Operator (LASSO); $\ell_{1}$ regularization
+- $0 <$`alpha`$<1$: Elastic Net regression
+
+
+# Uncertainty Quantification
+
+## The Bootstrap (High-Level Idea) {.smaller}
+
+- Say we compute some statistic $T(\boldsymbol{y})$ using observed data $\boldsymbol{y}$
+  - E.g., RAPM estimate $\hat{\alpha}_{j}$ for a single player $j$
+  - Estimated difference $\hat{\alpha}_{j} - \hat{\alpha}_{j'}$ b/w players $j$ and $j'$
+  - Something more exotic: e.g. $\max_{j}\hat{\alpha}_{j} - \min_{j}\hat{\alpha_{j}}$
+- These are *estimates* and there is always estimation uncertainty
+
+. . .
+
+- Repeatedly re-sample data and re-compute statistic
+  - Re-sampled datasets: $\boldsymbol{y}^{(1)}, \ldots, \boldsymbol{y}^{(B)}$
+  - Corresponding statistics: $T(\boldsymbol{y}^{(1)}), \ldots, T(\boldsymbol{y}^{(B)})$
+- Boostrapped statistics gives a sense of estimate's variability
+
+## Bootstrapping RAPM (plan)
+
+- Compute $\hat{\boldsymbol{\alpha}}(\hat{\lambda})$ using original dataset
+
+- Draw $B$ re-samples of size $n$
+  - Sample observed stints **with replacement**
+
+- For each re-sampled dataset, compute $\hat{\boldsymbol{\alpha}}(\hat{\lambda})$
+  - No need to re-run cross-validation to compute optimal $\lambda$
+  - Use the optimal $\lambda$ from original dataset
+  
+- Save the $B$ bootstrap estimates of $\boldsymbol{\alpha}$ in an array
+
+## A Single Iteration
+
+:::{.panel-tabset}
+
+### Re-sampling Data
+```{r}
+#| label: single-bootstrap-resample-code
+#| eval: false
+#| echo: true
+
+set.seed(479)
+n <- nrow(X_full)
+p <- ncol(X_full)
+boot_index <- sample(1:n, size = n, replace = TRUE)
+```
+
+```{r}
+#| label: single-bootstrap-resample-eval
+#| eval: true
+#| echo: false
+
+set.seed(479)
+n <- nrow(X_full)
+p <- ncol(X_full)
+boot_index <- sample(1:n, size = n, replace = TRUE)
+sort(boot_index)[1:20]
+```
+
+### Compute $\boldsymbol{\alpha}$
+
+```{r}
+#| label: single-bootstrap-fit
+#| eval: true
+#| echo: true
+fit <- glmnet(x = X_full[boot_index,], y = Y[boot_index],
+              lambda = cv_fit$lambda,
+              alpha = 0, standardize = FALSE)
+```
+
+### Bootstrapped Estimate
+```{r}
+#| label: single-bootstrap-display-alpha
+#| eval: true
+#| echo: false
+
+tmp_alpha <- fit$beta[,lambda_index]
+tmp_alpha_df <- data.frame(id = names(tmp_alpha), boot_alpha = tmp_alpha)
+rapm |>
+  dplyr::inner_join(y = tmp_alpha_df, by = "id") |>
+  dplyr::arrange(dplyr::desc(alpha_hat)) |>
+  dplyr::rename(Orig = rapm, Bootstrap = boot_alpha) |>
+  dplyr::select(Name, Orig, Bootstrap) |>
+  dplyr::slice_head(n = 10)
+
+
+```
+:::
+
+## Full Bootstrap
+```{r}
+#| label: bootstrap-rapm
+#| eval: true
+#| echo: true
+B <- 500 
+player_names <- colnames(X_full) 
+boot_rapm <- matrix(nrow = B, ncol = p, dimnames = list(c(), player_names)) 
+
+for(b in 1:B){
+  set.seed(479+b)
+  boot_index <- sample(1:n, size = n, replace = TRUE) 
+  
+  fit <- glmnet(x = X_full[boot_index,], y = Y[boot_index], 
+                lambda = cv_fit$lambda,
+                alpha = 0,standardize = FALSE)
+  tmp_alpha <- fit$beta[,lambda_index]
+  boot_rapm[b, names(tmp_alpha)] <- tmp_alpha 
+}
+```
+
+
+
+## Dončić-Davis Contrast
+
+:::{.panel-tabset}
+
+### Bootstrap Dist.
+```{r}
+#| label: fig-bootstrap-diff
+#| fig-width: 6
+#| fig-asp: 0.5625
+#| fig-align: center
+#| fig-cap: Bootstrap distribution of difference between Doncic & Davis
+
+doncic_id <- player_table |> dplyr::filter(Name == "Luka Doncic") |> dplyr::pull(id) #<1>
+davis_id <- player_table |> dplyr::filter(Name == "Anthony Davis") |> dplyr::pull(id) 
+
+boot_diff <- boot_rapm[,davis_id] - boot_rapm[,doncic_id] #<2>
+oi_colors <- palette.colors(palette = "Okabe-Ito")
+
+hist(boot_diff, #<3>
+     breaks = 20, #<4>
+     main = "Bootstrap Distribution of Davis-Doncic", 
+     xlab = "Difference")
+
+
+abline(h = ad_rapm - luka_rapm, col = oi_colors[3])
+```
+
+### Uncertainty Interval
+
+```{r}
+#| label: doncic-davis-interval
+#| eval: true
+#| echo: true
+doncic_id <- player_table |> dplyr::filter(Name == "Luka Doncic") |> dplyr::pull(id) 
+davis_id <- player_table |> dplyr::filter(Name == "Anthony Davis") |> dplyr::pull(id) 
+boot_diff <- boot_rapm[,davis_id] - boot_rapm[,doncic_id]
+
+ci <- quantile(boot_diff, probs = c(0.025, 0.975))
+round(ci, digits = 3)
+
+```
+
+:::
+
+
+## Visualizing RAPM Uncertainty
+
+```{r}
+#| label: fig-boot-intervals
+#| eval: true
+#| echo: false
+
+rapm_l95 <- apply(boot_rapm, MARGIN = 2, FUN = quantile, probs = 0.025)
+rapm_u95 <- apply(boot_rapm, MARGIN = 2, FUN = quantile, probs = 0.975)
+
+ix <- order(rapm$rapm)
+
+selected_players <- 
+  c("Shai Gilgeous-Alexander", 
+    "Jayson Tatum",
+    "Nikola Jokic",
+    "Giannis Antetokounmpo",
+    "Luka Doncic",
+    "Anthony Davis", 
+    "LeBron James")
+
+
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+plot(1, type = "n",
+     xlab = "",
+     ylab = "RAPM",
+     main = "RAPM (2024-25)",
+     xlim = c(0, p+1), 
+     ylim = c(-1,1) * max(abs(c(rapm$rapm, rapm_l95, rapm_u95))))
+for(i in 1:p){
+  name <- rapm$Name[ix[i]]
+  if(name %in% selected_players){
+    lines(x = c(i,i), y = c(rapm_l95[ix[i]], rapm_u95[ix[i]]), col = oi_colors[9], lwd = 0.75)
+    points(x = i, y = rapm$rapm[ix[i]], pch = 16, cex = 0.75, col = oi_colors[3])
+  } else{
+    points(x = i, y = rapm$rapm[ix[i]], pch = 16, cex = 0.5, col = oi_colors[1])
+    lines(x = c(i,i), y = c(rapm_l95[ix[i]], rapm_u95[ix[i]]), col = oi_colors[9], lwd = 0.25)
+  }
+}
+
+```
+
+
+## Uncertainty in Ranking
+
+- `rank()` returns sample ranks of vector elements
+```{r}
+#| label: rank-example
+#| echo: true
+#| eval: true
+x <- c(100, -1, 3, 2.5, -2)
+rank(x)
+```
+
+. . .
+
+```{r}
+#| label: rank-negative-example
+#| echo: true
+#| eval: true
+rank(-1*x)
+```
+
+## SGA's RAPM Ranking Uncertainty
+
+:::{.panel-tabset}
+
+
+### Point Estimate
+```{r}
+#| label: sga-rank
+#| echo: true
+#| eval: true
+rapm <- rapm |> dplyr::mutate(rank_rapm = rank(-1 * rapm))
+rapm |> dplyr::filter(Name == "Shai Gilgeous-Alexander")
+```
+
+### Bootstrapped Ranks
+-  `MARGIN = 1` **applies** function to each *row*
+```{r}
+#| label: boot-rank
+#| echo: true
+#| eval: true
+boot_rank <- apply(-1*boot_rapm, MARGIN = 1, FUN = rank)
+sga_id <- 
+  player_table |> dplyr::filter(Name == "Shai Gilgeous-Alexander") |> dplyr::pull(id)
+sga_ranks <- boot_rank[sga_id,]
+table(sga_ranks)[1:10]
+```
+- SGA had
+  - Highest RAPM in 58/500 bootstrap re-samples
+  - 2nd highest RAPM in 59/500 re-samples
+  
+
+### SGA's Rank
+- Considerable uncertainty in ranks!
+```{r}
+#| label: sga-rank-uncertainty
+#| echo: true
+#| eval: true
+
+quantile(sga_ranks, probs = c(0.025, 0.975))
+```
+:::

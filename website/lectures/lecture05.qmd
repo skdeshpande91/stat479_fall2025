@@ -31,7 +31,7 @@ Y_{i} &= \alpha_{0} + \alpha_{h_{1}(i)} + \alpha_{h_{2}(i)} + \alpha_{h_{3}(i)} 
 $$
 where $h_{1}(i), \ldots, h_{5}(i)$ and $a_{1}(i), \ldots, a_{5}(i)$ are, respectively, the indices of the homes and away team players on the court during stint $i$; $\alpha_{0}$ captures the average home court advantage in terms of point-differential per 100 possessions across all teams; and the $\epsilon_{i}$'s are independent random errors drawn from a distribution with mean zero.
 
-In [Lecture 4](lecture04.qmd#sec-apm-intro), we formed the $n \times (p+1)$ matrix $\boldsymbol{\mathbf{Z}}$ be the $n \times (p+1)$ matrix by appending a column of 1's to the matrix $\boldsymbol{\mathbf{X}}$ and let $\boldsymbol{\alpha} = (\alpha_{0}, \alpha_{1}, \ldots, \alpha_{p})^{\top}$ be the vector of length $p+1$ containing the home court advantage $\alpha_{0}$ and all the player-specific parameters $\alpha_{j}.$
+In [Lecture 4](lecture04.qmd#sec-apm-intro), we formed the $n \times (p+1)$ matrix $\boldsymbol{\mathbf{Z}}$ by appending a column of 1's to the matrix $\boldsymbol{\mathbf{X}}$ and let $\boldsymbol{\alpha} = (\alpha_{0}, \alpha_{1}, \ldots, \alpha_{p})^{\top}$ be the vector of length $p+1$ containing the home court advantage $\alpha_{0}$ and all the player-specific parameters $\alpha_{j}.$
 Letting $\boldsymbol{\mathbf{z}}_{i}$ be the $i$-th row of $\boldsymbol{\mathbf{Z}},$ we can write the APM model in a more compact form.
 $$
 Y_{i} = \boldsymbol{\mathbf{z}}_{i}^{\top}\boldsymbol{\alpha} + \epsilon_{i}.
@@ -209,7 +209,7 @@ Running this procedure, we obtain $B$ different estimates $\hat{\boldsymbol{\alp
 Importantly, each bootstrap estimate of the whole vector $\boldsymbol{\alpha}$ yields a bootstrap estimate of the constrast $\alpha_{j} - \alpha_{j'}.$
 By examining the
 
-As a concrete illustration, the following code computes 100 bootstrap estimates of the RAPM parameter vector.
+As a concrete illustration, the following code computes 500 bootstrap estimates of the RAPM parameter vector.
 It saves the bootstrap estimates of $\boldsymbol{\alpha}$ in a large matrix whose rows correspond to bootstrap samples and whose columns correspond to players.
 
 :::{.callout-important}
@@ -332,7 +332,7 @@ dim(boot_rank)
 To get the bootstrap distribution of SGA's ranking, we need to extract the values from the corresponding row of `boot_rank`.
 In the following code, we first look up SGA's player ID and then get the values from the row of `boot_rank` that is named with SGA's ID.
 ```{r}
-#| label: sga-boot-label
+#| label: sga-boot-table
 sga_id <- 
   player_table |>
   dplyr::filter(Name == "Shai Gilgeous-Alexander") |>

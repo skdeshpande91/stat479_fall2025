@@ -244,6 +244,10 @@ window.Quarto = {
     <a class="dropdown-item" href="../slides/lecture04.html">
  <span class="dropdown-text">Lecture 4: Adjusted Plus/Minus</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture05.html">
+ <span class="dropdown-text">Lecture 5: Regularized Adjusted Plus/Minus</span></a>
+  </li>  
     </ul>
   </li>
 </ul>
@@ -408,7 +412,7 @@ Y_{i} &amp;= \alpha_{0} + \alpha_{h_{1}(i)} + \alpha_{h_{2}(i)} + \alpha_{h_{3}(
 ~&amp;~~~~~~~~~~- \alpha_{a_{1}(i)} - \alpha_{a_{2}(i)} - \alpha_{a_{3}(i)} - \alpha_{a_{4}(i)} - \alpha_{a_{5}(i)} + \epsilon_{i},
 \end{align}
 \]</span> where <span class="math inline">\(h_{1}(i), \ldots, h_{5}(i)\)</span> and <span class="math inline">\(a_{1}(i), \ldots, a_{5}(i)\)</span> are, respectively, the indices of the homes and away team players on the court during stint <span class="math inline">\(i\)</span>; <span class="math inline">\(\alpha_{0}\)</span> captures the average home court advantage in terms of point-differential per 100 possessions across all teams; and the <span class="math inline">\(\epsilon_{i}\)</span>’s are independent random errors drawn from a distribution with mean zero.</p>
-<p>In <a href="../lectures/lecture04.html#sec-apm-intro">Lecture 4</a>, we formed the <span class="math inline">\(n \times (p+1)\)</span> matrix <span class="math inline">\(\boldsymbol{\mathbf{Z}}\)</span> be the <span class="math inline">\(n \times (p+1)\)</span> matrix by appending a column of 1’s to the matrix <span class="math inline">\(\boldsymbol{\mathbf{X}}\)</span> and let <span class="math inline">\(\boldsymbol{\alpha} = (\alpha_{0}, \alpha_{1}, \ldots, \alpha_{p})^{\top}\)</span> be the vector of length <span class="math inline">\(p+1\)</span> containing the home court advantage <span class="math inline">\(\alpha_{0}\)</span> and all the player-specific parameters <span class="math inline">\(\alpha_{j}.\)</span> Letting <span class="math inline">\(\boldsymbol{\mathbf{z}}_{i}\)</span> be the <span class="math inline">\(i\)</span>-th row of <span class="math inline">\(\boldsymbol{\mathbf{Z}},\)</span> we can write the APM model in a more compact form. <span class="math display">\[
+<p>In <a href="../lectures/lecture04.html#sec-apm-intro">Lecture 4</a>, we formed the <span class="math inline">\(n \times (p+1)\)</span> matrix <span class="math inline">\(\boldsymbol{\mathbf{Z}}\)</span> by appending a column of 1’s to the matrix <span class="math inline">\(\boldsymbol{\mathbf{X}}\)</span> and let <span class="math inline">\(\boldsymbol{\alpha} = (\alpha_{0}, \alpha_{1}, \ldots, \alpha_{p})^{\top}\)</span> be the vector of length <span class="math inline">\(p+1\)</span> containing the home court advantage <span class="math inline">\(\alpha_{0}\)</span> and all the player-specific parameters <span class="math inline">\(\alpha_{j}.\)</span> Letting <span class="math inline">\(\boldsymbol{\mathbf{z}}_{i}\)</span> be the <span class="math inline">\(i\)</span>-th row of <span class="math inline">\(\boldsymbol{\mathbf{Z}},\)</span> we can write the APM model in a more compact form. <span class="math display">\[
 Y_{i} = \boldsymbol{\mathbf{z}}_{i}^{\top}\boldsymbol{\alpha} + \epsilon_{i}.
 \]</span></p>
 <p>At the <a href="../lectures/lecture04.html#sec-looking-ahead">end of Lecture 4</a>, we saved a copy of the full matrix <span class="math inline">\(\boldsymbol{\mathbf{X}}\)</span> (which we called <code>X_full</code>) of signed on-court indicators, a vector of point differentials per 100 possessions <span class="math inline">\(\boldsymbol{Y}\)</span> (<code>Y</code>), and a look-up table containing player id numbers and names. We load those objects into our environment.</p>
@@ -482,7 +486,7 @@ Y_{i} = \boldsymbol{\mathbf{z}}_{i}^{\top}\boldsymbol{\alpha} + \epsilon_{i}.
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>), <span class="at">mgp =</span> <span class="fu">c</span>(<span class="fl">1.8</span>, <span class="fl">0.5</span>, <span class="dv">0</span>))</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(cv_fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<div id="fig-plot-cv" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" width="576">
+<div id="fig-plot-cv" class="quarto-float quarto-figure quarto-figure-center anchored" width="576" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-plot-cv-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <a href="lecture05_files/figure-html/fig-plot-cv-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: "><img src="lecture05_files/figure-html/fig-plot-cv-1.png" id="fig-plot-cv" class="img-fluid quarto-figure quarto-figure-center anchored figure-img" width="576"></a>
@@ -576,7 +580,7 @@ Figure&nbsp;1
 <li>Save the estimates in an array</li>
 </ol>
 <p>Running this procedure, we obtain <span class="math inline">\(B\)</span> different estimates <span class="math inline">\(\hat{\boldsymbol{\alpha}}(\lambda)^{(1)}, \ldots, \hat{\boldsymbol{\alpha}}(\lambda)^{(B)}\)</span> where <span class="math inline">\(\hat{\boldsymbol{\alpha}}(\lambda)^{(b)}\)</span> is the estimate obtained during the <span class="math inline">\(b\)</span>-th time through the loop. Importantly, each bootstrap estimate of the whole vector <span class="math inline">\(\boldsymbol{\alpha}\)</span> yields a bootstrap estimate of the constrast <span class="math inline">\(\alpha_{j} - \alpha_{j'}.\)</span> By examining the</p>
-<p>As a concrete illustration, the following code computes 100 bootstrap estimates of the RAPM parameter vector. It saves the bootstrap estimates of <span class="math inline">\(\boldsymbol{\alpha}\)</span> in a large matrix whose rows correspond to bootstrap samples and whose columns correspond to players.</p>
+<p>As a concrete illustration, the following code computes 500 bootstrap estimates of the RAPM parameter vector. It saves the bootstrap estimates of <span class="math inline">\(\boldsymbol{\alpha}\)</span> in a large matrix whose rows correspond to bootstrap samples and whose columns correspond to players.</p>
 <div class="callout callout-style-default callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
