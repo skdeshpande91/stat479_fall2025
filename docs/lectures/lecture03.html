@@ -1252,13 +1252,34 @@ Number of Fisher Scoring iterations: 6</code></pre>
 <p><strong>Random forests</strong> is a powerful regression approach that avoids specifying functional forms and allows for high-order interactions. At a high-level, a random forest model approximates a regression function <span class="math inline">\(\mathbb{E}[Y \vert \boldsymbol{\mathbf{X}}]\)</span> using the sum of several <em>regression trees</em> (which are just piece-wise constant step functions).</p>
 <section id="regression-trees-ensembles" class="level3">
 <h3 class="anchored" data-anchor-id="regression-trees-ensembles">Regression Trees &amp; Ensembles</h3>
-<p><strong>?@fig-tree</strong> shows an example of a regression tree defined over the space <span class="math inline">\([0,1]^{2}\)</span>. Regression trees represent piece-wise constant step-functions (<strong>?@fig-partition</strong>). To see this, imagine taking a point <span class="math inline">\(\boldsymbol{\mathbf{x}} = (x_{1}, \ldots, x_{p})\)</span> and tracing a path from the root of the tree — that is, the node at the very top — down to one of the terminal leaf nodes by following the decision rules. Specifically, when the path encounters an interior node associated with the rule <span class="math inline">\(\{X_{j} &lt; c\}\)</span>, the path proceeds to the left child if <span class="math inline">\(x_{j} &lt; c\)</span> and the right child otherwise. When the path reaches a leaf <span class="math inline">\(\ell\)</span>, we output the associated scalar <span class="math inline">\(\mu_{\ell}.\)</span> For instance, in the case of <strong>?@fig-partition</strong>, the path associated with every point in the yellow rectangle terminates in the yellow leaf node in <strong>?@fig-tree</strong></p>
+<p><a href="#fig-tree" class="quarto-xref">Figure&nbsp;1 (a)</a> shows an example of a regression tree defined over the space <span class="math inline">\([0,1]^{2}\)</span>. Regression trees represent piece-wise constant step-functions (<a href="#fig-partition" class="quarto-xref">Figure&nbsp;1 (b)</a>). To see this, imagine taking a point <span class="math inline">\(\boldsymbol{\mathbf{x}} = (x_{1}, \ldots, x_{p})\)</span> and tracing a path from the root of the tree — that is, the node at the very top — down to one of the terminal leaf nodes by following the decision rules. Specifically, when the path encounters an interior node associated with the rule <span class="math inline">\(\{X_{j} &lt; c\}\)</span>, the path proceeds to the left child if <span class="math inline">\(x_{j} &lt; c\)</span> and the right child otherwise. When the path reaches a leaf <span class="math inline">\(\ell\)</span>, we output the associated scalar <span class="math inline">\(\mu_{\ell}.\)</span> For instance, in the case of <a href="#fig-partition" class="quarto-xref">Figure&nbsp;1 (b)</a>, the path associated with every point in the yellow rectangle terminates in the yellow leaf node in <a href="#fig-tree" class="quarto-xref">Figure&nbsp;1 (a)</a>.</p>
 <div id="fig-regression-tree" class="quarto-layout-panel">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-regression-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="quarto-layout-row">
-<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
-<a href="figures/regression_tree.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: Regression trees are piecewise-constant step-functions"><img src="figures/regression_tree.png" id="fig-tree" class="img-fluid figure-img"></a>
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-regression-tree" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-tree" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="figures/regression_tree.png" class="lightbox" data-gallery="fig-regression-tree" title="Figure&nbsp;1&nbsp;(a): Regression tree"><img src="figures/regression_tree.png" class="img-fluid figure-img" data-ref-parent="fig-regression-tree"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-tree-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) Regression tree
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-regression-tree" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-partition" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-partition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="figures/partition.png" class="lightbox" data-gallery="fig-regression-tree" title="Figure&nbsp;1&nbsp;(b): Step function represented by the tree"><img src="figures/partition.png" class="img-fluid figure-img" data-ref-parent="fig-regression-tree"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-partition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b) Step function represented by the tree
+</figcaption>
+</figure>
+</div>
 </div>
 </div>
 </div>
@@ -1267,13 +1288,37 @@ Figure&nbsp;1: Regression trees are piecewise-constant step-functions
 </figcaption>
 </figure>
 </div>
-<p>It turns out that regression trees are <em>universal function approximators</em>: for just about every function with <span class="math inline">\(p\)</span> inputs, there is a regression tree that can approximate the function to an arbitrarily small tolerance. <strong>?@fig-tree-approx</strong> illustrates this: the true function is shown in pink and various tree approximations are shown in green.</p>
-<p><img src="figures/tree_appx_wide.png" class="img-fluid" alt="As the number of leaves increases (i.e., tree becomes deeper), we obtain more accurate approximations"> So, at least conceptually, this makes regression trees a very powerful tool in Statistics: rather than trying to pre-specify the functional form of <span class="math inline">\(\mathbb{E}[Y \vert \boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}]\)</span> — that is, manually specifying non-linearities or high-order interactions in a (generalized) linear model — we can instead focus on learning a regression trees<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> that fits the data well.</p>
-<p>As suggested by <strong>?@fig-tree-approx</strong>, we often need a very deep tree with lots of leaves to get a good approximation. Luckily, it turns out that very complicated trees can be decomposed into sums of simpler trees. In <strong>?@fig-sum-trees</strong>, we write the somewhat complex tree on the left as a sum of three simpler trees on the right<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>. We typically refer to a collection of simple regression trees as an ensemble. Methods that make predictions using ensembles of regression trees often out-perform more complicated deep-learning and neural-network models<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a></p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><a href="figures/sum_of_trees.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Complex trees can be represented as sums of simpler trees"><img src="figures/sum_of_trees.png" class="img-fluid figure-img" alt="Complex trees can be represented as sums of simpler trees"></a></p>
-<figcaption>Complex trees can be represented as sums of simpler trees</figcaption>
+<p>It turns out that regression trees are <em>universal function approximators</em>: for just about every function with <span class="math inline">\(p\)</span> inputs, there is a regression tree that can approximate the function to an arbitrarily small tolerance. The catch is one often needs a very deep tree, with lots of splits and leaf nodes to obtain a highly accurate approximation. <a href="#fig-cart-approx" class="quarto-xref">Figure&nbsp;2</a> and <a href="#fig-tree-approx" class="quarto-xref">Figure&nbsp;3</a> illustrate this phenomenon. The tree on the right-hand side of <a href="#fig-cart-approx" class="quarto-xref">Figure&nbsp;2</a> has seven leaves and encodes a step function (green curve on the left) Although this step function captures certain macro trends (e.g., the increase around <span class="math inline">\(x = 0.4\)</span> and subsequent decrease around <span class="math inline">\(x = 0.6\)</span>) of the true function (pink), it misses a lot of local structure (e.g., the local optima between <span class="math inline">\(x = 0.2\)</span> and <span class="math inline">\(x = 0.4\)</span>). But, as the tree gets deeper and number of leaves increases, the approximation improves (<a href="#fig-tree-approx" class="quarto-xref">Figure&nbsp;3</a>).</p>
+<div id="fig-cart-approx" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-cart-approx-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="figures/treeapprx_cart.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;2: Left: True function (pink) and a step function approximation (green). Right: representation of the step function as a regression tree"><img src="figures/treeapprx_cart.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cart-approx-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Left: True function (pink) and a step function approximation (green). Right: representation of the step function as a regression tree
+</figcaption>
+</figure>
+</div>
+<div id="fig-tree-approx" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-tree-approx-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="figures/tree_appx_wide.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;3: As the number of leaves increases (i.e., tree becomes deeper), we obtain more accurate approximations"><img src="figures/tree_appx_wide.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-tree-approx-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: As the number of leaves increases (i.e., tree becomes deeper), we obtain more accurate approximations
+</figcaption>
+</figure>
+</div>
+<p>So, at least conceptually, this makes regression trees a very powerful tool in Statistics: rather than trying to pre-specify the functional form of <span class="math inline">\(\mathbb{E}[Y \vert \boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}]\)</span> — that is, manually specifying non-linearities or high-order interactions in a (generalized) linear model — we can instead focus on learning a regression trees<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> that fits the data well.</p>
+<p>As suggested by <a href="#fig-tree-approx" class="quarto-xref">Figure&nbsp;3</a>, we often need a very deep tree with lots of leaves to get a good approximation. Luckily, it turns out that very complicated trees can be decomposed into sums of simpler trees. In <a href="#fig-sum-trees" class="quarto-xref">Figure&nbsp;4</a>, we write the somewhat complex tree on the left as a sum of three simpler trees on the right<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>. We typically refer to a collection of simple regression trees as an ensemble. Methods that make predictions using ensembles of regression trees often out-perform more complicated deep-learning and neural-network models<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a></p>
+<div id="fig-sum-trees" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-sum-trees-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="figures/sum_of_trees.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;4: Complex trees can be represented as sums of simpler trees"><img src="figures/sum_of_trees.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sum-trees-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Complex trees can be represented as sums of simpler trees
+</figcaption>
 </figure>
 </div>
 </section>
@@ -1393,7 +1438,7 @@ Figure&nbsp;1: Regression trees are piecewise-constant step-functions
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="lecture03_files/figure-html/compare-statsbomb-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="lecture03_files/figure-html/compare-statsbomb-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="384"></a></p>
+<p><a href="lecture03_files/figure-html/compare-statsbomb-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6"><img src="lecture03_files/figure-html/compare-statsbomb-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="384"></a></p>
 </figure>
 </div>
 </div>

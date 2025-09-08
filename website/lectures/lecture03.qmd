@@ -744,19 +744,29 @@ Regression trees represent piece-wise constant step-functions (@fig-partition).
 To see this, imagine taking a point $\boldsymbol{\mathbf{x}} = (x_{1}, \ldots, x_{p})$ and tracing a path from the root of the tree --- that is, the node at the very top --- down to one of the terminal leaf nodes by following the decision rules.
 Specifically, when the path encounters an interior node associated with the rule $\{X_{j} < c\}$, the path proceeds to the left child if $x_{j} < c$ and the right child otherwise.
 When the path reaches a leaf $\ell$, we output the associated scalar $\mu_{\ell}.$
-For instance, in the case of @fig-partition, the path associated with every point in the yellow rectangle terminates in the yellow leaf node in @fig-tree
+For instance, in the case of @fig-partition, the path associated with every point in the yellow rectangle terminates in the yellow leaf node in @fig-tree.
 
-:::{#fig-regression-tree layout-ncol=2}
+::: {#fig-regression-tree layout-ncol=2}
+
 ![Regression tree](figures/regression_tree.png){#fig-tree}
+
 ![Step function represented by the tree](figures/partition.png){#fig-partition}
 
 Regression trees are piecewise-constant step-functions
 :::
 
 It turns out that regression trees are *universal function approximators*: for just about every function with $p$ inputs, there is a regression tree that can approximate the function to an arbitrarily small tolerance.
-@fig-tree-approx illustrates this: the true function is shown in pink and various tree approximations are shown in green.
+The catch is one often needs a very deep tree, with lots of splits and leaf nodes to obtain a highly accurate approximation.
+@fig-cart-approx and @fig-tree-approx illustrate this phenomenon.
+The tree on the right-hand side of @fig-cart-approx has seven leaves and encodes a step function (green curve on the left)
+Although this step function captures certain macro trends (e.g., the increase around $x = 0.4$ and subsequent decrease around $x = 0.6$) of the true function (pink), it misses a lot of local structure (e.g., the local optima between $x = 0.2$ and $x = 0.4$). 
+But, as the tree gets deeper and number of leaves increases, the approximation improves (@fig-tree-approx).
 
-![As the number of leaves increases (i.e., tree becomes deeper), we obtain more accurate approximations](figures/tree_appx_wide.png)
+![Left: True function (pink) and a step function approximation (green). Right: representation of the step function as a regression tree](figures/treeapprx_cart.png){#fig-cart-approx}
+
+
+![As the number of leaves increases (i.e., tree becomes deeper), we obtain more accurate approximations](figures/tree_appx_wide.png){#fig-tree-approx}
+
 So, at least conceptually, this makes regression trees a very powerful tool in Statistics: rather than trying to pre-specify the functional form of $\mathbb{E}[Y \vert \boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}]$ --- that is, manually specifying non-linearities or high-order interactions in a (generalized) linear model --- we can instead focus on learning a regression trees[^treelearn] that fits the data well. 
 
 [^treelearn]: That is, learn the number and arrangement of the interior and leaf nodes as well as the decision rules and leaf outputs
@@ -769,7 +779,7 @@ Methods that make predictions using ensembles of regression trees often out-perf
 
 [^tabular]: The canonical reference is @Grinsztajn2022 ([link](https://arxiv.org/abs/2207.08815)).
 
-![Complex trees can be represented as sums of simpler trees](figures/sum_of_trees.png)
+![Complex trees can be represented as sums of simpler trees](figures/sum_of_trees.png){#fig-sum-trees}
 
 [^transparency]: To verify this decomposition is correct, imagine stacking the three partitions on top of each other. 
 

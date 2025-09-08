@@ -207,7 +207,7 @@
 <h1>Motivation &amp; Outline</h1>
 
 </section>
-<section id="motivation-beth-mead-in-euro-2022" class="slide level2">
+<section id="motivation-beth-mead-in-euro-2022" class="slide level2 smaller">
 <h2>Motivation: Beth Mead in EURO 2022</h2>
 <ul>
 <li>Beth Mead scored 6 goals in EURO 2022. Which was more impressive?
@@ -243,11 +243,9 @@
 <p><a href="mead_sweden.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img data-src="mead_sweden.png" class="quarto-figure quarto-figure-center" style="width:60.0%"></a></p>
 </figure>
 </div>
-<div class="fragment">
 <ul>
 <li>This long-run frequency is Expected Goals (XG)</li>
 </ul>
-</div>
 </section></section>
 <section>
 <section id="soccer-event-data" class="title-slide slide level1 center">
@@ -278,7 +276,7 @@
 </ul>
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><a href="statsbomb_coordinates.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="StatsBomb Coordinates"><img data-src="statsbomb_coordinates.png" style="width:65.0%" data-fig-asp="0.75," alt="StatsBomb Coordinates"></a></p>
+<p><a href="statsbomb_coordinates.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="StatsBomb Coordinates"><img data-src="statsbomb_coordinates.png" style="width:60.0%" data-fig-asp="0.75," alt="StatsBomb Coordinates"></a></p>
 <figcaption>StatsBomb Coordinates</figcaption>
 </figure>
 </div>
@@ -313,33 +311,32 @@
 <div class="sourceCode cell-code" id="cb4" data-code-line-numbers="|1|2|3|5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a></a>StatsBombR<span class="sc">::</span><span class="fu">FreeCompetitions</span>() <span class="sc">|&gt;</span></span>
 <span id="cb4-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(competition_id <span class="sc">==</span> <span class="dv">53</span> <span class="sc">&amp;</span> season_id <span class="sc">==</span> <span class="dv">106</span>) <span class="sc">|&gt;</span> </span>
 <span id="cb4-3"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeMatches</span>() <span class="sc">|&gt;</span></span>
-<span id="cb4-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(match_id, home_team.home_team_name, away_team.away_team_name, home_score, away_score) <span class="sc">|&gt;</span></span>
+<span id="cb4-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(home_team.home_team_name, away_team.away_team_name, home_score, away_score) <span class="sc">|&gt;</span></span>
 <span id="cb4-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="fragment">
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 5 × 5
-  match_id home_team.home_team_name away_team.away_team_…¹ home_score away_score
-     &lt;int&gt; &lt;chr&gt;                    &lt;chr&gt;                       &lt;int&gt;      &lt;int&gt;
-1  3845506 England Women's          Sweden Women's                  4          0
-2  3835326 Belgium Women's          Iceland Women's                 1          1
-3  3835330 Germany Women's          Spain Women's                   2          0
-4  3845507 Germany Women's          France Women's                  2          1
-5  3835322 Germany Women's          Denmark Women's                 4          0
-# ℹ abbreviated name: ¹​away_team.away_team_name</code></pre>
+<pre><code># A tibble: 5 × 4
+  home_team.home_team_name away_team.away_team_name home_score away_score
+  &lt;chr&gt;                    &lt;chr&gt;                         &lt;int&gt;      &lt;int&gt;
+1 England Women's          Norway Women's                    8          0
+2 England Women's          Austria Women's                   1          0
+3 Denmark Women's          WNT Finland                       1          0
+4 Germany Women's          Austria Women's                   2          0
+5 Austria Women's          Norway Women's                    1          0</code></pre>
 </div>
 </div>
 </div>
 </section>
-<section id="event-data" class="slide level2">
+<section id="event-data" class="slide level2 scrollable">
 <h2>Event Data</h2>
 <div class="panel-tabset">
 <ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-1-1">Get EURO2022 Events</a></li><li><a href="#tabset-1-2">Extract All Shots</a></li></ul>
 <div class="tab-content">
 <div id="tabset-1-1">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6" data-code-line-numbers="|2|3|4-6|"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a>euro2022_events <span class="ot">&lt;-</span></span>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a>euro2022_events <span class="ot">&lt;-</span></span>
 <span id="cb6-2"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeCompetitions</span>() <span class="sc">|&gt;</span> </span>
 <span id="cb6-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(competition_id <span class="sc">==</span> <span class="dv">53</span> <span class="sc">&amp;</span> season_id <span class="sc">==</span> <span class="dv">106</span>) <span class="sc">|&gt;</span> </span>
 <span id="cb6-4"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeMatches</span>() <span class="sc">|&gt;</span> </span>
@@ -349,11 +346,23 @@
 </div>
 </div>
 <div id="tabset-1-2">
+<div class="fragment">
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a>euro2022_shots <span class="ot">&lt;-</span></span>
 <span id="cb7-2"><a></a>  euro2022_events <span class="sc">|&gt;</span></span>
 <span id="cb7-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(type.name <span class="sc">==</span> <span class="st">"Shot"</span> <span class="sc">&amp;</span> shot.body_part.name <span class="sc">!=</span> <span class="st">"Other"</span>) <span class="sc">|&gt;</span></span>
 <span id="cb7-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">Y =</span> <span class="fu">ifelse</span>(shot.outcome.name <span class="sc">==</span> <span class="st">"Goal"</span>, <span class="dv">1</span>, <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div class="fragment">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "minute"              "player.name"         "shot.technique.name"
+ [4] "shot.body_part.name" "shot.type.name"      "location.x"         
+ [7] "location.y"          "DistToGoal"          "DistToKeeper"       
+[10] "AngleToGoal"         "AngleToKeeper"       "OpposingTeam"       </code></pre>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -362,12 +371,12 @@
 <section id="meads-shots" class="slide level2">
 <h2>Mead’s Shots</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a>mead_shots <span class="ot">&lt;-</span></span>
-<span id="cb8-2"><a></a>  euro2022_shots <span class="sc">|&gt;</span></span>
-<span id="cb8-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(player.name <span class="sc">==</span> <span class="st">"Bethany Mead"</span>)</span>
-<span id="cb8-4"><a></a></span>
-<span id="cb8-5"><a></a>mead_shots <span class="sc">|&gt;</span></span>
-<span id="cb8-6"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(OpposingTeam, minute, shot.body_part.name, shot.technique.name, Y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a>mead_shots <span class="ot">&lt;-</span></span>
+<span id="cb9-2"><a></a>  euro2022_shots <span class="sc">|&gt;</span></span>
+<span id="cb9-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(player.name <span class="sc">==</span> <span class="st">"Bethany Mead"</span>)</span>
+<span id="cb9-4"><a></a></span>
+<span id="cb9-5"><a></a>mead_shots <span class="sc">|&gt;</span></span>
+<span id="cb9-6"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(OpposingTeam, minute, shot.body_part.name, shot.technique.name, Y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 15 × 5
    OpposingTeam     minute shot.body_part.name shot.technique.name     Y
@@ -455,21 +464,21 @@
 <div class="tab-content">
 <div id="tabset-2-1">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a>wi_events <span class="ot">&lt;-</span></span>
-<span id="cb10-2"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeCompetitions</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb10-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(competition_gender <span class="sc">==</span> <span class="st">"female"</span> <span class="sc">&amp;</span> competition_international) <span class="sc">|&gt;</span></span>
-<span id="cb10-4"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeMatches</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb10-5"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">free_allevents</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb10-6"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">allclean</span>() <span class="sc">|&gt;</span></span>
-<span id="cb10-7"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">get.opposingteam</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a>wi_events <span class="ot">&lt;-</span></span>
+<span id="cb11-2"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeCompetitions</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb11-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(competition_gender <span class="sc">==</span> <span class="st">"female"</span> <span class="sc">&amp;</span> competition_international) <span class="sc">|&gt;</span></span>
+<span id="cb11-4"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeMatches</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb11-5"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">free_allevents</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb11-6"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">allclean</span>() <span class="sc">|&gt;</span></span>
+<span id="cb11-7"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">get.opposingteam</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div id="tabset-2-2">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a>wi_shots <span class="ot">&lt;-</span></span>
-<span id="cb11-2"><a></a>  wi_events <span class="sc">|&gt;</span></span>
-<span id="cb11-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(type.name <span class="sc">==</span> <span class="st">"Shot"</span> <span class="sc">&amp;</span> shot.body_part.name <span class="sc">!=</span> <span class="st">"Other"</span>) <span class="sc">|&gt;</span>  </span>
-<span id="cb11-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">Y =</span> <span class="fu">ifelse</span>(shot.outcome.name <span class="sc">==</span> <span class="st">"Goal"</span>, <span class="dv">1</span>, <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a></a>wi_shots <span class="ot">&lt;-</span></span>
+<span id="cb12-2"><a></a>  wi_events <span class="sc">|&gt;</span></span>
+<span id="cb12-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(type.name <span class="sc">==</span> <span class="st">"Shot"</span> <span class="sc">&amp;</span> shot.body_part.name <span class="sc">!=</span> <span class="st">"Other"</span>) <span class="sc">|&gt;</span>  </span>
+<span id="cb12-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">Y =</span> <span class="fu">ifelse</span>(shot.outcome.name <span class="sc">==</span> <span class="st">"Goal"</span>, <span class="dv">1</span>, <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
@@ -510,11 +519,11 @@
 <section id="estimating-xgbody-part" class="slide level2">
 <h2>Estimating XG(body part)</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13" data-code-line-numbers="|3|4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a>xg_model1 <span class="ot">&lt;-</span></span>
-<span id="cb13-2"><a></a>  wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb13-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(shot.body_part.name) <span class="sc">|&gt;</span></span>
-<span id="cb13-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">XG1 =</span> <span class="fu">mean</span>(Y), <span class="at">n =</span> dplyr<span class="sc">::</span><span class="fu">n</span>())</span>
-<span id="cb13-5"><a></a>xg_model1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14" data-code-line-numbers="|3|4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a></a>xg_model1 <span class="ot">&lt;-</span></span>
+<span id="cb14-2"><a></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb14-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(shot.body_part.name) <span class="sc">|&gt;</span></span>
+<span id="cb14-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">XG1 =</span> <span class="fu">mean</span>(Y), <span class="at">n =</span> dplyr<span class="sc">::</span><span class="fu">n</span>())</span>
+<span id="cb14-5"><a></a>xg_model1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="fragment">
 <div class="cell">
@@ -533,13 +542,12 @@
 <h2>Assessing Beth Mead’s Performance</h2>
 <ul>
 <li>Append XG estimates to <code>mead_shots</code> w/ <code>left_join</code></li>
-<li>Based on bodypart, each goal is about equally impressive:</li>
-<li>Model suggests 11% of repeated shots would result in goals</li>
+<li>Based on bodypart, each goal is about equally impressive</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15" data-code-line-numbers="|2|3|4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a>mead_shots <span class="ot">&lt;-</span> mead_shots <span class="sc">|&gt;</span></span>
-<span id="cb15-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> xg_model1 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(shot.body_part.name, XG1),</span>
-<span id="cb15-3"><a></a>                   <span class="at">by =</span> <span class="st">"shot.body_part.name"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16" data-code-line-numbers="|2|3|4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a></a>mead_shots <span class="ot">&lt;-</span> mead_shots <span class="sc">|&gt;</span></span>
+<span id="cb16-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> xg_model1 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(shot.body_part.name, XG1),</span>
+<span id="cb16-3"><a></a>                   <span class="at">by =</span> <span class="st">"shot.body_part.name"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="fragment">
 <div class="cell">
@@ -560,14 +568,16 @@
 <li>Each goal was scored off a different type of shot</li>
 <li>What if we condition body part &amp; shot technique?</li>
 </ul>
+<div class="fragment">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a><span class="fu">table</span>(wi_shots <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">pull</span>(shot.technique.name))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a><span class="fu">table</span>(wi_shots <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">pull</span>(shot.technique.name))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
      Backheel Diving Header   Half Volley           Lob        Normal 
            35            10           648            28          3720 
 Overhead Kick        Volley 
            17           302 </code></pre>
+</div>
 </div>
 </div>
 </section>
@@ -578,11 +588,11 @@ Overhead Kick        Volley
 <div class="tab-content">
 <div id="tabset-3-1">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19" data-code-line-numbers="3|4|"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a></a>xg_model2 <span class="ot">&lt;-</span></span>
-<span id="cb19-2"><a></a>  wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb19-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(shot.body_part.name, shot.technique.name) <span class="sc">|&gt;</span></span>
-<span id="cb19-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">XG2 =</span> <span class="fu">mean</span>(Y), <span class="at">n =</span> dplyr<span class="sc">::</span><span class="fu">n</span>(), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
-<span id="cb19-5"><a></a>xg_model2 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(XG2))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20" data-code-line-numbers="3-4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a>xg_model2 <span class="ot">&lt;-</span></span>
+<span id="cb20-2"><a></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb20-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(shot.body_part.name, shot.technique.name) <span class="sc">|&gt;</span></span>
+<span id="cb20-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">XG2 =</span> <span class="fu">mean</span>(Y), <span class="at">n =</span> dplyr<span class="sc">::</span><span class="fu">n</span>(), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb20-5"><a></a>xg_model2 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(XG2))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 14 × 4
    shot.body_part.name shot.technique.name    XG2     n
@@ -606,15 +616,15 @@ Overhead Kick        Volley
 </div>
 <div id="tabset-3-2">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a>mead_shots <span class="ot">&lt;-</span></span>
-<span id="cb21-2"><a></a>  mead_shots <span class="sc">|&gt;</span></span>
-<span id="cb21-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(</span>
-<span id="cb21-4"><a></a>    <span class="at">y =</span> xg_model2 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>n), </span>
-<span id="cb21-5"><a></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>, <span class="st">"shot.technique.name"</span>))</span>
-<span id="cb21-6"><a></a></span>
-<span id="cb21-7"><a></a>mead_shots <span class="sc">|&gt;</span></span>
-<span id="cb21-8"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(OpposingTeam, minute, shot.body_part.name, shot.technique.name, Y, XG2) <span class="sc">|&gt;</span></span>
-<span id="cb21-9"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">14</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a></a>mead_shots <span class="ot">&lt;-</span></span>
+<span id="cb22-2"><a></a>  mead_shots <span class="sc">|&gt;</span></span>
+<span id="cb22-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(</span>
+<span id="cb22-4"><a></a>    <span class="at">y =</span> xg_model2 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>n), </span>
+<span id="cb22-5"><a></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>, <span class="st">"shot.technique.name"</span>))</span>
+<span id="cb22-6"><a></a></span>
+<span id="cb22-7"><a></a>mead_shots <span class="sc">|&gt;</span></span>
+<span id="cb22-8"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(OpposingTeam, minute, shot.body_part.name, shot.technique.name, Y, XG2) <span class="sc">|&gt;</span></span>
+<span id="cb22-9"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">14</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 × 6
   OpposingTeam    minute shot.body_part.name shot.technique.name     Y    XG2
@@ -710,7 +720,7 @@ Figure&nbsp;1
 </div>
 </div>
 </section>
-<section id="model-based-xg" class="slide level2">
+<section id="model-based-xg" class="slide level2 smaller">
 <h2>Model-based XG</h2>
 <ul>
 <li>“Binning-and-averaging” not viable w/ many features due to small sample sizes</li>
@@ -767,7 +777,7 @@ Figure&nbsp;1
 <li>Beth Mead scored 2.89 more goals than expected</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a></a><span class="fu">sum</span>(mead_shots<span class="sc">$</span>Y <span class="sc">-</span> mead_shots<span class="sc">$</span>shot.statsbomb_xg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a></a><span class="fu">sum</span>(mead_shots<span class="sc">$</span>Y <span class="sc">-</span> mead_shots<span class="sc">$</span>shot.statsbomb_xg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 2.896323</code></pre>
 </div>
@@ -777,13 +787,13 @@ Figure&nbsp;1
 <section id="assessing-all-euro2022-players" class="slide level2">
 <h2>Assessing All EURO2022 Players</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a></a>goe <span class="ot">&lt;-</span> </span>
-<span id="cb28-2"><a></a>  euro2022_shots <span class="sc">|&gt;</span></span>
-<span id="cb28-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">diff =</span> Y <span class="sc">-</span> shot.statsbomb_xg) <span class="sc">|&gt;</span></span>
-<span id="cb28-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(player.name) <span class="sc">|&gt;</span></span>
-<span id="cb28-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">GOE =</span> <span class="fu">sum</span>(diff), <span class="at">Goals =</span> <span class="fu">sum</span>(Y), <span class="at">n_shots =</span> dplyr<span class="sc">::</span><span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
-<span id="cb28-6"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(GOE)) </span>
-<span id="cb28-7"><a></a>goe <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, (dplyr<span class="sc">::</span><span class="fu">n</span>()<span class="sc">-</span><span class="dv">4</span>)<span class="sc">:</span>dplyr<span class="sc">::</span><span class="fu">n</span>()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a></a>goe <span class="ot">&lt;-</span> </span>
+<span id="cb29-2"><a></a>  euro2022_shots <span class="sc">|&gt;</span></span>
+<span id="cb29-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">diff =</span> Y <span class="sc">-</span> shot.statsbomb_xg) <span class="sc">|&gt;</span></span>
+<span id="cb29-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(player.name) <span class="sc">|&gt;</span></span>
+<span id="cb29-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">GOE =</span> <span class="fu">sum</span>(diff), <span class="at">Goals =</span> <span class="fu">sum</span>(Y), <span class="at">n_shots =</span> dplyr<span class="sc">::</span><span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb29-6"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(GOE)) </span>
+<span id="cb29-7"><a></a>goe <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, (dplyr<span class="sc">::</span><span class="fu">n</span>()<span class="sc">-</span><span class="dv">4</span>)<span class="sc">:</span>dplyr<span class="sc">::</span><span class="fu">n</span>()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 10 × 4
    player.name                GOE Goals n_shots
@@ -801,16 +811,32 @@ Figure&nbsp;1
 </div>
 </div>
 </section>
-<section id="looking-ahead" class="slide level2">
+<section id="looking-ahead" class="slide level2 smaller">
 <h2>Looking Ahead</h2>
 <ul>
-<li>I <strong>Strongly</strong> recommend you work through code yourself
+<li>I <strong>strongly</strong> recommend you work through code yourself
 <ul>
 <li>Full code available <a href="../../lectures/lecture02.html">here</a></li>
 <li>Try more binning-and-averaging XG estimates w/ other features</li>
 <li>Try to replicate goals over expected with EURO 2025 data</li>
 </ul></li>
+<li>Will post code for plotting all players during a shot
+<ul>
+<li><code>shot.freeze_frame</code> contains data frame with other players &amp; their positions</li>
+</ul></li>
 </ul>
+</section>
+<section id="project-groups" class="slide level2">
+<h2>Project Groups</h2>
+<ul>
+<li>Form groups by <strong>Friday September 12</strong> (sign up on Canvas)</li>
+<li>Use Piazza to help find teammates</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><a href="piazza_teammate_qr.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5"><img data-src="piazza_teammate_qr.png" class="quarto-figure quarto-figure-center" style="width:30.0%"></a></p>
+</figure>
+</div>
 
 
 </section></section>

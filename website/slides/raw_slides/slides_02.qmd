@@ -8,7 +8,7 @@ execute:
 
 # Motivation & Outline
 
-## Motivation: Beth Mead in EURO 2022
+## Motivation: Beth Mead in EURO 2022{.smaller}
 - Beth Mead scored 6 goals in EURO 2022. Which was more impressive?
   - Goal in 15th minute against Austria [link](https://youtube.com/clip/UgkxnOKsnw4W3h-BqV5kyh-tOVnnTgBEc9u5?si=zpQB7OF43gt3yiwK)
   - Goal in 37th minute against Norway [link](https://youtube.com/clip/UgkxqZ03bRBGCr4vS0M4yTMtHMOHsA6kkTHw?si=2IlC7AVi2CQotunG)
@@ -30,8 +30,6 @@ execute:
 - How often would she score?
 
 ![](mead_sweden.png){width="60%" fig-align="center"}
-
-. . .
 
 - This long-run frequency is Expected Goals (XG) 
 
@@ -56,7 +54,7 @@ devtools::install_github("statsbomb/StatsBombR")
 - Offensive action moves left-to-right
 - Vertical coordinate increases as you move top-to-bottom
 
-![StatsBomb Coordinates](statsbomb_coordinates.png){fig-asp=0.75, width="65%"}
+![StatsBomb Coordinates](statsbomb_coordinates.png){fig-asp=0.75, width="60%"}
 
 ## Free Competitions
 - `FreeCompetitions()` returns table of available competitions
@@ -73,7 +71,7 @@ StatsBombR::FreeCompetitions() |>
   dplyr::slice_sample(n=10)
 ```
 
-## Free Matches{}
+## Free Matches
 ```{r}
 #| label: view-euro2022-matches-code
 #| message: false
@@ -84,7 +82,7 @@ StatsBombR::FreeCompetitions() |>
 StatsBombR::FreeCompetitions() |>
   dplyr::filter(competition_id == 53 & season_id == 106) |> 
   StatsBombR::FreeMatches() |>
-  dplyr::select(match_id, home_team.home_team_name, away_team.away_team_name, home_score, away_score) |>
+  dplyr::select(home_team.home_team_name, away_team.away_team_name, home_score, away_score) |>
   dplyr::slice_sample(n=5)
 ```
 
@@ -100,16 +98,17 @@ StatsBombR::FreeCompetitions() |>
 tmp <- StatsBombR::FreeCompetitions() |>
   dplyr::filter(competition_id == 53 & season_id == 106) |> 
   StatsBombR::FreeMatches() |>
-  dplyr::select(match_id, home_team.home_team_name, away_team.away_team_name, home_score, away_score) 
+  dplyr::select(home_team.home_team_name, away_team.away_team_name, home_score, away_score) 
 ```
 ```{r}
 #| label: view-euro2022-matches-display
 #| eval: true 
 #| echo: false
+set.seed(724)
 tmp |> dplyr::slice_sample(n=5)
 ```
 
-## Event Data
+## Event Data{.scrollable}
 
 :::{.panel-tabset}
 
@@ -121,7 +120,6 @@ tmp |> dplyr::slice_sample(n=5)
 #| output: false
 #| message: false
 #| warning: false
-#| code-line-numbers: "|2|3|4-6|"
 euro2022_events <-
   StatsBombR::FreeCompetitions() |> 
   dplyr::filter(competition_id == 53 & season_id == 106) |> 
@@ -132,6 +130,9 @@ euro2022_events <-
 ```  
 
 ### Extract All Shots
+
+
+:::{.fragment}
 ```{r}
 #| label: get-euro2022-shots
 #| eval: true
@@ -141,6 +142,23 @@ euro2022_shots <-
   dplyr::filter(type.name == "Shot" & shot.body_part.name != "Other") |>
   dplyr::mutate(Y = ifelse(shot.outcome.name == "Goal", 1, 0))
 ```
+:::
+
+:::{.fragment}
+```{r}
+#| label: euro2022-columns
+#| eval: true
+#| echo: false
+my_cols <- 
+  c("match.id", "player.name", "OpposingTeam", "minute","location.x", "location.y",
+    "shot.type.name", 
+    "shot.technique.name", "shot.body_part.name",
+    "DistToGoal", "DistToKeeper", # dist. to keeper is distance from GK to goal
+    "AngleToGoal", "AngleToKeeper")
+colnames(euro2022_shots)[colnames(euro2022_shots) %in% my_cols]
+```
+:::
+
 :::
 
 
@@ -281,8 +299,7 @@ xg_model1
 
 ## Assessing Beth Mead's Performance
 - Append XG estimates to `mead_shots` w/ `left_join`
-- Based on bodypart, each goal is about equally impressive:
-- Model suggests 11% of repeated shots would result in goals
+- Based on bodypart, each goal is about equally impressive
 ```{r}
 #| label: mead-xg-foot-code
 #| echo: true
@@ -304,6 +321,9 @@ mead_shots |> dplyr::slice(c(1,4,14)) |>
 ## Accounting For Shot Technique
 - Each goal was scored off a different type of shot
 - What if we condition body part & shot technique?
+
+. . .
+
 ```{r}
 #| label: wi-tech
 #| eval: true
@@ -319,7 +339,7 @@ table(wi_shots |> dplyr::pull(shot.technique.name))
 #| label: wi-xg-body-tech
 #| eval: true
 #| echo: true
-#| code-line-numbers: "3|4|"
+#| code-line-numbers: "3-4"
 xg_model2 <-
   wi_shots |>
   dplyr::group_by(shot.body_part.name, shot.technique.name) |>
@@ -530,7 +550,7 @@ wi_shots |>
 ```
 
 
-## Model-based XG
+## Model-based XG{.smaller}
 - "Binning-and-averaging" not viable w/ many features due to small sample sizes
 - *Statistical models* overcome these challenges by "borrowing strength"
 - $\textrm{XG}(\boldsymbol{\mathbf{x}})$ informed by shots with $\boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}$ and $\boldsymbol{\mathbf{X}} \approx \boldsymbol{\mathbf{x}}$
@@ -592,8 +612,19 @@ goe |> dplyr::slice(c(1:5, (dplyr::n()-4):dplyr::n()))
 
 ```
 
-## Looking Ahead
-- I **Strongly** recommend you work through code yourself
+## Looking Ahead{.smaller}
+- I **strongly** recommend you work through code yourself
   - Full code available [here](../../lectures/lecture02.qmd)
   - Try more binning-and-averaging XG estimates w/ other features
   - Try to replicate goals over expected with EURO 2025 data
+
+- Will post code for plotting all players during a shot
+  - `shot.freeze_frame` contains data frame with other players & their positions
+
+## Project Groups
+
+- Form groups by **Friday September 12** (sign up on Canvas)
+- Use Piazza to help find teammates
+
+![](piazza_teammate_qr.png){width="30%" fig-align="center"}
+
