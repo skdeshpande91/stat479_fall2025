@@ -1,0 +1,731 @@
+---
+title: "STAT 479: Lecture 8"
+subtitle: "Defensive Credit & WAR"
+format: revealjs
+execute: 
+  cache: true
+---
+
+
+# Recap & Overview
+
+## Offensive Credit Allocation{.smaller}
+- During at-bat $i$, batting team generates $\delta_{i}$ run value
+- [Lecture 7](../../lectures/lecture07.qmd): divide $\delta_{i}$ b/w batter and baserunners
+- Conservation of run value: if batting team gains $\delta$, fielding team gains $-\delta$
+- Today: divide $-\delta_{i}$ b/w pitcher and fielders
+
+## Two Possibilities{.smaller}
+
+- Ball is not put in play during at-bat
+  - At-bat ends w/ homerun, strikeout, walk
+  - Pitcher deserves all credit (or blame)
+
+. . .
+
+- Ball is put in play (e.g., flyout, groundout, single, double, triple, etc.)
+  - $\hat{p}$: probability of making an out (based on location)
+  - Give $\delta^{(p)} = -\delta \times (1-\hat{p})$ to the pitcher
+  - Divide $\delta^{(f)} = -\delta \times \hat{p}$ among other fielders
+
+
+# Data Preparation
+
+## Statcast Coordinates{.smaller}
+```{r}
+#| label: load-statcast
+#| eval: true
+#| echo: false
+load("../../lectures/statcast2024.RData")
+load("../../lectures/runValue2024.RData")
+load("../../lectures/player2024_lookup.RData")
+oi_colors <- palette.colors(palette = "Okabe-Ito")
+```
+
+:::{.panel-tabset}
+### Background
+- `hc_x` and `hc_y`: coordinates where batted ball is first fielded
+- `hit_location`: position of player who first fielding ball
+- Statcast coordinate system
+  - Home plate at top of plot near `(125, 200)`
+  - First baseline on the **left**
+  - Units are not in feet
+  
+### Visualization
+```{r}
+#| label: fig-hc-coordinates
+#| fig-width: 5
+#| fig-height: 5
+#| fig-align: center
+#| fig-cap: Locations where all batted balls are first fielded
+
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+plot(statcast2024$hc_x, statcast2024$hc_y, 
+     xlab = "hc_x", ylab = "hc_y",
+     pch = 16, cex = 0.2, 
+     col = adjustcolor(oi_colors[1], alpha.f = 0.1))
+```
+
+### First Base
+```{r}
+#| label: fig-fielder3
+#| fig-width: 5
+#| fig-height: 5
+#| fig-align: center
+#| fig-cap: Location of all batted balls initially fielded by the first baseman
+
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+plot(statcast2024$hc_x[statcast2024$hit_location!=3], 
+     statcast2024$hc_y[statcast2024$hit_location != 3], 
+     xlab = "hc_x", ylab = "hc_y",
+     pch = 16, cex = 0.2, 
+     col = adjustcolor(oi_colors[1], alpha.f = 0.1))
+points(statcast2024$hc_x[statcast2024$hit_location==3], 
+     statcast2024$hc_y[statcast2024$hit_location==3],
+     pch = 16, cex = 0.2, 
+     col = adjustcolor(oi_colors[2], alpha.f = 0.1))
+```
+
+:::
+
+## Transformed Coordinates{.smaller}
+
+:::{.panel-tabset}
+
+### Details
+- Transform: `x = 2.5 * (hc_x - 125.42)` & `y = 2.5 * (198.27 - hc_y)`
+- Define new coordinate system where
+  - Home plate at bottom of plot at `(0,0)`
+  - Units are in feet
+  - First base on the right around `(90/sqrt(2), 90/sqrt(2))`
+
+### Visualization
+```{r}
+#| label: transformc-hc
+#| eval: true
+#| echo: false
+statcast2024 <-
+  statcast2024 |>
+  dplyr::mutate(
+    x = 2.5 * (hc_x - 125.42),
+    y = 2.5 * (198.27 - hc_y))
+```
+```{r}
+#| label: fig-new-coords
+#| eval: true
+#| echo: false
+#| fig-width: 5
+#| fig-height: 5
+#| fig-align: center
+#| fig-cap: New coordinate system
+
+par(mar = c(1,1,1,1), mgp = c(1.8, 0.5, 0))
+plot(statcast2024$x, 
+     statcast2024$y, 
+     xlab = "", ylab = "",
+     xaxt = "n", yaxt = "n", bty = "n",
+     pch = 16, cex = 0.2, 
+     xlim = c(-300, 300),
+     ylim = c(-100, 500),
+     col = adjustcolor(oi_colors[1], alpha.f = 0.1))
+
+abline(a = 0, b = 1, col = oi_colors[5], lwd = 1) #<1>
+abline(a = 0, b = -1, col = oi_colors[5], lwd = 1)
+
+lines(x = c(0,90/sqrt(2)), y = c(0, 90/sqrt(2)), col = "white", lwd = 2) #<2>
+lines(x = c(0,-90/sqrt(2)), y = c(0, 90/sqrt(2)), col = "white", lwd = 2)
+lines(x = c(90/sqrt(2), 0), y = c(90/sqrt(2), 90*sqrt(2)), col = "white", lwd = 2)
+lines(x = c(-90/sqrt(2), 0), y = c(90/sqrt(2), 90*sqrt(2)), col = "white", lwd = 2)
+
+
+points(x = 0, y = 0, pch = 16, cex = 0.8, col = "white")
+points(x = 90/sqrt(2), y = 90/sqrt(2), pch = 16, cex = 0.8, col = "white")
+points(x = -90/sqrt(2), y = 90/sqrt(2), pch = 16,cex = 0.8, col = "white")
+points(x = 0, y = 90*sqrt(2), pch = 16, cex = 0.8, col = "white")
+```
+
+:::
+
+## More Data Preparation
+
+- `def_atbat2024`: at-bat level data table containing
+  - Pitcher & fielder identities
+  - Batted ball locations & fielder position
+  - Ending values of `type` and `events`: i.e. `end_type` and `end_events`
+    - Useful for determining at-bat level outcomes
+  - Narrative descriptions: `des`
+
+- See [lecture notes](../../lectures/lecture08.qmd#sec-hit-location-data) for full code
+
+```{r}
+#| label: prepare-data
+#| eval: true
+#| echo: false
+def_atbat2024 <-
+  statcast2024 |>
+  dplyr::group_by(game_pk, at_bat_number) |>
+  dplyr::arrange(pitch_number) |>
+  dplyr::mutate(
+    end_events = dplyr::last(events),
+    end_x = dplyr::last(x),
+    end_y = dplyr::last(y),
+    end_type = dplyr::last(type),
+    end_hit_location = dplyr::last(hit_location)) |>
+  dplyr::ungroup() |>
+  dplyr::filter(pitch_number == 1) |>
+  dplyr::arrange(game_date, game_pk, at_bat_number, pitch_number) |>
+  dplyr::select(
+    game_date, game_pk, at_bat_number,
+    end_events, end_type, des,
+    batter,
+    pitcher, fielder_2, fielder_3,
+    fielder_4, fielder_5, fielder_6,
+    fielder_7, fielder_8, fielder_9,
+    end_x, end_y, end_hit_location) |>
+  dplyr::rename(x = end_x, y = end_y) |>
+  dplyr::inner_join(y = runValue2024, by = c("game_pk", "at_bat_number"))
+
+```
+
+
+
+
+# Estimating Out Probabilities
+
+## Unique Events {.smaller}
+- `end_type`: did last pitch of at-bat end in **S**trike, **B**all, or contact (**X**)? 
+- `events`: more granular description of at-bat outcome
+
+- All `events` when contact is made
+```{r}
+#| label: sanity-1
+#| eval: true
+#| echo: true
+table(def_atbat2024$end_events[def_atbat2024$end_type == "X"], useNA = 'always')
+```
+
+. . .
+- All `events` for balls and strikes
+```{r}
+#| label: sanity-2
+#| eval: true
+#| echo: true
+table(def_atbat2024$end_events[def_atbat2024$end_type != "X"], useNA = 'always')
+
+```
+
+## Extract Balls in Play{.smaller}
+- Some manual correction was needed
+```{r}
+#| label: define-bip
+#| eval: true
+#| echo: true
+bip <- def_atbat2024 |> dplyr::filter(end_type == "X")
+bip$end_events[65138] <- "fielders_choice_out"
+out_events <- 
+  c("double_play", "field_out", "fielders_choice_out",
+    "force_out", "grounded_into_double_play", 
+    "sac_bunt", "sac_fly", "sac_fly_double_play",
+    "triple_play")
+bip <-
+  bip |>
+  dplyr::filter(end_events != "home_run" & !is.na(x) & !is.na(y)) |>
+  dplyr::mutate(Out = ifelse(end_events %in% out_events, 1, 0)) 
+```
+
+## Binning & Averaging{.smaller}
+
+:::{.panel-tabset}
+
+### Grid Code
+- Divide field into grid of 3ft x 3ft bins
+- Remove unrealistic grid locations
+```{r}
+#| label: build-grid
+#| eval: true
+#| echo: true
+#| code-line-numbers: "1-4|6-10"
+grid_sep <- 3 
+x_grid <- seq(from = -300, to = 300, by = grid_sep)
+y_grid <- seq(from = -100, to = 500, by = grid_sep)
+raw_grid <- expand.grid(x = x_grid, y = y_grid)
+
+grid <- raw_grid |>
+  dplyr::filter(y + x > -100 & y - x > -100 & sqrt(x^2 + y^2) < 580)
+```
+
+### Grid
+```{r}
+#| label: fig-restrict-grid
+#| fig-width: 5
+#| fig-height: 5
+#| fig-align: center
+#| fig-cap: Restricted grid of spatial locations
+par(mar = c(1,1,1,1), mgp = c(1.8, 0.5, 0))
+plot(bip$x, bip$y, 
+     xlim = c(-300, 300), ylim = c(-100, 500),
+     xaxt = "n", yaxt = "n", xlab = "", ylab = "",
+     pch = 16, cex = 0.2, 
+     col = adjustcolor(oi_colors[1], alpha.f = 0.2))
+points(grid$x, grid$y, pch = 16, cex = 0.2, 
+       col = adjustcolor(oi_colors[3], alpha.f = 0.3))
+```
+
+### Estimation Code
+```{r}
+#| label: bin-probs
+#| eval: true
+#| echo: true
+bin_probs <-
+  bip |>
+  dplyr::select(x, y, Out) |>
+  dplyr::mutate(
+    x_bin = cut(x, breaks = seq(-300-grid_sep/2, 300+grid_sep/2, by = grid_sep)), 
+    y_bin = cut(y, breaks = seq(-100 - grid_sep/2, 500+grid_sep/2, by = grid_sep))) |>
+  dplyr::group_by(x_bin, y_bin) |>
+  dplyr::summarise(
+    out_prob = mean(Out), 
+    n_balls = dplyr::n(),
+    .groups = "drop")
+```
+
+### Estimates
+```{r}
+#| label: fig-bin-probs
+#| eval: true
+#| echo: false
+#| fig-width: 5
+#| fig-height: 5
+#| fig-align: center
+#| fig-cap: Empirical out probabilities based on binning balls in play.
+
+grid_probs_bin <-
+  grid |>
+  dplyr::mutate(
+    x_bin = cut(x, breaks = seq(-300-grid_sep/2, 300+grid_sep/2, by = 3)),
+    y_bin = cut(y, breaks = seq(-100-grid_sep/2, 500+grid_sep/2, by = 3))) |>
+  dplyr::left_join(y = bin_probs, by = c("x_bin", "y_bin"))
+
+col_list <- colorBlindness::Blue2DarkRed18Steps #<1>
+
+par(mar = c(1,1,1,1), mgp = c(1.8, 0.5, 0))
+plot(1, type = "n", #<2>
+     xlim = c(-300, 300), ylim = c(-100, 500), 
+     xaxt = "n", yaxt = "n", bty = "n", 
+     xlab = "", ylab = "") 
+
+for(i in 1:nrow(grid_probs_bin)){
+  rect(xleft = grid_probs_bin$x[i] - grid_sep/2, #<6>
+       ybot = grid_probs_bin$y[i] - grid_sep/2,
+       xright = grid_probs_bin$x[i] + grid_sep/2,
+       ytop = grid_probs_bin$y[i] + grid_sep/2,
+       col = ifelse(
+         is.na(grid_probs_bin$out_prob[i]), 
+         adjustcolor(oi_colors[1], alpha.f = 0.2), #<7>
+         adjustcolor(rgb(colorRamp(col_list,bias=1)(grid_probs_bin$out_prob[i])/255), #<8>
+                     alpha.f = 0.5)),
+       border = NA) #<9>
+}
+abline(a = 0, b = 1, col = oi_colors[5], lwd = 2) 
+abline(a = 0, b = -1, col = oi_colors[5], lwd = 2)
+
+lines(x = c(0,90/sqrt(2)), y = c(0, 90/sqrt(2)), col = "white", lwd = 3) 
+lines(x = c(0,-90/sqrt(2)), y = c(0, 90/sqrt(2)), col = "white", lwd = 3)
+lines(x = c(90/sqrt(2), 0), y = c(90/sqrt(2), 90*sqrt(2)), col = "white", lwd = 3)
+lines(x = c(-90/sqrt(2), 0), y = c(90/sqrt(2), 90*sqrt(2)), col = "white", lwd = 3)
+
+
+points(x = 0, y = 0, pch = 16, cex = 0.8, col = "white")
+points(x = 90/sqrt(2), y = 90/sqrt(2), pch = 16, cex = 0.8, col = "white")
+points(x = -90/sqrt(2), y = 90/sqrt(2), pch = 16,cex = 0.8, col = "white")
+points(x = 0, y = 90*sqrt(2), pch = 16, cex = 0.8, col = "white")
+
+```
+
+:::
+
+
+## Logistic Regression
+- What about a logistic regression model?
+$$
+\log\left(\frac{\mathbb{P}(\textrm{out})}{1 - \mathbb{P}(\textrm{out})}\right) = \beta_{0} + \beta_{1}x + \beta_{2}y
+$$
+```{r}
+#| label: fit-logit-code
+#| eval: false
+#| echo: true
+logit_fit <-
+  glm(Out ~ x + y,
+      family = binomial(link = "logit"), data = bip)
+```
+```{r}
+#| label: fit-logit-eval
+#| eval: true
+#| echo: false
+logit_fit <-
+  glm(Out ~ x + y,
+      family = binomial(link = "logit"), data = bip)
+grid_logit_preds <-
+  predict(object = logit_fit, 
+          newdata = grid, type = "response") #<1>
+grid_logit_cols <- 
+  rgb(colorRamp(col_list,bias=1)(grid_logit_preds)/255) # <2>
+```
+
+## Logistic Regression Estimates
+```{r}
+#| label: fig-logistic-fit
+#| fig-width: 6
+#| fig-height: 6
+#| fig-align: center
+#| fig-cap: Logistic regression forecasts of out probabilities as a function of location.
+
+par(mar = c(1,1,1,1), mgp = c(1.8, 0.5, 0))
+plot(1, type = "n", 
+     xlim = c(-300, 300), ylim = c(-100, 500), 
+     xaxt = "n", yaxt = "n", bty = "n", 
+     xlab = "", ylab = "")
+
+for(i in 1:nrow(grid_probs_bin)){
+  rect(xleft = grid_probs_bin$x[i] - grid_sep/2, 
+       ybot = grid_probs_bin$y[i] - grid_sep/2,
+       xright = grid_probs_bin$x[i] + grid_sep/2,
+       ytop = grid_probs_bin$y[i] + grid_sep/2,
+       col = adjustcolor(grid_logit_cols[i], alpha.f = 0.5), #<1>
+       border = NA)
+}
+abline(a = 0, b = 1, col = oi_colors[5], lwd = 2) 
+abline(a = 0, b = -1, col = oi_colors[5], lwd = 2)
+
+lines(x = c(0,90/sqrt(2)), y = c(0, 90/sqrt(2)), col = "white", lwd = 3) 
+lines(x = c(0,-90/sqrt(2)), y = c(0, 90/sqrt(2)), col = "white", lwd = 3)
+lines(x = c(90/sqrt(2), 0), y = c(90/sqrt(2), 90*sqrt(2)), col = "white", lwd = 3)
+lines(x = c(-90/sqrt(2), 0), y = c(90/sqrt(2), 90*sqrt(2)), col = "white", lwd = 3)
+
+points(x = 0, y = 0, pch = 16, cex = 0.8, col = "white")
+points(x = 90/sqrt(2), y = 90/sqrt(2), pch = 16, cex = 0.8, col = "white")
+points(x = -90/sqrt(2), y = 90/sqrt(2), pch = 16,cex = 0.8, col = "white")
+points(x = 0, y = 90*sqrt(2), pch = 16, cex = 0.8, col = "white")
+```
+
+## Generalized Additive Model
+$$
+\log\left(\frac{\mathbb{P}(\textrm{out})}{1 - \mathbb{P}(\textrm{out})} \right) = s(x,y),
+$$
+- $s(x,y)$ is a **smooth** function in both $x$ and $y$
+  - Technically: $s(x,y) = \sum_{d=1}^{D}{\beta_{d}\phi_{d}(x,y)}$ 
+  - $\phi_{1}, \ldots, \phi_{D}$: fixed set of *spline* functions
+  - $\phi_{d}$ piecewise polynomial localized to small spatial region
+- Can be fit using the **mgcv** package
+
+## GAM Estimates
+
+:::{.panel-tabset}
+
+### Fit GAM
+- Use `mgcv::bam` for large datasets
+```{r}
+#| label: fit-gam
+#| eval: true
+#| echo: true
+library(mgcv)
+gam_fit <-
+  bam(formula = Out ~ s(x,y), 
+      family = binomial(link="logit"), data = bip)
+```
+
+### Visulization
+```{r}
+#| label: fig-out-gam
+#| eval: true
+#| echo: false
+#| fig-width: 6
+#| fig-height: 6
+#| fig-align: center
+#| fig-cap: GAM-estimated out probabilities
+grid_gam_preds <- 
+  predict(object = gam_fit,
+          newdata = grid, type = "response")
+
+grid_gam_cols <-   
+  rgb(colorRamp(col_list,bias=1)(grid_gam_preds)/255) 
+
+par(mar = c(1,1,5,1), mgp = c(1.8, 0.5, 0))
+plot(1, type = "n", 
+     xlim = c(-300, 300), ylim = c(-100, 500), 
+     xaxt = "n", yaxt = "n", bty = "n", 
+     main = "GAM out probabilities", xlab = "", ylab = "")
+
+for(i in 1:nrow(grid_probs_bin)){
+  rect(xleft = grid_probs_bin$x[i] - grid_sep/2, 
+       ybot = grid_probs_bin$y[i] - grid_sep/2,
+       xright = grid_probs_bin$x[i] + grid_sep/2,
+       ytop = grid_probs_bin$y[i] + grid_sep/2,
+       col = adjustcolor(grid_gam_cols[i], alpha.f = 0.5),
+       border = NA)
+}
+abline(a = 0, b = 1, col = oi_colors[5], lwd = 2) 
+abline(a = 0, b = -1, col = oi_colors[5], lwd = 2)
+
+lines(x = c(0,90/sqrt(2)), y = c(0, 90/sqrt(2)), col = "white", lwd = 3) 
+lines(x = c(0,-90/sqrt(2)), y = c(0, 90/sqrt(2)), col = "white", lwd = 3)
+lines(x = c(90/sqrt(2), 0), y = c(90/sqrt(2), 90*sqrt(2)), col = "white", lwd = 3)
+lines(x = c(-90/sqrt(2), 0), y = c(90/sqrt(2), 90*sqrt(2)), col = "white", lwd = 3)
+
+
+points(x = 0, y = 0, pch = 16, cex = 0.8, col = "white")
+points(x = 90/sqrt(2), y = 90/sqrt(2), pch = 16, cex = 0.8, col = "white")
+points(x = -90/sqrt(2), y = 90/sqrt(2), pch = 16,cex = 0.8, col = "white")
+points(x = 0, y = 90*sqrt(2), pch = 16, cex = 0.8, col = "white")
+```
+
+### Appending Out Probs
+```{r}
+#| label: add-preds
+#| eval: true
+#| echo: true
+all_preds <-
+  predict(object = gam_fit, 
+          newdata = def_atbat2024, #<1>
+          type = "response")
+def_atbat2024$p_out <- all_preds #<2>
+
+def_atbat2024 <-
+  def_atbat2024 |>
+  dplyr::mutate(
+    p_out = dplyr::case_when(
+      is.na(p_out) & end_events == "home_run" ~ 0, 
+      is.na(p_out) & end_type != "X" ~ 0, 
+      .default = p_out)) |>
+  dplyr::filter(!is.na(p_out))
+```
+:::
+
+## Defining $\delta^{(p)}$ and $\delta^{(f)}$
+- Divide run value $\delta$ into
+  - $\delta^{(f)} = -1 \times \hat{p} \times \delta$
+  - $\delta^{(p)} = -1 \times (1 - \hat{p}) \times \delta$
+```{r}
+#| label: add-pitch-field-rv
+#| eval: true
+#| echo: true
+def_atbat2024 <-
+  def_atbat2024 |>
+  dplyr::mutate(
+    delta_p = -1 * (1 - p_out) * RunValue,
+    delta_f = -1 * p_out * RunValue)
+```
+
+
+# Pitching Run Values
+
+## $\textrm{RAA}^{(p)}$ (definition)
+
+- $\delta_{i}^{(p)} = -1 \times (1 - \hat{p}_{i}) \times \delta_{i}$
+  - Run value created by pitcher in at-bat $i$
+  - Positive values indicate good performance
+  
+- $\textrm{RAA}^{(p)}$: sum $\delta_{i}^{(p)}$'s across each pitchers at-bats
+
+
+## Computing $\textrm{RAA}^{(p)}$
+
+```{r}
+#| label: load-defatbat
+#| eval: true
+#| echo: false
+rm(def_atbat2024)
+load("../../lectures/def_atbat2024.RData")
+```
+
+
+:::{.panel-tabset}
+
+### Code
+```{r}
+#| label: raa-p
+#| eval: true
+#| echo: true
+raa_p <-
+  def_atbat2024 |>
+  dplyr::select(pitcher, delta_p) |>
+  dplyr::group_by(pitcher) |>
+  dplyr::summarise(RAA_p = sum(delta_p, na.rm = TRUE)) |>
+  dplyr::rename(key_mlbam = pitcher) |>
+  dplyr::inner_join(y = player2024_lookup, by = "key_mlbam") |>
+  dplyr::select(Name, key_mlbam, RAA_p)
+```
+
+
+### Top-10
+```{r}
+#| label: top-raa-p
+#| eval: true
+#| echo: true
+raa_p |>
+  dplyr::arrange(dplyr::desc(RAA_p)) |>
+  dplyr::slice_head(n=10)
+```
+:::
+
+# Fielding Run Values
+
+## Fielding Responsibility{.smaller}
+- Say ball hit towards gap b/w 1st base and left field 
+  - Batting team creates large positive $\delta$
+  - $\hat{p} \approx 0$
+  - $\delta^{(f)}$ is large and negative
+  
+- How much blame should third baseman receive?
+
+## Position Weights{.smaller}
+- Idea: assign $w_{\ell} \delta^{(f)}$ to fielder at position $\ell$
+$$
+w_{\ell} = \frac{\hat{p}_{\ell}}{\hat{p}_{1} + \cdots + \hat{p}_{9}}
+$$
+- $\hat{p}_{\ell}$: prob. that fielder position $\ell$ makes out based on location
+- Can estimate $\hat{p}_{\ell}$ with fielder-specific GAMs
+  - See [lecture notes](../../lectures/lecture08.qmd#sec-fielding) for code
+  - Takes ~10-15 minutes to run
+- Numerical stability: restrict to balls w/in 150ft of typical fielder location
+  - I.e., balls hit to deep left field likely irrelevant for first baseman model
+
+## Run Value by Position
+
+:::{.panel-set}
+### Definition
+- For each at-bat $i$ assign $w_{i,\ell}\delta_{i}^{(f)}$ to player at position $\ell$
+- Sums these values for each player-position to get $\textrm{RAA}_{\ell}^{(f)}$
+  - Some players play multiple positions in the field
+- $\textrm{RAA}_{\ell}^{(f)}$: run value created by playing position $\ell$
+
+### First Base (code)
+```{r}
+#| label: raa-f3
+#| eval: true
+#| echo: true
+raa_f3 <-
+  def_atbat2024 |>
+  dplyr::mutate(RAA_f3 = delta_f * w3) |>
+  dplyr::group_by(fielder_3) |>
+  dplyr::summarize(RAA_f3 = sum(RAA_f3, na.rm = TRUE)) |>
+  dplyr::rename(key_mlbam = fielder_3)
+```
+
+### First Base (Top-10)
+```{r}
+#| label: raa-f3-top10
+#| eval: true
+#| echo: true
+raa_f3 |>
+  dplyr::inner_join(y = player2024_lookup, by = "key_mlbam") |>
+  dplyr::select(Name, RAA_f3) |>
+  dplyr::arrange(dplyr::desc(RAA_f3)) |>
+  dplyr::slice_head(n = 10)
+```
+:::
+
+
+## Total Fielding Run Value $\textrm{RAA}^{(f)}$
+
+- For each player we have $\textrm{RAA}^{(f)}_{1}, \ldots, \textrm{RAA}^{(f)}_{9}$
+  - $\textrm{RAA}^{(f)}_{\ell}$: total run value created from fielding at position $\ell$
+- $\textrm{RAA}^{(f)} = \textrm{RAA}^{(f)}_{1} + \cdots + \textrm{RAA}^{(f)}_{9}$
+
+
+# Replacement Level
+
+## Recap
+- $\textrm{RAA} = \textrm{RAA}^{(b)} + \textrm{RAA}^{(br)} + \textrm{RAA}^{(f)} + \textrm{RAA}^{(p)}$
+- Comprehensive measure of player performance in all parts of the game
+- Absolute $\textrm{RAA}$ are interesting...
+- ... but are much more useful when calibrated to some baseline
+
+## Replacement Level
+- Quoting from [FanGraphs](https://library.fangraphs.com/misc/war/replacement-level/)
+> Replacement level is simply the level of production you could get from a player that would cost you nothing but the league minimum salary to acquire. 
+
+. . . 
+- Definition is fairly arbitrary!
+> we believe that a team making the MLB minimum would win about 29.7% of its games in a give year, or roughly 47-48 per team
+
+## Roster-based Definition{.smaller}
+- Most MLB teams carry 12 pitchers & 13 position players
+- On any given day: 
+  - $30 \times 12 = 360$ available pitchers
+  - $30 \times 13 = 390$ available position players
+- Sort position players by number of at-bats in which they batted
+  - Top 390: not-replacement
+- Sort pitchers by numbers of at-bats in which they pitched
+  - Top 360: not-replacement
+
+## Identifying Non-Replacement Players
+
+
+:::{.panel-tabset}
+
+### Player Lists
+```{r}
+#| label: define-replacement
+#| echo: true
+#| eval: true
+all_players <- unique( #<1>
+  c(def_atbat2024$batter, def_atbat2024$pitcher, def_atbat2024$fielder_2,
+    def_atbat2024$fielder_3, def_atbat2024$fielder_4, def_atbat2024$fielder_5,
+    def_atbat2024$fielder_6, def_atbat2024$fielder_7, def_atbat2024$fielder_8, def_atbat2024$fielder_9))
+pitchers <- unique(def_atbat2024$pitcher) #<2>
+position_players <- all_players[!all_players %in% pitchers] #<3>
+```
+
+### Count PAs
+```{r}
+#| label: count-pa
+#| eval: true
+#| echo: true
+position_pa <-
+  def_atbat2024 |>
+  dplyr::filter(batter %in% position_players) |> #<1>
+  dplyr::group_by(batter) |>
+  dplyr::summarise(n = dplyr::n()) |> #<2>
+  dplyr::arrange(dplyr::desc(n)) |> #<3>
+  dplyr::rename(key_mlbam = batter)
+
+pitcher_pa <-
+  def_atbat2024 |>
+  dplyr::group_by(pitcher) |> #<4>
+  dplyr::summarise(n = dplyr::n()) |>
+  dplyr::arrange(dplyr::desc(n)) |>
+  dplyr::rename(key_mlbam = pitcher) #<5>
+```
+
+### Replacement Thresholds
+```{r}
+#| label: repl-threshold
+#| eval: true
+#| echo: true
+repl_position_players <- position_pa$key_mlbam[-(1:390)] #<6>
+repl_pitchers <- pitcher_pa$key_mlbam[-(1:360)]
+
+cat("Cut-off for position players:", position_pa$n[390], "\n")
+cat("Cut-off for pitchers:", pitcher_pa$n[360], "\n")
+```
+
+:::
+<!--
+## Pitch Trajectory Variables{.smaller}
+
+- Pitch release coordinates (`pos_release_x` and `pos_release_z`)
+- Initial velocity (`vx0`, `vy0`, `vz0`)
+- Acceleration at half-way point (`ax`, `ay`, and `az`)
+- Location where pitch crosses front edge of home plate (`plate_x` and `plate_z`)
+- Pitch type (`pitch_type`)
+```{r}
+#| label: pitch-type-table
+#| eval: true
+#| echo: true
+table(statcast2024$pitch_type)
+```
+- We'll return to these variables in [Lecture 11](../../lectures/lecture11.qmd)
+-->
+
+

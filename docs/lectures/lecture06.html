@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.7.31">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -91,7 +91,7 @@ div.csl-indent {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-4bfb630b09c0e164834af1bb3207dbff.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -267,6 +267,14 @@ window.Quarto = {
         <li>
     <a class="dropdown-item" href="../slides/lecture05.html">
  <span class="dropdown-text">Lecture 5: Regularized Adjusted Plus/Minus</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture06.html">
+ <span class="dropdown-text">Lecture 6: Expected Runs</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture08.html">
+ <span class="dropdown-text">Lecture 8: Defensive Credit Allocation &amp; WAR</span></a>
   </li>  
     </ul>
   </li>
@@ -449,7 +457,7 @@ window.Quarto = {
 <section id="sec-history" class="level3">
 <h3 class="anchored" data-anchor-id="sec-history">A Brief History</h3>
 <p>On October 4, 2006, during an American League Division Series game between the Oakland Athletics and Minnesota Twins, the sports media company Sportvision<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> debuted PitchF/X<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>, a system of cameras for tracking the position of every pitch as it traveled from the pitcher’s hand to the batter. After installing the system in every MLB ballpark, Sportvision began providing the data in real-time data to the MLB. These data, combined with additional information recorded by an MLB Advanced Media employee, powered the popular <a href="https://www.mlb.com/schedule/gameday">GameDay application</a> and were publicly available through the GameDay application programming interface (API) for many years.</p>
-<p>In 2017, PithcF/X system was phased out replaced by the radar-based Trackman system, which was originally developed to track the trajectories of golf balls. Trackman is part of the larger Statcast system, which additionally tracks the movement of all players on the field. See <a href="https://www.nytimes.com/athletic/5627303/2024/07/10/mlb-statcast-10-year-anniversary/">this New York Times article</a> for more about the history of Statcast.</p>
+<p>In 2017, PITCHf/x system was phased out replaced by the radar-based Trackman system, which was originally developed to track the trajectories of golf balls. Trackman is part of the larger Statcast system, which additionally tracks the movement of all players on the field. See <a href="https://www.nytimes.com/athletic/5627303/2024/07/10/mlb-statcast-10-year-anniversary/">this New York Times article</a> for more about the history of Statcast.</p>
 </section>
 <section id="sec-statcast-query" class="level3">
 <h3 class="anchored" data-anchor-id="sec-statcast-query">Accessing Statcast Data in R</h3>
@@ -586,7 +594,7 @@ Warning
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    strikes <span class="sc">&gt;=</span> <span class="dv">0</span> <span class="sc">&amp;</span> strikes <span class="sc">&lt;</span> <span class="dv">3</span> <span class="sc">&amp;</span> </span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>      balls <span class="sc">&gt;=</span> <span class="dv">0</span> <span class="sc">&amp;</span> balls <span class="sc">&lt;</span> <span class="dv">4</span> <span class="sc">&amp;</span> </span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>      outs_when_up <span class="sc">&gt;=</span> <span class="dv">0</span> <span class="sc">&amp;</span> outs_when_up <span class="sc">&lt;</span> <span class="dv">3</span>) <span class="sc">|&gt;</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(game_pk, at_bat_number, pitch_number)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(game_date, game_pk, at_bat_number, pitch_number)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We’re now left with 695,135 regular season pitches.</p>
 <section id="pitch--and-at-bat-level-descriptions" class="level3">
@@ -673,7 +681,7 @@ Warning
 <pre><code>── MLB Game Starting Batting Order data from MLB.com ─── baseballr 1.6.0.9002 ──</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>ℹ Data updated: 2025-08-02 17:10:16 CDT</code></pre>
+<pre><code>ℹ Data updated: 2025-08-19 18:11:54 CDT</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 18 × 8
@@ -983,7 +991,7 @@ Definition: Run Value
 <p>Statcast numbers every at-bat within the game and every pitch within each at-bat. To compute the number of runs scored within each at-bat, we will:</p>
 <ol type="1">
 <li>Sort the pitches by at-bat number and then by pitch number in ascending order</li>
-<li>Take the different between the <em>last</em> value of <code>post_bat_score</code> and <em>first</em> value of <code>bat_score</code> within each at-bat.</li>
+<li>Take the difference between the <em>last</em> value of <code>post_bat_score</code> and <em>first</em> value of <code>bat_score</code> within each at-bat.</li>
 </ol>
 <p>Let’s try to verify this by looking at pitches from the third, fourth, and fifth at-bats of Dodgers’ 8th inning against the Padres<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a></p>
 <div class="cell">
@@ -1020,21 +1028,21 @@ Definition: Run Value
 <span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RunsScored =</span> dplyr<span class="sc">::</span><span class="fu">last</span>(post_bat_score) <span class="sc">-</span> dplyr<span class="sc">::</span><span class="fu">first</span>(bat_score)) <span class="sc">|&gt;</span></span>
 <span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
 <span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(at_bat_number, pitch_number)</span>
-<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>dodgers_inning <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(at_bat_number, pitch_number, bat_score, description, post_bat_score)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>dodgers_inning <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(at_bat_number, pitch_number, bat_score, description, post_bat_score, RunsScored)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 25 × 5
-   at_bat_number pitch_number bat_score description   post_bat_score
-           &lt;int&gt;        &lt;int&gt;     &lt;dbl&gt; &lt;chr&gt;                  &lt;dbl&gt;
- 1            59            1         1 called_strike              1
- 2            59            2         1 ball                       1
- 3            59            3         1 ball                       1
- 4            59            4         1 foul                       1
- 5            59            6         1 blocked_ball               1
- 6            60            1         1 ball                       1
- 7            60            2         1 foul_tip                   1
- 8            60            3         1 hit_into_play              1
- 9            61            1         1 ball                       1
-10            61            2         1 ball                       1
+<pre><code># A tibble: 25 × 6
+   at_bat_number pitch_number bat_score description   post_bat_score RunsScored
+           &lt;int&gt;        &lt;int&gt;     &lt;dbl&gt; &lt;chr&gt;                  &lt;dbl&gt;      &lt;dbl&gt;
+ 1            59            1         1 called_strike              1          0
+ 2            59            2         1 ball                       1          0
+ 3            59            3         1 ball                       1          0
+ 4            59            4         1 foul                       1          0
+ 5            59            6         1 blocked_ball               1          0
+ 6            60            1         1 ball                       1          0
+ 7            60            2         1 foul_tip                   1          0
+ 8            60            3         1 hit_into_play              1          0
+ 9            61            1         1 ball                       1          0
+10            61            2         1 ball                       1          0
 # ℹ 15 more rows</code></pre>
 </div>
 </div>
@@ -1294,7 +1302,7 @@ Definition: Run Value
 <span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">RE24 =</span> <span class="fu">sum</span>(RunValue),<span class="at">N =</span> dplyr<span class="sc">::</span><span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
 <span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> tmp_lookup, <span class="at">by =</span> <span class="st">"batter"</span>) <span class="sc">|&gt;</span></span>
 <span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Name, RE24, N) <span class="sc">|&gt;</span></span>
-<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(<span class="fu">desc</span>(RE24))</span>
+<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(RE24))</span>
 <span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a>re24</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 649 × 3

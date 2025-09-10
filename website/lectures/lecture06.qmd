@@ -47,7 +47,7 @@ These data, combined with additional information recorded by an MLB Advanced Med
 
 [^fast]: See [this article by Mike Fast](https://tht.fangraphs.com/wp-content/uploads/sites/8/images/pitchfx_guide.bt.pdf) for more background
 
-In 2017, PithcF/X system was phased out replaced by the radar-based Trackman system, which was originally developed to track the trajectories of golf balls.
+In 2017, PITCHf/x system was phased out replaced by the radar-based Trackman system, which was originally developed to track the trajectories of golf balls.
 Trackman is part of the larger Statcast system, which additionally tracks the movement of all players on the field.
 See [this New York Times article](https://www.nytimes.com/athletic/5627303/2024/07/10/mlb-statcast-10-year-anniversary/) for more about the history of Statcast.
 
@@ -189,7 +189,8 @@ load("raw_statcast2024.RData")
 The function `annual_statcast_query` actually scrapes data not only from the regular season but also from the pre-season and the play-offs.
 The column `game_type` records the type of game in which each pitch was thrown.
 Looking at the [Statcast documentation](https://baseballsavant.mlb.com/csv-docs), we see that regular season pitches have `game_type=="R"`.
-```{r table-game_type}
+```{r}
+#| label: game-type-table
 table(raw_statcast2024$game_type, useNA = 'always')
 ```
 
@@ -204,7 +205,7 @@ statcast2024 <-
     strikes >= 0 & strikes < 3 & 
       balls >= 0 & balls < 4 & 
       outs_when_up >= 0 & outs_when_up < 3) |>
-  dplyr::arrange(game_pk, at_bat_number, pitch_number)
+  dplyr::arrange(game_date, game_pk, at_bat_number, pitch_number)
 ```
 We're now left with 695,135 regular season pitches.
 
@@ -544,7 +545,7 @@ Statcast numbers every at-bat within the game and every pitch within each at-bat
 To compute the number of runs scored within each at-bat, we will:
 
   1. Sort the pitches by at-bat number and then by pitch number in ascending order
-  2. Take the different between the *last* value of `post_bat_score` and *first* value of `bat_score` within each at-bat.
+  2. Take the difference between the *last* value of `post_bat_score` and *first* value of `bat_score` within each at-bat.
 
 Let's try to verify this by looking at pitches from the third, fourth, and fifth at-bats of Dodgers' 8th inning against the Padres[^atbatindex]
 
@@ -573,7 +574,7 @@ dodgers_inning <-
   dplyr::mutate(RunsScored = dplyr::last(post_bat_score) - dplyr::first(bat_score)) |>
   dplyr::ungroup() |>
   dplyr::arrange(at_bat_number, pitch_number)
-dodgers_inning |> dplyr::select(at_bat_number, pitch_number, bat_score, description, post_bat_score)
+dodgers_inning |> dplyr::select(at_bat_number, pitch_number, bat_score, description, post_bat_score, RunsScored)
 ```
 
 We can now apply this formula to all pitches in `statcast2024` by grouping by `game_pk` and `at_bat_number`.
@@ -776,7 +777,7 @@ re24 <-
   dplyr::summarise(RE24 = sum(RunValue),N = dplyr::n()) |>
   dplyr::inner_join(y = tmp_lookup, by = "batter") |>
   dplyr::select(Name, RE24, N) |>
-  dplyr::arrange(desc(RE24))
+  dplyr::arrange(dplyr::desc(RE24))
 re24
 ```
 When we compare our top-10 to [FanGraph's leaderboard for RE24](https://www.fangraphs.com/leaders/major-league?pos=all&type=3&sortcol=5&sortdir=default&qual=30&team=0&startdate=&enddate=&month=0&season1=2024&season=2024), we see a lot of overlap.

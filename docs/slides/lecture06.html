@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>STAT 479 (Fall 2025): Sports Analytics – STAT479</title>
+<title>Lecture 6: Expected Runs – STAT479</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,64 +20,26 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-4bfb630b09c0e164834af1bb3207dbff.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
-<script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
-<link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
-<link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-4bfb630b09c0e164834af1bb3207dbff.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -107,17 +69,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }</script>
 
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../styles.css">
 </head>
 
-<body class="nav-fixed quarto-light">
+<body class="nav-sidebar docked nav-fixed quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">STAT479</span>
     </a>
   </div>
@@ -128,11 +90,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page"> 
+    <a class="nav-link" href="../index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./syllabus.html"> 
+    <a class="nav-link" href="../syllabus.html"> 
 <span class="menu-text">Syllabus</span></a>
   </li>  
   <li class="nav-item dropdown ">
@@ -141,55 +103,55 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-lecture-code">    
         <li>
-    <a class="dropdown-item" href="./lectures/lecture00.html">
+    <a class="dropdown-item" href="../lectures/lecture00.html">
  <span class="dropdown-text">Lecture 0: Boxscore Metrics</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./lectures/lecture02.html">
+    <a class="dropdown-item" href="../lectures/lecture02.html">
  <span class="dropdown-text">Lecture 2: Expected Goals</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./lectures/lecture03.html">
+    <a class="dropdown-item" href="../lectures/lecture03.html">
  <span class="dropdown-text">Lecture 3: Estimating XG</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./lectures/lecture04.html">
+    <a class="dropdown-item" href="../lectures/lecture04.html">
  <span class="dropdown-text">Lecture 4: Adjusted Plus/Minus</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./lectures/lecture05.html">
+    <a class="dropdown-item" href="../lectures/lecture05.html">
  <span class="dropdown-text">Lecture 5: Regularized Adjusted Plus/Minus</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./lectures/lecture06.html">
+    <a class="dropdown-item" href="../lectures/lecture06.html">
  <span class="dropdown-text">Lecture 6: Run Expectancy</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./lectures/lecture07.html">
+    <a class="dropdown-item" href="../lectures/lecture07.html">
  <span class="dropdown-text">Lecture 7: Offensive Credit Allocation in Baseball</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./lectures/lecture08.html">
+    <a class="dropdown-item" href="../lectures/lecture08.html">
  <span class="dropdown-text">Lecture 8: Defensive Credit Allocation in Baseball</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./lectures/lecture09.html">
+    <a class="dropdown-item" href="../lectures/lecture09.html">
  <span class="dropdown-text">Lecture 9: Multilevel Modeling</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./lectures/lecture10.html">
+    <a class="dropdown-item" href="../lectures/lecture10.html">
  <span class="dropdown-text">Lecture 10: NFl WAR</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./lectures/lecture11.html">
+    <a class="dropdown-item" href="../lectures/lecture11.html">
  <span class="dropdown-text">Lecture 11: Pitch Framing</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./lectures/lecture12.html">
+    <a class="dropdown-item" href="../lectures/lecture12.html">
  <span class="dropdown-text">Lecture 12: Power Rankings I</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./lectures/lecture13.html">
+    <a class="dropdown-item" href="../lectures/lecture13.html">
  <span class="dropdown-text">Lecture 13: Power Rankings II</span></a>
   </li>  
     </ul>
@@ -200,31 +162,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-lecture-slides">    
         <li>
-    <a class="dropdown-item" href="./slides/lecture01.html">
+    <a class="dropdown-item" href="../slides/lecture01.html">
  <span class="dropdown-text">Lecture 1</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./slides/lecture02.html">
+    <a class="dropdown-item" href="../slides/lecture02.html">
  <span class="dropdown-text">Lecture 2: Expected Goals</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./slides/lecture03.html">
+    <a class="dropdown-item" href="../slides/lecture03.html">
  <span class="dropdown-text">Lecture 3: Estimating XG</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./slides/lecture04.html">
+    <a class="dropdown-item" href="../slides/lecture04.html">
  <span class="dropdown-text">Lecture 4: Adjusted Plus/Minus</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./slides/lecture05.html">
+    <a class="dropdown-item" href="../slides/lecture05.html">
  <span class="dropdown-text">Lecture 5: Regularized Adjusted Plus/Minus</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./slides/lecture06.html">
+    <a class="dropdown-item" href="../slides/lecture06.html">
  <span class="dropdown-text">Lecture 6: Expected Runs</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./slides/lecture08.html">
+    <a class="dropdown-item" href="../slides/lecture08.html">
  <span class="dropdown-text">Lecture 8: Defensive Credit Allocation &amp; WAR</span></a>
   </li>  
     </ul>
@@ -235,35 +197,79 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
       </div> <!-- /container-fluid -->
     </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../slides/lecture06.html">Lecture 6: Expected Runs</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
 </header>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
-<!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#sec-course-logistics" id="toc-sec-course-logistics" class="nav-link active" data-scroll-target="#sec-course-logistics">Course Logistics</a>
-  <ul class="collapse">
-  <li><a href="#sec-course-lectures" id="toc-sec-course-lectures" class="nav-link" data-scroll-target="#sec-course-lectures">Lectures</a></li>
-  <li><a href="#sec-course-staff" id="toc-sec-course-staff" class="nav-link" data-scroll-target="#sec-course-staff">Course Staff &amp; Office Hours</a></li>
-  </ul></li>
-  <li><a href="#sec-R-setup" id="toc-sec-R-setup" class="nav-link" data-scroll-target="#sec-R-setup">System Setup</a>
-  <ul class="collapse">
-  <li><a href="#sec-install-R" id="toc-sec-install-R" class="nav-link" data-scroll-target="#sec-install-R">Installing R &amp; RStudio</a></li>
-  <li><a href="#sec-required-packages" id="toc-sec-required-packages" class="nav-link" data-scroll-target="#sec-required-packages">Required Packages</a></li>
-  </ul></li>
-  </ul>
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../slides/lecture01.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 1</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../slides/lecture02.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 2: Expected Goals</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../slides/lecture03.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 3: Estimating XG</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../slides/lecture04.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 4: Adjusted Plus/Minus</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../slides/lecture05.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 5: Regularized Adjusted Plus/Minus</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../slides/lecture06.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Lecture 6: Expected Runs</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../slides/lecture08.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 8: Defensive Credit Allocation &amp; WAR</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
 </nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">STAT 479 (Fall 2025): Sports Analytics</h1>
+<h1 class="title">Lecture 6: Expected Runs</h1>
 </div>
 
 
@@ -280,101 +286,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>Welcome to STAT 479 (Special Topics in Statistics)! This iteration of the course will focus on sports analytics.</p>
-<p>All course material including lecture slides, code to reproduce the analyses discussed in lecture, and information about the projects will be posted on this website. So, please bookmark this page and check it regularly throughout the course.</p>
-<p>A PDF copy of the course syllabus is available <a href="syllabus/stat479_f25_syllabus.pdf">here</a> and an HTML version of the syllabus is available <a href="./syllabus.html">here</a> Below, you will find <a href="./index.html#sec-course-logistics">more details about course logistics</a> and important <a href="./index.html#sec-R-setup">information about setting up R</a>.</p>
-<section id="sec-course-logistics" class="level2">
-<h2 class="anchored" data-anchor-id="sec-course-logistics">Course Logistics</h2>
-<section id="sec-course-lectures" class="level3">
-<h3 class="anchored" data-anchor-id="sec-course-lectures">Lectures</h3>
-<p>Lectures will be held in-person Tuesdays and Thursdays from 11:00am to 12:15pm in Morgridge Hall 1524. Slides and code for each lecture will be posted on this website. Lectures will not be recorded. You are not permitted to record the lectures either.</p>
-</section>
-<section id="sec-course-staff" class="level3">
-<h3 class="anchored" data-anchor-id="sec-course-staff">Course Staff &amp; Office Hours</h3>
-<p><strong>Instructor</strong>: <a href="https://skdeshpande91.github.io">Sameer Deshpande</a> (sameer.deshpande@wisc.edu). Instructor office hours will take place on:</p>
-<ul>
-<li>Mondays from 11:00am to 12:00pm in Morgridge Hall 5586 (beginning 9/8/25).</li>
-<li>Wednesdays from 3:00pm to 4:00pm in Morgridge Hall 5586 (beginning 9/3/25)</li>
-<li>Fridays from 3:00pm to 4:30pm in Morgridge Hall 5618 (beginning 9/5/25)</li>
-</ul>
-<p>Office hours on Mondays and Wednesdays are designed for one-on-one meetings with the instructor. While the main purpose of Monday and Wednesday office hours is to discuss your specific experience and learning in the course, feel free to stop by to chat about your educational and career goals and/or any personal sports analytic projects you might be pursuing.</p>
-<p>Friday office hours are intended for collaborative and small group work. During Friday office hours, small groups can step through analyses from lecture, work on the exercises, and on their team projects with the instructor and other students. Friday office hours are also a great way to brainstorm project ideas with and to get feedback from other teams.</p>
-<p>If you have specific questions about the course content (e.g., parsing a particular bit of syntax or understanding a step in an analysis), I encourage you to ask the question on Piazza and to attend Friday office hours. If you cannot make the Monday or Wednesday office hours, please email me and suggest some times at which you are free.</p>
-<p><strong>Teaching Assistant</strong>: Zhexuan Liu (zhexuan.liu2@wisc.edu). TA office hours will be held 9:15am - 10:45am on Tuesday and Thursdays in Morgridge Hall 2515. TA office hours will begin on 9/16/25.</p>
-</section>
-</section>
-<section id="sec-R-setup" class="level2">
-<h2 class="anchored" data-anchor-id="sec-R-setup">System Setup</h2>
-<p>As noted in the <a href="./syllabus.html#sec-course-requisites">syllabus</a>, this course will make <em>extensive</em> use of R. Even if you have prior experience, I <strong>strongly</strong> recommend installing the latest version of both R and RStudio at the beginning of the course. As of the time of this writing, that is R version 4.5.1 and RStudio version 2025.05.</p>
-<section id="sec-install-R" class="level3">
-<h3 class="anchored" data-anchor-id="sec-install-R">Installing R &amp; RStudio</h3>
-<p>You can download a version of R specific to your operating system from <a href="https://cloud.r-project.org">this website</a>. After installing R, you should download and re-install RStudio from <a href="https://posit.co/download/rstudio-desktop/">this website</a>.</p>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Tip
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Whenever you update your version of R, you need to re-install the packages; this is a perennial source of <a href="https://bsky.app/profile/benbushong.com/post/3lbqnkbazgh2e">frustration</a> for many R users and <a href="https://bsky.app/profile/hadley.nz/post/3lnlrbqv7qs2i">some good-natured humor</a> from others<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
-</div>
-</div>
-</section>
-<section id="sec-required-packages" class="level3">
-<h3 class="anchored" data-anchor-id="sec-required-packages">Required Packages</h3>
-<p>Throughout the course, we will make extensive use of several <strong>tidyverse</strong> packages, primarily for data loading, pre-processing, and manipulation. We will also make extensive use of the packages <strong>glmnet</strong>, <strong>lme4</strong>, <strong>mgcv</strong>, and <strong>ranger</strong> for model fitting. As the course progresses, we will introduce and install new package as required. For the most part, these packages will be specific to a particular sport. Every package that we will use in this class is available through either (i) the Comprehensive R Archive Network (CRAN) or (ii) a public GitHub repository maintained by the packager developer. We typically install CRAN packages using the <code>install.packages()</code> command. To install packages hosted on GitHub, we will use the <a href="https://devtools.r-lib.org/reference/remote-reexports.html"><code>install_github()</code></a> function in the <a href="https://devtools.r-lib.org/index.html"><strong>devtools</strong></a> package, which is itself available on CRAN.</p>
-<p>For visualizations, we will try to use colorblind-friendly palettes<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> as much as possible. The package <a href="https://cran.r-project.org/web/packages/colorBlindness/vignettes/colorBlindness.html"><strong>colorBlindness</strong></a> contains several palettes for diverging and qualitative data. We will use the <code>Blue2DarkRed18Steps</code> palette from <strong>colorBlindness</strong> for making heatmaps (e.g., <a href="./lectures/lecture08.html#fig-out-gam">this one</a>)</p>
-<p>Prior to <a href="./lectures/lecture02.html">Lecture 2</a>, please make sure you install the required packages.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="fu">c</span>(<span class="st">"devtools"</span>, <span class="st">"tidyverse"</span>, <span class="st">"glmnet"</span>, <span class="st">"lme4"</span>, <span class="st">"mgcv"</span>, <span class="st">"ranger"</span>, <span class="st">"colorBlindness"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>I am also personally partial to the palette developed by <a href="https://jfly.uni-koeln.de/color/">Okabe &amp; Ito</a>, which is available using the <code>palette.colors()</code> function. We will often use this palette to annotate scatter plots (e.g., <a href="./lectures/lecture09.html#fig-full-alphas">this one in Lecture 9</a>). <a href="#fig-oi-colors" class="quarto-xref">Figure&nbsp;1</a> shows the 9 colors contained in the Okabe-Ito palette.</p>
-<div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="annotated-cell-2"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-2-1"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a>oi_colors <span class="ot">&lt;-</span> </span>
-<span id="annotated-cell-2-2"><a href="#annotated-cell-2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">palette.colors</span>(<span class="at">palette =</span> <span class="st">"Okabe-Ito"</span>)</span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1">1</button><span id="annotated-cell-2-3" class="code-annotation-target"><a href="#annotated-cell-2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>), <span class="at">mgp =</span> <span class="fu">c</span>(<span class="fl">1.8</span>, <span class="fl">0.5</span>, <span class="dv">0</span>))</span>
-<button class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="2">2</button><span id="annotated-cell-2-4" class="code-annotation-target"><a href="#annotated-cell-2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>, <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">cex =</span> <span class="dv">4</span>, <span class="at">col =</span> oi_colors)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-annotation">
-<dl class="code-annotation-container-hidden code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
-<dd>
-<span data-code-cell="annotated-cell-2" data-code-lines="3" data-code-annotation="1">The <code>mar</code> argument reserves 3 margin lines for the bottom and left sides of the plot, 2 for the top, and 1 for the right. The <code>mgp</code> argument specifies how the axis title, label, and lines are placed.</span>
-</dd>
-<dt data-target-cell="annotated-cell-2" data-target-annotation="2">2</dt>
-<dd>
-<span data-code-cell="annotated-cell-2" data-code-lines="4" data-code-annotation="2">Plots large, filled circles with the palette colors</span>
-</dd>
-</dl>
-</div>
-<div class="cell-output-display">
-<div id="fig-oi-colors" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-oi-colors-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="index_files/figure-html/fig-oi-colors-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: The 9 colors in the Okabe-Ito colorblind-friendly palette."><img src="index_files/figure-html/fig-oi-colors-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="480"></a>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-oi-colors-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: The 9 colors in the Okabe-Ito colorblind-friendly palette.
-</figcaption>
-</figure>
-</div>
-</div>
+<p>You can view the presentation in a full screen window <a href="raw_slides/slides_06.html" target="_blank">here</a>. Code for the lecture is available at <a href="../lectures/lecture06.html">this link</a></p>
+<div>
+<iframe class="slide-deck" src="raw_slides/slides_06.html" height="420" width="747" style="border: 1px solid #123233;"></iframe>
 </div>
 
 
-</section>
-</section>
 
-
-<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
-
-<ol>
-<li id="fn1"><p>Even Hadley Wickham, who leads the tidyverse team at Posit, <a href="https://bsky.app/profile/hadley.nz/post/3lnmafh3ljs2y">manually re-installs</a> packages after every update<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>See <a href="https://sronpersonalpages.nl/~pault/">these notes by Paul Tol</a> for a lot of useful information about colorblindness and how different palettes are perceived by different people.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-</ol>
-</section></div></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
@@ -814,38 +733,6 @@ Figure&nbsp;1: The 9 colors in the Okabe-Ito colorblind-friendly palette.
   });
   </script>
 </div> <!-- /content -->
-<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
-(function() {
-  let previousOnload = window.onload;
-  window.onload = () => {
-    if (previousOnload) {
-      previousOnload();
-    }
-    lightboxQuarto.on('slide_before_load', (data) => {
-      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
-      const href = trigger.getAttribute('href');
-      if (href !== null) {
-        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
-        if (imgEl !== null) {
-          const srcAttr = imgEl.getAttribute("src");
-          if (srcAttr && srcAttr.startsWith("data:")) {
-            slideConfig.href = srcAttr;
-          }
-        }
-      } 
-    });
-  
-    lightboxQuarto.on('slide_after_load', (data) => {
-      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
-      if (window.Quarto?.typesetMath) {
-        window.Quarto.typesetMath(slideNode);
-      }
-    });
-  
-  };
-  
-})();
-          </script>
 
 
 

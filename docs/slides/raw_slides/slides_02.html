@@ -1,214 +1,352 @@
 <!DOCTYPE html>
-<html lang="en"><head>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.31">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>STAT 479 Lecture 2 – STAT479</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../../site_libs/quarto-html/tabby.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-4bfb630b09c0e164834af1bb3207dbff.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
 <link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
-<link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.7.32">
+<link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
 
-  <title>STAT479 – STAT 479 Lecture 2</title>
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
-  <link rel="stylesheet" href="../../site_libs/revealjs/dist/reset.css">
-  <link rel="stylesheet" href="../../site_libs/revealjs/dist/reveal.css">
-  <style>
-    code{white-space: pre-wrap;}
-    span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
-    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    ul.task-list{list-style: none;}
-    ul.task-list li input[type="checkbox"] {
-      width: 0.8em;
-      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
-      vertical-align: middle;
-    }
-    /* CSS for syntax highlighting */
-    html { -webkit-text-size-adjust: 100%; }
-    pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-    pre > code.sourceCode > span:empty { height: 1.2em; }
-    .sourceCode { overflow: visible; }
-    code.sourceCode > span { color: inherit; text-decoration: inherit; }
-    div.sourceCode { margin: 1em 0; }
-    pre.sourceCode { margin: 0; }
-    @media screen {
-    div.sourceCode { overflow: auto; }
-    }
-    @media print {
-    pre > code.sourceCode { white-space: pre-wrap; }
-    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-    }
-    pre.numberSource code
-      { counter-reset: source-line 0; }
-    pre.numberSource code > span
-      { position: relative; left: -4em; counter-increment: source-line; }
-    pre.numberSource code > span > a:first-child::before
-      { content: counter(source-line);
-        position: relative; left: -1em; text-align: right; vertical-align: baseline;
-        border: none; display: inline-block;
-        -webkit-touch-callout: none; -webkit-user-select: none;
-        -khtml-user-select: none; -moz-user-select: none;
-        -ms-user-select: none; user-select: none;
-        padding: 0 4px; width: 4em;
-        color: #aaaaaa;
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
       }
-    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-    div.sourceCode
-      { color: #003b4f; background-color: #f1f3f5; }
-    @media screen {
-    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
     }
-    code span { color: #003b4f; } /* Normal */
-    code span.al { color: #ad0000; } /* Alert */
-    code span.an { color: #5e5e5e; } /* Annotation */
-    code span.at { color: #657422; } /* Attribute */
-    code span.bn { color: #ad0000; } /* BaseN */
-    code span.bu { } /* BuiltIn */
-    code span.cf { color: #003b4f; font-weight: bold; } /* ControlFlow */
-    code span.ch { color: #20794d; } /* Char */
-    code span.cn { color: #8f5902; } /* Constant */
-    code span.co { color: #5e5e5e; } /* Comment */
-    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
-    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
-    code span.dt { color: #ad0000; } /* DataType */
-    code span.dv { color: #ad0000; } /* DecVal */
-    code span.er { color: #ad0000; } /* Error */
-    code span.ex { } /* Extension */
-    code span.fl { color: #ad0000; } /* Float */
-    code span.fu { color: #4758ab; } /* Function */
-    code span.im { color: #00769e; } /* Import */
-    code span.in { color: #5e5e5e; } /* Information */
-    code span.kw { color: #003b4f; font-weight: bold; } /* Keyword */
-    code span.op { color: #5e5e5e; } /* Operator */
-    code span.ot { color: #003b4f; } /* Other */
-    code span.pp { color: #ad0000; } /* Preprocessor */
-    code span.sc { color: #5e5e5e; } /* SpecialChar */
-    code span.ss { color: #20794d; } /* SpecialString */
-    code span.st { color: #20794d; } /* String */
-    code span.va { color: #111111; } /* Variable */
-    code span.vs { color: #20794d; } /* VerbatimString */
-    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
-  </style>
-  <link rel="stylesheet" href="../../site_libs/revealjs/dist/theme/quarto-9a1a2c3d5c7ea7f04258c8f180195b78.css">
-  <link href="../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
-  <link href="../../site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
-  <link href="../../site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
-  <link href="../../site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
-  <style type="text/css">
-    .reveal div.sourceCode {
-      margin: 0;
-      overflow: auto;
-    }
-    .reveal div.hanging-indent {
-      margin-left: 1em;
-      text-indent: -1em;
-    }
-    .reveal .slide:not(.center) {
-      height: 100%;
-    }
-    .reveal .slide.scrollable {
-      overflow-y: auto;
-    }
-    .reveal .footnotes {
-      height: 100%;
-      overflow-y: auto;
-    }
-    .reveal .slide .absolute {
-      position: absolute;
-      display: block;
-    }
-    .reveal .footnotes ol {
-      counter-reset: ol;
-      list-style-type: none; 
-      margin-left: 0;
-    }
-    .reveal .footnotes ol li:before {
-      counter-increment: ol;
-      content: counter(ol) ". "; 
-    }
-    .reveal .footnotes ol li > p:first-child {
-      display: inline-block;
-    }
-    .reveal .slide ul,
-    .reveal .slide ol {
-      margin-bottom: 0.5em;
-    }
-    .reveal .slide ul li,
-    .reveal .slide ol li {
-      margin-top: 0.4em;
-      margin-bottom: 0.2em;
-    }
-    .reveal .slide ul[role="tablist"] li {
-      margin-bottom: 0;
-    }
-    .reveal .slide ul li > *:first-child,
-    .reveal .slide ol li > *:first-child {
-      margin-block-start: 0;
-    }
-    .reveal .slide ul li > *:last-child,
-    .reveal .slide ol li > *:last-child {
-      margin-block-end: 0;
-    }
-    .reveal .slide .columns:nth-child(3) {
-      margin-block-start: 0.8em;
-    }
-    .reveal blockquote {
-      box-shadow: none;
-    }
-    .reveal .tippy-content>* {
-      margin-top: 0.2em;
-      margin-bottom: 0.7em;
-    }
-    .reveal .tippy-content>*:last-child {
-      margin-bottom: 0.2em;
-    }
-    .reveal .slide > img.stretch.quarto-figure-center,
-    .reveal .slide > img.r-stretch.quarto-figure-center {
-      display: block;
-      margin-left: auto;
-      margin-right: auto; 
-    }
-    .reveal .slide > img.stretch.quarto-figure-left,
-    .reveal .slide > img.r-stretch.quarto-figure-left  {
-      display: block;
-      margin-left: 0;
-      margin-right: auto; 
-    }
-    .reveal .slide > img.stretch.quarto-figure-right,
-    .reveal .slide > img.r-stretch.quarto-figure-right  {
-      display: block;
-      margin-left: auto;
-      margin-right: 0; 
-    }
-  </style>
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
 </head>
-<body class="quarto-light">
-  <div class="reveal">
-    <div class="slides">
 
-<section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">STAT 479 Lecture 2</h1>
-  <p class="subtitle">Expected Goals</p>
+<body class="nav-fixed quarto-light">
 
-<div class="quarto-title-authors">
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">STAT479</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../syllabus.html"> 
+<span class="menu-text">Syllabus</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-lecture-code" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Lecture Code</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-lecture-code">    
+        <li>
+    <a class="dropdown-item" href="../../lectures/lecture00.html">
+ <span class="dropdown-text">Lecture 0: Boxscore Metrics</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lectures/lecture02.html">
+ <span class="dropdown-text">Lecture 2: Expected Goals</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lectures/lecture03.html">
+ <span class="dropdown-text">Lecture 3: Estimating XG</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lectures/lecture04.html">
+ <span class="dropdown-text">Lecture 4: Adjusted Plus/Minus</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lectures/lecture05.html">
+ <span class="dropdown-text">Lecture 5: Regularized Adjusted Plus/Minus</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lectures/lecture06.html">
+ <span class="dropdown-text">Lecture 6: Run Expectancy</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lectures/lecture07.html">
+ <span class="dropdown-text">Lecture 7: Offensive Credit Allocation in Baseball</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lectures/lecture08.html">
+ <span class="dropdown-text">Lecture 8: Defensive Credit Allocation in Baseball</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lectures/lecture09.html">
+ <span class="dropdown-text">Lecture 9: Multilevel Modeling</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lectures/lecture10.html">
+ <span class="dropdown-text">Lecture 10: NFl WAR</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lectures/lecture11.html">
+ <span class="dropdown-text">Lecture 11: Pitch Framing</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lectures/lecture12.html">
+ <span class="dropdown-text">Lecture 12: Power Rankings I</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../lectures/lecture13.html">
+ <span class="dropdown-text">Lecture 13: Power Rankings II</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-lecture-slides" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Lecture Slides</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-lecture-slides">    
+        <li>
+    <a class="dropdown-item" href="../../slides/lecture01.html">
+ <span class="dropdown-text">Lecture 1</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../slides/lecture02.html">
+ <span class="dropdown-text">Lecture 2: Expected Goals</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../slides/lecture03.html">
+ <span class="dropdown-text">Lecture 3: Estimating XG</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../slides/lecture04.html">
+ <span class="dropdown-text">Lecture 4: Adjusted Plus/Minus</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../slides/lecture05.html">
+ <span class="dropdown-text">Lecture 5: Regularized Adjusted Plus/Minus</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../slides/lecture06.html">
+ <span class="dropdown-text">Lecture 6: Expected Runs</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../slides/lecture08.html">
+ <span class="dropdown-text">Lecture 8: Defensive Credit Allocation &amp; WAR</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#motivation-outline" id="toc-motivation-outline" class="nav-link active" data-scroll-target="#motivation-outline">Motivation &amp; Outline</a>
+  <ul class="collapse">
+  <li><a href="#motivation-beth-mead-in-euro-2022" id="toc-motivation-beth-mead-in-euro-2022" class="nav-link" data-scroll-target="#motivation-beth-mead-in-euro-2022">Motivation: Beth Mead in EURO 2022</a></li>
+  <li><a href="#a-thought-experiment" id="toc-a-thought-experiment" class="nav-link" data-scroll-target="#a-thought-experiment">A Thought Experiment</a></li>
+  </ul></li>
+  <li><a href="#soccer-event-data" id="toc-soccer-event-data" class="nav-link" data-scroll-target="#soccer-event-data">Soccer Event Data</a>
+  <ul class="collapse">
+  <li><a href="#statsbomb-hudl" id="toc-statsbomb-hudl" class="nav-link" data-scroll-target="#statsbomb-hudl">StatsBomb &amp; Hudl</a></li>
+  <li><a href="#statsbomb-coordinates" id="toc-statsbomb-coordinates" class="nav-link" data-scroll-target="#statsbomb-coordinates">StatsBomb Coordinates</a></li>
+  <li><a href="#free-competitions" id="toc-free-competitions" class="nav-link" data-scroll-target="#free-competitions">Free Competitions</a></li>
+  <li><a href="#free-matches" id="toc-free-matches" class="nav-link" data-scroll-target="#free-matches">Free Matches</a></li>
+  <li><a href="#event-data" id="toc-event-data" class="nav-link" data-scroll-target="#event-data">Event Data</a></li>
+  <li><a href="#meads-shots" id="toc-meads-shots" class="nav-link" data-scroll-target="#meads-shots">Mead’s Shots</a></li>
+  </ul></li>
+  <li><a href="#conditional-expectations" id="toc-conditional-expectations" class="nav-link" data-scroll-target="#conditional-expectations">Conditional Expectations</a>
+  <ul class="collapse">
+  <li><a href="#thought-experiment-repeating-shots" id="toc-thought-experiment-repeating-shots" class="nav-link" data-scroll-target="#thought-experiment-repeating-shots">Thought Experiment: Repeating Shots</a></li>
+  <li><a href="#setup-notation" id="toc-setup-notation" class="nav-link" data-scroll-target="#setup-notation">Setup &amp; Notation</a></li>
+  <li><a href="#conditional-probability" id="toc-conditional-probability" class="nav-link" data-scroll-target="#conditional-probability">Conditional Probability</a></li>
+  </ul></li>
+  <li><a href="#two-basic-xg-models" id="toc-two-basic-xg-models" class="nav-link" data-scroll-target="#two-basic-xg-models">Two Basic XG Models</a>
+  <ul class="collapse">
+  <li><a href="#defining-the-super-population" id="toc-defining-the-super-population" class="nav-link" data-scroll-target="#defining-the-super-population">Defining The Super-population</a></li>
+  <li><a href="#idealized-calculation" id="toc-idealized-calculation" class="nav-link" data-scroll-target="#idealized-calculation">Idealized Calculation</a></li>
+  <li><a href="#practical-calculation" id="toc-practical-calculation" class="nav-link" data-scroll-target="#practical-calculation">Practical Calculation</a></li>
+  <li><a href="#estimating-xgbody-part" id="toc-estimating-xgbody-part" class="nav-link" data-scroll-target="#estimating-xgbody-part">Estimating XG(body part)</a></li>
+  <li><a href="#assessing-beth-meads-performance" id="toc-assessing-beth-meads-performance" class="nav-link" data-scroll-target="#assessing-beth-meads-performance">Assessing Beth Mead’s Performance</a></li>
+  <li><a href="#accounting-for-shot-technique" id="toc-accounting-for-shot-technique" class="nav-link" data-scroll-target="#accounting-for-shot-technique">Accounting For Shot Technique</a></li>
+  <li><a href="#new-xg-estimates" id="toc-new-xg-estimates" class="nav-link" data-scroll-target="#new-xg-estimates">New XG Estimates</a></li>
+  <li><a href="#accounting-for-more-features" id="toc-accounting-for-more-features" class="nav-link" data-scroll-target="#accounting-for-more-features">Accounting for more features</a></li>
+  <li><a href="#digression-what-is-the-cone" id="toc-digression-what-is-the-cone" class="nav-link" data-scroll-target="#digression-what-is-the-cone">Digression: What is the cone?</a></li>
+  <li><a href="#idealized-computation" id="toc-idealized-computation" class="nav-link" data-scroll-target="#idealized-computation">Idealized Computation</a></li>
+  <li><a href="#practical-challenges" id="toc-practical-challenges" class="nav-link" data-scroll-target="#practical-challenges">Practical Challenges</a></li>
+  <li><a href="#model-based-xg" id="toc-model-based-xg" class="nav-link" data-scroll-target="#model-based-xg">Model-based XG</a></li>
+  <li><a href="#statsbombs-xg-estimates" id="toc-statsbombs-xg-estimates" class="nav-link" data-scroll-target="#statsbombs-xg-estimates">StatsBomb’s XG Estimates</a></li>
+  </ul></li>
+  <li><a href="#goals-over-expected" id="toc-goals-over-expected" class="nav-link" data-scroll-target="#goals-over-expected">Goals Over Expected</a>
+  <ul class="collapse">
+  <li><a href="#did-mead-outperform-expectations" id="toc-did-mead-outperform-expectations" class="nav-link" data-scroll-target="#did-mead-outperform-expectations">Did Mead Outperform Expectations?</a></li>
+  <li><a href="#assessing-all-euro2022-players" id="toc-assessing-all-euro2022-players" class="nav-link" data-scroll-target="#assessing-all-euro2022-players">Assessing All EURO2022 Players</a></li>
+  <li><a href="#looking-ahead" id="toc-looking-ahead" class="nav-link" data-scroll-target="#looking-ahead">Looking Ahead</a></li>
+  <li><a href="#project-groups" id="toc-project-groups" class="nav-link" data-scroll-target="#project-groups">Project Groups</a></li>
+  </ul></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="slides_02.html"><i class="bi bi-file-slides"></i>RevealJS</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">STAT 479 Lecture 2</h1>
+<p class="subtitle lead">Expected Goals</p>
 </div>
 
-</section>
-<section>
-<section id="motivation-outline" class="title-slide slide level1 center">
-<h1>Motivation &amp; Outline</h1>
 
-</section>
-<section id="motivation-beth-mead-in-euro-2022" class="slide level2 smaller">
-<h2>Motivation: Beth Mead in EURO 2022</h2>
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="motivation-outline" class="level1">
+<h1>Motivation &amp; Outline</h1>
+<section id="motivation-beth-mead-in-euro-2022" class="level2 smaller">
+<h2 class="smaller anchored" data-anchor-id="motivation-beth-mead-in-euro-2022">Motivation: Beth Mead in EURO 2022</h2>
 <ul>
 <li>Beth Mead scored 6 goals in EURO 2022. Which was more impressive?
 <ul>
@@ -217,7 +355,7 @@
 <li>Goal in 33rd minute against Sweden <a href="https://youtube.com/clip/UgkxwW9N1bXUv4G9HoSHVvYy_rk_aSjkrgwO?si=O90nkbgNd2FTv3e_">link</a></li>
 </ul></li>
 </ul>
-<div class="fragment">
+<p>. . .</p>
 <ul>
 <li>We can argue endlessly about <em>qualitative</em> differences
 <ul>
@@ -225,35 +363,31 @@
 <li>Type of shot; time; score; …</li>
 </ul></li>
 </ul>
-</div>
-<div class="fragment">
+<p>. . .</p>
 <ul>
 <li>Goal: <strong>quantitative</strong> comparison</li>
 </ul>
-</div>
 </section>
-<section id="a-thought-experiment" class="slide level2">
-<h2>A Thought Experiment</h2>
+<section id="a-thought-experiment" class="level2">
+<h2 class="anchored" data-anchor-id="a-thought-experiment">A Thought Experiment</h2>
 <ul>
 <li>What if we could replay each shot over and over again?</li>
 <li>How often would she score?</li>
 </ul>
 <div class="quarto-figure quarto-figure-center">
-<figure>
-<p><a href="mead_sweden.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img data-src="mead_sweden.png" class="quarto-figure quarto-figure-center" style="width:60.0%"></a></p>
+<figure class="figure">
+<p><a href="mead_sweden.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="mead_sweden.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%"></a></p>
 </figure>
 </div>
 <ul>
 <li>This long-run frequency is Expected Goals (XG)</li>
 </ul>
-</section></section>
-<section>
-<section id="soccer-event-data" class="title-slide slide level1 center">
-<h1>Soccer Event Data</h1>
-
 </section>
-<section id="statsbomb-hudl" class="slide level2">
-<h2>StatsBomb &amp; Hudl</h2>
+</section>
+<section id="soccer-event-data" class="level1">
+<h1>Soccer Event Data</h1>
+<section id="statsbomb-hudl" class="level2">
+<h2 class="anchored" data-anchor-id="statsbomb-hudl">StatsBomb &amp; Hudl</h2>
 <ul>
 <li>Player location data for all events
 <ul>
@@ -265,24 +399,24 @@
 <li><strong>StatsBombR</strong> package: available via GitHub</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"statsbomb/StatsBombR"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"statsbomb/StatsBombR"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="statsbomb-coordinates" class="slide level2">
-<h2>StatsBomb Coordinates</h2>
+<section id="statsbomb-coordinates" class="level2">
+<h2 class="anchored" data-anchor-id="statsbomb-coordinates">StatsBomb Coordinates</h2>
 <ul>
 <li>Offensive action moves left-to-right</li>
 <li>Vertical coordinate increases as you move top-to-bottom</li>
 </ul>
 <div class="quarto-figure quarto-figure-center">
-<figure>
-<p><a href="statsbomb_coordinates.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="StatsBomb Coordinates"><img data-src="statsbomb_coordinates.png" style="width:60.0%" data-fig-asp="0.75," alt="StatsBomb Coordinates"></a></p>
+<figure class="figure">
+<p><a href="statsbomb_coordinates.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="StatsBomb Coordinates"><img src="statsbomb_coordinates.png" class="img-fluid figure-img" style="width:60.0%" data-fig-asp="0.75," alt="StatsBomb Coordinates"></a></p>
 <figcaption>StatsBomb Coordinates</figcaption>
 </figure>
 </div>
 </section>
-<section id="free-competitions" class="slide level2">
-<h2>Free Competitions</h2>
+<section id="free-competitions" class="level2">
+<h2 class="anchored" data-anchor-id="free-competitions">Free Competitions</h2>
 <ul>
 <li><code>FreeCompetitions()</code> returns table of available competitions</li>
 </ul>
@@ -305,16 +439,16 @@
 </div>
 </div>
 </section>
-<section id="free-matches" class="slide level2">
-<h2>Free Matches</h2>
+<section id="free-matches" class="level2">
+<h2 class="anchored" data-anchor-id="free-matches">Free Matches</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4" data-code-line-numbers="|1|2|3|5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a></a>StatsBombR<span class="sc">::</span><span class="fu">FreeCompetitions</span>() <span class="sc">|&gt;</span></span>
-<span id="cb4-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(competition_id <span class="sc">==</span> <span class="dv">53</span> <span class="sc">&amp;</span> season_id <span class="sc">==</span> <span class="dv">106</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb4-3"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeMatches</span>() <span class="sc">|&gt;</span></span>
-<span id="cb4-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(home_team.home_team_name, away_team.away_team_name, home_score, away_score) <span class="sc">|&gt;</span></span>
-<span id="cb4-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>StatsBombR<span class="sc">::</span><span class="fu">FreeCompetitions</span>() <span class="sc">|&gt;</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(competition_id <span class="sc">==</span> <span class="dv">53</span> <span class="sc">&amp;</span> season_id <span class="sc">==</span> <span class="dv">106</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb4-3"><a href="#cb4-3"></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeMatches</span>() <span class="sc">|&gt;</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(home_team.home_team_name, away_team.away_team_name, home_score, away_score) <span class="sc">|&gt;</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a>  dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="fragment">
+<p>. . .</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 × 4
@@ -327,31 +461,30 @@
 5 Austria Women's          Norway Women's                    1          0</code></pre>
 </div>
 </div>
-</div>
 </section>
-<section id="event-data" class="slide level2 scrollable">
-<h2>Event Data</h2>
-<div class="panel-tabset">
-<ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-1-1">Get EURO2022 Events</a></li><li><a href="#tabset-1-2">Extract All Shots</a></li></ul>
+<section id="event-data" class="level2 scrollable">
+<h2 class="scrollable anchored" data-anchor-id="event-data">Event Data</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">Get EURO2022 Events</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">Extract All Shots</a></li></ul>
 <div class="tab-content">
-<div id="tabset-1-1">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a>euro2022_events <span class="ot">&lt;-</span></span>
-<span id="cb6-2"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeCompetitions</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb6-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(competition_id <span class="sc">==</span> <span class="dv">53</span> <span class="sc">&amp;</span> season_id <span class="sc">==</span> <span class="dv">106</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb6-4"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeMatches</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb6-5"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">free_allevents</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb6-6"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">allclean</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb6-7"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">get.opposingteam</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>euro2022_events <span class="ot">&lt;-</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeCompetitions</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(competition_id <span class="sc">==</span> <span class="dv">53</span> <span class="sc">&amp;</span> season_id <span class="sc">==</span> <span class="dv">106</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeMatches</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">free_allevents</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">allclean</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">get.opposingteam</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<div id="tabset-1-2">
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
 <div class="fragment">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a>euro2022_shots <span class="ot">&lt;-</span></span>
-<span id="cb7-2"><a></a>  euro2022_events <span class="sc">|&gt;</span></span>
-<span id="cb7-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(type.name <span class="sc">==</span> <span class="st">"Shot"</span> <span class="sc">&amp;</span> shot.body_part.name <span class="sc">!=</span> <span class="st">"Other"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb7-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">Y =</span> <span class="fu">ifelse</span>(shot.outcome.name <span class="sc">==</span> <span class="st">"Goal"</span>, <span class="dv">1</span>, <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>euro2022_shots <span class="ot">&lt;-</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  euro2022_events <span class="sc">|&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(type.name <span class="sc">==</span> <span class="st">"Shot"</span> <span class="sc">&amp;</span> shot.body_part.name <span class="sc">!=</span> <span class="st">"Other"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">Y =</span> <span class="fu">ifelse</span>(shot.outcome.name <span class="sc">==</span> <span class="st">"Goal"</span>, <span class="dv">1</span>, <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div class="fragment">
@@ -368,15 +501,15 @@
 </div>
 </div>
 </section>
-<section id="meads-shots" class="slide level2">
-<h2>Mead’s Shots</h2>
+<section id="meads-shots" class="level2">
+<h2 class="anchored" data-anchor-id="meads-shots">Mead’s Shots</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a>mead_shots <span class="ot">&lt;-</span></span>
-<span id="cb9-2"><a></a>  euro2022_shots <span class="sc">|&gt;</span></span>
-<span id="cb9-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(player.name <span class="sc">==</span> <span class="st">"Bethany Mead"</span>)</span>
-<span id="cb9-4"><a></a></span>
-<span id="cb9-5"><a></a>mead_shots <span class="sc">|&gt;</span></span>
-<span id="cb9-6"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(OpposingTeam, minute, shot.body_part.name, shot.technique.name, Y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>mead_shots <span class="ot">&lt;-</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  euro2022_shots <span class="sc">|&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(player.name <span class="sc">==</span> <span class="st">"Bethany Mead"</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>mead_shots <span class="sc">|&gt;</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(OpposingTeam, minute, shot.body_part.name, shot.technique.name, Y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 15 × 5
    OpposingTeam     minute shot.body_part.name shot.technique.name     Y
@@ -398,26 +531,24 @@
 15 Sweden Women's       46 Left Foot           Normal                  0</code></pre>
 </div>
 </div>
-</section></section>
-<section>
-<section id="conditional-expectations" class="title-slide slide level1 center">
-<h1>Conditional Expectations</h1>
-
 </section>
-<section id="thought-experiment-repeating-shots" class="slide level2">
-<h2>Thought Experiment: Repeating Shots</h2>
+</section>
+<section id="conditional-expectations" class="level1">
+<h1>Conditional Expectations</h1>
+<section id="thought-experiment-repeating-shots" class="level2">
+<h2 class="anchored" data-anchor-id="thought-experiment-repeating-shots">Thought Experiment: Repeating Shots</h2>
 <ul>
 <li>What proportion of repetitions result in goals?</li>
 <li>Across all repetitions, conditions kept the same</li>
 </ul>
 <div class="quarto-figure quarto-figure-center">
-<figure>
-<p><a href="mead_sweden.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img data-src="mead_sweden.png" class="quarto-figure quarto-figure-center" style="width:60.0%"></a></p>
+<figure class="figure">
+<p><a href="mead_sweden.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="mead_sweden.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%"></a></p>
 </figure>
 </div>
 </section>
-<section id="setup-notation" class="slide level2">
-<h2>Setup &amp; Notation</h2>
+<section id="setup-notation" class="level2">
+<h2 class="anchored" data-anchor-id="setup-notation">Setup &amp; Notation</h2>
 <ul>
 <li>Suppose our data set contains <span class="math inline">\(n\)</span> shots</li>
 <li>For shot <span class="math inline">\(i = 1, \ldots, n,\)</span> we observe
@@ -432,26 +563,23 @@
 </ul></li>
 </ul>
 </section>
-<section id="conditional-probability" class="slide level2">
-<h2>Conditional Probability</h2>
+<section id="conditional-probability" class="level2">
+<h2 class="anchored" data-anchor-id="conditional-probability">Conditional Probability</h2>
 <ul>
 <li>Assumption: data are a representative sample from an infinite <em>super-population</em> of shots</li>
 <li>Each shot in super-population characterized by pair <span class="math inline">\((\boldsymbol{\mathbf{X}}, Y)\)</span></li>
 <li>Repeating shot with features <span class="math inline">\(\boldsymbol{\mathbf{x}}\)</span> equivalent to sampling from <em>slice</em> of super-population with <span class="math inline">\(\boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}.\)</span></li>
 </ul>
-<div class="fragment">
+<p>. . .</p>
 <p><span class="math display">\[
 \textrm{XG}(\boldsymbol{\mathbf{x}}) = \mathbb{E}[Y \vert \boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}] = \mathbb{P}(Y = 1 \vert \boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}})
 \]</span></p>
-</div>
-</section></section>
-<section>
-<section id="two-basic-xg-models" class="title-slide slide level1 center">
-<h1>Two Basic XG Models</h1>
-
 </section>
-<section id="defining-the-super-population" class="slide level2">
-<h2>Defining The Super-population</h2>
+</section>
+<section id="two-basic-xg-models" class="level1">
+<h1>Two Basic XG Models</h1>
+<section id="defining-the-super-population" class="level2">
+<h2 class="anchored" data-anchor-id="defining-the-super-population">Defining The Super-population</h2>
 <ul>
 <li>Ultimate goal is to assess Mead’s performance in EURO 2022
 <ul>
@@ -459,33 +587,33 @@
 <li>Focus on shots attempted w/ foot or head</li>
 </ul></li>
 </ul>
-<div class="panel-tabset">
-<ul id="tabset-2" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-2-1">Get Events</a></li><li><a href="#tabset-2-2">Extract Shots</a></li></ul>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">Get Events</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">Extract Shots</a></li></ul>
 <div class="tab-content">
-<div id="tabset-2-1">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a>wi_events <span class="ot">&lt;-</span></span>
-<span id="cb11-2"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeCompetitions</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb11-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(competition_gender <span class="sc">==</span> <span class="st">"female"</span> <span class="sc">&amp;</span> competition_international) <span class="sc">|&gt;</span></span>
-<span id="cb11-4"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeMatches</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb11-5"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">free_allevents</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb11-6"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">allclean</span>() <span class="sc">|&gt;</span></span>
-<span id="cb11-7"><a></a>  StatsBombR<span class="sc">::</span><span class="fu">get.opposingteam</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>wi_events <span class="ot">&lt;-</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeCompetitions</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(competition_gender <span class="sc">==</span> <span class="st">"female"</span> <span class="sc">&amp;</span> competition_international) <span class="sc">|&gt;</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">FreeMatches</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">free_allevents</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">allclean</span>() <span class="sc">|&gt;</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  StatsBombR<span class="sc">::</span><span class="fu">get.opposingteam</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<div id="tabset-2-2">
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a></a>wi_shots <span class="ot">&lt;-</span></span>
-<span id="cb12-2"><a></a>  wi_events <span class="sc">|&gt;</span></span>
-<span id="cb12-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(type.name <span class="sc">==</span> <span class="st">"Shot"</span> <span class="sc">&amp;</span> shot.body_part.name <span class="sc">!=</span> <span class="st">"Other"</span>) <span class="sc">|&gt;</span>  </span>
-<span id="cb12-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">Y =</span> <span class="fu">ifelse</span>(shot.outcome.name <span class="sc">==</span> <span class="st">"Goal"</span>, <span class="dv">1</span>, <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>wi_shots <span class="ot">&lt;-</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  wi_events <span class="sc">|&gt;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(type.name <span class="sc">==</span> <span class="st">"Shot"</span> <span class="sc">&amp;</span> shot.body_part.name <span class="sc">!=</span> <span class="st">"Other"</span>) <span class="sc">|&gt;</span>  </span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">Y =</span> <span class="fu">ifelse</span>(shot.outcome.name <span class="sc">==</span> <span class="st">"Goal"</span>, <span class="dv">1</span>, <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
 </div>
 </section>
-<section id="idealized-calculation" class="slide level2">
-<h2>Idealized Calculation</h2>
+<section id="idealized-calculation" class="level2">
+<h2 class="anchored" data-anchor-id="idealized-calculation">Idealized Calculation</h2>
 <ul>
 <li>Suppose our only feature is <code>shot.body_part.name</code></li>
 </ul>
@@ -504,8 +632,8 @@
 </ul></li>
 </ul>
 </section>
-<section id="practical-calculation" class="slide level2">
-<h2>Practical Calculation</h2>
+<section id="practical-calculation" class="level2">
+<h2 class="anchored" data-anchor-id="practical-calculation">Practical Calculation</h2>
 <ul>
 <li>Since we cannot access infinite super-population, we must <strong>estimate</strong> XG from data</li>
 <li>We do so by mimicking idealized calculation
@@ -516,16 +644,16 @@
 <li>Rely on <strong>dplyr</strong>’s <code>group_by()</code> functionality to do this</li>
 </ul>
 </section>
-<section id="estimating-xgbody-part" class="slide level2">
-<h2>Estimating XG(body part)</h2>
+<section id="estimating-xgbody-part" class="level2">
+<h2 class="anchored" data-anchor-id="estimating-xgbody-part">Estimating XG(body part)</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14" data-code-line-numbers="|3|4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a></a>xg_model1 <span class="ot">&lt;-</span></span>
-<span id="cb14-2"><a></a>  wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb14-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(shot.body_part.name) <span class="sc">|&gt;</span></span>
-<span id="cb14-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">XG1 =</span> <span class="fu">mean</span>(Y), <span class="at">n =</span> dplyr<span class="sc">::</span><span class="fu">n</span>())</span>
-<span id="cb14-5"><a></a>xg_model1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>xg_model1 <span class="ot">&lt;-</span></span>
+<span id="cb14-2"><a href="#cb14-2"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb14-3"><a href="#cb14-3"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(shot.body_part.name) <span class="sc">|&gt;</span></span>
+<span id="cb14-4"><a href="#cb14-4"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">XG1 =</span> <span class="fu">mean</span>(Y), <span class="at">n =</span> dplyr<span class="sc">::</span><span class="fu">n</span>())</span>
+<span id="cb14-5"><a href="#cb14-5"></a>xg_model1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="fragment">
+<p>. . .</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 × 3
@@ -536,21 +664,22 @@
 3 Right Foot          0.111  2560</code></pre>
 </div>
 </div>
-</div>
 </section>
-<section id="assessing-beth-meads-performance" class="slide level2">
-<h2>Assessing Beth Mead’s Performance</h2>
+<section id="assessing-beth-meads-performance" class="level2">
+<h2 class="anchored" data-anchor-id="assessing-beth-meads-performance">Assessing Beth Mead’s Performance</h2>
 <ul>
 <li>Append XG estimates to <code>mead_shots</code> w/ <code>left_join</code></li>
 <li>Based on bodypart, each goal is about equally impressive</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16" data-code-line-numbers="|2|3|4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a></a>mead_shots <span class="ot">&lt;-</span> mead_shots <span class="sc">|&gt;</span></span>
-<span id="cb16-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> xg_model1 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(shot.body_part.name, XG1),</span>
-<span id="cb16-3"><a></a>                   <span class="at">by =</span> <span class="st">"shot.body_part.name"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a>mead_shots <span class="ot">&lt;-</span> mead_shots <span class="sc">|&gt;</span></span>
+<span id="cb16-2"><a href="#cb16-2"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> xg_model1 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(shot.body_part.name, XG1),</span>
+<span id="cb16-3"><a href="#cb16-3"></a>                   <span class="at">by =</span> <span class="st">"shot.body_part.name"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="fragment">
+<p>. . .</p>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>mead_shots <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">4</span>,<span class="dv">14</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(OpposingTeam, minute, shot.body_part.name, Y, XG1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 × 5
   OpposingTeam    minute shot.body_part.name     Y   XG1
@@ -560,17 +689,16 @@
 3 Sweden Women's      33 Right Foot              1 0.111</code></pre>
 </div>
 </div>
-</div>
 </section>
-<section id="accounting-for-shot-technique" class="slide level2">
-<h2>Accounting For Shot Technique</h2>
+<section id="accounting-for-shot-technique" class="level2">
+<h2 class="anchored" data-anchor-id="accounting-for-shot-technique">Accounting For Shot Technique</h2>
 <ul>
 <li>Each goal was scored off a different type of shot</li>
 <li>What if we condition body part &amp; shot technique?</li>
 </ul>
-<div class="fragment">
+<p>. . .</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a><span class="fu">table</span>(wi_shots <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">pull</span>(shot.technique.name))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(wi_shots <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">pull</span>(shot.technique.name))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
      Backheel Diving Header   Half Volley           Lob        Normal 
@@ -579,20 +707,19 @@ Overhead Kick        Volley
            17           302 </code></pre>
 </div>
 </div>
-</div>
 </section>
-<section id="new-xg-estimates" class="slide level2">
-<h2>New XG Estimates</h2>
-<div class="panel-tabset">
-<ul id="tabset-3" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-3-1">XG Estimates</a></li><li><a href="#tabset-3-2">Mead’s Performance</a></li></ul>
+<section id="new-xg-estimates" class="level2">
+<h2 class="anchored" data-anchor-id="new-xg-estimates">New XG Estimates</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true">XG Estimates</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false">Mead’s Performance</a></li></ul>
 <div class="tab-content">
-<div id="tabset-3-1">
+<div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20" data-code-line-numbers="3-4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a>xg_model2 <span class="ot">&lt;-</span></span>
-<span id="cb20-2"><a></a>  wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb20-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(shot.body_part.name, shot.technique.name) <span class="sc">|&gt;</span></span>
-<span id="cb20-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">XG2 =</span> <span class="fu">mean</span>(Y), <span class="at">n =</span> dplyr<span class="sc">::</span><span class="fu">n</span>(), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
-<span id="cb20-5"><a></a>xg_model2 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(XG2))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a>xg_model2 <span class="ot">&lt;-</span></span>
+<span id="cb21-2"><a href="#cb21-2"></a>  wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb21-3"><a href="#cb21-3"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(shot.body_part.name, shot.technique.name) <span class="sc">|&gt;</span></span>
+<span id="cb21-4"><a href="#cb21-4"></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">XG2 =</span> <span class="fu">mean</span>(Y), <span class="at">n =</span> dplyr<span class="sc">::</span><span class="fu">n</span>(), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb21-5"><a href="#cb21-5"></a>xg_model2 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(XG2))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 14 × 4
    shot.body_part.name shot.technique.name    XG2     n
@@ -614,17 +741,17 @@ Overhead Kick        Volley
 </div>
 </div>
 </div>
-<div id="tabset-3-2">
+<div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a></a>mead_shots <span class="ot">&lt;-</span></span>
-<span id="cb22-2"><a></a>  mead_shots <span class="sc">|&gt;</span></span>
-<span id="cb22-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(</span>
-<span id="cb22-4"><a></a>    <span class="at">y =</span> xg_model2 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>n), </span>
-<span id="cb22-5"><a></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>, <span class="st">"shot.technique.name"</span>))</span>
-<span id="cb22-6"><a></a></span>
-<span id="cb22-7"><a></a>mead_shots <span class="sc">|&gt;</span></span>
-<span id="cb22-8"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(OpposingTeam, minute, shot.body_part.name, shot.technique.name, Y, XG2) <span class="sc">|&gt;</span></span>
-<span id="cb22-9"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">14</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>mead_shots <span class="ot">&lt;-</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  mead_shots <span class="sc">|&gt;</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> xg_model2 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>n), </span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"shot.body_part.name"</span>, <span class="st">"shot.technique.name"</span>))</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>mead_shots <span class="sc">|&gt;</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(OpposingTeam, minute, shot.body_part.name, shot.technique.name, Y, XG2) <span class="sc">|&gt;</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">14</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 × 6
   OpposingTeam    minute shot.body_part.name shot.technique.name     Y    XG2
@@ -638,8 +765,8 @@ Overhead Kick        Volley
 </div>
 </div>
 </section>
-<section id="accounting-for-more-features" class="slide level2 smaller">
-<h2>Accounting for more features</h2>
+<section id="accounting-for-more-features" class="level2 smaller">
+<h2 class="smaller anchored" data-anchor-id="accounting-for-more-features">Accounting for more features</h2>
 <ul>
 <li>Our 2-feature model is still too coarse
 <ul>
@@ -662,17 +789,17 @@ Overhead Kick        Volley
 <li>How can we adjust for these in our XG model?</li>
 </ul>
 </section>
-<section id="digression-what-is-the-cone" class="slide level2">
-<h2>Digression: What is the cone?</h2>
+<section id="digression-what-is-the-cone" class="level2">
+<h2 class="anchored" data-anchor-id="digression-what-is-the-cone">Digression: What is the cone?</h2>
 <ul>
 <li>Cone: area between shot location &amp; goalposts <!-- visualize this; ideally with defenders on --></li>
 </ul>
 <div class="cell" data-layout-align="center" data-fig-caption="Only one defender and the goalkeeper are in the &quot;cone&quot;">
 <div class="cell-output-display">
-<div id="fig-mead-sweden" class="quarto-float quarto-figure quarto-figure-center" width="768" data-fig-align="center">
-<figure class="quarto-float quarto-float-fig">
+<div id="fig-mead-sweden" class="quarto-float quarto-figure quarto-figure-center anchored" width="768" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-mead-sweden-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="slides_02_files/figure-revealjs/fig-mead-sweden-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;1: "><img data-src="slides_02_files/figure-revealjs/fig-mead-sweden-1.png" id="fig-mead-sweden" class="quarto-figure quarto-figure-center" width="768"></a>
+<a href="slides_02_files/figure-html/fig-mead-sweden-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;1: "><img src="slides_02_files/figure-html/fig-mead-sweden-1.png" id="fig-mead-sweden" class="img-fluid quarto-figure quarto-figure-center anchored figure-img" width="768"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-mead-sweden-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;1
@@ -682,8 +809,8 @@ Figure&nbsp;1
 </div>
 </div>
 </section>
-<section id="idealized-computation" class="slide level2">
-<h2>Idealized Computation</h2>
+<section id="idealized-computation" class="level2">
+<h2 class="anchored" data-anchor-id="idealized-computation">Idealized Computation</h2>
 <ul>
 <li>If we could access super-population, easy to condition on more features
 <ul>
@@ -691,18 +818,22 @@ Figure&nbsp;1
 <li>Compute proportion of goals among the slice with <span class="math inline">\(\mathbf{\boldsymbol{X}} = \mathbf{\boldsymbol{x}}\)</span></li>
 </ul></li>
 </ul>
-<div class="fragment">
+<p>. . .</p>
 <ul>
 <li>Can we mimic this with our observed data?</li>
 </ul>
-</div>
 </section>
-<section id="practical-challenges" class="slide level2">
-<h2>Practical Challenges</h2>
+<section id="practical-challenges" class="level2">
+<h2 class="anchored" data-anchor-id="practical-challenges">Practical Challenges</h2>
 <ul>
 <li>Adjust for body part, technique, and # defenders in cone</li>
 </ul>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>wi_shots <span class="sc">|&gt;</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(shot.body_part.name, shot.technique.name, DefendersInCone) <span class="sc">|&gt;</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">XG =</span> <span class="fu">mean</span>(Y), <span class="at">n =</span> dplyr<span class="sc">::</span><span class="fu">n</span>(), <span class="at">.groups =</span> <span class="st">'drop'</span>) <span class="sc">|&gt;</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(XG)) <span class="sc">|&gt;</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, (dplyr<span class="sc">::</span><span class="fu">n</span>()<span class="sc">-</span><span class="dv">4</span>)<span class="sc">:</span>dplyr<span class="sc">::</span><span class="fu">n</span>()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 10 × 5
    shot.body_part.name shot.technique.name DefendersInCone    XG     n
@@ -720,15 +851,15 @@ Figure&nbsp;1
 </div>
 </div>
 </section>
-<section id="model-based-xg" class="slide level2 smaller">
-<h2>Model-based XG</h2>
+<section id="model-based-xg" class="level2 smaller">
+<h2 class="smaller anchored" data-anchor-id="model-based-xg">Model-based XG</h2>
 <ul>
 <li>“Binning-and-averaging” not viable w/ many features due to small sample sizes</li>
 <li><em>Statistical models</em> overcome these challenges by “borrowing strength”</li>
 <li><span class="math inline">\(\textrm{XG}(\boldsymbol{\mathbf{x}})\)</span> informed by shots with <span class="math inline">\(\boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}\)</span> and <span class="math inline">\(\boldsymbol{\mathbf{X}} \approx \boldsymbol{\mathbf{x}}\)</span></li>
 <li>How a model “borrows strength” depends on its underlying assumptions</li>
 </ul>
-<div class="fragment">
+<p>. . .</p>
 <ul>
 <li>Several challenges:
 <ul>
@@ -738,15 +869,19 @@ Figure&nbsp;1
 </ul></li>
 <li>StatsBomb has a proprietary model</li>
 </ul>
-</div>
 </section>
-<section id="statsbombs-xg-estimates" class="slide level2">
-<h2>StatsBomb’s XG Estimates</h2>
+<section id="statsbombs-xg-estimates" class="level2">
+<h2 class="anchored" data-anchor-id="statsbombs-xg-estimates">StatsBomb’s XG Estimates</h2>
 <ul>
 <li><code>shot.statsbomb_xg</code> records proprietary XG estimate</li>
 <li>Goal against Sweden had smallest XG and is, therefore, the most impressive</li>
 </ul>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>mead_shots <span class="sc">|&gt;</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(OpposingTeam, minute, XG1, XG2, shot.statsbomb_xg) <span class="sc">|&gt;</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">XG1 =</span> <span class="fu">round</span>(XG1, <span class="at">digits =</span> <span class="dv">3</span>), <span class="at">XG2 =</span> <span class="fu">round</span>(XG2, <span class="at">digits =</span> <span class="dv">3</span>), </span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">shot.statsbomb_xg =</span> <span class="fu">round</span>(shot.statsbomb_xg, <span class="at">digits =</span> <span class="dv">3</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">4</span>,<span class="dv">14</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 × 5
   OpposingTeam    minute   XG1   XG2 shot.statsbomb_xg
@@ -756,14 +891,12 @@ Figure&nbsp;1
 3 Sweden Women's      33 0.111 0.089             0.091</code></pre>
 </div>
 </div>
-</section></section>
-<section>
-<section id="goals-over-expected" class="title-slide slide level1 center">
-<h1>Goals Over Expected</h1>
-
 </section>
-<section id="did-mead-outperform-expectations" class="slide level2">
-<h2>Did Mead Outperform Expectations?</h2>
+</section>
+<section id="goals-over-expected" class="level1">
+<h1>Goals Over Expected</h1>
+<section id="did-mead-outperform-expectations" class="level2">
+<h2 class="anchored" data-anchor-id="did-mead-outperform-expectations">Did Mead Outperform Expectations?</h2>
 <ul>
 <li>How to interpret the difference <span class="math inline">\(Y_{i} - \textrm{XG}_{i}\)</span> when it is
 <ul>
@@ -772,28 +905,27 @@ Figure&nbsp;1
 <li>Close to 0</li>
 </ul></li>
 </ul>
-<div class="fragment">
+<p>. . .</p>
 <ul>
 <li>Beth Mead scored 2.89 more goals than expected</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a></a><span class="fu">sum</span>(mead_shots<span class="sc">$</span>Y <span class="sc">-</span> mead_shots<span class="sc">$</span>shot.statsbomb_xg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(mead_shots<span class="sc">$</span>Y <span class="sc">-</span> mead_shots<span class="sc">$</span>shot.statsbomb_xg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 2.896323</code></pre>
 </div>
 </div>
-</div>
 </section>
-<section id="assessing-all-euro2022-players" class="slide level2">
-<h2>Assessing All EURO2022 Players</h2>
+<section id="assessing-all-euro2022-players" class="level2">
+<h2 class="anchored" data-anchor-id="assessing-all-euro2022-players">Assessing All EURO2022 Players</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a></a>goe <span class="ot">&lt;-</span> </span>
-<span id="cb29-2"><a></a>  euro2022_shots <span class="sc">|&gt;</span></span>
-<span id="cb29-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">diff =</span> Y <span class="sc">-</span> shot.statsbomb_xg) <span class="sc">|&gt;</span></span>
-<span id="cb29-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(player.name) <span class="sc">|&gt;</span></span>
-<span id="cb29-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">GOE =</span> <span class="fu">sum</span>(diff), <span class="at">Goals =</span> <span class="fu">sum</span>(Y), <span class="at">n_shots =</span> dplyr<span class="sc">::</span><span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
-<span id="cb29-6"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(GOE)) </span>
-<span id="cb29-7"><a></a>goe <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, (dplyr<span class="sc">::</span><span class="fu">n</span>()<span class="sc">-</span><span class="dv">4</span>)<span class="sc">:</span>dplyr<span class="sc">::</span><span class="fu">n</span>()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>goe <span class="ot">&lt;-</span> </span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  euro2022_shots <span class="sc">|&gt;</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">diff =</span> Y <span class="sc">-</span> shot.statsbomb_xg) <span class="sc">|&gt;</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(player.name) <span class="sc">|&gt;</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">GOE =</span> <span class="fu">sum</span>(diff), <span class="at">Goals =</span> <span class="fu">sum</span>(Y), <span class="at">n_shots =</span> dplyr<span class="sc">::</span><span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(GOE)) </span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>goe <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, (dplyr<span class="sc">::</span><span class="fu">n</span>()<span class="sc">-</span><span class="dv">4</span>)<span class="sc">:</span>dplyr<span class="sc">::</span><span class="fu">n</span>()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 10 × 4
    player.name                GOE Goals n_shots
@@ -811,8 +943,8 @@ Figure&nbsp;1
 </div>
 </div>
 </section>
-<section id="looking-ahead" class="slide level2 smaller">
-<h2>Looking Ahead</h2>
+<section id="looking-ahead" class="level2 smaller">
+<h2 class="smaller anchored" data-anchor-id="looking-ahead">Looking Ahead</h2>
 <ul>
 <li>I <strong>strongly</strong> recommend you work through code yourself
 <ul>
@@ -826,624 +958,496 @@ Figure&nbsp;1
 </ul></li>
 </ul>
 </section>
-<section id="project-groups" class="slide level2">
-<h2>Project Groups</h2>
+<section id="project-groups" class="level2">
+<h2 class="anchored" data-anchor-id="project-groups">Project Groups</h2>
 <ul>
 <li>Form groups by <strong>Friday September 12</strong> (sign up on Canvas)</li>
 <li>Use Piazza to help find teammates</li>
 </ul>
 <div class="quarto-figure quarto-figure-center">
-<figure>
-<p><a href="piazza_teammate_qr.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5"><img data-src="piazza_teammate_qr.png" class="quarto-figure quarto-figure-center" style="width:30.0%"></a></p>
+<figure class="figure">
+<p><a href="piazza_teammate_qr.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5"><img src="piazza_teammate_qr.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:30.0%"></a></p>
 </figure>
 </div>
 
 
-</section></section>
-    </div>
-  <div class="quarto-auto-generated-content" style="display: none;">
-<div class="footer footer-default">
+</section>
+</section>
 
-</div>
-</div></div>
-
-  <script>window.backupDefine = window.define; window.define = undefined;</script>
-  <script src="../../site_libs/revealjs/dist/reveal.js"></script>
-  <!-- reveal.js plugins -->
-  <script src="../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
-  <script src="../../site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
-  <script src="../../site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
-  <script src="../../site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
-  <script src="../../site_libs/revealjs/plugin/quarto-support/support.js"></script>
-  
-
-  <script src="../../site_libs/revealjs/plugin/notes/notes.js"></script>
-  <script src="../../site_libs/revealjs/plugin/search/search.js"></script>
-  <script src="../../site_libs/revealjs/plugin/zoom/zoom.js"></script>
-  <script src="../../site_libs/revealjs/plugin/math/math.js"></script>
-  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
-
-  <script>
-
-      // Full list of configuration options available at:
-      // https://revealjs.com/config/
-      Reveal.initialize({
-'controlsAuto': true,
-'previewLinksAuto': false,
-'pdfSeparateFragments': false,
-'autoAnimateEasing': "ease",
-'autoAnimateDuration': 1,
-'autoAnimateUnmatched': true,
-'jumpToSlide': true,
-'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
-'smaller': false,
- 
-        // Display controls in the bottom right corner
-        controls: false,
-
-        // Help the user learn the controls by providing hints, for example by
-        // bouncing the down arrow when they first encounter a vertical slide
-        controlsTutorial: false,
-
-        // Determines where controls appear, "edges" or "bottom-right"
-        controlsLayout: 'edges',
-
-        // Visibility rule for backwards navigation arrows; "faded", "hidden"
-        // or "visible"
-        controlsBackArrows: 'faded',
-
-        // Display a presentation progress bar
-        progress: true,
-
-        // Display the page number of the current slide
-        slideNumber: false,
-
-        // 'all', 'print', or 'speaker'
-        showSlideNumber: 'all',
-
-        // Add the current slide number to the URL hash so that reloading the
-        // page/copying the URL will return you to the same slide
-        hash: true,
-
-        // Start with 1 for the hash rather than 0
-        hashOneBasedIndex: false,
-
-        // Flags if we should monitor the hash and change slides accordingly
-        respondToHashChanges: true,
-
-        // Push each slide change to the browser history
-        history: true,
-
-        // Enable keyboard shortcuts for navigation
-        keyboard: true,
-
-        // Enable the slide overview mode
-        overview: true,
-
-        // Disables the default reveal.js slide layout (scaling and centering)
-        // so that you can use custom CSS layout
-        disableLayout: false,
-
-        // Vertical centering of slides
-        center: false,
-
-        // Enables touch navigation on devices with touch input
-        touch: true,
-
-        // Loop the presentation
-        loop: false,
-
-        // Change the presentation direction to be RTL
-        rtl: false,
-
-        // see https://revealjs.com/vertical-slides/#navigation-mode
-        navigationMode: 'linear',
-
-        // Randomizes the order of slides each time the presentation loads
-        shuffle: false,
-
-        // Turns fragments on and off globally
-        fragments: true,
-
-        // Flags whether to include the current fragment in the URL,
-        // so that reloading brings you to the same fragment position
-        fragmentInURL: false,
-
-        // Flags if the presentation is running in an embedded mode,
-        // i.e. contained within a limited portion of the screen
-        embedded: false,
-
-        // Flags if we should show a help overlay when the questionmark
-        // key is pressed
-        help: true,
-
-        // Flags if it should be possible to pause the presentation (blackout)
-        pause: true,
-
-        // Flags if speaker notes should be visible to all viewers
-        showNotes: false,
-
-        // Global override for autoplaying embedded media (null/true/false)
-        autoPlayMedia: null,
-
-        // Global override for preloading lazy-loaded iframes (null/true/false)
-        preloadIframes: null,
-
-        // Number of milliseconds between automatically proceeding to the
-        // next slide, disabled when set to 0, this value can be overwritten
-        // by using a data-autoslide attribute on your slides
-        autoSlide: 0,
-
-        // Stop auto-sliding after user input
-        autoSlideStoppable: true,
-
-        // Use this method for navigation when auto-sliding
-        autoSlideMethod: null,
-
-        // Specify the average time in seconds that you think you will spend
-        // presenting each slide. This is used to show a pacing timer in the
-        // speaker view
-        defaultTiming: null,
-
-        // Enable slide navigation via mouse wheel
-        mouseWheel: false,
-
-        // The display mode that will be used to show slides
-        display: 'block',
-
-        // Hide cursor if inactive
-        hideInactiveCursor: true,
-
-        // Time before the cursor is hidden (in ms)
-        hideCursorTime: 5000,
-
-        // Opens links in an iframe preview overlay
-        previewLinks: false,
-
-        // Transition style (none/fade/slide/convex/concave/zoom)
-        transition: 'none',
-
-        // Transition speed (default/fast/slow)
-        transitionSpeed: 'default',
-
-        // Transition style for full page slide backgrounds
-        // (none/fade/slide/convex/concave/zoom)
-        backgroundTransition: 'none',
-
-        // Number of slides away from the current that are visible
-        viewDistance: 3,
-
-        // Number of slides away from the current that are visible on mobile
-        // devices. It is advisable to set this to a lower number than
-        // viewDistance in order to save resources.
-        mobileViewDistance: 2,
-
-        // The "normal" size of the presentation, aspect ratio will be preserved
-        // when the presentation is scaled to fit different resolutions. Can be
-        // specified using percentage units.
-        width: 1050,
-
-        height: 700,
-
-        // Factor of the display size that should remain empty around the content
-        margin: 0.1,
-
-        math: {
-          mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/MathJax.js',
-          config: 'TeX-AMS_HTML-full',
-          tex2jax: {
-            inlineMath: [['\\(','\\)']],
-            displayMath: [['\\[','\\]']],
-            balanceBraces: true,
-            processEscapes: false,
-            processRefs: true,
-            processEnvironments: true,
-            preview: 'TeX',
-            skipTags: ['script','noscript','style','textarea','pre','code'],
-            ignoreClass: 'tex2jax_ignore',
-            processClass: 'tex2jax_process'
-          },
-        },
-
-        // reveal.js plugins
-        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
-
-          RevealMath,
-          RevealNotes,
-          RevealSearch,
-          RevealZoom
-        ]
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
       });
-    </script>
-    
-    <script>
-      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
-      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
-      // slide changes (different for each slide format).
-      (function () {
-        // dispatch for htmlwidgets
-        function fireSlideEnter() {
-          const event = window.document.createEvent("Event");
-          event.initEvent("slideenter", true, true);
-          window.document.dispatchEvent(event);
-        }
-
-        function fireSlideChanged(previousSlide, currentSlide) {
-          fireSlideEnter();
-
-          // dispatch for shiny
-          if (window.jQuery) {
-            if (previousSlide) {
-              window.jQuery(previousSlide).trigger("hidden");
-            }
-            if (currentSlide) {
-              window.jQuery(currentSlide).trigger("shown");
-            }
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
           }
         }
-
-        // hookup for slidy
-        if (window.w3c_slidy) {
-          window.w3c_slidy.add_observer(function (slide_num) {
-            // slide_num starts at position 1
-            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
           });
         }
-
-      })();
-    </script>
-
-    <script id="quarto-html-after-body" type="application/javascript">
-      window.document.addEventListener("DOMContentLoaded", function (event) {
-        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
-        tabsets.forEach(function(tabset) {
-          const tabby = new Tabby('#' + tabset.id);
-        });
-        const isCodeAnnotation = (el) => {
-          for (const clz of el.classList) {
-            if (clz.startsWith('code-annotation-')) {                     
-              return true;
-            }
-          }
-          return false;
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
         }
-        const onCopySuccess = function(e) {
-          // button target
-          const button = e.trigger;
-          // don't keep focus
-          button.blur();
-          // flash "checked"
-          button.classList.add('code-copy-button-checked');
-          var currentTitle = button.getAttribute("title");
-          button.setAttribute("title", "Copied!");
-          let tooltip;
-          if (window.bootstrap) {
-            button.setAttribute("data-bs-toggle", "tooltip");
-            button.setAttribute("data-bs-placement", "left");
-            button.setAttribute("data-bs-title", "Copied!");
-            tooltip = new bootstrap.Tooltip(button, 
-              { trigger: "manual", 
-                customClass: "code-copy-button-tooltip",
-                offset: [0, -8]});
-            tooltip.show();    
-          }
-          setTimeout(function() {
-            if (tooltip) {
-              tooltip.hide();
-              button.removeAttribute("data-bs-title");
-              button.removeAttribute("data-bs-toggle");
-              button.removeAttribute("data-bs-placement");
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
             }
-            button.setAttribute("title", currentTitle);
-            button.classList.remove('code-copy-button-checked');
-          }, 1000);
-          // clear code selection
-          e.clearSelection();
-        }
-        const getTextToCopy = function(trigger) {
-            const codeEl = trigger.previousElementSibling.cloneNode(true);
-            for (const childEl of codeEl.children) {
-              if (isCodeAnnotation(childEl)) {
-                childEl.remove();
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
               }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
             }
-            return codeEl.innerText;
-        }
-        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-          text: getTextToCopy
-        });
-        clipboard.on('success', onCopySuccess);
-        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-            text: getTextToCopy,
-            container: window.document.getElementById('quarto-embedded-source-code-modal')
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
           });
-          clipboardModal.on('success', onCopySuccess);
-        }
-          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-          var mailtoRegex = new RegExp(/^mailto:/);
-            var filterRegex = new RegExp('/' + window.location.host + '/');
-          var isInternal = (href) => {
-              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
           }
-          // Inspect non-navigation links and adorn them if external
-         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-          for (var i=0; i<links.length; i++) {
-            const link = links[i];
-            if (!isInternal(link.href)) {
-              // undo the damage that might have been done by quarto-nav.js in the case of
-              // links that we want to consider external
-              if (link.dataset.originalHref !== undefined) {
-                link.href = link.dataset.originalHref;
-              }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        const annoteTargets = window.document.querySelectorAll('.code-annotation-anchor');
+        for (let i=0; i<annoteTargets.length; i++) {
+          const annoteTarget = annoteTargets[i];
+          const targetCell = annoteTarget.getAttribute("data-target-cell");
+          const targetAnnotation = annoteTarget.getAttribute("data-target-annotation");
+          const contentFn = () => {
+            const content = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+            if (content) {
+              const tipContent = content.cloneNode(true);
+              tipContent.classList.add("code-annotation-tip-content");
+              return tipContent.outerHTML;
             }
           }
-        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
           const config = {
             allowHTML: true,
-            maxWidth: 500,
-            delay: 100,
-            arrow: false,
+            content: contentFn,
+            onShow: (instance) => {
+              selectCodeLines(instance.reference);
+              instance.reference.classList.add('code-annotation-active');
+              window.tippy.hideAll();
+            },
+            onHide: (instance) => {
+              unselectCodeLines();
+              instance.reference.classList.remove('code-annotation-active');
+            },
+            maxWidth: 300,
+            delay: [50, 0],
+            duration: [200, 0],
+            offset: [5, 10],
+            arrow: true,
             appendTo: function(el) {
-                return el.closest('section.slide') || el.parentElement;
+              return el.parentElement.parentElement.parentElement;
             },
             interactive: true,
             interactiveBorder: 10,
-            theme: 'light-border',
-            placement: 'bottom-start',
+            theme: 'quarto',
+            placement: 'right',
+            popperOptions: {
+              modifiers: [
+              {
+                name: 'flip',
+                options: {
+                  flipVariations: false, // true by default
+                  allowedAutoPlacements: ['right'],
+                  fallbackPlacements: ['right', 'top', 'top-start', 'top-end', 'bottom', 'bottom-start', 'bottom-end', 'left'],
+                },
+              },
+              {
+                name: 'preventOverflow',
+                options: {
+                  mainAxis: false,
+                  altAxis: false
+                }
+              }
+              ]        
+            }      
           };
-          if (contentFn) {
-            config.content = contentFn;
-          }
-          if (onTriggerFn) {
-            config.onTrigger = onTriggerFn;
-          }
-          if (onUntriggerFn) {
-            config.onUntrigger = onUntriggerFn;
-          }
-            config['offset'] = [0,0];
-            config['maxWidth'] = 700;
-          window.tippy(el, config); 
+          window.tippy(annoteTarget, config); 
         }
-        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-        for (var i=0; i<noterefs.length; i++) {
-          const ref = noterefs[i];
-          tippyHover(ref, function() {
-            // use id or data attribute instead here
-            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-            try { href = new URL(href).hash; } catch {}
-            const id = href.replace(/^#\/?/, "");
-            const note = window.document.getElementById(id);
-            if (note) {
-              return note.innerHTML;
-            } else {
-              return "";
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
             }
+            popup.appendChild(citeDiv);
           });
-        }
-            let selectedAnnoteEl;
-            const selectorForAnnotation = ( cell, annotation) => {
-              let cellAttr = 'data-code-cell="' + cell + '"';
-              let lineAttr = 'data-code-annotation="' +  annotation + '"';
-              const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
-              return selector;
-            }
-            const selectCodeLines = (annoteEl) => {
-              const doc = window.document;
-              const targetCell = annoteEl.getAttribute("data-target-cell");
-              const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
-              const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
-              const lines = annoteSpan.getAttribute("data-code-lines").split(",");
-              const lineIds = lines.map((line) => {
-                return targetCell + "-" + line;
-              })
-              let top = null;
-              let height = null;
-              let parent = null;
-              if (lineIds.length > 0) {
-                  //compute the position of the single el (top and bottom and make a div)
-                  const el = window.document.getElementById(lineIds[0]);
-                  top = el.offsetTop;
-                  height = el.offsetHeight;
-                  parent = el.parentElement.parentElement;
-                if (lineIds.length > 1) {
-                  const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-                  const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-                  height = bottom - top;
-                }
-                if (top !== null && height !== null && parent !== null) {
-                  // cook up a div (if necessary) and position it 
-                  let div = window.document.getElementById("code-annotation-line-highlight");
-                  if (div === null) {
-                    div = window.document.createElement("div");
-                    div.setAttribute("id", "code-annotation-line-highlight");
-                    div.style.position = 'absolute';
-                    parent.appendChild(div);
-                  }
-                  div.style.top = top - 2 + "px";
-                  div.style.height = height + 4 + "px";
-                  div.style.left = 0;
-                  let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-                  if (gutterDiv === null) {
-                    gutterDiv = window.document.createElement("div");
-                    gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-                    gutterDiv.style.position = 'absolute';
-                    const codeCell = window.document.getElementById(targetCell);
-                    const gutter = codeCell.querySelector('.code-annotation-gutter');
-                    gutter.appendChild(gutterDiv);
-                  }
-                  gutterDiv.style.top = top - 2 + "px";
-                  gutterDiv.style.height = height + 4 + "px";
-                }
-                selectedAnnoteEl = annoteEl;
-              }
-            };
-            const unselectCodeLines = () => {
-              const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
-              elementsIds.forEach((elId) => {
-                const div = window.document.getElementById(elId);
-                if (div) {
-                  div.remove();
-                }
-              });
-              selectedAnnoteEl = undefined;
-            };
-              // Handle positioning of the toggle
-          window.addEventListener(
-            "resize",
-            throttle(() => {
-              elRect = undefined;
-              if (selectedAnnoteEl) {
-                selectCodeLines(selectedAnnoteEl);
-              }
-            }, 10)
-          );
-          function throttle(fn, ms) {
-          let throttle = false;
-          let timer;
-            return (...args) => {
-              if(!throttle) { // first call gets through
-                  fn.apply(this, args);
-                  throttle = true;
-              } else { // all the others get throttled
-                  if(timer) clearTimeout(timer); // cancel #2
-                  timer = setTimeout(() => {
-                    fn.apply(this, args);
-                    timer = throttle = false;
-                  }, ms);
-              }
-            };
-          }
-            const annoteTargets = window.document.querySelectorAll('.code-annotation-anchor');
-            for (let i=0; i<annoteTargets.length; i++) {
-              const annoteTarget = annoteTargets[i];
-              const targetCell = annoteTarget.getAttribute("data-target-cell");
-              const targetAnnotation = annoteTarget.getAttribute("data-target-annotation");
-              const contentFn = () => {
-                const content = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
-                if (content) {
-                  const tipContent = content.cloneNode(true);
-                  tipContent.classList.add("code-annotation-tip-content");
-                  return tipContent.outerHTML;
-                }
-              }
-              const config = {
-                allowHTML: true,
-                content: contentFn,
-                onShow: (instance) => {
-                  selectCodeLines(instance.reference);
-                  instance.reference.classList.add('code-annotation-active');
-                  window.tippy.hideAll();
-                },
-                onHide: (instance) => {
-                  unselectCodeLines();
-                  instance.reference.classList.remove('code-annotation-active');
-                },
-                maxWidth: 300,
-                delay: [50, 0],
-                duration: [200, 0],
-                offset: [5, 10],
-                arrow: true,
-                appendTo: function(el) {
-                  return el.parentElement.parentElement.parentElement;
-                },
-                interactive: true,
-                interactiveBorder: 10,
-                theme: 'light-border',
-                placement: 'right',
-                popperOptions: {
-                  modifiers: [
-                  {
-                    name: 'flip',
-                    options: {
-                      flipVariations: false, // true by default
-                      allowedAutoPlacements: ['right'],
-                      fallbackPlacements: ['right', 'top', 'top-start', 'top-end', 'bottom', 'bottom-start', 'bottom-end', 'left'],
-                    },
-                  },
-                  {
-                    name: 'preventOverflow',
-                    options: {
-                      mainAxis: false,
-                      altAxis: false
-                    }
-                  }
-                  ]        
-                }      
-              };
-              window.tippy(annoteTarget, config); 
-            }
-        const findCites = (el) => {
-          const parentEl = el.parentElement;
-          if (parentEl) {
-            const cites = parentEl.dataset.cites;
-            if (cites) {
-              return {
-                el,
-                cites: cites.split(' ')
-              };
-            } else {
-              return findCites(el.parentElement)
-            }
-          } else {
-            return undefined;
-          }
-        };
-        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-        for (var i=0; i<bibliorefs.length; i++) {
-          const ref = bibliorefs[i];
-          const citeInfo = findCites(ref);
-          if (citeInfo) {
-            tippyHover(citeInfo.el, function() {
-              var popup = window.document.createElement('div');
-              citeInfo.cites.forEach(function(cite) {
-                var citeDiv = window.document.createElement('div');
-                citeDiv.classList.add('hanging-indent');
-                citeDiv.classList.add('csl-entry');
-                var biblioDiv = window.document.getElementById('ref-' + cite);
-                if (biblioDiv) {
-                  citeDiv.innerHTML = biblioDiv.innerHTML;
-                }
-                popup.appendChild(citeDiv);
-              });
-              return popup.innerHTML;
-            });
-          }
-        }
-      });
-      </script>
-    <script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
-    (function() {
-      let previousOnload = window.onload;
-      window.onload = () => {
-        if (previousOnload) {
-          previousOnload();
-        }
-        lightboxQuarto.on('slide_before_load', (data) => {
-          const { slideIndex, slideNode, slideConfig, player, trigger } = data;
-          const href = trigger.getAttribute('href');
-          if (href !== null) {
-            const imgEl = window.document.querySelector(`a[href="${href}"] img`);
-            if (imgEl !== null) {
-              const srcAttr = imgEl.getAttribute("src");
-              if (srcAttr && srcAttr.startsWith("data:")) {
-                slideConfig.href = srcAttr;
-              }
-            }
-          } 
+          return popup.innerHTML;
         });
-      
-        lightboxQuarto.on('slide_after_load', (data) => {
-          const { slideIndex, slideNode, slideConfig, player, trigger } = data;
-          if (window.Quarto?.typesetMath) {
-            window.Quarto.typesetMath(slideNode);
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
           }
-        });
-      
-      };
-      
-    })();
-              </script>
-    
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
 
 </body></html>

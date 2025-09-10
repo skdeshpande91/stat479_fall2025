@@ -17,7 +17,7 @@ Equivalently, the fielding team creates $-\delta$ units of run value.
 In this lecture, we discuss how to divide this $-\delta$ run value between the pitchers (@sec-pitching) and fielders (@sec-fielding). 
 
 For at-bats $i$ that end without the ball being put in play (i.e., a strikeout, walk, or a homerun), we will assign the entirety of the $-\delta_{i}$ run value to the pitcher.
-But for at-bats that result with balls put in play, we will divide $-\delta_{i}$ into two parts $\delta^{(p)}_{i} = -\delta \times \hat{p}_{i}$ and $\delta^{(f)} = -\delta_{i} \times (1 - \hat{p}_{i})$ where $\hat{p}_{i}$ is an *estimate* of the probability that play results in an out given the batted ball's location (@sec-out-probs).
+But for at-bats that result with balls put in play, we will divide $-\delta_{i}$ into two parts $\delta^{(f)}_{i} = -\delta \times \hat{p}_{i}$ and $\delta^{(p)} = -\delta_{i} \times (1 - \hat{p}_{i})$ where $\hat{p}_{i}$ is an *estimate* of the probability that play results in an out given the batted ball's location (@sec-out-probs).
 We will specifically estimate these out probabilities using **Generalized Additive Models** (@sec-gam).
 Finally, we compute how more run value each player creates through their batting, baserunning, pitching, and fielding than a replacement level player (@sec-war).
 
@@ -33,7 +33,7 @@ oi_colors <-
   palette.colors(palette = "Okabe-Ito")
 ```
 
-Recall from [Lecture 6](lecture06.qmd) that the StatCast variables `hc_x` and `hc_y` record the coordinates where each batted ball is first fielded.
+Recall from [Lecture 6](lecture06.qmd) that the Statcast variables `hc_x` and `hc_y` record the coordinates where each batted ball is first fielded.
 When we plotted the available `hc_x` and `hc_y` values, we saw the outlines of the park, with home plate located around `hc_x = 125` and `hc_y = 200.`
 We can also roughly make out the first and third base lines and the infield.
 
@@ -62,21 +62,25 @@ When we plot just the pitches first fielded by first basemen (`hit_location=3`),
 #| fig-cap: Location of all batted balls initially fielded by the first baseman
 
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
-plot(statcast2024$hc_x[statcast2024$hit_location==3], 
-     statcast2024$hc_y[statcast2024$hit_location==3], 
+plot(statcast2024$hc_x[statcast2024$hit_location!=3], 
+     statcast2024$hc_y[statcast2024$hit_location != 3], 
      xlab = "hc_x", ylab = "hc_y",
+     pch = 16, cex = 0.2, 
+     col = adjustcolor(oi_colors[1], alpha.f = 0.1))
+points(statcast2024$hc_x[statcast2024$hit_location==3], 
+     statcast2024$hc_y[statcast2024$hit_location==3],
      pch = 16, cex = 0.2, 
      col = adjustcolor(oi_colors[2], alpha.f = 0.1))
 ```
 
-[^positions]: The official position numberings are: 1 (pitcher), 2 (catcher), 3 (first baseman), 4 (second baseman), 5 (third baseman), 6 (shortstop), 7 (left fielder), 8 (center fielder), and 9 (right fielder).
+[^positions]: The official position numbers are: 1 (pitcher), 2 (catcher), 3 (first baseman), 4 (second baseman), 5 (third baseman), 6 (shortstop), 7 (left fielder), 8 (center fielder), and 9 (right fielder).
 
 Although MLB Stadiums are equipped with lots of very cool camera and ball tracking technology, the variables `hc_x` and `hc_y` are *not* derived from those technologies.
 Instead a stringer manually marks the location of the batted ball on a tablet so the coordinates `hc_x` and `hc_y` are expressed in units of pixels on that tablet.
 [Jim Albert](https://bayesball.github.io), who is one of the founding fathers of Statistical research in baseball, [suggested](https://baseballwithr.wordpress.com/2021/04/) the following transformation from the original `(hc_x, hc_y)` coordinate system to one that places home plate at the bottom of the plot (with coordinates `(0,0)`) and measures distances in feet.
 $$
 \begin{align}
-x &= 2.5 \times (\texttt{hc_x} - 125.42) & y &= 2.5 \times (198.27 - \texttt{hc_y})
+x &= 2.5 \times (\texttt{hc\_x} - 125.42) & y &= 2.5 \times (198.27 - \texttt{hc\_y})
 \end{align}
 $$
 
@@ -217,7 +221,7 @@ bip <-
 
 
 
-### Binning and averaging
+### Binning and Averaging
 
 One potential approach works by dividing the field into small rectangular regions and computing the proportion of balls landing within each region that result in an out.
 To this end, we will first create a grid of 3ft x 3ft squares that covers the range of our batted ball locations.
@@ -761,6 +765,7 @@ def_atbat2024 <-
 ```
 
 
+
 Now, for each fielding position, we can compute $w_{i,\ell} \times \delta^{(f)}_{i}$ and aggregate these values across players at that position to compute $\textrm{RAA}_{\ell}^{(f)},$ which quantifies the total run value created by the player through their fielding at position $\ell.$
 Negative values of $\textrm{RAA}_{\ell}^{(f)}$ suggest that the player's fielding at position $\ell$ netted *positive* run value for the batting team, thereby negatively impacthing his own team.
 
@@ -920,6 +925,12 @@ raa_p |>
 We will save both `raa_f` and `raa_p` for later use
 ```{r}
 save(raa_f, raa_p, file = "raa_defensive2024.RData")
+```
+
+```{r}
+#| label: save-def-atbat
+#| echo: false
+save(def_atbat2024, file = "def_atbat2024.RData")
 ```
 
 ## Replacement Level {#sec-war}

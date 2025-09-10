@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.7.31">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -91,7 +91,7 @@ div.csl-indent {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-4bfb630b09c0e164834af1bb3207dbff.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -268,6 +268,14 @@ window.Quarto = {
     <a class="dropdown-item" href="../slides/lecture05.html">
  <span class="dropdown-text">Lecture 5: Regularized Adjusted Plus/Minus</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture06.html">
+ <span class="dropdown-text">Lecture 6: Expected Runs</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture08.html">
+ <span class="dropdown-text">Lecture 8: Defensive Credit Allocation &amp; WAR</span></a>
+  </li>  
     </ul>
   </li>
 </ul>
@@ -385,7 +393,7 @@ window.Quarto = {
   <li><a href="#sec-hit-location-data" id="toc-sec-hit-location-data" class="nav-link" data-scroll-target="#sec-hit-location-data">Hit Location Data</a></li>
   <li><a href="#sec-out-probs" id="toc-sec-out-probs" class="nav-link" data-scroll-target="#sec-out-probs">Estimating Out Probabilities</a>
   <ul class="collapse">
-  <li><a href="#binning-and-averaging" id="toc-binning-and-averaging" class="nav-link" data-scroll-target="#binning-and-averaging">Binning and averaging</a></li>
+  <li><a href="#binning-and-averaging" id="toc-binning-and-averaging" class="nav-link" data-scroll-target="#binning-and-averaging">Binning and Averaging</a></li>
   <li><a href="#sec-logistic" id="toc-sec-logistic" class="nav-link" data-scroll-target="#sec-logistic">A Logistic Regression Model for Outs</a></li>
   </ul></li>
   <li><a href="#sec-gam" id="toc-sec-gam" class="nav-link" data-scroll-target="#sec-gam">Generalized Additive Models</a>
@@ -424,7 +432,7 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="sec-overview">Overview</h2>
 <p>In <a href="../lectures/lecture07.html">Lecture 7</a>, we distributed the run value created in each at-bat between the batter and base runners. Aggregating over all at-bats, we computed each player’s <span class="math inline">\(\textrm{RAA}^{\textrm{br}},\)</span> which quantifies how much more run value a player created through his base running than would otherwise be expected based on the starting game states and ending events of the at-bats in which he was involved. We also computed <span class="math inline">\(\textrm{RAA}^{\textrm{b}},\)</span> which quantifies how much more run value a player created through his hitting than would be expected based on his position.</p>
 <p>According to the conservation of runs framework introduced by <span class="citation" data-cites="Baumer2015_openWAR">Baumer, Jensen, and Matthews (<a href="#ref-Baumer2015_openWAR" role="doc-biblioref">2015</a>)</span>, whenever the batting team creates <span class="math inline">\(\delta\)</span> units of run value in at-bat, the fielding team (necessarily) gives up <span class="math inline">\(\delta\)</span> units of run value. Equivalently, the fielding team creates <span class="math inline">\(-\delta\)</span> units of run value. In this lecture, we discuss how to divide this <span class="math inline">\(-\delta\)</span> run value between the pitchers (<a href="#sec-pitching" class="quarto-xref">Section&nbsp;6</a>) and fielders (<a href="#sec-fielding" class="quarto-xref">Section&nbsp;5</a>).</p>
-<p>For at-bats <span class="math inline">\(i\)</span> that end without the ball being put in play (i.e., a strikeout, walk, or a homerun), we will assign the entirety of the <span class="math inline">\(-\delta_{i}\)</span> run value to the pitcher. But for at-bats that result with balls put in play, we will divide <span class="math inline">\(-\delta_{i}\)</span> into two parts <span class="math inline">\(\delta^{(p)}_{i} = -\delta \times \hat{p}_{i}\)</span> and <span class="math inline">\(\delta^{(f)} = -\delta_{i} \times (1 - \hat{p}_{i})\)</span> where <span class="math inline">\(\hat{p}_{i}\)</span> is an <em>estimate</em> of the probability that play results in an out given the batted ball’s location (<a href="#sec-out-probs" class="quarto-xref">Section&nbsp;3</a>). We will specifically estimate these out probabilities using <strong>Generalized Additive Models</strong> (<a href="#sec-gam" class="quarto-xref">Section&nbsp;4</a>). Finally, we compute how more run value each player creates through their batting, baserunning, pitching, and fielding than a replacement level player (<a href="#sec-war" class="quarto-xref">Section&nbsp;7</a>).</p>
+<p>For at-bats <span class="math inline">\(i\)</span> that end without the ball being put in play (i.e., a strikeout, walk, or a homerun), we will assign the entirety of the <span class="math inline">\(-\delta_{i}\)</span> run value to the pitcher. But for at-bats that result with balls put in play, we will divide <span class="math inline">\(-\delta_{i}\)</span> into two parts <span class="math inline">\(\delta^{(f)}_{i} = -\delta \times \hat{p}_{i}\)</span> and <span class="math inline">\(\delta^{(p)} = -\delta_{i} \times (1 - \hat{p}_{i})\)</span> where <span class="math inline">\(\hat{p}_{i}\)</span> is an <em>estimate</em> of the probability that play results in an out given the batted ball’s location (<a href="#sec-out-probs" class="quarto-xref">Section&nbsp;3</a>). We will specifically estimate these out probabilities using <strong>Generalized Additive Models</strong> (<a href="#sec-gam" class="quarto-xref">Section&nbsp;4</a>). Finally, we compute how more run value each player creates through their batting, baserunning, pitching, and fielding than a replacement level player (<a href="#sec-war" class="quarto-xref">Section&nbsp;7</a>).</p>
 </section>
 <section id="sec-hit-location-data" class="level2">
 <h2 class="anchored" data-anchor-id="sec-hit-location-data">Hit Location Data</h2>
@@ -436,7 +444,7 @@ window.Quarto = {
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>oi_colors <span class="ot">&lt;-</span> </span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">palette.colors</span>(<span class="at">palette =</span> <span class="st">"Okabe-Ito"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Recall from <a href="../lectures/lecture06.html">Lecture 6</a> that the StatCast variables <code>hc_x</code> and <code>hc_y</code> record the coordinates where each batted ball is first fielded. When we plotted the available <code>hc_x</code> and <code>hc_y</code> values, we saw the outlines of the park, with home plate located around <code>hc_x = 125</code> and <code>hc_y = 200.</code> We can also roughly make out the first and third base lines and the infield.</p>
+<p>Recall from <a href="../lectures/lecture06.html">Lecture 6</a> that the Statcast variables <code>hc_x</code> and <code>hc_y</code> record the coordinates where each batted ball is first fielded. When we plotted the available <code>hc_x</code> and <code>hc_y</code> values, we saw the outlines of the park, with home plate located around <code>hc_x = 125</code> and <code>hc_y = 200.</code> We can also roughly make out the first and third base lines and the infield.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>), <span class="at">mgp =</span> <span class="fu">c</span>(<span class="fl">1.8</span>, <span class="fl">0.5</span>, <span class="dv">0</span>))</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(statcast2024<span class="sc">$</span>hc_x, statcast2024<span class="sc">$</span>hc_y, </span>
@@ -459,11 +467,15 @@ Figure&nbsp;1: Locations where all batted balls are first fielded
 <p>It is not immediately apparent, however, whether the first base line is on the left or right. Luckily, StatCast also contains the official <a href="https://en.wikipedia.org/wiki/Baseball_positions">fielding position</a> of the player who first fields the ball<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. When we plot just the pitches first fielded by first basemen (<code>hit_location=3</code>), we see that in the original <code>(hc_x, hc_y)</code> coordinate system, first base is on the <em>right</em> hand side of the plot.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>), <span class="at">mgp =</span> <span class="fu">c</span>(<span class="fl">1.8</span>, <span class="fl">0.5</span>, <span class="dv">0</span>))</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(statcast2024<span class="sc">$</span>hc_x[statcast2024<span class="sc">$</span>hit_location<span class="sc">==</span><span class="dv">3</span>], </span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>     statcast2024<span class="sc">$</span>hc_y[statcast2024<span class="sc">$</span>hit_location<span class="sc">==</span><span class="dv">3</span>], </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(statcast2024<span class="sc">$</span>hc_x[statcast2024<span class="sc">$</span>hit_location<span class="sc">!=</span><span class="dv">3</span>], </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>     statcast2024<span class="sc">$</span>hc_y[statcast2024<span class="sc">$</span>hit_location <span class="sc">!=</span> <span class="dv">3</span>], </span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"hc_x"</span>, <span class="at">ylab =</span> <span class="st">"hc_y"</span>,</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">cex =</span> <span class="fl">0.2</span>, </span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="fu">adjustcolor</span>(oi_colors[<span class="dv">2</span>], <span class="at">alpha.f =</span> <span class="fl">0.1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="fu">adjustcolor</span>(oi_colors[<span class="dv">1</span>], <span class="at">alpha.f =</span> <span class="fl">0.1</span>))</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(statcast2024<span class="sc">$</span>hc_x[statcast2024<span class="sc">$</span>hit_location<span class="sc">==</span><span class="dv">3</span>], </span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>     statcast2024<span class="sc">$</span>hc_y[statcast2024<span class="sc">$</span>hit_location<span class="sc">==</span><span class="dv">3</span>],</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">cex =</span> <span class="fl">0.2</span>, </span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="fu">adjustcolor</span>(oi_colors[<span class="dv">2</span>], <span class="at">alpha.f =</span> <span class="fl">0.1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div id="fig-fielder3" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
@@ -479,7 +491,7 @@ Figure&nbsp;2: Location of all batted balls initially fielded by the first basem
 </div>
 <p>Although MLB Stadiums are equipped with lots of very cool camera and ball tracking technology, the variables <code>hc_x</code> and <code>hc_y</code> are <em>not</em> derived from those technologies. Instead a stringer manually marks the location of the batted ball on a tablet so the coordinates <code>hc_x</code> and <code>hc_y</code> are expressed in units of pixels on that tablet. <a href="https://bayesball.github.io">Jim Albert</a>, who is one of the founding fathers of Statistical research in baseball, <a href="https://baseballwithr.wordpress.com/2021/04/">suggested</a> the following transformation from the original <code>(hc_x, hc_y)</code> coordinate system to one that places home plate at the bottom of the plot (with coordinates <code>(0,0)</code>) and measures distances in feet. <span class="math display">\[
 \begin{align}
-x &amp;= 2.5 \times (\texttt{hc_x} - 125.42) &amp; y &amp;= 2.5 \times (198.27 - \texttt{hc_y})
+x &amp;= 2.5 \times (\texttt{hc\_x} - 125.42) &amp; y &amp;= 2.5 \times (198.27 - \texttt{hc\_y})
 \end{align}
 \]</span></p>
 <p>The following code implements this transformation, storing the new coordinates as <code>x</code> and <code>y</code> and then plots the batted ball locations. It also overlays the first and third base lines, the base paths and places points at the base locations.</p>
@@ -639,7 +651,7 @@ FALSE  TRUE
 <span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">Out =</span> <span class="fu">ifelse</span>(end_events <span class="sc">%in%</span> out_events, <span class="dv">1</span>, <span class="dv">0</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="binning-and-averaging" class="level3">
-<h3 class="anchored" data-anchor-id="binning-and-averaging">Binning and averaging</h3>
+<h3 class="anchored" data-anchor-id="binning-and-averaging">Binning and Averaging</h3>
 <p>One potential approach works by dividing the field into small rectangular regions and computing the proportion of balls landing within each region that result in an out. To this end, we will first create a grid of 3ft x 3ft squares that covers the range of our batted ball locations.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">range</span>(bip<span class="sc">$</span>x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1195,15 +1207,15 @@ Warning
 </dl>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "Starting l = 2025-08-27 09:57:49.644412"
-[1] "Starting l = 2025-08-27 09:59:04.242862"
-[1] "Starting l = 2025-08-27 10:00:12.467914"
-[1] "Starting l = 2025-08-27 10:01:38.263245"
-[1] "Starting l = 2025-08-27 10:03:05.567834"
-[1] "Starting l = 2025-08-27 10:04:28.544976"
-[1] "Starting l = 2025-08-27 10:05:49.736759"
-[1] "Starting l = 2025-08-27 10:06:30.463164"
-[1] "Starting l = 2025-08-27 10:07:10.79696"</code></pre>
+<pre><code>[1] "Starting l = 2025-08-29 14:38:00.552928"
+[1] "Starting l = 2025-08-29 14:39:14.987264"
+[1] "Starting l = 2025-08-29 14:40:23.477313"
+[1] "Starting l = 2025-08-29 14:41:49.002872"
+[1] "Starting l = 2025-08-29 14:43:16.114538"
+[1] "Starting l = 2025-08-29 14:44:38.687035"
+[1] "Starting l = 2025-08-29 14:45:59.223967"
+[1] "Starting l = 2025-08-29 14:46:39.934514"
+[1] "Starting l = 2025-08-29 14:47:20.333144"</code></pre>
 </div>
 </div>
 <p>The columns <code>p_out_1</code>, …, <code>p_out_9</code> in <code>def_atbat2024</code> contain several <code>NA</code> values. Some of these correspond to at-bats that did not result in ball being put in play (i.e., those with <code>end_type = S</code> or <code>end_type = B</code>) while others correspond to at-bats in which the ball was hit far away from the typical location of the fielder. For these latter at-bats, we will manually set the position-specific out probabilities as follows: 1. For home runs and balls hit outside the 150ft radius for each position, we set <code>p_out_*</code> = 0 2. For at-bats ending with a strike or ball, we keep <code>p_out_* = NA</code>. 3. For balls in play with missing <code>x</code> and <code>y</code> coordinates, we set <code>p_out_* = NA</code></p>
@@ -1656,7 +1668,7 @@ Baumer, Benjamin S., Shane T. Jensen, and Gregory J. Matthews. 2015. <span>“<s
 </div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
-<li id="fn1"><p>The official position numberings are: 1 (pitcher), 2 (catcher), 3 (first baseman), 4 (second baseman), 5 (third baseman), 6 (shortstop), 7 (left fielder), 8 (center fielder), and 9 (right fielder).<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>The official position numbers are: 1 (pitcher), 2 (catcher), 3 (first baseman), 4 (second baseman), 5 (third baseman), 6 (shortstop), 7 (left fielder), 8 (center fielder), and 9 (right fielder).<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>If you’re keen to learn more about splines, consider taking STAT 351 (Introduction to Nonparametric Statistics). A lot of the mathematical theory underpinning smoothing splines was developed by Prof.&nbsp;<a href="https://en.wikipedia.org/wiki/Grace_Wahba">Grace Wahba</a>, who was a long-serving member of the faculty here.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn3"><p>This choice is decidedly ad hoc. You should experiment with different cut-offs to see how the downstream results change!<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn4"><p>The Cy Young Award is given to the best pitchers in the National League and American League.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
