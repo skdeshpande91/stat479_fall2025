@@ -104,7 +104,7 @@ $$
 - $\hat{p}_{i}$: predicted $\textrm{XG}$ for shot $i$ from fitted model
 - How close is $\hat{p}_{i}$ to $y_{i}$?
 
-## Misclassification Rate (Definition)
+## Misclassification Rate (Definition) {.smaller}
 
 - $\hat{p}_{i} > 0.5:$ model predicts $y_{i} = 1$ more likely than $y_{i} = 0$
 - Ideal: $\hat{p}_{i} > 0.5$ when $y_{i} = 1$ and $\hat{p}_{i} < 0.5$ when $y_{i} = 0$
@@ -116,7 +116,7 @@ $$
 \textrm{MISS} = n^{-1}\sum_{i = 1}^{n}{\mathbb{I}(y_{i} \neq \mathbb{I}(\hat{p}_{i} \geq 0.5))},
 $$
 
-## Misclassification Rate (Example)
+## Misclassification Rate (Example) {.scrollable}
 
 ```{r}
 #| label: misclass-code
@@ -149,8 +149,30 @@ cat("Model 2 misclassificaiton",
 
 - Why do Models 1 & 2 have the same misclassification rate???
 
+. . .
 
-## Brier Score (Definition)
+:::{.panel-tabset}
+
+### XG1
+```{r}
+#| label: unik-xg1
+#| eval: true
+#| echo: false
+simple_preds |> dplyr::select(shot.body_part.name, XG1) |> unique()
+
+```
+### XG2
+```{r}
+#| label: unik-xg2
+#| eval: true
+#| echo: false
+simple_preds |> dplyr::select(shot.body_part.name, shot.technique.name, XG2) |> unique()
+```
+:::
+
+
+
+## Brier Score (Definition) {.smaller}
 - MISS only cares whether $\hat{p}_{i}$ is on the wrong-side of 50%
   - Forecasting $\hat{p} = 0.501$ and $\hat{p} = 0.999$ have same loss when $y = 0$
   - Doesn't penalize how **far** $\hat{p}$ is from $Y$
@@ -195,7 +217,7 @@ cat("Model 2 Brier Score:",
 
 
 ## Log-Loss (Definition)
-- Like Brier Score but penalizes extreme mistakes more severely
+- Like Brier but penalizes extreme mistakes more severely
 
 $$
 \textrm{LogLoss} = -1 \times \sum_{i = 1}^{n}{\left[ y_{i} \times \log(\hat{p}_{i}) + (1 - y_{i})\times\log(1-\hat{p}_{i})\right]}.
@@ -251,7 +273,7 @@ cat("Model 2 Log-Loss:",
   - Fit model to *estimate* $\mathbb{E}[Y \vert \boldsymbol{\mathbf{X}} = \boldsymbol{\mathbf{x}}]$
   - Fitted model returns predictions $\hat{p}(\boldsymbol{\mathbf{x}})$
 - Computed $\textrm{MISS}, \textrm{Brier},$ and $\textrm{LogLoss}$ w/ same data used to fit model
-- This only checks whether model fits **observed** data well?
+- This only checks whether model fits **observed** data well
 
 . . . 
 
@@ -329,6 +351,8 @@ train_preds <-
 ```
 
 ### Evaluate Models
+
+:::{.fragment}
 ```{r}
 #| label: single-fold-simple-test-code
 #| eval: false
@@ -345,8 +369,11 @@ logloss(train_preds$Y, train_preds$XG2)
 logloss(test_preds$Y, test_preds$XG2)
 ```
 
-. . .
+:::
 
+
+
+:::{.fragment}
 ```{r}
 #| label: single-fold-simple-test-eval
 #| eval: true
@@ -366,12 +393,19 @@ cat("BodyPart+Technique train log-loss:",
     "test log-loss:",
     round(logloss(test_preds$Y, test_preds$XG2), digits = 3), "\n")
 ```
+:::
 
 :::
 
-## Multiple Splits
+## Multiple Splits{.smaller}
 
 - Recommend averaging over many train/test splits (e.g., 100)
+- See [lecture notes](../../lectures/lecture03.qmd) for full code
+- Each iteration in a `for()` loop:
+  - Sets new seed & form new train/test split
+  - Re-trains both XG models and computes train & test error
+  - Save errors in an array
+
 ```{r}
 #| label: cv-simple
 #| eval: true
@@ -632,7 +666,7 @@ wi_shots <- wi_shots |>
   dplyr::mutate(shot.body_part.name = factor(shot.body_part.name))
 ```
 
-## Model Specification
+## Model Specification{.smaller}
 
 $$
 \beta_{0} + \beta_{1}\times \textrm{DistToGoal} + \\ \beta_{\textrm{LeftFoot}}\times \mathbb{I}(\textrm{LeftFoot}) + \beta_{\textrm{RightFoot}} \times \mathbb{I}(\textrm{RightFoot})
@@ -641,9 +675,9 @@ $$
 - Different predictions based on the body part used to attempt the shot
 
 - For a shot taken at distance $d$:
-  - Header: log-odds $ = \beta_{0} + \beta_{1}d$
-  - Left-footed shot: $ = \beta_{0} + \beta_{1}d + \beta_{\textrm{LeftFoot}}$ 
-  - Right-footed shot: $ = \beta_{0} + \beta_{1}d + \beta_{\textrm{RightFoot}}$
+  - Header: log-odds: $\beta_{0} + \beta_{1}d$
+  - Left-footed shot: $\beta_{0} + \beta_{1}d + \beta_{\textrm{LeftFoot}}$ 
+  - Right-footed shot: $\beta_{0} + \beta_{1}d + \beta_{\textrm{RightFoot}}$
   
 ## Fitted Model{.scrollable}
   
@@ -905,6 +939,11 @@ shot_vars
 
 ## Regression Trees II
 
+![Left: True function (pink) and a step function approximation (green). Right: representation of the step function as a regression tree](treeapprx_cart.png){width="80%"}
+
+
+## Regression Trees III
+
 ![](tree_appx_wide.png)
 
 - Regression trees can approximate functions arbitrarily well
@@ -1005,3 +1044,109 @@ logloss(y_train, train_preds)
 logloss(y_test, test_preds)
 ```
 :::
+
+## Average Out-of-Sample Performance
+
+- Across 100 random train/test splits random forests model outperforms others
+```{r}
+#| label: cv-ranger
+n_sims <- 100
+train_logloss <- rep(NA, times = n_sims)
+test_logloss <- rep(NA, times = n_sims)
+
+for(r in 1:n_sims){
+  set.seed(479+r)
+  train_data <-
+    wi_shots |>
+    dplyr::slice_sample(n = n_train) |>
+    dplyr::select(dplyr::all_of(c("id",shot_vars)))
+
+  test_data <-
+    wi_shots |>
+    dplyr::anti_join(y = train_data, by = "id") |>
+    dplyr::select(dplyr::all_of(c("id", shot_vars)))
+
+  y_train <- train_data$Y
+  y_test <- test_data$Y
+
+  train_data <-
+    train_data |>
+    dplyr::mutate(Y = factor(Y, levels = c(0,1))) |>
+    dplyr::select(-id)
+  test_data <-
+    test_data |>
+    dplyr::mutate(Y = factor(Y, levels = c(0,1))) |>
+    dplyr::select(-id)
+  
+  fit <- ranger::ranger(
+    formula = Y~.,
+    data = train_data, 
+    probability = TRUE)
+  train_preds <- 
+    predict(object = fit, data = train_data)$predictions[,2]
+
+  test_preds <- 
+    predict(object = fit, data = test_data)$predictions[,2]
+
+  train_logloss[r] <- logloss(y_train, train_preds)
+  test_logloss[r] <- logloss(y_test, test_preds)
+}
+cat("RandomForest training logloss:", round(mean(train_logloss), digits = 4), "\n")
+cat("RandomForest testing logloss:", round(mean(test_logloss), digits = 4), "\n")
+```
+
+## Comparison to StatsBomb's Model
+
+:::{.panel-tabset}
+### Full RF Model
+```{r}
+#| label: train-full-rf
+#| echo: true
+#| eval: true
+full_data <-
+  wi_shots |>
+  dplyr::select(dplyr::all_of(c("id",shot_vars)))
+
+full_rf_fit <-
+  ranger::ranger(formula = Y~.,data = full_data, probability = TRUE)
+
+preds <- predict(object = fit, data = full_data)$predictions[,2]
+```
+
+### In-Sample Loss
+```{r}
+
+cat("RandomForest training logloss:", round(logloss(full_data$Y, preds), digits = 4), "\n")
+cat("StatsBomb training logloss:", round(logloss(wi_shots$Y, wi_shots$shot.statsbomb_xg), digits = 4), "\n")
+```
+
+### Comparison
+```{r}
+#| label: fig-compare-statsbomb
+#| fig-align: center
+#| fig-width: 4
+#| fig-height: 4
+#| fig-cap: Comparing our random forest predictions to StatsBomb's proprietary XG
+
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+plot(wi_shots$shot.statsbomb_xg, preds,
+     pch = 16, cex = 0.5, col = rgb(0,0,0, 0.25),
+     xlim = c(0, 1), ylim = c(0,1),
+     xlab = "StatsBomb's XG", ylab = "Our XG", main = 'Comparison of XG estimates')
+```
+
+:::
+
+## Looking Ahead{.smaller}
+
+- Next week: model-based assessment of NBA player performance
+  - Good idea to read [notes](../../lectures/lecture04.qmd) & install **hoopR**
+  - Review notes on linear regression from prev. course (e.g., STAT 333 or 340)
+  - [Chapter 1.6](https://bookdown.org/roback/bookdown-BeyondMLR/ch-MLRreview.html#multreg) of *Beyond Multiple Linear Regression* is a great resource as well
+- Form projects groups by tomorrow
+  - Should be able to sign up on Canvas
+  - Email me if you're running into issues
+  - Piazza can help find teammates
+- I'll post several project ideas over the weekend
+  - Goal for y'all: form ideas of what y'all want to do by end of next week
+  - Goal for me: check-in w/ all project teams by 9/26

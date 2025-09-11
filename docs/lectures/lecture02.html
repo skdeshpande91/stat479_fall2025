@@ -268,6 +268,14 @@ window.Quarto = {
     <a class="dropdown-item" href="../slides/lecture05.html">
  <span class="dropdown-text">Lecture 5: Regularized Adjusted Plus/Minus</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture06.html">
+ <span class="dropdown-text">Lecture 6: Expected Runs</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture08.html">
+ <span class="dropdown-text">Lecture 8: Defensive Credit Allocation &amp; WAR</span></a>
+  </li>  
     </ul>
   </li>
 </ul>
@@ -613,7 +621,7 @@ Generalization
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>A key assumption of all XG models is that the observed data is a random sample drawn from the super-population. The only women’s internationals matches for which StatsBomb data were from the 2019 and 2023 World Cup and the 2022 EURO tournaments. These matches are arguably <strong>not</strong> highly representative of all women’s international matches, meaning that we should exercise some caution when using models fitted to these data to analyze matches from other competitions (e.g., an international friendly or a match in a domestic league).</p>
+<p>A key assumption of all XG models is that the observed data is a random sample drawn from the super-population. The only women’s internationals matches for which StatsBomb data were from the 2019 and 2023 World Cup and the 2022 and 2025 EURO tournaments. These matches are arguably <strong>not</strong> highly representative of all women’s international matches, meaning that we should exercise some caution when using models fitted to these data to analyze matches from other competitions (e.g., an international friendly or a match in a domestic league).</p>
 </div>
 </div>
 <p>We can now create a table of just Beth Mead’s shots from EURO 2022 and add a column with the XG for each shot. To do this, we first filter our table <code>wi_shots</code> using the player name (note, StatsBomb uses her full name!). Then, for every left-footed shot Mead attempted, we want to copy over the corresponding value from the table <code>xg_model1</code>, which in this case is 0.114. Similarly, we want to copy over the corresponding values for right-footed shots and headers from <code>xg_model1</code> into our table for Mead’s shots. We can do this using an <a href="https://r4ds.hadley.nz/joins.html#sec-mutating-joins">left join</a>. In the code below, we actually create a temporary version of <code>xg_model1</code> that drops the column recording the overall counts of the body part used for the shots in <code>wi_shots</code>. This way, when we perform the join, we don’t create a new column with these counts.</p>

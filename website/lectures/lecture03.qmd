@@ -836,7 +836,7 @@ train_logloss <- rep(NA, times = n_sims)
 test_logloss <- rep(NA, times = n_sims)
 
 for(r in 1:n_sims){
-  set.seed(479)
+  set.seed(479+r)
   train_data <-
     wi_shots |>
     dplyr::slice_sample(n = n_train) |>
@@ -884,17 +884,17 @@ In the code below, we re-fit a random forests model to the whole dataset.
 We then plot our XG estimates against StatsBomb's.
 
 ```{r}
-#| label: compare-statsbomb
+#| label: fig-compare-statsbomb
 #| fig-align: center
 #| fig-width: 4
-train_data <-
+full_data <-
   wi_shots |>
   dplyr::select(dplyr::all_of(c("id",shot_vars)))
 
 full_rf_fit <-
-  ranger::ranger(formula = Y~.,data = train_data, probability = TRUE)
+  ranger::ranger(formula = Y~.,data = full_data, probability = TRUE)
 
-preds <- predict(object = fit, data = train_data)$predictions[,2]
+preds <- predict(object = fit, data = full_data)$predictions[,2]
 
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
 plot(wi_shots$shot.statsbomb_xg, preds,
