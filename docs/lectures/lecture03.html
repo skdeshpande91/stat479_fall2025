@@ -931,7 +931,7 @@ Extrapolation
 <ol type="1">
 <li><code>object</code>: this is the output from our <code>glm</code> call (i.e., the fitted model object), which we have here saved as <code>fit1</code></li>
 <li><code>newdata</code>: this is a data table containing the features of the observations for which we would like predictions. The table that we pass here needs to have columns for every feature used in the model.</li>
-<li><code>type</code>: When <code>object</code> is the result from fitting a logistic regression model, <code>predict</code> will return predictions on the log-odds scale (i.e, <span class="math inline">\(\hat{\beta}_{0} + \hat{\beta}_{1}X_[1} + \cdots + \hat{\beta}_{p}X_{p}\)</span>) by default. To get predictions on the probability scale, we need to set <code>type = "response"</code></li>
+<li><code>type</code>: When <code>object</code> is the result from fitting a logistic regression model, <code>predict</code> will return predictions on the log-odds scale (i.e, <span class="math inline">\(\hat{\beta}_{0} + \hat{\beta}_{1}X_{1} + \cdots + \hat{\beta}_{p}X_{p}\)</span>) by default. To get predictions on the probability scale, we need to set <code>type = "response"</code></li>
 </ol>
 <p>In the code below, we obtain predictions for both the training and testing observations and then compute the average log-loss for this training/testing split.</p>
 <div class="cell">
@@ -1431,7 +1431,7 @@ Figure&nbsp;4: Complex trees can be represented as sums of simpler trees
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>full_data <span class="ot">&lt;-</span></span>
 <span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  wi_shots <span class="sc">|&gt;</span></span>
-<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(dplyr<span class="sc">::</span><span class="fu">all_of</span>(<span class="fu">c</span>(<span class="st">"id"</span>,shot_vars)))</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(dplyr<span class="sc">::</span><span class="fu">all_of</span>(<span class="fu">c</span>(shot_vars)))</span>
 <span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>full_rf_fit <span class="ot">&lt;-</span></span>
 <span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>  ranger<span class="sc">::</span><span class="fu">ranger</span>(<span class="at">formula =</span> Y<span class="sc">~</span>.,<span class="at">data =</span> full_data, <span class="at">probability =</span> <span class="cn">TRUE</span>)</span>

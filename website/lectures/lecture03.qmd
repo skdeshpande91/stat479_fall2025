@@ -455,7 +455,7 @@ The function takes three arguments:
 
   1. `object`: this is the output from our `glm` call (i.e., the fitted model object), which we have here saved as `fit1`
   2. `newdata`: this is a data table containing the features of the observations for which we would like predictions. The table that we pass here needs to have columns for every feature used in the model.
-  3. `type`: When `object` is the result from fitting a logistic regression model, `predict` will return predictions on the log-odds scale (i.e, $\hat{\beta}_{0} + \hat{\beta}_{1}X_[1} + \cdots + \hat{\beta}_{p}X_{p}$) by default. To get predictions on the probability scale, we need to set `type = "response"`
+  3. `type`: When `object` is the result from fitting a logistic regression model, `predict` will return predictions on the log-odds scale (i.e, $\hat{\beta}_{0} + \hat{\beta}_{1}X_{1} + \cdots + \hat{\beta}_{p}X_{p}$) by default. To get predictions on the probability scale, we need to set `type = "response"`
 
 In the code below, we obtain predictions for both the training and testing observations and then compute the average log-loss for this training/testing split.
 ```{r}
@@ -889,7 +889,7 @@ We then plot our XG estimates against StatsBomb's.
 #| fig-width: 4
 full_data <-
   wi_shots |>
-  dplyr::select(dplyr::all_of(c("id",shot_vars)))
+  dplyr::select(dplyr::all_of(c(shot_vars)))
 
 full_rf_fit <-
   ranger::ranger(formula = Y~.,data = full_data, probability = TRUE)
