@@ -630,43 +630,6 @@ raa_b <-
 ```
 
 
-<!--As noted in [@Baumer2015_openWAR, Section 3.3], we need to take care to calibrate each batter's hitting performance with the expected performance by position.-->
-<!-- Update: 1 August: since the NL instituted the DH rule, there's little need for positional adjustment. This also conserves the runs -->
-
-<!--
-### Average Run Value by Position {#sec-rv_position}
-```{r}
-#| label: batting-calibration
-load("positions2024.RData")
-batting <-
-  atbat2024 |>
-  dplyr::select(batter, mu) |>
-  dplyr::rename(key_mlbam = batter) |>
-  dplyr::left_join(y = positions2024, by = "key_mlbam")
-
-avg_mu_position <-
-  batting |>
-  dplyr::group_by(position) |>
-  dplyr::summarise(avg_mu = mean(mu))
-```
-
-We can now go through and subtract the position average from each $\hat{\mu}_{i}$ in `batting`.
-This represents the run value above average created by the batter's hittign in the at-bat.
-In the following code, we aggregate these at-bat level run values above average for each player.
-We denote the total $\textrm{RAA}^{\textrm{b}}.$
-
-```{r}
-#| label: compute-raa-b
-raa_b <-
-  batting |>
-  dplyr::left_join(y = avg_mu_position, by = "position") |>
-  dplyr::mutate(mu_aa = mu - avg_mu) |>
-  dplyr::group_by(key_mlbam) |>
-  dplyr::summarise(RAA_b = sum(mu)) |>
-  dplyr::left_join(y = player2024_lookup, by = "key_mlbam") |>
-  dplyr::select(Name, key_mlbam, RAA_b)
-```
--->
 We find a lot of very good batters among the players with highest $\textrm{RAA}^{\textrm{b}}$'s 
 ```{r}
 #| label: top-raa-b
