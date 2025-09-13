@@ -32,6 +32,7 @@ We will also want to include the columns `event` and `des`, which record the eve
 #| label: data-prep
 load("statcast2024.RData")
 load("runValue2024.RData")
+load("player2024_lookup.RData")
 raw_atbat2024 <- 
   statcast2024 |>
   dplyr::group_by(game_pk, inning, inning_topbot) |> # <1> 
@@ -234,7 +235,7 @@ It works by first checking whether there is anyone on 1b at the start of the at-
 If so, it checks whether that player is on first, second, or third base at the end of the at-bat.
 If not, it parses the at-bat description contained in `des` and looks for a sentence containing the player's name.
 If that sentence contains the words "out" or "caught stealing", it sets the number of bases advanced to 0.
-But, if the sentnce contains the word "score", it sets the number of bases advanced to 3, since the runner scored from first.
+But, if the sentence contains the word "score", it sets the number of bases advanced to 3, since the runner scored from first.
 ```{r}
 load("player2024_lookup.RData")
 #| label: mvt-1b-function
@@ -556,7 +557,7 @@ For each player, we can aggregate these values across all at-bats in which they 
 raa_1b <-
   baserunning |>
   dplyr::filter(!is.na(on_1b)) |>
-  dplyr::mutate(RAA_1b = kappa_1b * eta) |>
+  dplyr::mutate(RAA_1b = norm_1b * eta) |>
   dplyr::group_by(on_1b) |>
   dplyr::summarise(RAA_1b = sum(RAA_1b)) |>
   dplyr::rename(key_mlbam = on_1b)
@@ -570,7 +571,7 @@ We can similarly compute the run value above average created by the runners on s
 raa_2b <-
   baserunning |>
   dplyr::filter(!is.na(on_2b)) |>
-  dplyr::mutate(RAA_2b = kappa_2b * eta) |>
+  dplyr::mutate(RAA_2b = norm_2b * eta) |>
   dplyr::group_by(on_2b) |>
   dplyr::summarise(RAA_2b = sum(RAA_2b)) |>
   dplyr::rename(key_mlbam = on_2b)
@@ -578,14 +579,14 @@ raa_2b <-
 raa_3b <-
   baserunning |>
   dplyr::filter(!is.na(on_3b)) |>
-  dplyr::mutate(RAA_3b = kappa_3b * eta) |>
+  dplyr::mutate(RAA_3b = norm_3b * eta) |>
   dplyr::group_by(on_3b) |>
   dplyr::summarise(RAA_3b = sum(RAA_3b)) |>
   dplyr::rename(key_mlbam = on_3b)
 
 raa_batter <-
   baserunning |>
-  dplyr::mutate(RAA_batter = kappa_batter * eta) |>
+  dplyr::mutate(RAA_batter = norm_batter * eta) |>
   dplyr::group_by(batter) |>
   dplyr::summarise(RAA_batter = sum(RAA_batter)) |>
   dplyr::rename(key_mlbam = batter)
@@ -611,10 +612,28 @@ Interestingly, the player with the largest $\textrm{RAA}^{\textrm{br}}$, Jose Ra
 
 ## Crediting Batters {#sec-batting}
 
-We now need to distribute $\hat{\mu}_{i}$ to each batter.
-As noted in [@Baumer2015_openWAR, Section 3.3], we need to take care to calibrate each batter's hitting performance with the expected performance by position.
+We will credit $\hat{\mu}_{i}$ to each batter.
+The following code block totals the $\hat{\mu}_{i}$ for each batter.
+```{r}
+#| label: compute-raa-b
+batting <- 
+  atbat2024 |>
+  dplyr::select(batter, mu) |>
+  dplyr::rename(key_mlbam = batter)
+
+raa_b <-
+  batting |>
+  dplyr::group_by(key_mlbam) |>
+  dplyr::summarise(RAA_b = sum(mu)) |>
+  dplyr::left_join(y = player2024_lookup, by = "key_mlbam") |>
+  dplyr::select(Name, key_mlbam, RAA_b)
+```
+
+
+<!--As noted in [@Baumer2015_openWAR, Section 3.3], we need to take care to calibrate each batter's hitting performance with the expected performance by position.-->
 <!-- Update: 1 August: since the NL instituted the DH rule, there's little need for positional adjustment. This also conserves the runs -->
 
+<!--
 ### Average Run Value by Position {#sec-rv_position}
 ```{r}
 #| label: batting-calibration
@@ -647,7 +666,7 @@ raa_b <-
   dplyr::left_join(y = player2024_lookup, by = "key_mlbam") |>
   dplyr::select(Name, key_mlbam, RAA_b)
 ```
-
+-->
 We find a lot of very good batters among the players with highest $\textrm{RAA}^{\textrm{b}}$'s 
 ```{r}
 #| label: top-raa-b

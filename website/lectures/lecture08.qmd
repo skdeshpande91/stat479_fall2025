@@ -660,7 +660,7 @@ for(l in 1:9){
   preds <- predict(object = fit_list[[l]], newdata = tmp_df, type = "response")  #<10>
   def_atbat2024[[paste0("p_out_", l)]] <- preds #<11>
 }
-save(fit_list, file = "position_gam_fits.RData") #<12>
+save(fit_list, mid_x, mid_y, file = "position_gam_fits.RData") #<12>
 ```
 1. Vectors containing coordinates for the typical fielder location
 2. Holds all fitted objects, so that we can use them later to visualize position-specific out probabilities
@@ -1023,7 +1023,8 @@ cat("Cut-off for pitchers:", pitcher_pa$n[360], "\n")
 6. Get the IDs of the position players and pitchers outside, respectively, the top 390 and 360 numbers of plate appearances
 
 Ultimately, we wish to compare each player's $RAA$ to the $RAA$ that would have been created had the player been replaced by a replacement-level player.
-To estimate this counter-factual $RAA$, we will divide the total $RAA$ produced by all replacement-level players by the total number of plate appearances..
+To estimate this counter-factual $RAA$, we will divide the total $RAA$ produced by all replacement-level players by the total number of plate appearances.
+
 ```{r}
 #| label: compute-avg-repl
 

@@ -374,7 +374,10 @@ Figure&nbsp;3: New coordinate system
                         0 </code></pre>
 </div>
 </div>
-<p>. . . - All <code>events</code> for balls and strikes</p>
+<div class="fragment">
+<ul>
+<li>All <code>events</code> for balls and strikes</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a><span class="fu">table</span>(def_atbat2024<span class="sc">$</span>end_events[def_atbat2024<span class="sc">$</span>end_type <span class="sc">!=</span> <span class="st">"X"</span>], <span class="at">useNA =</span> <span class="st">'always'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -385,6 +388,7 @@ Figure&nbsp;3: New coordinate system
                 40145                   107                   304 
                  walk                  &lt;NA&gt; 
                 14029                     0 </code></pre>
+</div>
 </div>
 </div>
 </section>
@@ -516,7 +520,7 @@ Figure&nbsp;6: Logistic regression forecasts of out probabilities as a function 
 <section id="gam-estimates" class="slide level2">
 <h2>GAM Estimates</h2>
 <div class="panel-tabset">
-<ul id="tabset-4" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-4-1">Fit GAM</a></li><li><a href="#tabset-4-2">Visulization</a></li><li><a href="#tabset-4-3">Appending Out Probs</a></li></ul>
+<ul id="tabset-4" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-4-1">Fit GAM</a></li><li><a href="#tabset-4-2">Visualization</a></li><li><a href="#tabset-4-3">Appending Out Probs</a></li></ul>
 <div class="tab-content">
 <div id="tabset-4-1">
 <ul>
@@ -547,20 +551,20 @@ Figure&nbsp;7: GAM-estimated out probabilities
 </div>
 <div id="tabset-4-3">
 <div class="cell">
-<div class="sourceCode cell-code" id="annotated-cell-11"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy"><code class="sourceCode r"><span id="annotated-cell-11-1"><a href="#annotated-cell-11-1"></a>all_preds <span class="ot">&lt;-</span></span>
-<span id="annotated-cell-11-2"><a href="#annotated-cell-11-2"></a>  <span class="fu">predict</span>(<span class="at">object =</span> gam_fit, </span>
-<span id="annotated-cell-11-3"><a href="#annotated-cell-11-3"></a>          <span class="at">newdata =</span> def_atbat2024,</span>
-<span id="annotated-cell-11-4"><a href="#annotated-cell-11-4"></a>          <span class="at">type =</span> <span class="st">"response"</span>)</span>
-<span id="annotated-cell-11-5"><a href="#annotated-cell-11-5"></a>def_atbat2024<span class="sc">$</span>p_out <span class="ot">&lt;-</span> all_preds</span>
-<span id="annotated-cell-11-6"><a href="#annotated-cell-11-6"></a></span>
-<span id="annotated-cell-11-7"><a href="#annotated-cell-11-7"></a>def_atbat2024 <span class="ot">&lt;-</span></span>
-<span id="annotated-cell-11-8"><a href="#annotated-cell-11-8"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-11-9"><a href="#annotated-cell-11-9"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="annotated-cell-11-10"><a href="#annotated-cell-11-10"></a>    <span class="at">p_out =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
-<span id="annotated-cell-11-11"><a href="#annotated-cell-11-11"></a>      <span class="fu">is.na</span>(p_out) <span class="sc">&amp;</span> end_events <span class="sc">==</span> <span class="st">"home_run"</span> <span class="sc">~</span> <span class="dv">0</span>, </span>
-<span id="annotated-cell-11-12"><a href="#annotated-cell-11-12"></a>      <span class="fu">is.na</span>(p_out) <span class="sc">&amp;</span> end_type <span class="sc">!=</span> <span class="st">"X"</span> <span class="sc">~</span> <span class="dv">0</span>, </span>
-<span id="annotated-cell-11-13"><a href="#annotated-cell-11-13"></a>      <span class="at">.default =</span> p_out)) <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-11-14"><a href="#annotated-cell-11-14"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(p_out))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-13"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy"><code class="sourceCode r"><span id="annotated-cell-13-1"><a href="#annotated-cell-13-1"></a>all_preds <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-13-2"><a href="#annotated-cell-13-2"></a>  <span class="fu">predict</span>(<span class="at">object =</span> gam_fit, </span>
+<span id="annotated-cell-13-3"><a href="#annotated-cell-13-3"></a>          <span class="at">newdata =</span> def_atbat2024,</span>
+<span id="annotated-cell-13-4"><a href="#annotated-cell-13-4"></a>          <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="annotated-cell-13-5"><a href="#annotated-cell-13-5"></a>def_atbat2024<span class="sc">$</span>p_out <span class="ot">&lt;-</span> all_preds</span>
+<span id="annotated-cell-13-6"><a href="#annotated-cell-13-6"></a></span>
+<span id="annotated-cell-13-7"><a href="#annotated-cell-13-7"></a>def_atbat2024 <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-13-8"><a href="#annotated-cell-13-8"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-13-9"><a href="#annotated-cell-13-9"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="annotated-cell-13-10"><a href="#annotated-cell-13-10"></a>    <span class="at">p_out =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="annotated-cell-13-11"><a href="#annotated-cell-13-11"></a>      <span class="fu">is.na</span>(p_out) <span class="sc">&amp;</span> end_events <span class="sc">==</span> <span class="st">"home_run"</span> <span class="sc">~</span> <span class="dv">0</span>, </span>
+<span id="annotated-cell-13-12"><a href="#annotated-cell-13-12"></a>      <span class="fu">is.na</span>(p_out) <span class="sc">&amp;</span> end_type <span class="sc">!=</span> <span class="st">"X"</span> <span class="sc">~</span> <span class="dv">0</span>, </span>
+<span id="annotated-cell-13-13"><a href="#annotated-cell-13-13"></a>      <span class="at">.default =</span> p_out)) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-13-14"><a href="#annotated-cell-13-14"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(p_out))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
@@ -649,7 +653,7 @@ Figure&nbsp;7: GAM-estimated out probabilities
 <section id="fielding-responsibility" class="slide level2 smaller">
 <h2>Fielding Responsibility</h2>
 <ul>
-<li>Say ball hit towards gap b/w 1st base and left field
+<li>Say ball hit towards gap b/w 1st base and right field
 <ul>
 <li>Batting team creates large positive <span class="math inline">\(\delta\)</span></li>
 <li><span class="math inline">\(\hat{p} \approx 0\)</span></li>
@@ -657,6 +661,57 @@ Figure&nbsp;7: GAM-estimated out probabilities
 </ul></li>
 <li>How much blame should third baseman receive?</li>
 </ul>
+</section>
+<section id="fielder-out-probabilities" class="slide level2">
+<h2>Fielder Out Probabilities</h2>
+<div class="panel-tabset">
+<ul id="tabset-6" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-6-1">1B Out Prob</a></li><li><a href="#tabset-6-2">3B Out Prob</a></li><li><a href="#tabset-6-3">RF Out Prob</a></li></ul>
+<div class="tab-content">
+<div id="tabset-6-1">
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-1b-pout" class="quarto-float quarto-figure quarto-figure-center" width="480">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-1b-pout-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="slides_08_files/figure-revealjs/fig-1b-pout-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8" title="Figure&nbsp;8: "><img data-src="slides_08_files/figure-revealjs/fig-1b-pout-1.png" id="fig-1b-pout" width="480"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-1b-pout-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-6-2">
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-3b-pout" class="quarto-float quarto-figure quarto-figure-center" width="480">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-3b-pout-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="slides_08_files/figure-revealjs/fig-3b-pout-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" title="Figure&nbsp;9: "><img data-src="slides_08_files/figure-revealjs/fig-3b-pout-1.png" id="fig-3b-pout" width="480"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-3b-pout-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-6-3">
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><a href="slides_08_files/figure-revealjs/unnamed-chunk-1-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10"><img data-src="slides_08_files/figure-revealjs/unnamed-chunk-1-1.png" width="960"></a></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 </section>
 <section id="position-weights" class="slide level2 smaller">
 <h2>Position Weights</h2>
@@ -676,8 +731,64 @@ w_{\ell} = \frac{\hat{p}_{\ell}}{\hat{p}_{1} + \cdots + \hat{p}_{9}}
 </ul></li>
 </ul>
 </section>
-<section id="run-value-by-position" class="slide level2">
-<h2>Run Value by Position</h2>
+<section id="position-weights-examples" class="slide level2">
+<h2>Position Weights Examples</h2>
+<div class="panel-tabset">
+<ul id="tabset-7" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-7-1">1B Weight</a></li><li><a href="#tabset-7-2">3B Weight</a></li><li><a href="#tabset-7-3">RF Weight</a></li></ul>
+<div class="tab-content">
+<div id="tabset-7-1">
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-1b-weight" class="quarto-float quarto-figure quarto-figure-center" width="480">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-1b-weight-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="slides_08_files/figure-revealjs/fig-1b-weight-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-11" title="Figure&nbsp;10: "><img data-src="slides_08_files/figure-revealjs/fig-1b-weight-1.png" id="fig-1b-weight" width="480"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-1b-weight-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-7-2">
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-3b-weight" class="quarto-float quarto-figure quarto-figure-center" width="480">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-3b-weight-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="slides_08_files/figure-revealjs/fig-3b-weight-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-12" title="Figure&nbsp;11: "><img data-src="slides_08_files/figure-revealjs/fig-3b-weight-1.png" id="fig-3b-weight" width="480"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-3b-weight-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-7-3">
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-rf-weight" class="quarto-float quarto-figure quarto-figure-center" width="480">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-rf-weight-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="slides_08_files/figure-revealjs/fig-rf-weight-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-13" title="Figure&nbsp;12: "><img data-src="slides_08_files/figure-revealjs/fig-rf-weight-1.png" id="fig-rf-weight" width="480"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-rf-weight-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="run-value-by-fielding-position" class="slide level2">
+<h2>Run Value by Fielding Position</h2>
 <div class="panel-set">
 <h3 id="definition">Definition</h3>
 <ul>
@@ -731,6 +842,44 @@ w_{\ell} = \frac{\hat{p}_{\ell}}{\hat{p}_{1} + \cdots + \hat{p}_{9}}
 </ul></li>
 <li><span class="math inline">\(\textrm{RAA}^{(f)} = \textrm{RAA}^{(f)}_{1} + \cdots + \textrm{RAA}^{(f)}_{9}\)</span></li>
 </ul>
+</section>
+<section id="putting-it-all-together" class="slide level2">
+<h2>Putting It All Together</h2>
+<ul>
+<li><span class="math inline">\(\textrm{RAA} = \textrm{RAA}^{(b)} + \textrm{RAA}^{(br)} + \textrm{RAA}^{(f)} + \textrm{RAA}^{(p)}\)</span></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a>raa <span class="ot">&lt;-</span></span>
+<span id="cb17-2"><a></a>  raa_b <span class="sc">|&gt;</span></span>
+<span id="cb17-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>Name) <span class="sc">|&gt;</span></span>
+<span id="cb17-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_br <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>Name), <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb17-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_p <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>Name), <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb17-6"><a></a>  dplyr<span class="sc">::</span><span class="fu">full_join</span>(<span class="at">y =</span> raa_f <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>Name), <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb17-7"><a></a>  tidyr<span class="sc">::</span><span class="fu">replace_na</span>(<span class="fu">list</span>(<span class="at">RAA_b =</span> <span class="dv">0</span>, <span class="at">RAA_br =</span> <span class="dv">0</span>, <span class="at">RAA_f =</span> <span class="dv">0</span>, <span class="at">RAA_p =</span> <span class="dv">0</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb17-8"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RAA =</span> RAA_b <span class="sc">+</span> RAA_br <span class="sc">+</span> RAA_f <span class="sc">+</span> RAA_p) <span class="sc">|&gt;</span></span>
+<span id="cb17-9"><a></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> player2024_lookup <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(key_mlbam, Name), <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb17-10"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Name, key_mlbam, RAA, RAA_b, RAA_br, RAA_f, RAA_p)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="raa-leaderboard" class="slide level2">
+<h2>RAA Leaderboard</h2>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 7
+   Name              key_mlbam   RAA  RAA_b RAA_br RAA_f RAA_p
+   &lt;chr&gt;                 &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+ 1 Bobby Witt           677951 165.  61.1   24.9    78.7     0
+ 2 Gunnar Henderson     683002 117.  44.8   -2.82   75.0     0
+ 3 Elly De La Cruz      682829 114.  19.4   15.4    79.4     0
+ 4 Jose Ramirez         608070 113.  30.9   32.7    49.7     0
+ 5 Zach Neto            687263 110.   3.57  15.4    91.2     0
+ 6 Marcus Semien        543760 108.   0.501 17.7    89.6     0
+ 7 Ketel Marte          606466 101.  35.2   10.5    55.3     0
+ 8 Vladimir Guerrero    665489  99.0 47.3   -0.734  52.4     0
+ 9 Francisco Lindor     596019  98.5 30.6    0.699  67.2     0
+10 Jose Altuve          514888  98.2 19.3   13.9    65.0     0</code></pre>
+</div>
+</div>
 </section></section>
 <section>
 <section id="replacement-level" class="title-slide slide level1 center">
@@ -775,46 +924,119 @@ w_{\ell} = \frac{\hat{p}_{\ell}}{\hat{p}_{1} + \cdots + \hat{p}_{9}}
 <section id="identifying-non-replacement-players" class="slide level2">
 <h2>Identifying Non-Replacement Players</h2>
 <div class="panel-tabset">
-<ul id="tabset-6" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-6-1">Player Lists</a></li><li><a href="#tabset-6-2">Count PAs</a></li><li><a href="#tabset-6-3">Replacement Thresholds</a></li></ul>
+<ul id="tabset-8" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-8-1">Player Lists</a></li><li><a href="#tabset-8-2">Count PAs</a></li><li><a href="#tabset-8-3">Replacement Thresholds</a></li></ul>
 <div class="tab-content">
-<div id="tabset-6-1">
+<div id="tabset-8-1">
 <div class="cell">
-<div class="sourceCode cell-code" id="annotated-cell-18"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy"><code class="sourceCode r"><span id="annotated-cell-18-1"><a href="#annotated-cell-18-1"></a>all_players <span class="ot">&lt;-</span> <span class="fu">unique</span>(</span>
-<span id="annotated-cell-18-2"><a href="#annotated-cell-18-2"></a>  <span class="fu">c</span>(def_atbat2024<span class="sc">$</span>batter, def_atbat2024<span class="sc">$</span>pitcher, def_atbat2024<span class="sc">$</span>fielder_2,</span>
-<span id="annotated-cell-18-3"><a href="#annotated-cell-18-3"></a>    def_atbat2024<span class="sc">$</span>fielder_3, def_atbat2024<span class="sc">$</span>fielder_4, def_atbat2024<span class="sc">$</span>fielder_5,</span>
-<span id="annotated-cell-18-4"><a href="#annotated-cell-18-4"></a>    def_atbat2024<span class="sc">$</span>fielder_6, def_atbat2024<span class="sc">$</span>fielder_7, def_atbat2024<span class="sc">$</span>fielder_8, def_atbat2024<span class="sc">$</span>fielder_9))</span>
-<span id="annotated-cell-18-5"><a href="#annotated-cell-18-5"></a>pitchers <span class="ot">&lt;-</span> <span class="fu">unique</span>(def_atbat2024<span class="sc">$</span>pitcher)</span>
-<span id="annotated-cell-18-6"><a href="#annotated-cell-18-6"></a>position_players <span class="ot">&lt;-</span> all_players[<span class="sc">!</span>all_players <span class="sc">%in%</span> pitchers]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-21"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy"><code class="sourceCode r"><span id="annotated-cell-21-1"><a href="#annotated-cell-21-1"></a>all_players <span class="ot">&lt;-</span> <span class="fu">unique</span>(</span>
+<span id="annotated-cell-21-2"><a href="#annotated-cell-21-2"></a>  <span class="fu">c</span>(def_atbat2024<span class="sc">$</span>batter, def_atbat2024<span class="sc">$</span>pitcher, def_atbat2024<span class="sc">$</span>fielder_2,</span>
+<span id="annotated-cell-21-3"><a href="#annotated-cell-21-3"></a>    def_atbat2024<span class="sc">$</span>fielder_3, def_atbat2024<span class="sc">$</span>fielder_4, def_atbat2024<span class="sc">$</span>fielder_5,</span>
+<span id="annotated-cell-21-4"><a href="#annotated-cell-21-4"></a>    def_atbat2024<span class="sc">$</span>fielder_6, def_atbat2024<span class="sc">$</span>fielder_7, def_atbat2024<span class="sc">$</span>fielder_8, def_atbat2024<span class="sc">$</span>fielder_9))</span>
+<span id="annotated-cell-21-5"><a href="#annotated-cell-21-5"></a>pitchers <span class="ot">&lt;-</span> <span class="fu">unique</span>(def_atbat2024<span class="sc">$</span>pitcher)</span>
+<span id="annotated-cell-21-6"><a href="#annotated-cell-21-6"></a>position_players <span class="ot">&lt;-</span> all_players[<span class="sc">!</span>all_players <span class="sc">%in%</span> pitchers]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<div id="tabset-6-2">
+<div id="tabset-8-2">
 <div class="cell">
-<div class="sourceCode cell-code" id="annotated-cell-19"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy"><code class="sourceCode r"><span id="annotated-cell-19-1"><a href="#annotated-cell-19-1"></a>position_pa <span class="ot">&lt;-</span></span>
-<span id="annotated-cell-19-2"><a href="#annotated-cell-19-2"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-19-3"><a href="#annotated-cell-19-3"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(batter <span class="sc">%in%</span> position_players) <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-19-4"><a href="#annotated-cell-19-4"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(batter) <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-19-5"><a href="#annotated-cell-19-5"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">n =</span> dplyr<span class="sc">::</span><span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-19-6"><a href="#annotated-cell-19-6"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(n)) <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-19-7"><a href="#annotated-cell-19-7"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> batter)</span>
-<span id="annotated-cell-19-8"><a href="#annotated-cell-19-8"></a></span>
-<span id="annotated-cell-19-9"><a href="#annotated-cell-19-9"></a>pitcher_pa <span class="ot">&lt;-</span></span>
-<span id="annotated-cell-19-10"><a href="#annotated-cell-19-10"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-19-11"><a href="#annotated-cell-19-11"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(pitcher) <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-19-12"><a href="#annotated-cell-19-12"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">n =</span> dplyr<span class="sc">::</span><span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-19-13"><a href="#annotated-cell-19-13"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(n)) <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-19-14"><a href="#annotated-cell-19-14"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> pitcher)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-22"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy"><code class="sourceCode r"><span id="annotated-cell-22-1"><a href="#annotated-cell-22-1"></a>position_pa <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-22-2"><a href="#annotated-cell-22-2"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-22-3"><a href="#annotated-cell-22-3"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(batter <span class="sc">%in%</span> position_players) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-22-4"><a href="#annotated-cell-22-4"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(batter) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-22-5"><a href="#annotated-cell-22-5"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">n =</span> dplyr<span class="sc">::</span><span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-22-6"><a href="#annotated-cell-22-6"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(n)) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-22-7"><a href="#annotated-cell-22-7"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> batter)</span>
+<span id="annotated-cell-22-8"><a href="#annotated-cell-22-8"></a></span>
+<span id="annotated-cell-22-9"><a href="#annotated-cell-22-9"></a>pitcher_pa <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-22-10"><a href="#annotated-cell-22-10"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-22-11"><a href="#annotated-cell-22-11"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(pitcher) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-22-12"><a href="#annotated-cell-22-12"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">n =</span> dplyr<span class="sc">::</span><span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-22-13"><a href="#annotated-cell-22-13"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(n)) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-22-14"><a href="#annotated-cell-22-14"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> pitcher)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<div id="tabset-6-3">
+<div id="tabset-8-3">
 <div class="cell">
-<div class="sourceCode cell-code" id="annotated-cell-20"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy"><code class="sourceCode r"><span id="annotated-cell-20-1"><a href="#annotated-cell-20-1"></a>repl_position_players <span class="ot">&lt;-</span> position_pa<span class="sc">$</span>key_mlbam[<span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">390</span>)]</span>
-<span id="annotated-cell-20-2"><a href="#annotated-cell-20-2"></a>repl_pitchers <span class="ot">&lt;-</span> pitcher_pa<span class="sc">$</span>key_mlbam[<span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">360</span>)]</span>
-<span id="annotated-cell-20-3"><a href="#annotated-cell-20-3"></a></span>
-<span id="annotated-cell-20-4"><a href="#annotated-cell-20-4"></a><span class="fu">cat</span>(<span class="st">"Cut-off for position players:"</span>, position_pa<span class="sc">$</span>n[<span class="dv">390</span>], <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="annotated-cell-20-5"><a href="#annotated-cell-20-5"></a><span class="fu">cat</span>(<span class="st">"Cut-off for pitchers:"</span>, pitcher_pa<span class="sc">$</span>n[<span class="dv">360</span>], <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-23"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy"><code class="sourceCode r"><span id="annotated-cell-23-1"><a href="#annotated-cell-23-1"></a>repl_position_players <span class="ot">&lt;-</span> position_pa<span class="sc">$</span>key_mlbam[<span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">390</span>)]</span>
+<span id="annotated-cell-23-2"><a href="#annotated-cell-23-2"></a>repl_pitchers <span class="ot">&lt;-</span> pitcher_pa<span class="sc">$</span>key_mlbam[<span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">360</span>)]</span>
+<span id="annotated-cell-23-3"><a href="#annotated-cell-23-3"></a></span>
+<span id="annotated-cell-23-4"><a href="#annotated-cell-23-4"></a><span class="fu">cat</span>(<span class="st">"Cut-off for position players:"</span>, position_pa<span class="sc">$</span>n[<span class="dv">390</span>], <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="annotated-cell-23-5"><a href="#annotated-cell-23-5"></a><span class="fu">cat</span>(<span class="st">"Cut-off for pitchers:"</span>, pitcher_pa<span class="sc">$</span>n[<span class="dv">360</span>], <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Cut-off for position players: 131 
 Cut-off for pitchers: 204 </code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="replacement-level-per-at-bat-raa" class="slide level2">
+<h2>Replacement-Level Per-At-Bat RAA</h2>
+<ul>
+<li>If we replace Ohtani w/ a replacement-level player, what <span class="math inline">\(\textrm{RAA}\)</span> values would they achieve?</li>
+<li>Idea: multiple Ohtani’s number of at-bats by average per-at-bat <span class="math inline">\(\textrm{RAA}\)</span> of replacement-level players</li>
+<li>Divide total <span class="math inline">\(\textrm{RAA}\)</span> for all replacement-level players by total number of at-bats</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-7"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy"><code class="sourceCode r"><span id="annotated-cell-7-1"><a href="#annotated-cell-7-1"></a>repl_position_raa <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-7-2"><a href="#annotated-cell-7-2"></a>  raa <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-7-3"><a href="#annotated-cell-7-3"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(key_mlbam <span class="sc">%in%</span> repl_position_players) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-7-4"><a href="#annotated-cell-7-4"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> position_pa, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-7-5"><a href="#annotated-cell-7-5"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Name, key_mlbam, RAA, n)</span>
+<span id="annotated-cell-7-6"><a href="#annotated-cell-7-6"></a></span>
+<span id="annotated-cell-7-7"><a href="#annotated-cell-7-7"></a>repl_pitch_raa <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-7-8"><a href="#annotated-cell-7-8"></a>  raa <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-7-9"><a href="#annotated-cell-7-9"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(key_mlbam <span class="sc">%in%</span> repl_pitchers) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-7-10"><a href="#annotated-cell-7-10"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> pitcher_pa, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-7-11"><a href="#annotated-cell-7-11"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Name, key_mlbam, RAA, n) </span>
+<span id="annotated-cell-7-12"><a href="#annotated-cell-7-12"></a></span>
+<span id="annotated-cell-7-13"><a href="#annotated-cell-7-13"></a>repl_avg_pos <span class="ot">&lt;-</span> <span class="fu">sum</span>(repl_position_raa<span class="sc">$</span>RAA)<span class="sc">/</span><span class="fu">sum</span>(repl_position_raa<span class="sc">$</span>n)</span>
+<span id="annotated-cell-7-14"><a href="#annotated-cell-7-14"></a>repl_avg_pitch <span class="ot">&lt;-</span> <span class="fu">sum</span>(repl_pitch_raa<span class="sc">$</span>RAA)<span class="sc">/</span><span class="fu">sum</span>(repl_pitch_raa<span class="sc">$</span>n)</span>
+<span id="annotated-cell-7-15"><a href="#annotated-cell-7-15"></a></span>
+<span id="annotated-cell-7-16"><a href="#annotated-cell-7-16"></a><span class="fu">cat</span>(<span class="st">"Replacement-level per-at-bat RAA (position players):"</span>, <span class="fu">round</span>(repl_avg_pos, <span class="at">digits =</span> <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="annotated-cell-7-17"><a href="#annotated-cell-7-17"></a><span class="fu">cat</span>(<span class="st">"Replacement-level per-at-bat RAA (pitchers):"</span>, <span class="fu">round</span>(repl_avg_pitch, <span class="at">digits =</span> <span class="dv">4</span>),<span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Replacement-level per-at-bat RAA (position players): -0.002 
+Replacement-level per-at-bat RAA (pitchers): -0.0243 </code></pre>
+</div>
+</div>
+</section>
+<section id="position-player-war" class="slide level2">
+<h2>Position Player WAR</h2>
+<ul>
+<li>Compare player’s RAA to what replacement-level would achieve in same opportunities</li>
+<li>1 Win = 10 Runs</li>
+</ul>
+<div class="panel-tabset">
+<ul id="tabset-9" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-9-1">Code</a></li><li><a href="#tabset-9-2">Top-10</a></li></ul>
+<div class="tab-content">
+<div id="tabset-9-1">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a>position_war <span class="ot">&lt;-</span></span>
+<span id="cb21-2"><a></a>  raa <span class="sc">|&gt;</span></span>
+<span id="cb21-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span>key_mlbam <span class="sc">%in%</span> repl_position_players) <span class="sc">|&gt;</span></span>
+<span id="cb21-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> position_pa, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb21-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Name, key_mlbam, RAA, n) <span class="sc">|&gt;</span></span>
+<span id="cb21-6"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">shadowRAA =</span> n <span class="sc">*</span> repl_avg_pos) <span class="sc">|&gt;</span></span>
+<span id="cb21-7"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">WAR =</span> (RAA <span class="sc">-</span> shadowRAA)<span class="sc">/</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-9-2">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 6
+   Name              key_mlbam   RAA     n shadowRAA   WAR
+   &lt;chr&gt;                 &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;     &lt;dbl&gt; &lt;dbl&gt;
+ 1 Bobby Witt           677951 165.    694     -1.36 16.6 
+ 2 Gunnar Henderson     683002 117.    702     -1.37 11.8 
+ 3 Elly De La Cruz      682829 114.    679     -1.33 11.5 
+ 4 Jose Ramirez         608070 113.    657     -1.28 11.5 
+ 5 Zach Neto            687263 110.    590     -1.15 11.1 
+ 6 Marcus Semien        543760 108.    701     -1.37 10.9 
+ 7 Ketel Marte          606466 101.    562     -1.10 10.2 
+ 8 Vladimir Guerrero    665489  99.0   671     -1.31 10.0 
+ 9 Francisco Lindor     596019  98.5   689     -1.35  9.98
+10 Jose Altuve          514888  98.2   661     -1.29  9.95</code></pre>
 </div>
 </div>
 </div>
