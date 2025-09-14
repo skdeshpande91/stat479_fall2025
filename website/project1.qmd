@@ -1,0 +1,133 @@
+---
+title: "Project 1 Information"
+format: html
+---
+
+## Overivew
+
+For your first project, I would like you to use publicly available play-by-play, event-level, or tracking data to assess player or team performance or decision-making.
+That is, your analysis should be based on data that is more granular than match- or game-level (e.g., box score, tables of seasonal totals, etc.)
+The project report and recorded presentation are due on **Friday October 10 at 12:00pm (noon)**. 
+
+## Deliverables
+
+
+### Written Report
+
+The written report consists of a non-technical executive summary and a technical report.
+The executive summary, which should not exceed 500 words, should describe the overall goals, analytic approach, and main conclusions in non-technical language.
+The executive summary should be free from jargon, code listings, figures, tables, and charts.
+It should be written to be read and understood by a front office executive, coach, player, or fan with little data science experience.
+The rest of written report should
+
+  * Clearly state the problem being studied and provide sufficient background details and to motivate why the problem is important and interesting.
+  * Describe the data and major steps of the analysis
+  * Presents the main results within the context of the relevant sport(s) and supports the results with figures, tables, charts, and other statistical software output as appropriate.
+  * Discusses the limitations of the analysis and outlines concrete steps for further development.
+
+The technical section of the report should contain enough detail and code that another data scientist could replicate your analysis verify its soundness.
+Code listings and output (e.g., figures, tables, charts, and numerical summaries) should be tightly integrated with the written exposition.
+A good example of such integration is [here](https://github.com/danmorse314/hockeyR-models).
+Pay particular attention to the way the author complements the numerical results with detailed examples of individual performances. 
+
+### Presentation
+
+Each team will also record an 8--10 minute presentation (e.g., using Zoom) that provides an overview of their analysis.
+Each presentation should include the following elements
+
+  * Background (2--4 slides): clearly motivate and state the main problem being studied. Explain why it is interesting and important. Present just enough background to motivate the problem, while taking care not to overwhelm the audience with extraneous details. If appropriate, comment on the limitations of existing solutions to the problem or closely-related problems
+  * Analysis overview (2--4 slides): present only the main steps of your analysis. Be sure to explain why each step was necessary and how these steps contribute to the overall solution. Focus more on the high-level ideas and motivation for each step rather than the specific implementation or software syntax
+  * Main results (2--3 slides): distill your results into a few key points. Use figures, tables, charts, and other statistical software output to support your findings.
+  * Conclusion (1 slide): briefly summarize your analysis and findings and outline between 1 and 3 specific directions for future development, improvement or refinement.
+
+
+**Every group member must speak during the presentation**.
+I encourage you practice a few times to ensure smooth transitions between speakers.
+
+
+## Potential Topics
+
+For your first project, you could extend or modify an analysis presented in class or one of the Exercises listed in the lecture notes.
+Here are some other potential project ideas.
+Note, these are merely suggestions and you are free to develop projects outside this list.
+If you would like additional inspiration, check out the papers from the Reproducible Research Competition from last year's [CMU Sports Analytics Conference](https://www.stat.cmu.edu/cmsac/conference/2024/).
+The only requirement is that you (i) carefully assess player or team performance and (ii) utilize data at the play- or event-level (or finer).
+
+
+
+### Develop a New Metric
+
+Using play-by-play or event-level data, construct a new measure of player or team skill.
+If you pursue this option, please take care to motivate the development of your new metric and to state, precisely, what the metric aims to quantify.
+You should explore its operating characteristics including (but certainly not limited to) its stability across games or seasons; its ability to predict season-level outcomes; the extent to which you are measuring a latent skill or ability; and its relationship to existing metrics.
+You should also explain how your new metric overcomes any limitations of existing metrics and discuss any drawbacks your metric might have.
+Finally, you should discuss how players, teams, or fans might use your new metric. 
+Note: simply creating a new measure and ranking players according is **not** sufficient. 
+
+
+### A More Refined XG Model for Soccer
+
+In [Lecture 3](lectures/lecture03.qmd), we built a random forests model to estimate the probability of a shot resulting in a goal using many features created by StatsBomb.
+While this model seemed much more accurate than simpler, parametric models, there is still much room for improvement.
+For your project, you can continue to develop more complex XG model. Here are some potential directions
+
+  * Intuitively, we might expect XG to be monotonic in certain features (e.g., the further away a shot is from the goal, the lower the XG). Unfortunately, random forests does not allow for monotonic constraints. XGBoost is another tree ensemble method that allows for monotonicity. Explore the use of XGBoost to estimate expected goals.
+  * Our random forest model did not use the exact player locations as features. Intuitively, we might expect XG to vary smoothly in shot location. But if you simply include `location.x` and `location.y` as features, the resulting XG is not a smooth function. Explore the use of generalized additive models for creating smoother XG models.
+
+If you pursue this option, you should build at least 3 different XG models, compare them both quantitatively and qualitatively, and use the "best" model predictions to make a conclusion about player or team performance.
+At a minimum, you should establish which model is most predictive. 
+But a more ambitious project will draw insights from differences between each models' predctios[^statsbomb].
+If you pursue this option, you should StatsBomb data from at least 3 competitions with more than a handful of match data available.
+
+[^statsbomb]: See the section "Benefiting from training several variants of the model" in [this blogpost](https://www.hudl.com/blog/upgrading-expected-goals) from Hudl for some inspiration. 
+
+
+### Expected Goals in Hockey
+
+The package [**hockeyR**](https://hockeyr.netlify.app) provides functions for scraping play-by-play data from the National Hockey League.
+Among many other things, these data include shot distance, shot angle, and the coordinates of each shot.
+Using ideas from [Lecture 3](lectures/lecture03.qmd), develop an XG model for hockey.
+If you puruse this option, you should build at least 3 different XG models, compare them both quantaitively and qualitatively, and use the "best" model to make conclusions about player or team performance.
+You can also compare your model predictions to those provided by the package itself.
+
+### NBA Heatmaps & Expected Points
+
+In Lectures [4](lectures/lecture04.qmd) and [5](lectures/lecture05.qmd), we used the [**hoopR**](https://hoopr.sportsdataverse.org) package to scrape NBA play-by-play data, which we then used to estimate adjusted plus/minus.
+This package also includes shot location data.
+Using these data (and possibly other contextual information about the game state and player), build a model to predict the probability that a player makes a shot.
+Once built, use the model to compare player performance.
+For instance, you can convert these probabilities to expected points and explore how closely a player's total expected points tracks the actual points score.
+Or you could identify players who score substantially more or less points than what a league-average or replacement-level player might be expected to score given the same shot selection.
+
+If you puruse this option, you should build and compare at least 3 different models of shot selection. You should then select the "best" model using both qualitative and quantitative considerations.
+
+
+### WAR For College Football and Volleyball
+
+In [Lecture 10](lectures/lecture10.qmd), we used the [**nflfastR**](https://www.nflfastr.com) package to scrap play-by-play data from the National Football League.
+We then used these data to develop a version of Wins Above Replacement for offensive players in the NFL.
+The package [**cfbfastR**](https://cfbfastr.sportsdataverse.org) provides similar functinoality for college football.
+You could try to develop a version of WAR for college football.
+If you pursue this option, you must carefully deal with the differences between conferences when estimating individual player skills and defining replacement-level.
+
+The package [**ncaavolleyballr**](https://github.com/JeffreyRStevens/ncaavolleyballr) provides functions to scrape NCAA Volleyball data[^capitalization], including play-by-play logs.
+Each row in the play-by-play data table correspond to individual events within a point (e.g., a serve, set, attack, kill, etc.)
+Using these data, develop a version of wins above replacement. 
+To do this, you must first define and estimate an analog of runs value and expected points.
+Then, you must carefully divide this "currency" among players of different positions (e.g., middle blocker, libero, outside hitter, etc.).
+If you pursue this option, I highly recommend using the pre-scraped play-by-play data available [here](https://jeffreyrstevens.github.io/ncaavolleyballr/articles/data.html) and then accessing player- and team-specific information (e.g., rosters, schedules, season-level statistics) using the package functions.
+
+[^capitalization]: Note that there is another [package](https://github.com/tyler-widdison/ncaavolleyballR) with similar functionality and an almost identical name (note the uppercase "R").
+
+### Adjusted Plus/Minus for College Basketball
+
+The [**ncaahoopR**](https://github.com/lbenz730/ncaahoopR) package provides functions for scraping play-by-play data from college basketball.
+Using a workflow similar to the one presented in [Lecture 4](lectures/lecture04.qmd), convert these data into stint-level data and develop a version of weighted and/or regularized adjusted plus/minus for college basketball.
+
+### Extending Ideas from Baseball to Cricket
+
+The package [**cricketdata**](https://pkg.robjhyndman.com/cricketdata/) provides functions for scraping match-level data from (ESPNCricinfo)[https://www.espncricinfo.com].
+[Himanish Ganjoo](https://himanishganjoo.com) also provides very detailed ball-by-ball data for a large number of test, one-day international, and T20 matches [here](https://himanishganjoo.com/cricket-data/).
+You could consider building analogs of expected runs (e.g., as a function of wickets in hand and overs left) or building a model to predict the outcome of an individual ball given its line and length information.
+An even more ambitous project would develop a version of WAR for batting performance.
+
