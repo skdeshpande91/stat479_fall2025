@@ -6,11 +6,11 @@
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="../../site_libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
 <link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
 <link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.7.32">
+  <meta name="generator" content="quarto-1.7.31">
 
   <title>STAT479 – STAT 479: Lecture 4</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -550,7 +550,7 @@ Figure&nbsp;1: Large gap b/w SGA and rest of the league
 <div id="fig-pm-poss" class="quarto-float quarto-figure quarto-figure-center" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig">
 <div aria-describedby="fig-pm-poss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="slides_04_files/figure-revealjs/fig-pm-poss-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;2: Variability in +/- increases with number of possessions!"><img data-src="slides_04_files/figure-revealjs/fig-pm-poss-1.png" class="quarto-figure quarto-figure-center" width="576"></a>
+<a href="slides_04_files/figure-revealjs/fig-pm-poss-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;2: Variability in +/- increases with number of possessions!"><img data-src="slides_04_files/figure-revealjs/fig-pm-poss-1.png" class="quarto-figure quarto-figure-center" width="768"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pm-poss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;2: Variability in +/- increases with number of possessions!
@@ -629,26 +629,12 @@ Figure&nbsp;2: Variability in +/- increases with number of possessions!
 <li><span class="math inline">\(Y_{i}\)</span>: point differential per 100 possessions in stint <span class="math inline">\(i\)</span></li>
 <li><span class="math inline">\(h_{1}(i), \ldots, h_{5}(i)\)</span> &amp; <span class="math inline">\(a_{1}(i), \ldots, a_{5}(i)\)</span>: identities of players on court in stint <span class="math inline">\(i\)</span></li>
 </ul>
-<div class="fragment">
 <p><span class="math display">\[
 \begin{align}
 Y_{i} &amp;= \alpha_{0} + \alpha_{h_{1}(i)} + \alpha_{h_{2}(i)} + \alpha_{h_{3}(i)} + \alpha_{h_{4}(i)} + \alpha_{h_{5}(i)} \\
 ~&amp;~~~~~~~~~~- \alpha_{a_{1}(i)} - \alpha_{a_{2}(i)} - \alpha_{a_{3}(i)} - \alpha_{a_{4}(i)} - \alpha_{a_{5}(i)} + \epsilon_{i},
 \end{align}
 \]</span></p>
-</div>
-</section>
-<section id="interpretation" class="slide level2">
-<h2>Interpretation</h2>
-<ul>
-<li>Individual <span class="math inline">\(\alpha_{j}\)</span>’s are meaningless!</li>
-<li><span class="math inline">\(\alpha_{j}\)</span>: change in point differential per 100 possessions b/w
-<ul>
-<li>Playing 5-on-5 w/ player <span class="math inline">\(j\)</span> on the court</li>
-<li>Playing 5-on-4 w/ player <span class="math inline">\(j\)</span> off the court</li>
-</ul></li>
-<li>Differences (or <em>contrasts</em>) like <span class="math inline">\(\alpha_{j}-\alpha_{j'}\)</span> are much more useful</li>
-</ul>
 </section>
 <section id="example" class="slide level2 smaller">
 <h2>Example</h2>
@@ -676,6 +662,18 @@ Y_{i} &amp;= \alpha_{0} + \alpha_{h_{1}(i)} + \alpha_{h_{2}(i)} + \alpha_{h_{3}(
 </ul>
 </div>
 </section>
+<section id="potential-issue-interpretation" class="slide level2">
+<h2>Potential Issue: Interpretation</h2>
+<ul>
+<li>Individual <span class="math inline">\(\alpha_{j}\)</span>’s are meaningless!</li>
+<li><span class="math inline">\(\alpha_{j}\)</span>: change in point differential per 100 possessions b/w
+<ul>
+<li>Playing 5-on-5 w/ player <span class="math inline">\(j\)</span> on the court</li>
+<li>Playing 5-on-4 w/ player <span class="math inline">\(j\)</span> off the court</li>
+</ul></li>
+<li>Luckily, we can interpret differences (or <em>contrasts</em>) like <span class="math inline">\(\alpha_{j}-\alpha_{j'}\)</span></li>
+</ul>
+</section>
 <section id="apm-as-a-linear-model" class="slide level2">
 <h2>APM As A Linear Model</h2>
 <ul>
@@ -691,6 +689,19 @@ Y_{i} &amp;= \alpha_{0} + \alpha_{h_{1}(i)} + \alpha_{h_{2}(i)} + \alpha_{h_{3}(
 </ul>
 </div>
 </section>
+<section id="non-identifiability" class="slide level2">
+<h2>Non-identifiability</h2>
+<ul>
+<li>Recall that the model asserts <span class="math display">\[
+\begin{align}
+Y_{i} &amp;= \alpha_{0} + \alpha_{h_{1}(i)} + \alpha_{h_{2}(i)} + \alpha_{h_{3}(i)} + \alpha_{h_{4}(i)} + \alpha_{h_{5}(i)} \\
+~&amp;~~~~~~~~~~- \alpha_{a_{1}(i)} - \alpha_{a_{2}(i)} - \alpha_{a_{3}(i)} - \alpha_{a_{4}(i)} - \alpha_{a_{5}(i)} + \epsilon_{i},
+\end{align}
+\]</span></li>
+<li>Imagine we add 5 to every <span class="math inline">\(\alpha_{j}\)</span>: right-hand side remains unchanged</li>
+<li>While we can’t hope to learn <span class="math inline">\(\alpha_{j}\)</span>’s exactly, can still interpret <em>constrasts</em> <span class="math inline">\(\alpha_{j} - \alpha_{j'}\)</span></li>
+</ul>
+</section>
 <section id="singularity" class="slide level2 smaller">
 <h2>Singularity</h2>
 <ul>
@@ -703,19 +714,6 @@ Y_{i} &amp;= \alpha_{0} + \alpha_{h_{1}(i)} + \alpha_{h_{2}(i)} + \alpha_{h_{3}(
 </ul></li>
 <li>If you know all but one column, you can perfectly determine that column</li>
 <li><span class="math inline">\(\boldsymbol{\mathbf{Z}}^{\top}\boldsymbol{\mathbf{Z}}\)</span> not invertible</li>
-</ul>
-</section>
-<section id="non-identifiability" class="slide level2">
-<h2>Non-identifiability</h2>
-<ul>
-<li>Recall that the model asserts <span class="math display">\[
-\begin{align}
-Y_{i} &amp;= \alpha_{0} + \alpha_{h_{1}(i)} + \alpha_{h_{2}(i)} + \alpha_{h_{3}(i)} + \alpha_{h_{4}(i)} + \alpha_{h_{5}(i)} \\
-~&amp;~~~~~~~~~~- \alpha_{a_{1}(i)} - \alpha_{a_{2}(i)} - \alpha_{a_{3}(i)} - \alpha_{a_{4}(i)} - \alpha_{a_{5}(i)} + \epsilon_{i},
-\end{align}
-\]</span></li>
-<li>Imagine we add 5 to every <span class="math inline">\(\alpha_{j}\)</span>: right-hand side remains unchanged</li>
-<li>So, we can’t hope to learn <span class="math inline">\(\alpha_{j}\)</span>’s exactly!</li>
 </ul>
 </section>
 <section id="baseline-contrasts" class="slide level2 smaller">
@@ -735,7 +733,7 @@ Y_{i} &amp;= \alpha_{0} + \alpha_{h_{1}(i)} + \alpha_{h_{2}(i)} + \alpha_{h_{3}(
 </ul>
 </div>
 </section>
-<section id="a-re-parametrized-model" class="slide level2">
+<section id="a-re-parametrized-model" class="slide level2 smaller">
 <h2>A Re-parametrized Model</h2>
 <ul>
 <li><span class="math inline">\(\tilde{\boldsymbol{\mathbf{Z}}}\)</span> be the <span class="math inline">\(n \times (p'+1)\)</span> submatrix of <span class="math inline">\(\boldsymbol{\mathbf{Z}}\)</span> s.t.
@@ -746,8 +744,7 @@ Y_{i} &amp;= \alpha_{0} + \alpha_{h_{1}(i)} + \alpha_{h_{2}(i)} + \alpha_{h_{3}(
 <li>Turns out:
 <ul>
 <li><span class="math inline">\(\tilde{\boldsymbol{\mathbf{Z}}}\boldsymbol{\beta} = \boldsymbol{\mathbf{Z}}\boldsymbol{\alpha}\)</span></li>
-<li><span class="math inline">\(\tilde{\boldsymbol{\mathbf{Z}}}\)</span></li>
-<li>Can minimize <span class="math inline">\(\sum_{i = 1}^{n}{\left(Y_{i} - \tilde{\boldsymbol{\mathbf{z}}}_{i}^{\top}\boldsymbol{\beta}\right)^{2}}\)</span></li>
+<li>There quantity <span class="math inline">\(\sum_{i = 1}^{n}{\left(Y_{i} - \tilde{\boldsymbol{\mathbf{z}}}_{i}^{\top}\boldsymbol{\beta}\right)^{2}}\)</span> has a unique minimizer</li>
 </ul></li>
 </ul>
 <p><span class="math display">\[
@@ -802,23 +799,27 @@ Y_{i} &amp;= \alpha_{0} + \alpha_{h_{1}(i)} + \alpha_{h_{2}(i)} + \alpha_{h_{3}(
 <h1>Weighted Adjusted Plus/Minus</h1>
 
 </section>
-<section id="missing-context" class="slide level2">
+<section id="missing-context" class="slide level2 smaller">
 <h2>Missing Context</h2>
 <ul>
-<li>APM does not account for context &gt; “can artificially can artificially inflate the importance of performance in low-leverage situations, when the outcome of the game is essentially decided, while simultaneously deflating the importance of high-leverage performance, when the final outcome is still in question. For instance, point diﬀerential-based metrics model the home team’s lead dropping from 5 points to 0 points in the last minute of the first half in exactly the same way that they model the home team’s lead dropping from 30 points to 25 points in the last minute of the second half”.</li>
+<li>APM does not account for context</li>
+<li>Can over-inflate garbage-time performance when outcome essentially determined</li>
 </ul>
+<blockquote>
+<p>“can artificially can artificially inflate the importance of performance in low-leverage situations, when the outcome of the game is essentially decided, while simultaneously deflating the importance of high-leverage performance, when the final outcome is still in question. For instance, point diﬀerential-based metrics model the home team’s lead dropping from 5 points to 0 points in the last minute of the first half in exactly the same way that they model the home team’s lead dropping from 30 points to 25 points in the last minute of the second half”.</p>
+</blockquote>
 </section>
 <section id="a-weighted-version-of-apm" class="slide level2">
 <h2>A Weighted Version of APM</h2>
 <ul>
 <li>Introduce weight <span class="math inline">\(w_{i}\)</span> for stint <span class="math inline">\(i\)</span></li>
-<li>Find <span class="math inline">\(\tilde{\boldsymbol{\beta}}\)</span> minimizing <span class="math inline">\(w_{i}\left(Y_{i} - \tilde{\boldsymbol{\mathbf{z}}}_{i}^{\top}\boldsymbol{\beta}\right)^{2}\)</span></li>
-<li>Solution: <span class="math inline">\(\boldsymbol{\mathbf{W}}\)</span> diagonal matrix w/ entries <span class="math inline">\(w_{i}\)</span> <span class="math display">\[
+<li>Find <span class="math inline">\(\tilde{\boldsymbol{\beta}}\)</span> minimizing <span class="math inline">\(\sum{w_{i}\left(Y_{i} - \tilde{\boldsymbol{\mathbf{z}}}_{i}^{\top}\boldsymbol{\beta}\right)^{2}}\)</span></li>
+<li>Solution: letting <span class="math inline">\(\boldsymbol{\mathbf{W}}\)</span> denote diagonal matrix w/ entries <span class="math inline">\(w_{i}\)</span> <span class="math display">\[
 \hat{\boldsymbol{\beta}}_{w} = \left( \tilde{\boldsymbol{\mathbf{Z}}}^{\top}\tilde{\boldsymbol{\mathbf{Z}}}\right)^{-1}\tilde{\boldsymbol{\mathbf{Z}}}^{\top}\boldsymbol{\mathbf{W}}\boldsymbol{\mathbf{Y}}
 \]</span></li>
 </ul>
 </section>
-<section id="estimating-wapm" class="slide level2">
+<section id="estimating-wapm" class="slide level2 smaller">
 <h2>Estimating wAPM</h2>
 <ul>
 <li>Example weights:
@@ -886,6 +887,28 @@ Y_{i} &amp;= \alpha_{0} + \alpha_{h_{1}(i)} + \alpha_{h_{2}(i)} + \alpha_{h_{3}(
 <ul>
 <li>Avoids having to specify baseline players</li>
 <li>Estimates a latent strength for <em>all</em> players</li>
+</ul></li>
+</ul>
+</section>
+<section id="project-1" class="slide level2 smaller">
+<h2>Project 1</h2>
+<ul>
+<li>Thanks for sorting yourselves into group!
+<ul>
+<li>If you still don’t have a group, let me know!</li>
+<li>On Canvas, you need to be in a group under “Projects 1&amp;2 Groups”</li>
+</ul></li>
+<li><a href="../../project1.html">Project information</a> posted:
+<ul>
+<li>Requirements for written report and presentation</li>
+<li>Non-exhaustive list of project topics</li>
+<li>Main requirement: must use play-by-play or event-level data</li>
+<li>I.e., use data more granular than game- or season-level totals</li>
+</ul></li>
+<li>Project Check-in: by <strong>Friday 26 September</strong> email me a short overview of your project
+<ul>
+<li>Precise problem statement &amp; overview of data and analysis plan</li>
+<li>Happy to help brainstorm &amp; narrow down analysis in Office Hours (or by appt.)</li>
 </ul></li>
 </ul>
 
