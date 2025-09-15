@@ -2615,5 +2615,47 @@
     "title": "STAT 479: Offensive Credit Allocation",
     "section": "Looking Ahead",
     "text": "Looking Ahead\n\nDivided run value \\(\\delta_{i}\\) b/w batting & baserunning\nNext time: divide \\(-\\delta_{i}\\) b/w pitching & fielding"
+  },
+  {
+    "objectID": "slides/raw_slides/slides_09.html#comparing-football-plays",
+    "href": "slides/raw_slides/slides_09.html#comparing-football-plays",
+    "title": "STAT 479 Lecture 9",
+    "section": "Comparing Football Plays",
+    "text": "Comparing Football Plays\n\nWhich of these two touchdown plays is more impressive?\n\n86-yard touchdown pass from Justin Herbert to Ladd McConckey (video link)\n64-yard touchdown pass from Cooper Rush to KaVontae Turpin (video link)\n\n\n\n\nPlays share many similarities but important differences\n\nContext: down & distance, time left, score\nTime of pass: number of pass rushers, pocket integrity\nReceiver’s actions after the catch\n\n\n\n\n\nToday: expected points facilitated nuanced comparison\nMultilevel models to determine which passers generate most EP per attempt"
+  },
+  {
+    "objectID": "slides/raw_slides/slides_09.html#play-by-play-football-data",
+    "href": "slides/raw_slides/slides_09.html#play-by-play-football-data",
+    "title": "STAT 479 Lecture 9",
+    "section": "Play-by-Play Football Data",
+    "text": "Play-by-Play Football Data\n\nLoading DataGame-LevelStarting ContextPlay Info\n\n\n\nUse the nflfastR package\n\n\npbp2024 &lt;- nflfastR::load_pbp(season = 2024)\n\n\n\n\n\n# A tibble: 10 × 5\n   game_id          week season_type home_team away_team\n   &lt;chr&gt;           &lt;int&gt; &lt;chr&gt;       &lt;chr&gt;     &lt;chr&gt;    \n 1 2024_08_NYG_PIT     8 REG         PIT       NYG      \n 2 2024_08_MIN_LA      8 REG         LA        MIN      \n 3 2024_15_NE_ARI     15 REG         ARI       NE       \n 4 2024_10_CIN_BAL    10 REG         BAL       CIN      \n 5 2024_01_GB_PHI      1 REG         PHI       GB       \n 6 2024_08_KC_LV       8 REG         LV        KC       \n 7 2024_03_SF_LA       3 REG         LA        SF       \n 8 2024_18_NYG_PHI    18 REG         PHI       NYG      \n 9 2024_11_BAL_PIT    11 REG         PIT       BAL      \n10 2024_09_NO_CAR      9 REG         CAR       NO       \n\n\n\n\n\n\n# A tibble: 10 × 7\n   time  posteam_score defteam_score side_of_field yardline_100  down ydstogo\n   &lt;chr&gt;         &lt;dbl&gt;         &lt;dbl&gt; &lt;chr&gt;                &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;\n 1 10:23             0             0 NYG                     13     4      11\n 2 02:40            28            20 LA                      53     2      10\n 3 12:24             0             0 ARI                     33     3       5\n 4 12:58             0             0 CIN                     56     3       9\n 5 05:34            13            12 GB                      15    NA       0\n 6 02:00            NA            NA &lt;NA&gt;                    NA    NA       0\n 7 15:00             7            14 LA                      70     1      10\n 8 00:00             7             0 &lt;NA&gt;                    NA    NA       0\n 9 13:27             9             7 PIT                     58     2       7\n10 04:13            12             7 CAR                     15    NA       0\n\n\n\n\n\n\n# A tibble: 10 × 2\n   play_type   desc                                                             \n   &lt;chr&gt;       &lt;chr&gt;                                                            \n 1 field_goal  (10:23) 9-C.Boswell 31 yard field goal is GOOD, Center-46-C.Kunt…\n 2 run         (2:40) 17-P.Nacua right end to LA 45 for -2 yards (7-B.Murphy, 4…\n 3 no_play     (12:24) (Shotgun) 4-A.Gibson left tackle pushed ob at ARI 18 for…\n 4 pass        (12:58) (Shotgun) 9-J.Burrow pass deep middle to 1-J.Chase to BA…\n 5 extra_point 4-J.Elliott extra point is GOOD, Center-49-R.Lovato, Holder-10-B…\n 6 no_play     Timeout #2 by LV at 02:00.                                       \n 7 pass        (15:00) (Shotgun) 9-M.Stafford pass short middle to 88-J.Whittin…\n 8 &lt;NA&gt;        END QUARTER 1                                                    \n 9 pass        (13:27) (No Huddle) 3-R.Wilson pass short middle to 30-J.Warren …\n10 extra_point 19-B.Grupe extra point is GOOD, Center-49-Z.Wood, Holder-43-M.Ha…\n\n\n\nAlso several indicators: fumble, complete_pass, passing_yards\nCheck out the full listing"
+  },
+  {
+    "objectID": "slides/raw_slides/slides_09.html#player-id",
+    "href": "slides/raw_slides/slides_09.html#player-id",
+    "title": "STAT 479 Lecture 9",
+    "section": "Player ID",
+    "text": "Player ID\n\nnflfastR uses unique 9-digit id for each player (gsis_id)\n\n\nroster2024 &lt;-\n  nflfastR::fast_scraper_roster(seasons = 2024)\n\nroster2024 |&gt;\n  dplyr::filter(full_name == \"Jordan Love\") |&gt;\n  dplyr::select(full_name, gsis_id)\n\n# A tibble: 1 × 2\n  full_name   gsis_id   \n  &lt;chr&gt;       &lt;chr&gt;     \n1 Jordan Love 00-0036264"
+  },
+  {
+    "objectID": "slides/raw_slides/slides_09.html#overivew",
+    "href": "slides/raw_slides/slides_09.html#overivew",
+    "title": "STAT 479 Lecture 9",
+    "section": "Overivew",
+    "text": "Overivew\n\nGoal: estimate avg. number of points eventually scored by teams from similar situation\nEPA: diff. in post- and pre-play EP\n\n\\(\\textrm{EPA} &gt; 0\\): successful for offense\n\\(\\textrm{EPA} &lt; 0\\): unsuccessful for offense\n\nnflfastR’s EP model to predict next scoring event in half\n\nTouchdown (7), field goal (3), safety (2)\nOpposing touchdown (-7), field goal (-3), and safety (-2)\nNo score (0)"
+  },
+  {
+    "objectID": "slides/raw_slides/slides_09.html#expected-points-1",
+    "href": "slides/raw_slides/slides_09.html#expected-points-1",
+    "title": "STAT 479 Lecture 9",
+    "section": "Expected Points",
+    "text": "Expected Points\n\nVector of next score probabilities given play features \\(\\boldsymbol{\\mathbf{z}}\\): \\(\\boldsymbol{\\pi}(\\boldsymbol{\\mathbf{z}}) = (\\pi_{\\textrm{TD}}(\\boldsymbol{\\mathbf{z}}), \\ldots, \\pi_{\\textrm{oppFG}}(\\boldsymbol{\\mathbf{z}}))\\)\nEstimated w/ regression tree ensemble using XGBoost\n\n\n\n\nDefinition: Expected Points\n\n\nGiven a game state feature vector \\(\\boldsymbol{\\mathbf{z}}\\) and vector of drive outcome probabilities \\(\\boldsymbol{\\pi}(\\boldsymbol{\\mathbf{z}}),\\) the expected points \\(\\textrm{EP}(\\boldsymbol{\\mathbf{z}})\\) is \\[\n\\begin{align}\n\\textrm{EP}(\\boldsymbol{\\mathbf{z}}) &=  7\\times\\pi_{\\textrm{TD}}(\\boldsymbol{\\mathbf{z}}) +\n3\\times\\pi_{\\textrm{FG}}(\\boldsymbol{\\mathbf{z}}) +\n2\\times\\pi_{\\textrm{SAF}}(\\boldsymbol{\\mathbf{z}}) \\\\\n~&~~-2\\times\\pi_{\\textrm{oSAF}}(\\boldsymbol{\\mathbf{z}}) -\n3\\times\\pi_{\\textrm{oFG}}(\\boldsymbol{\\mathbf{z}})\n- 7\\times\\pi_{\\textrm{oTD}}(\\boldsymbol{\\mathbf{z}})\n\\end{align}\n\\]"
+  },
+  {
+    "objectID": "slides/raw_slides/slides_09.html#basic-use",
+    "href": "slides/raw_slides/slides_09.html#basic-use",
+    "title": "STAT 479 Lecture 9",
+    "section": "Basic Use",
+    "text": "Basic Use\n\nepa records the estimated EPA for each play\nMcConkey TD was play w/ highest EPA\n\nStarting EP: -1.54\nEnding EP: 7 (due to score)\n\n\n\npbp2024 |&gt;\n  dplyr::slice_max(epa) |&gt;\n  dplyr::select(ep, epa, desc)\n\n# A tibble: 1 × 3\n     ep   epa desc                                                              \n  &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;                                                             \n1 -1.54  8.54 (10:50) (Shotgun) 10-J.Herbert pass deep middle to 15-L.McConkey …"
   }
 ]

@@ -1,0 +1,170 @@
+---
+title: "STAT 479 Lecture 9"
+subtitle: "Multilevel Models"
+format: revealjs
+execute:
+  cache: true
+---
+
+
+# Motivation
+
+## Comparing Football Plays{.smaller}
+
+- Which of these two touchdown plays is more impressive?
+  * 86-yard touchdown pass from Justin Herbert to Ladd McConckey ([video link](https://www.youtube.com/watch?v=Hu9flYe2VrA))
+  * 64-yard touchdown pass from Cooper Rush to KaVontae Turpin ([video link](https://www.youtube.com/watch?v=U0Zp_is-X18))
+
+. . . 
+
+- Plays share many similarities but important differences
+  - Context: down & distance, time left, score
+  - Time of pass: number of pass rushers, pocket integrity
+  - Receiver's actions after the catch
+  
+. . .
+
+- Today: expected points facilitated nuanced comparison
+- Multilevel models to determine which passers generate most EP per attempt
+
+## Play-by-Play Football Data{.smaller}
+
+:::{.panel-tabset}
+
+### Loading Data
+- Use the [**nflfastR**](https://www.nflfastr.com) package
+```{r}
+#| label: load-pbp
+#| eval: true
+#| echo: true
+#| warning: false
+#| message: false
+#| output: false
+pbp2024 <- nflfastR::load_pbp(season = 2024)
+```
+
+### Game-Level
+
+```{r}
+#| label: game-context-cols
+#| eval: true
+#| echo: false
+set.seed(129)
+pbp2024 |> dplyr::select(game_id, week, season_type, home_team, away_team) |> dplyr::slice_sample(n=10)
+
+```
+
+### Starting Context
+
+```{r}
+#| label: starting-context
+#| eval: true
+#| echo: false
+set.seed(129)
+pbp2024 |> 
+  dplyr::select(time, posteam_score, defteam_score, side_of_field, yardline_100, down, ydstogo) |> 
+  dplyr::slice_sample(n=10)
+
+```
+
+### Play Info
+```{r}
+#| label: play-info
+#| eval: true
+#| echo: false
+set.seed(129)
+pbp2024 |> 
+  dplyr::select(play_type, desc) |> 
+  dplyr::slice_sample(n=10)
+```
+
+- Also several indicators: `fumble`, `complete_pass`, `passing_yards`
+- Check out the [full listing](https://www.nflfastr.com/articles/field_descriptions.html)
+:::
+
+## Player ID
+
+- **nflfastR** uses unique 9-digit id for each player (`gsis_id`)
+
+
+```{r}
+#| label: load-roster
+#| eval: true
+#| echo: true
+#| warning: false
+#| message: true
+roster2024 <-
+  nflfastR::fast_scraper_roster(seasons = 2024)
+
+roster2024 |>
+  dplyr::filter(full_name == "Jordan Love") |>
+  dplyr::select(full_name, gsis_id)
+```
+
+
+# Expected Points
+
+## Overivew
+
+- Goal: estimate avg. number of points eventually scored by teams from similar situation
+
+- EPA: diff. in post- and pre-play EP
+  - $\textrm{EPA} > 0$: successful for offense
+  - $\textrm{EPA} < 0$: unsuccessful for offense
+
+- **nflfastR**'s EP model to predict next scoring event in half  
+  - Touchdown (7), field goal (3), safety (2)
+  - Opposing touchdown (-7), field goal (-3), and safety (-2)
+  - No score (0)
+
+## Expected Points
+
+- Vector of next score probabilities given play features $\boldsymbol{\mathbf{z}}$: $\boldsymbol{\pi}(\boldsymbol{\mathbf{z}}) = (\pi_{\textrm{TD}}(\boldsymbol{\mathbf{z}}), \ldots, \pi_{\textrm{oppFG}}(\boldsymbol{\mathbf{z}}))$
+
+- Estimated w/ regression tree ensemble using XGBoost
+
+:::{.callout-note icon=false}
+## Definition: Expected Points
+Given a game state feature vector $\boldsymbol{\mathbf{z}}$ and vector of drive outcome probabilities $\boldsymbol{\pi}(\boldsymbol{\mathbf{z}}),$ the *expected points* $\textrm{EP}(\boldsymbol{\mathbf{z}})$ is 
+$$
+\begin{align}
+\textrm{EP}(\boldsymbol{\mathbf{z}}) &=  7\times\pi_{\textrm{TD}}(\boldsymbol{\mathbf{z}}) + 
+3\times\pi_{\textrm{FG}}(\boldsymbol{\mathbf{z}}) + 
+2\times\pi_{\textrm{SAF}}(\boldsymbol{\mathbf{z}}) \\
+~&~~-2\times\pi_{\textrm{oSAF}}(\boldsymbol{\mathbf{z}}) - 
+3\times\pi_{\textrm{oFG}}(\boldsymbol{\mathbf{z}})
+- 7\times\pi_{\textrm{oTD}}(\boldsymbol{\mathbf{z}})
+\end{align}
+$$
+:::
+
+## Basic Use: Comparing Plays
+
+- `ep` and `epa`: starting EP and EP added during play
+- McConkey TD had highest EPA: 7 - (-1.54) = 8.54
+- Turpin TD had EPA 7 - 0.77 = 6.23
+
+```{r}
+#| label: highest-epa
+#| eval: true
+#| echo: true
+pbp2024 |>
+  dplyr::slice_max(epa) |>
+  dplyr::select(ep, epa, desc)
+```
+
+## Basic Uses: Comparing Teams
+
+```{r}
+#| label: team-epa
+#| eval: true
+#| echo: true
+pbp2024 |>
+  dplyr::group_by(posteam) |>
+  dplyr::summarize(epa = mean(epa, na.rm = TRUE)) |> 
+  dplyr::arrange(desc(epa)) |>
+  dplyr::slice(c(1:5, (dplyr::n()-4):(dplyr::n()))) 
+```
+
+# Predicting EPA on a New Pass
+
