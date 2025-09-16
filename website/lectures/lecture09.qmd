@@ -183,7 +183,6 @@ table(pbp2024[,c("play_type", "season_type")])
 In addition to EPA, we also include the unique identifier of the passer (`passer_player_id`) and a narrative description of the play (`desc`).
 ```{r}
 #| label: player-only-df
-pass2024 <- 
 pass2024 <-
   pbp2024 |>
   dplyr::filter(play_type == "pass" & season_type == "REG") |> 
@@ -500,7 +499,7 @@ plot(alphas$n, alphas$ols,
      xlab = "Number of passes",
      ylab = "Avg. EPA per pass",
      main = "EPA per pass",
-     pch = 16, cex = 0.5, col = oi_colors[1])
+     pch = 16, cex = 0.5, col = oi_colors[9])
 points(alphas$n, alphas$lmer, pch = 15, col = oi_colors[2], cex = 0.5)
 abline(h = alpha0_hat, col = oi_colors[3])
 ```
@@ -532,7 +531,9 @@ pass2024 <-
                 air_yards, 
                 posteam_type, shotgun, no_huddle, qb_hit,
                 pass_location,
-                desc)
+                desc) |>
+  dplyr::mutate(posteam_type = factor(posteam_type),
+                pass_location = factor(pass_location))
 pass2024 |> dplyr::slice_head(n = 2)
 ```
 
@@ -652,3 +653,7 @@ Multilevel models offer a way to overcome these issues while also accounting for
 Using a multilevel model, we estimated the average EP per pass each passer provides over and above what could be explained by covariates like `air_yards` and the formation from which the pass was thrown.
 In [Lecture 10](lecture10.qmd), we will fit a series of multilevel models to divide the EPA on a play between the different offensive players.
 We will use the model estimates to compute a version of wins above replacement for offensive players in the NFL.
+
+## Exercises
+
+1. Arguably, a better measure of a play success than EPA is whether a play increased the offensive team's chances of winning the game. **nflfastR** provides estimates of the win probability and win probability added. Repeat the modeling but with WPA instead of EPA. What is the relationship between per-pass WPA and per-pass EPA after adjusting for the same fixed effects from our full model?

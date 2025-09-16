@@ -159,6 +159,8 @@ pbp2024 |>
 #| label: team-epa
 #| eval: true
 #| echo: true
+oi_colors <- 
+  palette.colors(palette = "Okabe-Ito")
 pbp2024 |>
   dplyr::group_by(posteam) |>
   dplyr::summarize(epa = mean(epa, na.rm = TRUE)) |> 
@@ -168,3 +170,383 @@ pbp2024 |>
 
 # Predicting EPA on a New Pass
 
+
+
+## League-Average {.smaller}
+```{r}
+#| label: extra-reg
+#| eval: true
+#| echo: false
+pass2024 <-
+  pbp2024 |>
+  dplyr::filter(play_type == "pass" & season_type == "REG") |> 
+  dplyr::filter(!grepl("TWO-POINT CONVERSION ATTEMPT", desc) & #<1>
+                  !grepl("sacked", desc)) |> #<1>
+  dplyr::select(epa, passer_player_id, desc)
+```
+
+
+- EPA on a future pass if you don't know anything else?
+- League average `mean(pbp2024$epa)` seems reasonable
+
+. . .
+
+```{r}
+#| label: fig-league-epa
+#| eval: true
+#| echo: false
+#| fig-width: 8
+#| fig-asp: 0.5625
+#| fig-cap: EPA on all regular season passes
+
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+hist(pass2024$epa, breaks = 100,
+     xlab = "EPA", main = "Regular Season EPA")
+abline(v = mean(pass2024$epa), col = oi_colors[3])
+```
+
+## Player-Specific Model
+
+- Would your prediction change if you knew passer identity?
+  - If Patrick Mahomes was throwing the pass, expect higher EPA
+  - If Daniel Jones was throwing the pass, expect lower EPA
+
+. . .
+
+- $I$: number of unique passers in data set
+- $Y_{ij}$: EPA on pass $j$ thrown by player $i$
+- $\alpha_{i}$: avg. EPA/pass for player $i$ (unknown)
+- Model: $Y_{ij} = \alpha_{i} + \epsilon_{ij}$
+
+## Estimating $\alpha_{i}$ {.smaller}
+- Idea 1: group by `passer_player_id` & compute `mean(epa)` for each player
+- Equivalent (and more extensible): fit a linear model w/ least squares
+
+:::{.panel-tabset}
+
+### Setup
+
+- Regress `epa` on *categorical* `passer_player_id`
+- Must convert `passer_player_id` to a `factor()`
+- Useful to manually set a reference player (e.g., Aaron Rodgers)
+
+```{r}
+#| label: set-reference
+#| eval: true
+#| echo: true
+rodgers_id <- 
+  roster2024 |> 
+  dplyr::filter(full_name == "Aaron Rodgers") |> 
+  dplyr::pull(gsis_id)
+
+pass2024 <-
+  pass2024 |>
+  dplyr::mutate(
+    passer_player_id = factor(passer_player_id),
+    passer_player_id = relevel(passer_player_id, ref = rodgers_id))
+```
+
+
+### Estimation
+- Estimates $\beta_{0} = \alpha_{\textrm{Rodgers}}$ and $\beta_{i} = \alpha_{i} - \alpha_{\textrm{Rodgers}}$
+
+```{r}
+#| label: fit-ols
+#| eval: true
+#| echo: true
+ols_fit <-
+  lm(formula = epa ~ 1 + passer_player_id,
+     data = pass2024)
+ols_betas <- coefficients(ols_fit)
+ols_betas[1:5]
+```
+
+### Example
+
+```{r}
+#| label: check-dak-epa
+#| eval: true
+#| echo: true
+dak_id <- 
+  roster2024 |> 
+  dplyr::filter(full_name == "Dak Prescott") |> 
+  dplyr::pull(gsis_id)
+mean(pass2024$epa[pass2024$passer_player_id == dak_id]) 
+ols_betas[paste0("passer_player_id", dak_id)] + ols_betas["(Intercept)"]
+```
+
+### Top-10
+
+```{r}
+#| label: build-alpha
+names(ols_betas)[1] <- paste0("passser_player_id", rodgers_id) #<1>
+names(ols_betas) <- 
+  stringr::str_remove(string = names(ols_betas), pattern = "passer_player_id") #<2>
+alphas <- 
+  data.frame(gsis_id = names(ols_betas), ols = ols_betas) |> #<3>
+  dplyr::mutate(ols = ifelse(gsis_id == rodgers_id, ols, ols + dplyr::first(ols))) |> #<4>
+  dplyr::inner_join(y = roster2024 |> dplyr::select(gsis_id, full_name), by = "gsis_id")
+alphas |>
+  dplyr::arrange(dplyr::desc(ols)) |>
+  dplyr::slice(c(1:5, (dplyr::n()-4):dplyr::n())) |>
+  dplyr::select(full_name, ols)
+```
+
+. . .
+
+- How can a punter have the highest per-pass EPA???
+
+:::
+
+## Small Sample Size
+
+```{r}
+#| label: smallsample-setup
+#| eval: true
+#| echo: false
+n_passes <-
+  pass2024 |>
+  dplyr::group_by(passer_player_id) |> 
+  dplyr::summarise(n = dplyr::n()) |> #<1>
+  dplyr::rename(gsis_id = passer_player_id) #<2>
+
+alphas <-
+  alphas |>
+  dplyr::inner_join(y = n_passes, by = "gsis_id")
+```
+
+```{r}
+#| label: fig-avg-alpha
+#| fig-width: 8
+#| fig-asp: 0.5625
+#| fig-align: center
+#| fig-cap: The variability in per-pass decreases dramatically as the number of passes increases.
+
+oi_colors <- 
+  palette.colors(palette = "Okabe-Ito")
+
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+plot(alphas$n, alphas$ols, 
+     xlab = "Number of passes",
+     ylab = "Avg. EPA per pass",
+     main = "EPA per pass",
+     pch = 16, cex = 0.5, col = oi_colors[1])
+abline(h = mean(pass2024$epa), col = oi_colors[3])
+```
+
+## Thought-Experiment{.smaller}
+
+- If $i$ threw many passes, $\hat{\alpha}_{i}$ accurately estimates latent ability $\alpha_{i}$
+  - Prefer to use $\hat{\alpha}_{i}$ over global mean $\overline{y}$
+  
+- If $i$ threw very few passes, $\hat{\alpha}_{i}$ can be very noisy
+  - Global mean $\overline{y}$ arguably better than $\hat{\alpha}_{i}$
+  
+- What about for players b/w extremes?
+
+. . .
+
+- Idea: $w_{i} \times \hat{\alpha}_{i} + (1 - w_{i}) \times \overline{y}$
+  - If $n_{i}$ very large, $w_{i}$ should be closer to 1
+  - If $n_{i}$ very small, $w_{i}$ should be closer to 0
+- Problem: how to specify weights *in data-driven way*?
+
+# Multilevel Models
+
+## Model Specification{.smaller}
+- Level 1: observed EPA for player $i$ normally distributed around $\alpha_{i}$
+- Level 2: Latent player abilities $\alpha_{i}$'s are themselves normally distributed around $\mu$
+$$
+\begin{align}
+\textrm{Level 1}&: &\quad  Y_{ij} &= \alpha_{i} + \epsilon_{ij}; \epsilon_{ij} \sim N(0, \sigma^{2}) \quad \textrm{for all}\ j = 1, \ldots, n_{i},\ i = 1, \ldots, I \\
+\textrm{Level 2}&: &\quad \alpha_{i} &= \alpha_{0} + u_{i}; u_{i} \sim N(0, \sigma^{2}_{\alpha}) \quad \textrm{for all}\ i = 1, \ldots, I
+\end{align}
+$$
+
+- $\alpha_{0}$: average per-pass EPA over super-population of passers
+- $\sigma$ captures "within-player" variability in EPA pass-to-pass
+- $\sigma_{\alpha}$ captures "between-player" variability in per-pass EPA
+
+. . .
+
+- Level 2 responses $\alpha_{i}$ are **not observable**
+- "Borrowing strength": predition for player $i'$ informed by their data *and everyone else's data*
+  - Estimate of $\alpha_{i}$ informed by $i$'s data **and $\alpha_{0}$
+  - Estimates of $\alpha_{i}$ determine estimate of $\alpha_{0}$
+  
+## Hierarchical Structure
+
+- Often data exhibits hierarchical grouping structure
+  - Passes group by QB, players in teams etc.
+- Grouping variable may be relevant to outcome & induces correlation
+- Outcomes from same group may be tightly clustered around group average
+
+## Fitting Multilevel Models
+
+- The `(1 | passer_player_id)` tells `lmer()` to include a *random intercept* for each passer
+
+```{r}
+#| label: fit-random-intercept
+#| echo: true
+#| eval: true
+#| message: false
+library(lme4)
+multilevel_fit <-
+  lmer(formula = epa ~ 1 + (1|passer_player_id), 
+       data = pass2024)
+```
+
+## Extracting Estimates{.smaller}
+- Use `ranef()` to extract estimates $\hat{u}_{i}$'s
+- Use `coef` to get $\hat{\alpha}_{i} = \hat{\alpha}_{0} + \hat{u}_{i}$
+  - Only valid when there is one grouping variable
+  - W/ more grouping variables, random intercepts not identified
+- `coef()` and `ranef()` return lists w/ one element per grouping variable
+  - Each list element is a data table
+
+```{r}
+#| label: display-coef
+#| eval: true
+#| echo: true
+tmp <- coef(multilevel_fit)
+tmp[["passer_player_id"]] |> dplyr::slice_head(n = 5)
+```
+
+## Estimated Random Intercepts $\hat{\alpha}_{i}$
+
+:::{.panel-tabset}
+
+### Code
+
+- Create temporary table `lmer_alpha` with player name, id, and estimate
+- Join `lmer_alpha` to `alphas` (so we can compare with OLS estimates)
+
+```{r}
+lmer_alpha <- data.frame( 
+    lmer = tmp[["passer_player_id"]][,1], 
+    gsis_id = rownames(tmp[["passer_player_id"]])) 
+
+alphas <- alphas |>
+  dplyr::inner_join(y = lmer_alpha, by = "gsis_id")
+```
+
+### Top & Bottom 5 Passers
+```{r}
+#| label: dispaly-top-alphas
+#| eval: true
+#| echo: false
+alphas |>
+  dplyr::arrange(dplyr::desc(lmer)) |>
+  dplyr::slice(c(1:5, (dplyr::n()-4):dplyr::n())) |>
+  dplyr::select(full_name, lmer, n)
+```
+:::
+
+## Visualizing Multilevel Estimates
+
+- Multilevel model *pulls* player-specific means to global mean
+  - Amount of data dictates degree to which original estimate is pulled
+  
+```{r}
+#| label: fig-shrinkage
+#| fig-width: 8
+#| fig-asp: 0.5625
+#| fig-align: center
+
+alpha0_hat <- fixef(multilevel_fit)["(Intercept)"] 
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+plot(alphas$n, alphas$ols, 
+     ylim = c(-4.5, 4.5),
+     xlab = "Number of passes",
+     ylab = "Avg. EPA per pass",
+     main = "EPA per pass",
+     pch = 16, cex = 0.5, col = oi_colors[9])
+points(alphas$n, alphas$lmer, pch = 15, col = oi_colors[2], cex = 0.5)
+abline(h = alpha0_hat, col = oi_colors[3])
+```
+
+
+## Adjusting For Additional Covariates
+
+- Simple model doesn't account for formation, whether QB was hit while throwing, etc.
+
+```{r}
+#| label: build-pass2024
+#| eval: true
+#| echo: true
+pass2024 <-
+  pbp2024 |>
+  dplyr::filter(play_type == "pass" & season_type == "REG") |> 
+  dplyr::filter(!grepl("TWO-POINT CONVERSION ATTEMPT", desc) &
+                  !grepl("sacked", desc)) |>
+  dplyr::select(epa, passer_player_id, 
+                air_yards, 
+                posteam_type, shotgun, no_huddle, qb_hit,
+                pass_location,
+                desc) |>
+  dplyr::mutate(posteam_type = factor(posteam_type),
+                pass_location = factor(pass_location))
+```
+
+## Including Fixed Effects
+- $\boldsymbol{\mathbf{x}}$ contains: `air_yards`, `shotgun`, `qb_hit`, `pass_location`, `posteam_type`
+- Effects of these factors are constant (i.e., **fixed**) across all passers
+$$
+\begin{align}
+\textrm{Level 1}&: &\quad  Y_{ij} &= \alpha_{i} + \boldsymbol{\mathbf{x}}_{ij}^{\top}\boldsymbol{\beta} +  \epsilon_{ij}; \quad \epsilon_{ij} \sim N(0, \sigma^{2}) \\
+\textrm{Level 2}&: &\quad \alpha_{i} &= \alpha_{0} + u_{i}; \quad u_{i} \sim N(0, \sigma^{2}_{\alpha}) 
+\end{align}
+$$
+
+## Fitting Our Elaborated Model{.scrollable}
+
+```{r}
+#| label: multilevel-full
+#| eval: true
+#| echo: true
+ml_fit_full <-
+  lme4::lmer(formula = epa ~ 1 + (1|passer_player_id) + 
+               air_yards + posteam_type + shotgun +
+               no_huddle + qb_hit + pass_location, data = pass2024)
+```
+
+```{r}
+#| label: summary-ml-fit-full
+#| eval: true
+#| echo: false
+summary(ml_fit_full)
+
+```
+
+## Top- and Bottom-5 Passers
+
+- After adjusting for important fixed effects 
+  - Lamar Jackson has highest EPA/pass
+  - Dorian Thompson-Robinson had the lowest EPA/pass
+  
+```{r}
+#| label: view-new-alphas
+
+tmp <- coef(ml_fit_full)
+lmer_alpha_full <- 
+  data.frame( 
+    lmer = tmp[["passer_player_id"]][,1],
+    gsis_id = rownames(tmp[["passer_player_id"]])) |>
+  dplyr::inner_join(roster2024 |> dplyr::select(gsis_id, full_name), by = "gsis_id")
+
+lmer_alpha_full |>
+  dplyr::arrange(dplyr::desc(lmer)) |>
+  dplyr::slice(c(1:5, (dplyr::n()-4):dplyr::n()))  |>
+  dplyr::select(full_name, lmer)
+```
+
+## Looking Ahead
+
+- EPA is based on starting & ending game state
+- 2 phases of passing play: ball in air + after the catch
+- Currently analysis implicitly credits QBs for both phases
+
+- [Lecture 10](../../lectures/lecture10.qmd): divide total EPA among relevant offensive players
+- Develop a version of WAR
+  - Multilevel model to estimate per-play contribution
+  - Scale model estimates by opportunities to create replacement-level shadow
