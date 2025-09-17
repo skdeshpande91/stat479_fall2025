@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.7.31">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -91,7 +91,7 @@ div.csl-indent {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-4bfb630b09c0e164834af1bb3207dbff.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -739,7 +739,7 @@ play_type      POST   REG
 <pre><code>               (Intercept) passer_player_id00-0026158 
                 0.11303340                 0.04427535 
 passer_player_id00-0026300 passer_player_id00-0026498 
-               -0.32316791                 0.05621013 
+               -0.32316791                 0.05623275 
 passer_player_id00-0027973 
                -0.19838613 </code></pre>
 </div>
@@ -870,7 +870,7 @@ passer_player_id00-0027973
 <pre><code>── nflverse play by play data ──────────────────────────────────────────────────</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>ℹ Data updated: 2025-04-30 02:39:06 EDT</code></pre>
+<pre><code>ℹ Data updated: 2025-08-11 15:43:02 EDT</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 2
@@ -968,21 +968,21 @@ Warning
 Formula: epa ~ 1 + (1 | passer_player_id)
    Data: pass2024
 
-REML criterion at convergence: 65351.6
+REML criterion at convergence: 65367.5
 
 Scaled residuals: 
     Min      1Q  Median      3Q     Max 
--8.3587 -0.5309 -0.1400  0.5547  5.4923 
+-8.3583 -0.5309 -0.1402  0.5549  5.4894 
 
 Random effects:
  Groups           Name        Variance Std.Dev.
- passer_player_id (Intercept) 0.01518  0.1232  
- Residual                     2.33009  1.5265  
-Number of obs: 17723, groups:  passer_player_id, 101
+ passer_player_id (Intercept) 0.0152   0.1233  
+ Residual                     2.3302   1.5265  
+Number of obs: 17727, groups:  passer_player_id, 103
 
 Fixed effects:
             Estimate Std. Error t value
-(Intercept)   0.1297     0.0207   6.265</code></pre>
+(Intercept)   0.1294     0.0207    6.25</code></pre>
 </div>
 </div>
 <p>First, we find the estimate of the overall grand mean EPA per play in the “Fixed effects” section: the average EPA across all passers and passes is estimated to be <span class="math inline">\(\hat{\alpha}_{0} \approx 0.1294.\)</span> The “Random effects” section reports our estimates <span class="math inline">\(\hat{\sigma} \approx 1.526\)</span> and <span class="math inline">\(\hat{\sigma}_{\alpha} = 0.123\)</span> of, respectively, the variability in EPA that we’d expect to see between passes thrown by the same player and the variability in latent EPA per pass across the different passers. The fact that <span class="math inline">\(\hat{\sigma}_{\alpha}\)</span> is so much smaller than <span class="math inline">\(\hat{\sigma}\)</span> suggests that most of the variability in observed passing play EPA is driven more by noise than differences in latent player ability.</p>
@@ -1000,11 +1000,11 @@ Fixed effects:
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>           (Intercept)
-00-0023459   0.1164973
-00-0026158   0.1467385
-00-0026300   0.1231416
-00-0026498   0.1601689
-00-0027973   0.0199101</code></pre>
+00-0023459  0.11643217
+00-0026158  0.14662915
+00-0026300  0.12284041
+00-0026498  0.16012352
+00-0027973  0.01971509</code></pre>
 </div>
 </div>
 <p>We will append our multilevel estimates to our data table <code>alpha</code></p>
@@ -1042,16 +1042,16 @@ Fixed effects:
 <span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(full_name, lmer, n)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                  full_name        lmer   n
-1             Lamar Jackson  0.36827643 469
-2                Jared Goff  0.33318327 536
-3                Josh Allen  0.27346854 482
-4                Joe Burrow  0.27175401 651
-5            Baker Mayfield  0.27066068 569
-6               Andy Dalton  0.01991010 160
-7                 Drew Lock  0.01613596 180
-8        Anthony Richardson  0.01212565 261
-9           Spencer Rattler -0.04063512 227
-10 Dorian Thompson-Robinson -0.13685136 118</code></pre>
+1             Lamar Jackson  0.36825428 469
+2                Jared Goff  0.33315635 536
+3                Josh Allen  0.27342658 482
+4                Joe Burrow  0.27172057 651
+5            Baker Mayfield  0.27062324 569
+6               Andy Dalton  0.01971509 160
+7                 Drew Lock  0.01595111 180
+8        Anthony Richardson  0.01197563 261
+9           Spencer Rattler -0.04081740 227
+10 Dorian Thompson-Robinson -0.13715503 118</code></pre>
 </div>
 </div>
 <p>We see that our multilevel estimates for players who threw very few passes are aggressively shrunk towards to the overall grand-mean.</p>
