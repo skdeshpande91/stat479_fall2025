@@ -1,9 +1,346 @@
 ---
-title: "Lecture 12: Power Rankings I"
+title: "Lecture 12: Bradley-Terry Models"
 format: html
 execute: 
   cache: true
 ---
+
+## Motivation: The 2025 NCAA Women's Ice Hockey Tournament
+
+The Wisconsin Badgers defeated the Ohio State Buckeyes women in the championship game of the 2025 NCAA Women's Ice Hockey Tournament[^fullgame].
+During the 2024-25 regular season, the Badgers won 38 games, lost 1 game, and tied 2 games.
+The Buckeyes won 35 games, lost 4 games, and did not tie any games.
+Based on these regular season results, one could argue that the best team won the championship.
+In this lecture, we will ask "did the best team win" and present a framework for estimating relative team strengths and forecasting match winners.
+
+[^fullgame]: The full game is available to view [here](https://www.youtube.com/watch?v=gUANkwgxgD0).
+
+To motivate our developments, let's consider two slightly different --- but certainly related --- questions, which are somewhat more quantitative than "which team is the best?": 
+  1. If we could repeatedly play the game at a neutral site, how often would the Badgers win? And how often would the Badgers win if the match were repeatedly played at [LaBahn Arena](https://en.wikipedia.org/wiki/LaBahn_Arena)^[labanh] or [the Ohio State University Ice Rink](https://en.wikipedia.org/wiki/Ohio_State_University_Ice_Rink)^[osu]
+  2. If the NCAA Championship were awarded to the winner in a "best-of-5" series[^bestof5] at a neutral site, what is the likelihood that the Badgers would win the championship? What are the chances if the best-of-5 series was split between the two teams' home arena?
+  
+[^labahn]: Home of the Badger women's ice hockey team.
+
+[^osu]: Home of the Buckeyes women's ice hockey team.
+
+[^bestof5]: In a "best of" series, teams play each other until one has won a majority of the contests. So, in a "best-of-5" series, the first team to reach 3 wins is declared the series winner. For more, check out the [Wikipedia entry](https://en.wikipedia.org/wiki/Playoff_format#Best-of_formats).
+
+To answer these questions, we introduce a model for estimating latent team strengths from pairwise comparisons (i.e., match results; @sec-bt-def).
+We then estimate the model parameters (@sec-bt-est) and then use the model estimates to simulate the outcome of a single game (@sec-single-simulation) and the outcome of a series (@sec-series-simulate).
+
+## The Bradley-Terry Model {@sec-bt-def}
+
+Suppose we observe the outcome of $n$ games played between $p$ teams.
+Let $Y_{i} = 1$ if the home team wins match $i$ and let $Y_{i} = 0$ if the away team wins match $i.$
+Without loss of generality, suppose that we number the teams $1, 2, \ldots, p.$
+Let $h(i)$ and $a(i)$ denote the indices of the home and away team for match $i.$
+
+
+
+
+## Scraping D1 Women's Hockey Results {@sec-scraping}
+
+We will fit a Bradley-Terry model to estimate the latent team strengths of all D1 Women's Ice Hockey Teams.
+To do this, we need to build a data table that contains, at a minimum, the identities of the home and away teams and an indicator of whether the home team won for each regular-season game.
+Unfortunately, there is not (yet) an existing R package that contains such a table or even provides the tools needed to scrape the data.
+So, we will need to acquire the data ourselves.
+
+US College Hockey Online is an independent media organization focused on college hockey.
+In addition to posting articles, weekly polls & rankings, and team & individual statistics, USCHO publishes box score and play-by-play data.
+For instance, here is the [play-by-play](https://www.uscho.com/gameday/division-i-women/2024-2025/2025-03-23/game-7949/) from the 2025 championship game.
+They also publish match results for each season in a tabular form[^composite-schedule]
+
+[^composite-schedule]: See [here](https://www.uscho.com/scoreboard/division-i-women/2024-2025/composite-schedule/) for the 2024-25 results
+
+This information is readily scraped using tools like [**rvest**](https://rvest.tidyverse.org/index.html).
+<!-- See TO DO for more details -->
+The codeblock below defines a function that scrapes a single season's worth of D1 Women's Ice Hockey results.
+
+```{r}
+#| label: uscho-scraper
+#| eval: true
+#| code-fold: true
+#| code-summary: Function for scraping 
+scrape_uscho <- function(season){
+  
+  col_names <-
+    c("Day", "", "Date", "Time", 
+      "Opponent", "Opp Score", "", "Home", "Score", "OT",
+      "Notes", "Type", "Summary", "TV")
+  
+  target_url <- 
+    paste0("https://www.uscho.com/scoreboard/division-i-women/",
+           season, "-", season+1, 
+           "/composite-schedule/")
+  raw_data <-
+    rvest::read_html(target_url)
+  raw_elements <-
+    raw_data |>
+    rvest::html_elements(xpath = '//*[(@id = "ez-outstream-ez-stuck-close")] | //td') |> 
+    rvest::html_text2()
+  
+  assign(paste0("raw_wd1hockey_", season, "_", season+1), raw_data)
+  save(list = paste0("raw_wd1hockey_", season, "_", season+1),
+       file = paste0("raw_wd1hockey_", season, "_", season+1, ".RData"))
+  
+  if(!identical(col_names, raw_elements[1:14])){
+    message(paste0("Season ", season,"-",season+1, ": did not find expected column names in html elements!"))
+    results <- NULL
+  } 
+  
+  # 2022-23 does not have TV abbreviations
+  
+  altitude_ix <- which(grepl("Altitude", raw_elements))[1]
+  
+  if(altitude_ix %% 14 != 1){
+    message(paste0("Season ", season, "-", season+1, ": did not find expected number of elements in table!"))
+    results <- NULL
+  } else{
+    # First 14 elements 
+    n_games <- (altitude_ix - 1)/14 - 1 
+    games <- 
+      data.frame(
+        Day = rep(NA, times = n_games),
+        Date = rep(NA, times = n_games),
+        Time = rep(NA, times = n_games),
+        Opponent = rep(NA, times = n_games),
+        OppScore = rep(NA, times = n_games),
+        Home = rep(NA, times = n_games),
+        HomeScore = rep(NA, times = n_games),
+        OT = rep(NA, times = n_games),
+        Notes = rep(NA, times = n_games),
+        Type = rep(NA, times = n_games))
+    
+    games[["Day"]] <- 
+      raw_elements[seq(15, (n_games+1)*14, by = 14)] 
+    games[["Date"]] <-
+      raw_elements[seq(17, (n_games+1)*14, by = 14)]
+    games[["Time"]] <-
+      raw_elements[seq(18, (n_games+1)*14, by = 14)]
+    games[["Opponent"]] <-
+      raw_elements[seq(19, (n_games+1)*14, by = 14)]
+    games[["OppScore"]] <-
+      raw_elements[seq(20, (n_games+1)*14, by = 14)]
+    games[["Home"]] <-
+      raw_elements[seq(22, (n_games+1)*14, by = 14)]
+    games[["HomeScore"]] <-
+      raw_elements[seq(23, (n_games+1)*14, by = 14)]
+    games[["OT"]] <-
+      raw_elements[seq(24, (n_games+1)*14, by = 14)]
+    games[["Notes"]] <-
+      raw_elements[seq(25, (n_games+1)*14, by = 14)]
+    games[["Type"]] <-
+      raw_elements[seq(26, (n_games+1)*14, by = 14)]
+    results <- 
+      tidyr::as_tibble(games) |>
+      dplyr::mutate(
+        OT = ifelse(OT == "", NA_character_, OT),
+        Notes = ifelse(Notes == "", NA_character_, Notes),
+        HomeScore = as.integer(HomeScore),
+        OppScore = as.integer(OppScore))
+  }
+  return(results)
+}
+```
+
+We can use this function to obtain game-by-game results from the 2024-25 regular season
+```{r}
+#| label: scrape-2024-25
+#| eval: true
+#| echo: true
+wd1hockey_2024_2025 <- scrape_uscho(season = 2024)
+save(wd1hockey_2024_2025, file = "wd1hockey_2024_2025.RData") #<1>
+```
+1. Save a copy of the data table so that we can load it later without have to re-scrape it
+
+In addition to the recording the date and time of each game, our data table `wd1hockey_2024_2025` records the home and away team names (`Home` and `Opponent`); the home and away team scores (`HomeScore` and `OppScore`); whether the game went into overtime (`OT = "OT"`) or not (`OT = NA`).
+```{r}
+#| label: data-view
+#| eval: true
+#| echo: false
+set.seed(479)
+wd1hockey_2024_2025 |> dplyr::slice_sample(n=10)
+```
+
+In the following subsections, we will investigate what the columns `Type` and `Notes` record.
+
+
+### Determining the Winner
+
+In order to fit a Bradley-Terry model using these data, we still need to determine whether the home team won the game or not.
+Intuitively, we can do this by adding a column to `wd1hockey_2024_2025` that compares `HomeScore` to `OppScore`.
+Unfortunately, this simple strategy is not quite adequate as there are a number of games in which `HomeScore = OppScore`.
+It turns out that many of these games ended in a shootout[^shootout] and the ultimate winner is recorded in the `Notes` column.
+```{r}
+#| label: view-equal-scores
+#| eval: true
+#| echo: true
+wd1hockey_2024_2025 |>
+  dplyr::filter(HomeScore == OppScore) |>
+  dplyr::select(Opponent, OppScore, Home, HomeScore, Notes) |>
+  dplyr::slice_head(n=5)
+```
+`Notes` uses a three-character abbreviation instead of the team's full name.
+We can look up the abbreviations by inspecting the box score for each game.
+For instance, by looking under the "Team" column [here](https://www.uscho.com/gameday/division-i-women/2024-2025/2025-03-23/game-7949/), we see that Wisconsin and Ohio States' abbreviations are, respectively, `"WIS"` and `"OSU"`.
+A table listing every team and its USCHO's abbreviation is available [here](). 
+After downloading this table and saving it in our working directory, we can load it into our R session
+```{r}
+#| label: load-team-abbreviations
+#| echo: true
+#| eval: true
+team_abbr <- readr::read_csv(file = "wd1hockey_teams.csv")
+```
+
+To whether the home team won a match, we first check whether `HomeScore` and `OppScore` are identical.
+If not, then we can check whether `HomeScore > OppScore`.
+But if they are the same, we can determine the winner by parsing the text in `Notes`.
+The following code block implement a function that executes this procedure.
+```{r}
+#| label: get-home-winner
+#| echo: true
+#| eval: true
+#| code-fold: true
+#| code-summary: Function that determines if the home team won the game
+get_home_winner <- 
+  function(Home_abbr, HomeScore, Opp_abbr, OppScore, Notes)
+{
+  home_winner <- NA
+  if(HomeScore > OppScore) home_winner <- 1
+  else if(HomeScore < OppScore) home_winner <- 0
+  else{
+    if(!is.na(Notes) & grepl("SO", Notes)){ #<1>
+      winner <- 
+        stringr::str_split(string = Notes, pattern = " wins")[[1]][1] #<2>
+      if(winner == Home_abbr) home_winner <- 1
+      else if(winner == Opp_abbr) home_winner <- 0
+    }
+  }
+  return(home_winner)
+}
+```
+1. Here is where we check if `Notes` contains the string "SO"
+2. Pulls out the three-character abbreviation for the winning team
+
+We can now apply this function to every row in our data table and append a columns `Home_Winner` and `Opp_Winner` containing an indicator of whether the home team won the game.
+```{r}
+#| label: add-home-winner
+#| eval: true
+#| echo: true
+wd1hockey_2024_2025 <-
+  wd1hockey_2024_2025 |>
+  dplyr::mutate(
+    HomeScore = as.integer(HomeScore),
+    OppScore = as.integer(OppScore)) |>
+  dplyr::left_join(y = team_abbr |> dplyr::rename(Home_abbr = abbr, Home = team), #<1>
+                   by = "Home") |> #<1>
+  dplyr::left_join(y = team_abbr |> dplyr::rename(Opp_abbr = abbr, Opponent = team), #<1>
+                   by = "Opponent") |> #<1>
+  dplyr::rowwise() |> #<2>
+  dplyr::mutate(
+    Home_Winner = 
+      get_home_winner(Home_abbr, HomeScore, Opp_abbr, OppScore, Notes)) |>
+  dplyr::ungroup() |> #<2>
+  dplyr::mutate(Opp_Winner = 1-Home_Winner)
+```
+1. Add columns containing the home and away team abbreviations
+2. `rowwise()` is like `group_by()` in that divides the data table by row and applies the same operation to each row. 
+
+### Identifying Regular Season Games
+
+The column `Type` records whether the game was an exhibition game (`Type="EX"`), non-conference game (`Type="NC"`), or a conference game.
+In the case of a conference game, `Type` records an abbreviation of the conference.
+```{r}
+#| label: tabulate-type
+#| eval: true
+#| echo: true
+table(wd1hockey_2024_2025$Type)
+```
+
+We will fit our Bradley-Terry model using data only from the regular season, which includes conference tournaments and mid-season tournaments[^beanpot] but not the NCAA Tournament, which is used to determine the national championship.
+The column `Notes`, in addition to recording the result of shootouts, also records whether the game was part of a tournament. 
+
+[^beanpot]: The [Beanpot](https://en.wikipedia.org/wiki/Beanpot_(ice_hockey)) is a good example: it is a tournament played by teams from schools in the Greater Boston area.
+
+```{r}
+#| label: get-regular-season
+#| eval: true
+#| echo: true
+reg_season <-
+  wd1hockey_2024_2025 |>
+  dplyr::filter(Type != "EX" & !grepl("NCAA W Tournament", Notes)) 
+```
+
+Of the `{r} nrow(reg_season)` games in `reg_season`, there are `{r} sum(is.na(reg_season$Home_Winner))` that ended in ties.
+We will remove these from our analysis [^btties]
+
+```{r}
+#| label: remove-ties
+#| echo: true
+#| eval: true
+no_ties <-
+  reg_season |> dplyr::filter(!is.na(Home_Winner))
+```
+
+[^btties]: There are extensions of the Bradley-Terry model that include ties. But the software we'll be using in this class does not yet support fitting such extensions. So, we will exclude these games from our analysis
+
+
+## Fitting Bradley-Terry Models
+
+We will use the package [**BradleyTerry2**](https://github.com/hturner/BradleyTerry2) to fit Bradley-Terry models in R.
+You can install the package using
+```{r}
+#| label: install-bt2
+#| eval: false
+#| echo: true
+devtools::install_github("hturner/BradleyTerry2")
+```
+
+### Re-formatting Our Data
+
+The package **BradleyTerry2** uses a somewhat idiosyncratic syntax.
+Instead of passing a table with one row per game, it instead wants each row to corresponding to a unique home-away combination.
+It further encodes the match results using a pair of numbers, the number of home team wins and the number of away team wins.
+
+```{r}
+#| label: reformat
+#| eval: true
+#| echo: true
+results <-
+  noties |>
+  dplyr::group_by(Home, Opponent) |>
+  dplyr::summarise(
+    HomeWin = sum(Home_Winner),
+    OppWin = sum(Opp_Winner), .groups = 'drop') |>
+  dplyr::mutate(
+    Home = 
+      factor(Home, 
+             levels = unique(c(reg_season$Home, reg_season$Opponent))),
+    Opponent = 
+      factor(Opponent,
+             levels = unique(c(reg_season$Home, reg_season$Opponent))))
+```
+
+### Extracting Team Strengths
+
+```{r}
+#| label: fit-bt
+#| eval: true
+#| echo: true
+library(BradleyTerry2)
+fit <-
+  BTm(outcome = cbind(results$HomeWin, results$OppWin),
+      player1 = Home, player2 = Opponent,
+      formula = NULL,
+       data = results)
+
+```
+
+
+The function `BTabilities()` pulls out the value of $\lambda$ for each team. 
+```{r}
+lambda <- BTabilities(fit)
+```
 <!--
 ## Overview
 
