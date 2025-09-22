@@ -335,7 +335,7 @@ statcast2024 <-
 ## Definition
 - For each pitch let $R$ be numbers of runs scored in remainder of half-inning
 - $\textrm{o} \in \{0,1,2\}$ be number of outs
-- $\textbfM{br} \in \{"000", "100", "010", "001", "110", "101", "011", "111"\}$
+- $\textbf{br} \in \{"000", "100", "010", "001", "110", "101", "011", "111"\}$
 - $\rho(\textrm{o}, \textrm{br}) = \mathbb{E}[R \vert \textrm{o}, \textrm{br}]$
 - Avg. number of runs team expects to score based on current game-state
 
@@ -580,7 +580,7 @@ runValue2024 <-
 :::{.panel-tabset}
 
 ### Terminal States
-- `dplyr::lead()` 
+- `dplyr::lead()` produces `NA`'s at the end of half-inning
 ```{r}
 #| label: cleanup-expected-runs
 #| eval: true
@@ -595,6 +595,8 @@ runValue2024 <-
 ### Joining Expected Runs
 ```{r}
 #| label: join-expected-runs
+#| eval: true
+#| echo: true
 end_expected_runs <- 
   expected_runs |>
   dplyr::rename(
@@ -688,8 +690,20 @@ re24 |>
 
 ## Looking Ahead
 - Suppose batter hits a single and baserunner advances from 1st to 3rd
-  - Run Value reflects change in run expectancy. `BaseRunner`: `'100' $\rightarrow$ '101'`)
+  - Run Value reflects change in run expectancy. `BaseRunner`: `'100'` $\rightarrow$ `'101'`)
   - Is it fair to give batter all the credit for creating run value?
 - Lecture 7: Dividing run value b/w baserunner and batter
 - Lecture 8: Divide negative run value b/w pitcher and fielder
+
+## Projects{.smaller}
+
+- Project Check-in: by **Friday 26 September** email me a short overview of your project
+  - Precise problem statement & overview of data and analysis plan
+  - Happy to help brainstorm & narrow down analysis in Office Hours (or by appt.)
+  - Inspiration: exercises in lecture notes & [project information](../../project1.qmd) page
+
+- Office Hours this week:
+  - Tuesday (today): 4pm - 5:45pm (MH 5586)
+  - Wednesday: 3pm-4pm (MH5586)
+  - Friday: 1pm - 3pm (MH closed after 3pm)
 

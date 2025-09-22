@@ -10,35 +10,271 @@ execute:
 The Wisconsin Badgers defeated the Ohio State Buckeyes women in the championship game of the 2025 NCAA Women's Ice Hockey Tournament[^fullgame].
 During the 2024-25 regular season, the Badgers won 38 games, lost 1 game, and tied 2 games.
 The Buckeyes won 35 games, lost 4 games, and did not tie any games.
-Based on these regular season results, one could argue that the best team won the championship.
-In this lecture, we will ask "did the best team win" and present a framework for estimating relative team strengths and forecasting match winners.
+In this lecture, we'll consider the broad question "Did the better team win?" and introduce a framework for measuring latent team strength and predicting the outcome of individual matches.
 
 [^fullgame]: The full game is available to view [here](https://www.youtube.com/watch?v=gUANkwgxgD0).
 
-To motivate our developments, let's consider two slightly different --- but certainly related --- questions, which are somewhat more quantitative than "which team is the best?": 
-  1. If we could repeatedly play the game at a neutral site, how often would the Badgers win? And how often would the Badgers win if the match were repeatedly played at [LaBahn Arena](https://en.wikipedia.org/wiki/LaBahn_Arena)^[labanh] or [the Ohio State University Ice Rink](https://en.wikipedia.org/wiki/Ohio_State_University_Ice_Rink)^[osu]
-  2. If the NCAA Championship were awarded to the winner in a "best-of-5" series[^bestof5] at a neutral site, what is the likelihood that the Badgers would win the championship? What are the chances if the best-of-5 series was split between the two teams' home arena?
+To motivate our developments, let's consider two slightly different --- but certainly related --- questions, which are somewhat more nuanced than "did the better team win?": 
+
+  1. If we could repeatedly play the championship game, how often would the Badgers win?
+  2. If the NCAA Championship were awarded to the winner in a "best-of-5" series[^bestof5] at a neutral site, what is the likelihood that the Badgers would win the championship? 
   
-[^labahn]: Home of the Badger women's ice hockey team.
-
-[^osu]: Home of the Buckeyes women's ice hockey team.
-
 [^bestof5]: In a "best of" series, teams play each other until one has won a majority of the contests. So, in a "best-of-5" series, the first team to reach 3 wins is declared the series winner. For more, check out the [Wikipedia entry](https://en.wikipedia.org/wiki/Playoff_format#Best-of_formats).
 
 To answer these questions, we introduce a model for estimating latent team strengths from pairwise comparisons (i.e., match results; @sec-bt-def).
-We then estimate the model parameters (@sec-bt-est) and then use the model estimates to simulate the outcome of a single game (@sec-single-simulation) and the outcome of a series (@sec-series-simulate).
+We build a data set containing the outcomes of every Division 1 NCAA Women's Ice Hockey game from the 2024-25 season (@sec-scraping).
+We then estimate the model parameters (@sec-bt-est) before using the model estimates to simulate a best-of-5 series (@sec-series-simulate) between the Badgers and Buckeyes.
 
-## The Bradley-Terry Model {@sec-bt-def}
+## The Bradley-Terry Model {#sec-bt-def}
 
 Suppose we observe the outcome of $n$ games played between $p$ teams.
 Let $Y_{i} = 1$ if the home team wins match $i$ and let $Y_{i} = 0$ if the away team wins match $i.$
 Without loss of generality, suppose that we number the teams $1, 2, \ldots, p.$
-Let $h(i)$ and $a(i)$ denote the indices of the home and away team for match $i.$
+
+The basic Bradley-Terry model associates each team $j = 1, \ldots, p,$ with a latent strength $\lambda_{j}$ and asserts that
+$$
+\mathbb{P}(\textrm{team i beats team j}) = \frac{e^{\lambda_{i}}}{e^{\lambda_{i}} + e^{\lambda_{j}}} = \frac{1}{1 + e^{-1 \times (\lambda_{i} - \lambda_{j})}}
+$$
+In other words, under the basic Bradley-Terry model, the log-odds of team $i$ beating team $j$ is $\lambda_{i} - \lambda_{j}.$
+
+### Example: Predicted Probabilities {#sec-ex-probs}
+
+Consider a round-robin tournament between 4 teams (numbered 1, 2, 3, and 4) in which every teams plays every other team exactly once.
+Further suppose that the latent team strengths are $\lambda_{1} = 1, \lambda_{2} = 0.5, \lambda_{3} = 0.3$ and $\lambda_{4} = 0.$
+According to the Bradley-Terry model, if team 1 plays team 2, it is expected to win with probability
+$$
+\mathbb{P}(\textrm{team 1 beats team 2}) = \frac{e^{1}}{e^{1} + e^{0.5}} \approx 62\%
+$$
+```{r}
+#| label: basic-bt-example
+#| echo: true
+#| eval: true
+lambda <- c(1, 0.5, 0.3, 0)
+1/(1 + exp(-1 * (lambda[1] - lambda[2]))) #<1>
+```
+1. It is more numerically stable to compute the difference in strengths on the log-odds scale and apply the inverse logistic transform than to exponentiate the $\lambda$'s in the numerator and denominator.
+
+Manually computing the probability that each team beats every other team is not too difficulty[^manual].
+To compute all these probabilities in one go, we can make use of the `outer()` function to assemble a matrix containing all pairwise differences of the $\lambda_{i}'$.
+```{r}
+#| label: outer-demo
+#| eval: true
+#| echo: true
+outer(X = lambda, Y = lambda, FUN = "-") #<1>
+```
+1. `outer()` applies the function specified with the `FUN` argument to every combination of its arguments `X` and `Y`.
+
+Once we have these differences, which are on the log-odds scale, we can apply the [inverse logistic](../slides/raw_slides/slides_03.qmd#fig-logistic) function to transform them to the probability scale.
+The result is a matrix whose $(i,j)$ element is $\mathbb{P}(\textrm{team i beats team j})$.
+```{r}
+#| label: example-pairwise-probs
+#| eval: true
+#| echo: true
+probs <- 1/(1 + exp(-1 * outer(X = lambda, Y = lambda, FUN = "-")))
+diag(probs) <- NA #<1>
+round(probs, digits = 3)
+```
+1. The probability of a team beating itself is not well-defined so we will manually set these values to `NA`
+
+[^manual]: That is, manually computing `1/(1 + exp(-1 * (lambda[i] - lambda[j])))` for every pair of `(i,j)`.
+
+Armed with the probabilities of each team beating every other team, we can start to compute the probabilities of more elaborate events.
+Assuming the match outcomes are independent, the probability that team 1 wins its matches against Teams 2 and 3 but loses to Team 4 is
+$$
+0.622 \times 0.668 \times (1 - 0.731) \approx 11.1\%
+$$
+
+```{r}
+#| label: team1-probs
+#| eval: true
+#| echo: true
+round(probs[1,2] * probs[1,3] * probs[1,4], digits = 3)
+```
+
+We can also compute the probability that Team 2 wins exactly 2 of its 3 games
+$$
+\begin{align}
+\mathbb{P}(\textrm{team 2 wins 2 games}) &= \mathbb{P}(\textrm{team 2 beats 1 \& 3 and loses to 4}) \\
+&~+ \mathbb{P}(\textrm{team 2 beats 1 \& 4 and loses to 3}) \\
+&~+ \mathbb{P}(\textrm{team 2 betas 3 \& 4 and loses to 1})
+\end{align}
+$$
+
+```{r}
+#| label: team2-2game-probs
+#| eval: true
+probs[2,1] * probs[2,3] * probs[4,2] + 
+  probs[2,1] * probs[2,4] * probs[3,2] + 
+  probs[1,2] * probs[2,3] * probs[2,4]
+```
 
 
+### Example: Tournament Simulation {#sec-ex-tournament}
+
+In our 4-team round-robin tournament, what is the probability that Team 3 finishes in the top-2 in terms of wins[^group]?
+To compute this probability by hand, we would need to enumerate all the possible ways in which Team 3 can finish in the top-2 positions after all 6 matches.
+While not impossible to do in our 4-team example, such manual computation becomes unweildly as we increase the number of teams.
+
+[^group]: Many competitions features a round-robin "group stage" with the top-2 finishers for each group advancing to a single-elimination tournament to decide the champion.
+
+A much more elegant solution is to estimate this probability via simulation.
+Specifically, we can use the estimated match outcome probabilities to simulate each of the 6 games in our tournament many, many times.
+We can then compute the proportion of simulations in which Team 3 finishes in the top-2 in terms of wins.
+
+To perform this simulation, we begin by enumerating each pair of teams using the `combn()` function.
+
+```{r}
+combn(x = 1:4, m = 2)
+```
+The function `combn()` returns an array with two rows (one for each team) and columns for every game in the tournament.
+It will be more useful for us to convert this into a data table with rows for each game.
+In this table, we will label the teams `player1` and `player2` and also append a column containing the probability that `player1` beats `player2`
+
+```{r}
+design <- 
+  combn(x = 1:4, m = 2) |> 
+  t() |> #<1>
+  as.data.frame() |> #<2>
+  dplyr::rename(player1 = V1, player2 = V2) |> #<3>
+  dplyr::rowwise() |>
+  dplyr::mutate(prob = probs[player1, player2]) |> #<4>
+  dplyr::ungroup()
+design
+```
+1. Since `combn()` returns a matrix whose columns index games, we need to take its transpose
+2. For the **dplyr** verbs to work, we need to convert our table from a `matrix` to a `data.frame`
+3. By default `as.data.frame` will use the columns names `V1`, `V2`, etc. So, we change them here to something more informative
+4. Without the `rowwise()`, this line would create columns for all pairwise probabilities and not the desired one.
+
+Since match outcomes are binary, simulating the outcomes of the 6 matches is equivalent to flipping 6 independent coins, each with its own probability of landing heads.
+We interpret the event that a particular coin lands heads with the event that `player1` wins the match and the event of the coin landing tails as the event that `player2` wins the match.
+We can simulate these binary events using the `rbinom()` function
+```{r}
+#| label: simulate-rr4-outcome-single
+#| eval: true
+#| echo: true
+set.seed(479)
+outcomes <- rbinom(n = 6, size = 1, prob = design$prob)
+outcomes
+```
+The first three entries in `outcomes` correspond to the games in the first three rows of `design`, which are played between Team 1 and Teams 2, 3, and 4.
+So, in this simulation Team 1 loses to Team 2 but beats Teams 3 and 4.
+The fourth and fifth entry in `outcomes` corresponds to the games between Team 2 and Teams 3 & 4. 
+These entries are `0` and `1,` respectively, meaning that in this simulation Team 2 lost to Team 3 but beat Team 4.
+Finally, the sixth entry corresponds to the game between Team 3 and Team 4.
+It is equal to `1`, meaning that in this simulation Team 3 defeated Team 4.
+
+To tabulate each teams' wins, we create a temporary data frame containing the participants and a column recording the winner (`winner`).
+Then, we can count the number of times each team appears in the column `winner` using a grouped summary.
+In this simulation, Teams 1, 2, and 3 each won exactly 2 games.
+```{r}
+#| label: tmp-outcomes
+#| eval: true
+#| echo: true
+tmp_df <-
+  design |>
+  dplyr::select(player1, player2) |>
+  dplyr::mutate(
+    outcome = outcomes,
+    winner = ifelse(outcome == 1, player1, player2),
+    player1 = factor(player1, levels = 1:4),
+    player2 = factor(player2, levels = 1:4),
+    winner = factor(winner, levels = 1:4))
+
+wins <-
+  tmp_df |>
+  dplyr::group_by(winner) |>
+  dplyr::summarise(Wins = dplyr::n()) |>
+  dplyr::rename(Team = winner) |>
+  tidyr::complete(Team, fill = list(Wins = 0)) #<1>
+```
+1. If a team wins no games, they will not appear in the column `winner`. Using `complete()`, we can add rows for these teams and manually assign them 0 wins. 
+
+We can now repeat this simulation many times, each time recording the number of wins for each team.
+In the code block below, build an array whose rows correspond to simulation replications and whose columns record the number of wins for each team.
+
+```{r}
+#| label: simulate-rr4
+#| eval: true
+#| echo: true
+
+n_sims <- 5000
+simulated_wins <- matrix(data = NA, nrow = n_sims, ncol = 4)
+for(r in 1:n_sims){
+  set.seed(479+r)
+  outcomes <- rbinom(n = 6, size = 1, prob = design$prob)
+  wins <-
+    design |>
+    dplyr::select(player1, player2) |>
+    dplyr::mutate(
+      outcome = outcomes,
+      winner = ifelse(outcome == 1, player1, player2),
+      winner = factor(winner, levels = unique(c(design$player1, design$player2)))) |>
+  dplyr::group_by(winner) |>
+  dplyr::summarise(Wins = dplyr::n()) |>
+  dplyr::rename(Team = winner) |>
+  tidyr::complete(Team, fill = list(Wins = 0))
+  
+  simulated_wins[r,] <- wins |> dplyr::pull(Wins)
+}
+```
+
+Out of the 5000 simulations, Team 1 won all 3 of its games in 1534 simulations.
+Based on this, our *estimated* probability of Team 1 winning all 3 of its matches is $1534/5000 \approx 30.6\%,$ which is quite close to the exact value of 30.4% (which we can obtain by multiplying `probs[1,2] * probs[1,3] * probs[1,4]`).
+```{r}
+#| label: tabulate-rr4-team1
+#| eval: true
+#| echo: true
+table(simulated_wins[,1])
+```
 
 
-## Scraping D1 Women's Hockey Results {@sec-scraping}
+To estimate the probability that Team 3 finishes in the top-2, we will first rank each team based on the number of games they won in each simulation.
+Like in [Lecture 5](lecture05.qmd), we will call `rank` on the negative value of wins so that teams with more wins get lower numerical ranks.
+In the case of ties, we will assign the minimum possible rank (using the argument `ties.method="min"`).
+As an illustration, say that Teams 1 and 2 both won 2 games and Teams 3 and 4 both won 1 game each.
+This convention would assign Teams 1 and 2 a rank of 1 and Teams 3 and 4 a rank of 3 (there would be no second place).
+```{r}
+#| label: rank-tie-example
+#| eval: true
+#| echo: true
+rank(-1*c(2,2,1,1), ties.method = "min")
+```
+
+We compute the team rankings for each simulation replication using the `apply()` function.
+
+```{r}
+#| label: rank-rr4
+#| eval: true
+#| echo: true
+simulated_ranks <-
+  t( #<1>
+    apply(-1*simulated_wins, MARGIN = 1,  #<2>
+        FUN = rank, ties.method = "min")) #<3>
+ 
+```
+1. In this case, `apply()` will return a matrix with 4 rows and 5000 columns, so we need to transpose it
+2. We specify `MARGIN = 1` because we want to rank values within each row (i.e., simulation replication)
+3. `apply()` allows us to pass additional arguments needed for the function we passed via the argument `FUN`.
+
+We find that in 1565 of the 5000 simulations, Team 3 had the most wins (rank of 1) and in 1092 of the 5000 simulations, Team 3 had the second-most wins (rank of 2).
+So, the estimated probability of Team 3 finished in the top-2 in terms of wins is about `{r} round(mean(simulated_ranks[,3] <= 2), digits = 3)`.
+```{r}
+#| label: tabulate-rr4-rank3
+#| eval: true
+#| echo: true
+table(simulated_ranks[,3])
+```
+
+### Identifability
+
+The basic Bradley-Terry model assigns each team $j$ a latent strength $\lambda_{j}$ and models the log-odds of team $i$ beating team $j$ as the difference in strengths $\lambda_{i} - \lambda_{j}.$
+Notice that these log-odds (and hence, the probability of team $i$ beating team $j$) does not change if we add the same constant (e.g., 10) to each $\lambda_{j}.$
+This means that we can only estimates the underlying latent strengths up to an additive constant.
+In practice, we generally fix one of the $\lambda_{j}$'s to be zero; usually, the team names are represented are `factor` variables and we simply set the latent strength for the reference level to be zero.  
+
+
+## Scraping D1 Women's Hockey Results {#sec-scraping}
 
 We will fit a Bradley-Terry model to estimate the latent team strengths of all D1 Women's Ice Hockey Teams.
 To do this, we need to build a data table that contains, at a minimum, the identities of the home and away teams and an indicator of whether the home team won for each regular-season game.
@@ -61,6 +297,7 @@ The codeblock below defines a function that scrapes a single season's worth of D
 #| eval: true
 #| code-fold: true
 #| code-summary: Function for scraping 
+
 scrape_uscho <- function(season){
   
   col_names <-
@@ -165,7 +402,7 @@ wd1hockey_2024_2025 |> dplyr::slice_sample(n=10)
 In the following subsections, we will investigate what the columns `Type` and `Notes` record.
 
 
-### Determining the Winner
+### Determining the Winner {#determine-winner}
 
 In order to fit a Bradley-Terry model using these data, we still need to determine whether the home team won the game or not.
 Intuitively, we can do this by adding a column to `wd1hockey_2024_2025` that compares `HomeScore` to `OppScore`.
@@ -185,11 +422,22 @@ We can look up the abbreviations by inspecting the box score for each game.
 For instance, by looking under the "Team" column [here](https://www.uscho.com/gameday/division-i-women/2024-2025/2025-03-23/game-7949/), we see that Wisconsin and Ohio States' abbreviations are, respectively, `"WIS"` and `"OSU"`.
 A table listing every team and its USCHO's abbreviation is available [here](). 
 After downloading this table and saving it in our working directory, we can load it into our R session
+
 ```{r}
-#| label: load-team-abbreviations
+#| label: load-team-abbreviations-code
 #| echo: true
-#| eval: true
+#| eval: false
 team_abbr <- readr::read_csv(file = "wd1hockey_teams.csv")
+```
+
+```{r}
+#| label: load-team-abbreviations-eval
+#| echo: false
+#| eval: true
+#| output: false
+#| message: false
+#| warning: false
+team_abbr <- readr::read_csv(file = "../../data/wd1hockey_teams.csv")
 ```
 
 To whether the home team won a match, we first check whether `HomeScore` and `OppScore` are identical.
@@ -246,7 +494,7 @@ wd1hockey_2024_2025 <-
 1. Add columns containing the home and away team abbreviations
 2. `rowwise()` is like `group_by()` in that divides the data table by row and applies the same operation to each row. 
 
-### Identifying Regular Season Games
+### Identifying Regular Season Games {#sec-extract-reg-season}
 
 The column `Type` records whether the game was an exhibition game (`Type="EX"`), non-conference game (`Type="NC"`), or a conference game.
 In the case of a conference game, `Type` records an abbreviation of the conference.
@@ -272,7 +520,7 @@ reg_season <-
 ```
 
 Of the `{r} nrow(reg_season)` games in `reg_season`, there are `{r} sum(is.na(reg_season$Home_Winner))` that ended in ties.
-We will remove these from our analysis [^btties]
+We will remove these from our analysis[^btties]
 
 ```{r}
 #| label: remove-ties
@@ -285,7 +533,7 @@ no_ties <-
 [^btties]: There are extensions of the Bradley-Terry model that include ties. But the software we'll be using in this class does not yet support fitting such extensions. So, we will exclude these games from our analysis
 
 
-## Fitting Bradley-Terry Models
+## Fitting Bradley-Terry Models {#sec-bt-est}
 
 We will use the package [**BradleyTerry2**](https://github.com/hturner/BradleyTerry2) to fit Bradley-Terry models in R.
 You can install the package using
@@ -299,70 +547,269 @@ devtools::install_github("hturner/BradleyTerry2")
 ### Re-formatting Our Data
 
 The package **BradleyTerry2** uses a somewhat idiosyncratic syntax.
-Instead of passing a table with one row per game, it instead wants each row to corresponding to a unique home-away combination.
+Instead of passing a table with one row per game, it instead wants each row to correspond to a home team-away team pair.
 It further encodes the match results using a pair of numbers, the number of home team wins and the number of away team wins.
-
+In the following code block, we first divide the data into subgroups corresponding to unique pairs of home and away teams.
+Then, within each of those subgroups, we count up the number of home team and away team wins. 
 ```{r}
 #| label: reformat
 #| eval: true
 #| echo: true
 results <-
-  noties |>
-  dplyr::group_by(Home, Opponent) |>
+  no_ties |>
+  dplyr::group_by(Home, Opponent) |> #<1>
   dplyr::summarise(
-    HomeWin = sum(Home_Winner),
-    OppWin = sum(Opp_Winner), .groups = 'drop') |>
+    HomeWin = sum(Home_Winner), #<2>
+    OppWin = sum(Opp_Winner), .groups = 'drop') |> #<2>
   dplyr::mutate(
-    Home = 
-      factor(Home, 
-             levels = unique(c(reg_season$Home, reg_season$Opponent))),
-    Opponent = 
-      factor(Opponent,
-             levels = unique(c(reg_season$Home, reg_season$Opponent))))
+    Home = factor(Home, levels = sort(unique(c(reg_season$Home, reg_season$Opponent)))), #<3>
+    Opponent = factor(Opponent,levels = sort(unique(c(reg_season$Home, reg_season$Opponent))))) #<3>
 ```
+1. Subdivide data table of all games by home team - away team pairs
+2. Count the number of home and away team wins in each subgroup
+3. Convert home and away team identities into factor variables.
 
-### Extracting Team Strengths
+To better understand the structure of `results`, we can take a look at a few rows corresponding to Wisconsin's home games.
+```{r}
+#| label: view-wisco-home
+#| eval: true
+#| echo: true
+set.seed(123)
+results |> dplyr::filter(Home == "Wisconsin") |> dplyr::slice_sample(n=5)
+```
+The data table records that Wisconsin played Ohio State at home twice, winning one game and losing one game.
+Similarly, Wisconsin played Minnesota three times, winning all three games.
 
+### Estimating & Extracting Team Strengths
+
+We're now ready to estimate the latent strength parameters using the function `BTm` from the **BradleyTerry2** package.
 ```{r}
 #| label: fit-bt
 #| eval: true
 #| echo: true
-library(BradleyTerry2)
+
 fit <-
-  BTm(outcome = cbind(results$HomeWin, results$OppWin),
-      player1 = Home, player2 = Opponent,
-      formula = NULL,
-       data = results)
-
+  BradleyTerry2::BTm(
+    outcome = cbind(results$HomeWin, results$OppWin), #<1> 
+    player1 = Home, player2 = Opponent,data = results) #<2>
 ```
+1. `BTm` wants the counts of home & away team wins for each unique team pair passed as a separate data frame
+2. We use `player1` and `player2` to tell `BTm` which columns in the data frame pass with the `data` argument correspond to the home and away team argument
 
-
-The function `BTabilities()` pulls out the value of $\lambda$ for each team. 
+The function `BTabilities()` returns a matrix with columns containing the estimated value of $\lambda$ for each team and the associated standard error.
+Taking a look at the first few rows, we see that Assumption College was taken as the reference team and assigned a latent strength $\lambda = 0.$
+We further see that the model estimates the next several teams as having very large $\lambda$'s, suggesting that they are very likely to beat Assumption.
 ```{r}
-lambda <- BTabilities(fit)
+#| label: extract-lambda
+#| eval: true
+#| echo: true
+lambda_hat <- BradleyTerry2::BTabilities(fit)
+lambda_hat[1:5,]
 ```
-<!--
-## Overview
 
-## Scraping D1 Women's Hockey Results
+We see that Wisconsin, Ohio State, Cornell, and Minnesota all have even larger positive estimated strengths.
+This is not especially surprising, as these are four of the better teams in the country[^frozenfour].
+```{r}
+#| label: view-frozen4-lambda
+#| eval: true
+#| echo: true
+lambda_hat[c("Wisconsin", "Ohio State", "Cornell", "Minnesota"),]
+```
+
+@fig-lambda-hat-raw visualizes the estimated latent strength of each team *relative* to Assumption.
+We see the vast majority of the estimates are positive and many of the 95% confidence intervals do not cross 0, indicating that most teams are favored against Assumption. 
+
+```{r}
+#| label: fig-lambda-hat-raw
+#| eval: true
+#| echo: true
+#| fig-width: 8
+#| fig-asp: 0.5625
+#| fig-cap: Most teams are favored against the reference team (Assumption College)
+
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+oi_colors <- palette.colors(palette = "Okabe-Ito")
+
+n_teams <- nrow(lambda_hat) #<1>
+y_limit <- range(c(lambda_hat[,1] - 2*lambda_hat[,2], lambda_hat[,1] + 2*lambda_hat[,2])) #<1>
+
+ix <- order(lambda_hat[,1]) #<2>
+plot(1, type = "n", 
+     main = "Latent strength (relative to Assumption)",
+     xlim = c(0, n_teams), ylim = y_limit,
+     xaxt = "n", xlab = "",
+     ylab = "Estimated lambda")
+abline(h = 0, col = oi_colors[2], lwd = 0.5, lty = 2)
+for(i in 1:n_teams){
+  lines(x = c(i,i), 
+        y = lambda_hat[ix[i],"ability"] + c(-2,2) * lambda_hat[ix[i], "s.e."],  #<3>
+        col = oi_colors[9], lwd = 0.5)
+  points(x = i, y = lambda_hat[ix[i],"ability"], pch = 16, cex = 0.5, col = oi_colors[1])
+}
+
+```
+1. Get the number of teams and range of $\hat{\lambda}$'s
+2. Sort the $\hat{\lambda}$'s in increasing order and get the indices
+3. Confidence interval for $\lambda_{j}$ formed by taking the point estimate $\pm 2$ standard errors
+
+Instead of using Assumption College as the reference, we can re-center our estimated $\hat{\lambda}_{j}$'s using the function `update()`
+```{r}
+#| label: update-refcat
+fit_nh <- update(fit, refcat = "New Hampshire")
+lambda_hat_nh <- BradleyTerry2::BTabilities(fit_nh)
+lambda_hat_nh[c("Assumption", "New Hampshire", "Wisconsin", "Ohio State"),]
+```
+Visualizing these shifted we find
+
+```{r}
+#| label: fig-lambda-hat-nh
+#| eval: true
+#| echo: false
+#| fig-width: 8
+#| fig-asp: 0.5625
+#| fig-cap: "Some teams are significantly stronger and some teams are significantly weaker than New Hampshire"
+
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+n_teams <- nrow(lambda_hat_nh) 
+y_limit <- range(c(lambda_hat_nh[,1] - 2*lambda_hat_nh[,2], lambda_hat_nh[,1] + 2*lambda_hat_nh[,2]))
+
+ix <- order(lambda_hat_nh[,1]) 
+plot(1, type = "n", 
+     main = "Latent strength (relative to UNH)",
+     xlim = c(0, n_teams), ylim = y_limit,
+     xaxt = "n", xlab = "",
+     ylab = "Estimated lambda")
+abline(h = 0, col = oi_colors[2], lwd = 0.5, lty = 2)
+for(i in 1:n_teams){
+  lines(x = c(i,i), 
+        y = lambda_hat_nh[ix[i],"ability"] + c(-2,2) * lambda_hat_nh[ix[i], "s.e."],  #<3>
+        col = oi_colors[9], lwd = 0.5)
+  points(x = i, y = lambda_hat_nh[ix[i],"ability"], pch = 16, cex = 0.5, col = oi_colors[1])
+}
+
+```
+
+### Simulating a Best-of-5 Series {#sec-series-simulate}
+
+According to our model estimates, the probability that Wisconsin beats Ohio State in a single game is about 81%
+```{r}
+#| label: wi-osu-single-pred
+#| eval: true
+#| echo: true
+1/(1 + exp(-1 * (lambda_hat["Wisconsin", "ability"] - lambda_hat["Ohio State", "ability"])))
+```
+
+We can use a simulation to estimate the probability that Wisconsin would defeat Ohio State in a best-of-5 series.
+We first develop code to simulate the series, recording the eventual winner and the number of games needed to be played. 
+For this simulation, we use a `while()` loop in which each iteration involves simulating a single game.
+While running this loop, we keep a running tally of each teams' wins (`wi_wins` and `osu_wins`) as well as the number of games played `game_counter`.
+We want to iterate through the loop until either (i) `wi_wins == 3 & osu_wins < 3` (Wisconsin wins the series) or (ii) `osu_wins == 3 & wi_wins < 3` (Ohio State wins the series).
+```{r}
+#| label: simulate-series-single
+#| eval: true
+#| echo: true
+wi_wins <- 0 #<1>
+osu_wins <- 0 #<1>
+
+wi_prob <- 
+  1/(1 + exp(-1 * (lambda_hat["Wisconsin", "ability"] - lambda_hat["Ohio State", "ability"]))) #<2>
+
+game_counter <- 0 # <3>
+outcomes <- rep(NA, times= 5)
+set.seed(481)
+while( wi_wins  < 3 & osu_wins < 3 & game_counter < 5){ #<4>
+  game_counter <- game_counter + 1
+  outcomes[game_counter] <- rbinom(n = 1, size = 1, prob = wi_prob) #<5>
+  
+  if(outcomes[game_counter] == 1) wi_wins <- wi_wins + 1 #<6>
+  else if(outcomes[game_counter] == 0) osu_wins <- osu_wins + 1 #<6>
+
+}
+if(wi_wins == 3){ 
+  winner <- "Wisconsin"
+} else if(osu_wins == 3){
+  winner <- "Ohio State"
+} else{
+  winner <- NA
+}
+ 
+cat("Series ended after", game_counter, " games. Winner = ", winner, "\n")
+cat("Wisconsin: ", wi_wins, " Ohio State: ", osu_wins, "\n")
+cat("Game results:", outcomes, "\n")
+```
+1. Initialize the count of each teams' wins to be 0
+2. P(Wisconsin beats Ohio State)
+3. Initialize the number of games played to 0. This counter is incremented in every loop iteration
+4. We simulate a game only if the series is not yet decided
+5. Simulate outcome of the match: `outcome = 1` means Wisconsin won and `outcome = 0` means Ohio State won
+6. Increment running tallies of each teams' wins based on `outcome`
+[^frozenfour]: In fact, these four teams reached the semi-finals (or Frozen Four) in the 2025 NCAA Tournament
+
+In this single simulation, Wisconsin loses the first game, wins the second and third game, loses the fourh game, and wins the fifth game.
+To estimate the probability that Wisconsin wins a 5 game series, we can repeat this simulation many, many times.
+In the following code block, we create a data frame `series_results` whose rows corresponding to individual simulation replications and which contains two columns, one recording the winner and the other recording the number of games played to determine the winner.
+
+```{r}
+#| label: simulate-series
+#| eval: true
+#| echo: true
+n_sims <- 5000
+series_results <- data.frame(Winner = rep(NA, times = n_sims), Games = rep(NA, times = n_sims))
 
 
-## The Bradley-Terry Model
+wi_prob <- 
+  1/(1 + exp(-1 * (lambda_hat["Wisconsin", "ability"] - lambda_hat["Ohio State", "ability"]))) #<1>
+
+for(r in 1:n_sims){
+  wi_wins <- 0 #<2>
+  osu_wins <- 0 #<2>
+  game_counter <- 0 # <2>
+  winner <- NA #<2>
+  
+  set.seed(479+r)
+  while(wi_wins < 3 & osu_wins < 3 & game_counter < 5){
+    game_counter <- game_counter + 1
+    outcome <- rbinom(n = 1, size = 1, prob = wi_prob)
+    
+    if(outcome == 1) wi_wins <- wi_wins+1 #<3>
+    else osu_wins <- osu_wins <- osu_wins + 1 #<3>
+  }
+  
+  series_results[r, "Games"] <- game_counter
+  if(wi_wins == 3) series_results[r, "Winner"] <- "Wisconsin"
+  else if(osu_wins == 3) series_results[r, "Winner"] <- "Ohio State"
+}
 
 
-### Fitting Bradley-Terry Models {#sec-bt-models}
+```
+1. Since $\mathbb{P}(\textrm{Wisconsin beats Ohio State})$ does not change across simulation iterations, we define this outside the main loop
+2. At the beginning of each simulation, we need to re-initialize the running tallies of each team's wins and the number of games played
+3. Since we're only interested in the ultimate winner and number of games played, there is no need to save the individual match outcomes. But if you want to estimate the probability that Wisconsin wins the series but loses the first game, you'll need to save individual match outcomes.
 
+Across the 5000 simulated series, Wisconsin won about 95% (4768/5000).
+We further estimate that the series ends in 3 games with probability 55% (2767/5000), 4 games with probability 32% (1585/5000), and 5 games with probability 13% (648/5000).
 
-  Yes, it is a GLM, but care needs to be taken
-  We often set a reference level
+```{r}
+#| label: tabulate-series-simulation
+#| eval: true
+#| echo: true
+table(series_results$Winner)
 
+table(series_results$Games)
+```
 
-#### The basic model {#sec-basic-bt}
+## Looking Ahead
 
+Some of the games in our dataset were played at team's home venue (e.g., La Bahn arean here in Madison) while other games were played a neutral venue (e.g., the championship round of the Beanpot, which is typically played at T.D. Garden in Boston).
+Our initial Bradley-Terry model does not account for any potential home-ice advantage.
+In [Lecture 13](lecture13.qmd), we will add an term to our model that is 1 if the a game was played at one of the teams' home and is 0 if it was played a netural site.
 
-#### Home advantage {#sec-home-advantage}
+We will then simulate a more complex, single-elimination tournament and use the simulation to estimated probabilities of events like "Wisconsin reaches the semi-finals".
+To facilitate this, we will save the data table `no_ties` for future use
 
-## Simulation {#sec-simulation}
-
-  Let's simulate the tournament!
--->
+```{r}
+#| label: save-noties
+#| eval: true
+#| echo: true
+save(no_ties, file = "wd1hockey_regseason_2024_2025.RData")
+```

@@ -605,7 +605,7 @@ description                    B      S      X
 <ul>
 <li>For each pitch let <span class="math inline">\(R\)</span> be numbers of runs scored in remainder of half-inning</li>
 <li><span class="math inline">\(\textrm{o} \in \{0,1,2\}\)</span> be number of outs</li>
-<li><span class="math inline">\(\textbfM{br} \in \{"000", "100", "010", "001", "110", "101", "011", "111"\}\)</span></li>
+<li><span class="math inline">\(\textbf{br} \in \{"000", "100", "010", "001", "110", "101", "011", "111"\}\)</span></li>
 <li><span class="math inline">\(\rho(\textrm{o}, \textrm{br}) = \mathbb{E}[R \vert \textrm{o}, \textrm{br}]\)</span></li>
 <li>Avg. number of runs team expects to score based on current game-state</li>
 </ul>
@@ -845,7 +845,7 @@ post_bat_score     5     5     5</code></pre>
 <div class="tab-content">
 <div id="tabset-7-1">
 <ul>
-<li><code>dplyr::lead()</code></li>
+<li><code>dplyr::lead()</code> produces <code>NA</code>’s at the end of half-inning</li>
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a></a>runValue2024 <span class="ot">&lt;-</span></span>
@@ -856,7 +856,21 @@ post_bat_score     5     5     5</code></pre>
 </div>
 </div>
 <div id="tabset-7-2">
-
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a></a>end_expected_runs <span class="ot">&lt;-</span> </span>
+<span id="cb34-2"><a></a>  expected_runs <span class="sc">|&gt;</span></span>
+<span id="cb34-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(</span>
+<span id="cb34-4"><a></a>    <span class="at">end_Outs =</span> Outs,</span>
+<span id="cb34-5"><a></a>    <span class="at">end_BaseRunner =</span> BaseRunner,</span>
+<span id="cb34-6"><a></a>    <span class="at">end_rho =</span> rho)</span>
+<span id="cb34-7"><a></a></span>
+<span id="cb34-8"><a></a>runValue2024 <span class="ot">&lt;-</span></span>
+<span id="cb34-9"><a></a>  runValue2024 <span class="sc">|&gt;</span></span>
+<span id="cb34-10"><a></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> expected_runs, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Outs"</span>, <span class="st">"BaseRunner"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb34-11"><a></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> end_expected_runs, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"end_Outs"</span>, <span class="st">"end_BaseRunner"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb34-12"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">RunValue =</span> RunsScored <span class="sc">+</span> end_rho <span class="sc">-</span> rho) <span class="sc">|&gt;</span></span>
+<span id="cb34-13"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(game_pk, at_bat_number, RunValue)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </div>
 </div>
 </div>
@@ -873,19 +887,19 @@ post_bat_score     5     5     5</code></pre>
 <li>Append run value by <code>joining</code> using <code>game_pk</code> and <code>at_bat_number</code></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a></a>ohtani_id <span class="ot">&lt;-</span> </span>
-<span id="cb34-2"><a></a>  player2024_lookup <span class="sc">|&gt;</span></span>
-<span id="cb34-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(FullName <span class="sc">==</span> <span class="st">"Shohei Ohtani"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb34-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(key_mlbam)</span>
-<span id="cb34-5"><a></a></span>
-<span id="cb34-6"><a></a>ohtani_ab <span class="ot">&lt;-</span></span>
-<span id="cb34-7"><a></a>  statcast2024 <span class="sc">|&gt;</span></span>
-<span id="cb34-8"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(game_pk <span class="sc">==</span> <span class="dv">745444</span>) <span class="sc">|&gt;</span></span>
-<span id="cb34-9"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(pitch_number <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> batter <span class="sc">==</span> ohtani_id) <span class="sc">|&gt;</span></span>
-<span id="cb34-10"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(game_pk, at_bat_number, inning, des) <span class="sc">|&gt;</span></span>
-<span id="cb34-11"><a></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> runValue2024, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"game_pk"</span>, <span class="st">"at_bat_number"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb34-12"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(inning, RunValue, des)</span>
-<span id="cb34-13"><a></a>ohtani_ab</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a></a>ohtani_id <span class="ot">&lt;-</span> </span>
+<span id="cb35-2"><a></a>  player2024_lookup <span class="sc">|&gt;</span></span>
+<span id="cb35-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(FullName <span class="sc">==</span> <span class="st">"Shohei Ohtani"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb35-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(key_mlbam)</span>
+<span id="cb35-5"><a></a></span>
+<span id="cb35-6"><a></a>ohtani_ab <span class="ot">&lt;-</span></span>
+<span id="cb35-7"><a></a>  statcast2024 <span class="sc">|&gt;</span></span>
+<span id="cb35-8"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(game_pk <span class="sc">==</span> <span class="dv">745444</span>) <span class="sc">|&gt;</span></span>
+<span id="cb35-9"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(pitch_number <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> batter <span class="sc">==</span> ohtani_id) <span class="sc">|&gt;</span></span>
+<span id="cb35-10"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(game_pk, at_bat_number, inning, des) <span class="sc">|&gt;</span></span>
+<span id="cb35-11"><a></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> runValue2024, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"game_pk"</span>, <span class="st">"at_bat_number"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb35-12"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(inning, RunValue, des)</span>
+<span id="cb35-13"><a></a>ohtani_ab</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 × 3
   inning RunValue des                                                           
@@ -910,10 +924,10 @@ post_bat_score     5     5     5</code></pre>
 <li>Solution: temporary look-up table renaming <code>key_mlbam</code> to <code>batter</code></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a></a>tmp_lookup <span class="ot">&lt;-</span></span>
-<span id="cb36-2"><a></a>  player2024_lookup <span class="sc">|&gt;</span></span>
-<span id="cb36-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(key_mlbam, Name) <span class="sc">|&gt;</span></span>
-<span id="cb36-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">batter =</span> key_mlbam)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a></a>tmp_lookup <span class="ot">&lt;-</span></span>
+<span id="cb37-2"><a></a>  player2024_lookup <span class="sc">|&gt;</span></span>
+<span id="cb37-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(key_mlbam, Name) <span class="sc">|&gt;</span></span>
+<span id="cb37-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">batter =</span> key_mlbam)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div id="tabset-8-2">
@@ -921,15 +935,15 @@ post_bat_score     5     5     5</code></pre>
 <li>For each player, sum <code>RunValue</code> across all at-bats (RE24)</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a></a>re24 <span class="ot">&lt;-</span></span>
-<span id="cb37-2"><a></a>  statcast2024 <span class="sc">|&gt;</span> </span>
-<span id="cb37-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(pitch_number <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
-<span id="cb37-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(game_pk, at_bat_number, batter) <span class="sc">|&gt;</span></span>
-<span id="cb37-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> runValue2024, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"game_pk"</span>, <span class="st">"at_bat_number"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb37-6"><a></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(batter) <span class="sc">|&gt;</span></span>
-<span id="cb37-7"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">RE24 =</span> <span class="fu">sum</span>(RunValue),<span class="at">N =</span> dplyr<span class="sc">::</span><span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
-<span id="cb37-8"><a></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> tmp_lookup, <span class="at">by =</span> <span class="st">"batter"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb37-9"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Name, RE24, N)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a></a>re24 <span class="ot">&lt;-</span></span>
+<span id="cb38-2"><a></a>  statcast2024 <span class="sc">|&gt;</span> </span>
+<span id="cb38-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(pitch_number <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb38-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(game_pk, at_bat_number, batter) <span class="sc">|&gt;</span></span>
+<span id="cb38-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> runValue2024, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"game_pk"</span>, <span class="st">"at_bat_number"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb38-6"><a></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(batter) <span class="sc">|&gt;</span></span>
+<span id="cb38-7"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">RE24 =</span> <span class="fu">sum</span>(RunValue),<span class="at">N =</span> dplyr<span class="sc">::</span><span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb38-8"><a></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> tmp_lookup, <span class="at">by =</span> <span class="st">"batter"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb38-9"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Name, RE24, N)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div id="tabset-8-3">
@@ -937,9 +951,9 @@ post_bat_score     5     5     5</code></pre>
 <li>Aaron Judge appears to have created the most run value for his team in 2024</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a></a>re24 <span class="sc">|&gt;</span> </span>
-<span id="cb38-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(RE24)) <span class="sc">|&gt;</span></span>
-<span id="cb38-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a></a>re24 <span class="sc">|&gt;</span> </span>
+<span id="cb39-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(RE24)) <span class="sc">|&gt;</span></span>
+<span id="cb39-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 10 × 3
    Name               RE24     N
@@ -965,11 +979,28 @@ post_bat_score     5     5     5</code></pre>
 <ul>
 <li>Suppose batter hits a single and baserunner advances from 1st to 3rd
 <ul>
-<li>Run Value reflects change in run expectancy. <code>BaseRunner</code>: <code>'100' $\rightarrow$ '101'</code>)</li>
+<li>Run Value reflects change in run expectancy. <code>BaseRunner</code>: <code>'100'</code> <span class="math inline">\(\rightarrow\)</span> <code>'101'</code>)</li>
 <li>Is it fair to give batter all the credit for creating run value?</li>
 </ul></li>
 <li>Lecture 7: Dividing run value b/w baserunner and batter</li>
 <li>Lecture 8: Divide negative run value b/w pitcher and fielder</li>
+</ul>
+</section>
+<section id="projects" class="slide level2 smaller">
+<h2>Projects</h2>
+<ul>
+<li>Project Check-in: by <strong>Friday 26 September</strong> email me a short overview of your project
+<ul>
+<li>Precise problem statement &amp; overview of data and analysis plan</li>
+<li>Happy to help brainstorm &amp; narrow down analysis in Office Hours (or by appt.)</li>
+<li>Inspiration: exercises in lecture notes &amp; <a href="../../project1.html">project information</a> page</li>
+</ul></li>
+<li>Office Hours this week:
+<ul>
+<li>Tuesday (today): 4pm - 5:45pm (MH 5586)</li>
+<li>Wednesday: 3pm-4pm (MH5586)</li>
+<li>Friday: 1pm - 3pm (MH closed after 3pm)</li>
+</ul></li>
 </ul>
 
 
