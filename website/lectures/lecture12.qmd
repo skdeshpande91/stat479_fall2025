@@ -27,10 +27,7 @@ We then estimate the model parameters (@sec-bt-est) before using the model estim
 
 ## The Bradley-Terry Model {#sec-bt-def}
 
-Suppose we observe the outcome of $n$ games played between $p$ teams.
-Let $Y_{i} = 1$ if the home team wins match $i$ and let $Y_{i} = 0$ if the away team wins match $i.$
-Without loss of generality, suppose that we number the teams $1, 2, \ldots, p.$
-
+Suppose we observe the outcome of $n$ games played between $p$ teams, which we label $1, 2, \ldots, p.$
 The basic Bradley-Terry model associates each team $j = 1, \ldots, p,$ with a latent strength $\lambda_{j}$ and asserts that
 $$
 \mathbb{P}(\textrm{team i beats team j}) = \frac{e^{\lambda_{i}}}{e^{\lambda_{i}} + e^{\lambda_{j}}} = \frac{1}{1 + e^{-1 \times (\lambda_{i} - \lambda_{j})}}
@@ -266,7 +263,7 @@ So, the estimated probability of Team 3 finished in the top-2 in terms of wins i
 table(simulated_ranks[,3])
 ```
 
-### Identifability
+### Identifability {#sec-constraint}
 
 The basic Bradley-Terry model assigns each team $j$ a latent strength $\lambda_{j}$ and models the log-odds of team $i$ beating team $j$ as the difference in strengths $\lambda_{i} - \lambda_{j}.$
 Notice that these log-odds (and hence, the probability of team $i$ beating team $j$) does not change if we add the same constant (e.g., 10) to each $\lambda_{j}.$

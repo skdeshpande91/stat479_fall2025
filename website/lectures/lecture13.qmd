@@ -5,6 +5,214 @@ execute:
   cache: true
 ---
 
+## Overview
+
+
+
+Before proceeding, we load in the data table containing all regular season Division I women's ice hockey games from the 2024-25 season that did not end in ties.
+```{r}
+#| label: load-data
+#| echo: true
+#| eval: true
+load("wd1hockey_regseason_2024_2025.RData")
+```
+
+
+## Bradley-Terry Models with Home-Court Advantage {#sec-bt-home}
+
+Like the [basic model from Lecture 12](lecture12.qmd#sec-bt-def), we will associate a latent parameter $\lambda_{j}$ to each team $j = 1, \ldots, p.$
+We will also fix one $\lambda_{j} = 0$, corresponding to a pre-specified reference team[^identifiability].
+In addition to the latent team strengths $\lambda_{1}, \ldots, \lambda_{p},$ we will introduce an additional parameter $\lambda_{0}$ that accounts for a systematic home advantage. 
+
+Now suppose that the home team $H$ plays an away team $A$ at team $H$'s home.
+Our augmented Bradley-Terry model asserts that the log-odds that $H$ beats $A$ is $\lambda_{0} + \lambda_{H} - \lambda_{A}.$
+Equivalently, our augmented model asserts that
+$$
+\mathbb{P}(\textrm{team H beats team A at H's home}) = \frac{e^{\lambda_{H} + \lambda_{0}}}{e^{\lambda_{H} + \lambda_{0}} + e^{\lambda_{A}}}.
+$$
+Compared to the original Bradley-Terry model we considered in [Lecture 12](lecture12.qmd#sec-bt-def), our new model gives a systematic advantage to the home team.
+For any two teams $i$ and $j,$ our original Bradley-Terry model assumes that the probability of team $i$ beating team $j$ is the same across all locations.
+Under our new model, the model makes a different prediction depending on location: the log-odds of $i$ beating $j$ are
+
+  * $\lambda_{0} + \lambda_{i} - \lambda_{j}$: if the game is played at $i$'s home arena
+  * $-\lambda_{0} + \lambda_{i} - \lambda_{j}$: if the game is played at $j$'s home arena
+  * $\lambda_{i} - \lambda_{j}$: if the game is played at a neutral site (i.e., not at $i$'s or $j$'s home arena)
+
+To derive the log-odds of $i$ beating $j$ at $j$'s home arena, note that according to our model
+$$
+\mathbb{P}(\textrm{team j beats i at j's home}) = \frac{e^{\lambda_{j} + \lambda_{0}}}{e^{\lambda_{j} + \lambda_{0}} + e^{\lambda_{i}}}.
+$$
+Thus 
+$$
+\begin{align}
+\mathbb{P}(\textrm{team i beats j at j's home}) &= \frac{e^{\lambda_{i}}}{e^{\lambda_{j} + \lambda_{0}} + e^{\lambda_{i}}} \\
+&= \frac{1}{e^{\lambda_{j} + \lambda_{0} - \lambda_{i}} + 1} \\
+&= \frac{1}{1 + e^{-1 \times (-\lambda_{0} + \lambda_{i} - \lambda_{j})}}.
+\end{align}
+$$
+
+
+[^identifiability]: Remember, this is restriction is needed because the $\lambda_{j}$'s are otherwise not identifiable. Without this restriction, the data gives us know way to distinguish between one set of values for the $\lambda_{j}$'s and another set that shifts all the values by the same fixed constant. See [Lecture 12](lecture12.qmd#sec-constraint) for more details.
+
+
+
+
+### Determining Location
+
+Unfortunately, the data table we scraped from USCHO does not record the location of the game.
+USCHO publishes box scores for individual games on separate webpages with highly structured URLs.
+For instance, the URL for the webpage with the box score from the championship game between the Badgers and Buckeyes is
+```
+https://www.uscho.com/gameday/division-i-women/2024-2025/2025-03-23/game-7949/
+```
+Notice that after the date there is a unique game identifier (7949 in this case).
+Based on this, it is tempting to write a function that visits each individual site (e.g., by looping over the unique game ID's).
+Unfortunately, this strategy requires us to determine the unique game identifiers, which is not entirely straightforward.
+We instead impute the location information using a handful of heuristics.
+While these may not be perfect, we can argue that they are reasonable.
+
+We will assume all non-tournament conference games[^type] and most tournament games are played at the home arena of the listed home team and not at a neutral site.
+For instance, there were four games in [Icebreaker](https://hockeycommissioners.com/ice-breaker/womens-ice-breaker.php) tournament featured four games:
+  * Penn State vs Cornell ([boxscore](https://www.uscho.com/gameday/division-i-women/2024-2025/2024-10-25/game-6337/))
+  * Stonehill vs Ohio State ([boxscore](https://www.uscho.com/gameday/division-i-women/2024-2025/2024-10-25/game-6338/))
+  * Cornell vs Ohio State ([boxscore](https://www.uscho.com/gameday/division-i-women/2024-2025/2024-10-26/game-6342/))
+  * Stonehill vs Penn State ([boxscore](https://www.uscho.com/gameday/division-i-women/2024-2025/2024-10-26/game-6340/))
+```{r}
+#| label: find-icebreaker
+#| eval: true
+#| echo: true
+no_ties |>
+  dplyr::filter(grepl("IceBreaker", Notes)) |>
+  dplyr::select(Date, Opponent, Home, Notes, Type)
+```
+Inspecting the box scores pages for all four games, we see that they were all played at [Value City Arena](https://en.wikipedia.org/wiki/Value_City_Arena).
+Although this is located at the Ohio State University --- and is the home arena of their men's ice hockey team --- it is not the home arena of the women's ice hockey team.
+For the purposes of our analysis, we will assume that the games in this tournament are played at a neutral site.
+
+To record whether the game was played at the home arena of `Home` or at a neutral site, we will first identify all tournaments by pulling out the unique values in `Notes` that do not include the string `"SO"`
+
+```{r}
+#| label: find-tournament
+#| eval: true
+#| echo: true
+unik_notes <-
+  no_ties |>
+  dplyr::filter(!is.na(Notes) & !grepl("SO", Notes)) |>
+  dplyr::pull(Notes) |>
+  unique()
+unik_notes
+```
+
+We then manually inspect the box scores for each of the tournaments to determine whether they were played at any of the team's home arena.
+We find
+  * The East/West Classic was played at [Ridder Arena](https://en.wikipedia.org/wiki/Ridder_Arena), which is the home arena of Minnesota. So, we will treat the the games between [Penn State and Bemidji State](https://www.uscho.com/gameday/division-i-women/2024-2025/2025-01-03/game-6120/) and between [Brown and Bemidji State](https://www.uscho.com/gameday/division-i-women/2024-2025/2025-01-04/game-6122/) as being played at a neutral site. But we will treat the games involving Minneosta as being played at their home arena.
+  * The Nutmeg Classic was played at Martire Family Arena, which is the home arena of Sacred Heart. So, we will treat games from this tournament that do not involve Sacred Heart can be considered a neutral site game.
+  * The [Mayor's Cup game between Brown and Providence](https://www.uscho.com/gameday/division-i-women/2024-2025/2024-11-30/game-6116/) was played at [Schneider Arena](https://friars.com/facilities/schneider-arena/6), which is the home arena of Providence.
+  * The [Mayor's Cup game between Union and RPI](https://www.uscho.com/gameday/division-i-women/2024-2025/2025-01-25/game-6207/) was played at [MVP Arena](https://en.wikipedia.org/wiki/MVP_Arena), which is a neutral site
+  * All games in the Smashville Showcase were played at a neutral site: they were played at the Ford Ice Center, which is not the home arena of any of St. Thomas, Merrimack, Clarkson, or Penn State. 
+  * The Beanpot games between [Boston University and Harvard](https://www.uscho.com/gameday/division-i-women/2024-2025/2025-01-14/game-6170/) and [Boston College and Northeastern](https://www.uscho.com/gameday/division-i-women/2024-2025/2025-01-14/game-6169/) were played at [Matthews Arena](https://en.wikipedia.org/wiki/Matthews_Arena), which is the home arena of Northeastern. The games between [Boston College and Harvard](https://www.uscho.com/gameday/division-i-women/2024-2025/2025-01-21/game-6173/) and [Boston University and Northeastern](https://www.uscho.com/gameday/division-i-women/2024-2025/2025-01-21/game-6172/) were played at the T.D. Garden, which is a neutral site.
+
+
+The conference tournaments follow slightly different rules.
+
+  * All games in the [NEWHA](https://www.newhaonline.com/Tournament/2025_NEWHA_Tournament), and [AHA](https://atlantichockeyamerica.com/tournaments/?id=42&sport=whockey), and [HEA](https://hockeyeastonline.com/women/hockey-east-tournament/index.php) tournaments were played at the higher-ranked seeds home arena. So, none of these tournament games were played at a neutral site.
+  * All but the last three games of the ECAC tournament were held at the listed home team's home arena. The last three games (St. Lawrence vs Colgate, Clarkson vs Cornell, and Colgate vs Cornell) were held at Cornell's home arena. So only the March 7, 2025 game between St. Lawrence and Colgate was held at a neutral site.
+  * All the but last three games of the WHCA tournament were held at the listed home team's home arena. The last three (Minnesota vs Ohio State State, Minnesota Duluth vs Wisconsin, and Minnesota vs Wisconsin) were held at Minneosta Duluth's home arena. So, the March 7, 2025 game between Minnesota and Ohio State and the March 8, 2025 game between Minnesota and Wisconsin were held at a neutral site.
+
+Based on these findings, we create a new variable in `no_ties`, which records whether the game was played at a neutral site.
+```{r}
+#| label: add-neutral-site
+#| eval: true
+#| echo: true
+no_ties <-
+  no_ties |>
+  dplyr::mutate(
+    neutral = dplyr::case_when(
+      grepl("IceBreaker", Notes) ~ 1,
+      grepl("East/West", Notes) & Home != "Minnesota" ~ 1,
+      grepl("Nutmeg", Notes) & Home != "Sacred Heart" ~ 1,
+      grepl("Mayor", Notes) & Home == "Rensselaer" ~ 1,
+      grepl("Smashville", Notes) ~ 1,
+      grepl("Beanpot", Notes) & Home != "Northeastern" ~ 1, 
+      Date == "3/7/2025" & Home == "St. Lawrence" & Opponent == "Colgate" ~ 1,
+      Date == "3/7/2025" & Home == "Minnesota" & Opponent == "Ohio State" ~ 1,
+      Date == "3/8/2025" & Home == "Minnesota" & Opponent == "Wisconsin" ~ 1,
+      .default = 0))
+
+```
+
+### Fitting a Bradley-Terry Model with an Intercept
+
+Fitting our augmented model with the **BradleyTerry2** package requires some additional re-formatting[^docs], beyond what we did in [Lecture 12](lecture12.qmd#sec-bt-est). 
+Basically, we need to create two more indicators listing 
+Namely, we need to create indicators `Home.athome` & `Opp.athom` for whether the teams listed in the columns `Home` and `Opponent` are playing at their home arenas.
+This can be done using the `neutral` variable we created earlier: 
+
+  * If `neutral = 0`, the game was not at a neutral site. So, we set `Home.athome = 1` and `Opp.athome = 0`.
+  * If `neutral = 1`, the game was a neutral site. So, we set `Home.athome = 0` and `Opp.athome = 0`.
+  
+```{r}
+#| label: add-athome-indicators
+no_ties <-
+  no_ties |>
+  dplyr::mutate(Home.athome = ifelse(neutral == 1, 0, 1),
+                Opp.athome = 0)
+```
+
+[^docs]: See [Section 3.3](https://cran.r-project.org/web/packages/BradleyTerry2/vignettes/BradleyTerry.html#sec:order) of the package vignette "Bradley-Terry Models in R" for details.
+
+```{r}
+#| label: prep-data
+#| eval: true
+#| echo: true
+unik_teams <- sort(unique(c(no_ties$Home, no_ties$Opponent)))
+
+results <-
+  no_ties |>
+  dplyr::rename(home.team = Home, away.team = Opponent) |>
+  dplyr::group_by(home.team, away.team, neutral) |> 
+  dplyr::summarise(
+    home.win = sum(Home_Winner), 
+    away.win = sum(Opp_Winner), .groups = 'drop') |> 
+  dplyr::mutate(
+    home.team = factor(home.team, levels = unik_teams), 
+    away.team = factor(away.team,levels = unik_teams),
+    home.athome = ifelse(neutral == 1, 0, 1),
+    away.athome = 0) 
+
+```
+
+
+```{r}
+#| label: fit-model
+#| eval: true
+#| echo: true
+tmp_df <- data.frame(home.win = results$home.win, away.win = results$away.win)
+tmp_df$home.team <- data.frame(team = results$home.team, at.home = results$home.athome)
+tmp_df$away.team <- data.frame(team = results$away.team, at.home = results$away.athome)
+
+fit <-
+  BradleyTerry2::BTm(
+    outcome = cbind(home.win, away.win),
+    player1 = home.team, player2 = away.team,
+    formula = ~ team + at.home,
+    refcat = "New Hampshire",
+    id = "team",
+    data = tmp_df) 
+```
+
+
+
+[^type]: I.e., those with `Type` different from `"NC"`
+
+
+
+
+Box scores for individual games 
+
+
+
+
 
 
 

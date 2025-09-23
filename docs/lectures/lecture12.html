@@ -386,7 +386,7 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#sec-ex-probs" id="toc-sec-ex-probs" class="nav-link" data-scroll-target="#sec-ex-probs">Example: Predicted Probabilities</a></li>
   <li><a href="#sec-ex-tournament" id="toc-sec-ex-tournament" class="nav-link" data-scroll-target="#sec-ex-tournament">Example: Tournament Simulation</a></li>
-  <li><a href="#identifability" id="toc-identifability" class="nav-link" data-scroll-target="#identifability">Identifability</a></li>
+  <li><a href="#sec-constraint" id="toc-sec-constraint" class="nav-link" data-scroll-target="#sec-constraint">Identifability</a></li>
   </ul></li>
   <li><a href="#sec-scraping" id="toc-sec-scraping" class="nav-link" data-scroll-target="#sec-scraping">Scraping D1 Women’s Hockey Results</a>
   <ul class="collapse">
@@ -437,8 +437,7 @@ window.Quarto = {
 </section>
 <section id="sec-bt-def" class="level2">
 <h2 class="anchored" data-anchor-id="sec-bt-def">The Bradley-Terry Model</h2>
-<p>Suppose we observe the outcome of <span class="math inline">\(n\)</span> games played between <span class="math inline">\(p\)</span> teams. Let <span class="math inline">\(Y_{i} = 1\)</span> if the home team wins match <span class="math inline">\(i\)</span> and let <span class="math inline">\(Y_{i} = 0\)</span> if the away team wins match <span class="math inline">\(i.\)</span> Without loss of generality, suppose that we number the teams <span class="math inline">\(1, 2, \ldots, p.\)</span></p>
-<p>The basic Bradley-Terry model associates each team <span class="math inline">\(j = 1, \ldots, p,\)</span> with a latent strength <span class="math inline">\(\lambda_{j}\)</span> and asserts that <span class="math display">\[
+<p>Suppose we observe the outcome of <span class="math inline">\(n\)</span> games played between <span class="math inline">\(p\)</span> teams, which we label <span class="math inline">\(1, 2, \ldots, p.\)</span> The basic Bradley-Terry model associates each team <span class="math inline">\(j = 1, \ldots, p,\)</span> with a latent strength <span class="math inline">\(\lambda_{j}\)</span> and asserts that <span class="math display">\[
 \mathbb{P}(\textrm{team i beats team j}) = \frac{e^{\lambda_{i}}}{e^{\lambda_{i}} + e^{\lambda_{j}}} = \frac{1}{1 + e^{-1 \times (\lambda_{i} - \lambda_{j})}}
 \]</span> In other words, under the basic Bradley-Terry model, the log-odds of team <span class="math inline">\(i\)</span> beating team <span class="math inline">\(j\)</span> is <span class="math inline">\(\lambda_{i} - \lambda_{j}.\)</span></p>
 <section id="sec-ex-probs" class="level3">
@@ -690,8 +689,8 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="identifability" class="level3">
-<h3 class="anchored" data-anchor-id="identifability">Identifability</h3>
+<section id="sec-constraint" class="level3">
+<h3 class="anchored" data-anchor-id="sec-constraint">Identifability</h3>
 <p>The basic Bradley-Terry model assigns each team <span class="math inline">\(j\)</span> a latent strength <span class="math inline">\(\lambda_{j}\)</span> and models the log-odds of team <span class="math inline">\(i\)</span> beating team <span class="math inline">\(j\)</span> as the difference in strengths <span class="math inline">\(\lambda_{i} - \lambda_{j}.\)</span> Notice that these log-odds (and hence, the probability of team <span class="math inline">\(i\)</span> beating team <span class="math inline">\(j\)</span>) does not change if we add the same constant (e.g., 10) to each <span class="math inline">\(\lambda_{j}.\)</span> This means that we can only estimates the underlying latent strengths up to an additive constant. In practice, we generally fix one of the <span class="math inline">\(\lambda_{j}\)</span>’s to be zero; usually, the team names are represented are <code>factor</code> variables and we simply set the latent strength for the reference level to be zero.</p>
 </section>
 </section>
