@@ -552,15 +552,20 @@ Then, within each of those subgroups, we count up the number of home team and aw
 #| label: reformat
 #| eval: true
 #| echo: true
+
+unik_teams <- sort(unique(c(no_ties$Home, no_ties$Opponent)))
+
+
 results <-
   no_ties |>
-  dplyr::group_by(Home, Opponent) |> #<1>
+  dplyr::rename(home.team = Home, away.team = Opponent) |>
+  dplyr::group_by(home.team, away.team) |> #<1>
   dplyr::summarise(
-    HomeWin = sum(Home_Winner), #<2>
-    OppWin = sum(Opp_Winner), .groups = 'drop') |> #<2>
+    home.win = sum(Home_Winner), #<2>
+    away.win = sum(Opp_Winner), .groups = 'drop') |> #<2>
   dplyr::mutate(
-    Home = factor(Home, levels = sort(unique(c(reg_season$Home, reg_season$Opponent)))), #<3>
-    Opponent = factor(Opponent,levels = sort(unique(c(reg_season$Home, reg_season$Opponent))))) #<3>
+    home.team = factor(home.team, levels = unik_teams), #<3>
+    away.team = factor(away.team,levels = unik_teams)) #<3>
 ```
 1. Subdivide data table of all games by home team - away team pairs
 2. Count the number of home and away team wins in each subgroup
@@ -572,7 +577,7 @@ To better understand the structure of `results`, we can take a look at a few row
 #| eval: true
 #| echo: true
 set.seed(123)
-results |> dplyr::filter(Home == "Wisconsin") |> dplyr::slice_sample(n=5)
+results |> dplyr::filter(home.team == "Wisconsin") |> dplyr::slice_sample(n=5)
 ```
 The data table records that Wisconsin played Ohio State at home twice, winning one game and losing one game.
 Similarly, Wisconsin played Minnesota three times, winning all three games.
@@ -587,14 +592,19 @@ We're now ready to estimate the latent strength parameters using the function `B
 
 fit <-
   BradleyTerry2::BTm(
-    outcome = cbind(results$HomeWin, results$OppWin), #<1> 
-    player1 = Home, player2 = Opponent,data = results) #<2>
+    outcome = cbind(home.win, away.win), #<1> 
+    player1 = home.team, player2 = away.team, #<2>
+    refcat = "Assumption", #<3>
+    data = results) 
 ```
-1. `BTm` wants the counts of home & away team wins for each unique team pair passed as a separate data frame
-2. We use `player1` and `player2` to tell `BTm` which columns in the data frame pass with the `data` argument correspond to the home and away team argument
+1. The `outcome` argument needs to be a two-column matrix giving the number of home & away team wins for pair of home & away teams. 
+2. We use `player1` and `player2` to indicate the home and way teams
+3. We manually specify the reference team for whom we set $\lambda = 0.$
+4. `BTm` looks for the variables referenced in the `outcome`, `player1`, and `player2` arguments within the data table passed in the `data` argument.
+
 
 The function `BTabilities()` returns a matrix with columns containing the estimated value of $\lambda$ for each team and the associated standard error.
-Taking a look at the first few rows, we see that Assumption College was taken as the reference team and assigned a latent strength $\lambda = 0.$
+Taking a look at the first few rows, we can verify that `BTm` set Assumption College's latent strength to be 0.
 We further see that the model estimates the next several teams as having very large $\lambda$'s, suggesting that they are very likely to beat Assumption.
 ```{r}
 #| label: extract-lambda
@@ -604,7 +614,7 @@ lambda_hat <- BradleyTerry2::BTabilities(fit)
 lambda_hat[1:5,]
 ```
 
-We see that Wisconsin, Ohio State, Cornell, and Minnesota all have even larger positive estimated strengths.
+Wisconsin, Ohio State, Cornell, and Minnesota all have even larger positive estimated strengths.
 This is not especially surprising, as these are four of the better teams in the country[^frozenfour].
 ```{r}
 #| label: view-frozen4-lambda
@@ -642,6 +652,19 @@ for(i in 1:n_teams){
         y = lambda_hat[ix[i],"ability"] + c(-2,2) * lambda_hat[ix[i], "s.e."],  #<3>
         col = oi_colors[9], lwd = 0.5)
   points(x = i, y = lambda_hat[ix[i],"ability"], pch = 16, cex = 0.5, col = oi_colors[1])
+    team_name <- rownames(lambda_hat)[ix[i]]
+  abbr <- 
+    team_abbr |>
+    dplyr::filter(team == team_name) |> dplyr::pull(abbr)
+  if(i %% 2 == 0){
+      text(x = i, 
+       y = 0.25 + lambda_hat[ix[i], "ability"]  + 2 * lambda_hat[ix[i], "s.e."],
+       labels = abbr, cex = 0.7)
+  } else{
+      text(x = i, 
+       y = -0.25 + lambda_hat[ix[i], "ability"]  - 2 * lambda_hat[ix[i], "s.e."],
+       labels = abbr, cex = 0.7)
+  }
 }
 
 ```
@@ -682,6 +705,19 @@ for(i in 1:n_teams){
         y = lambda_hat_nh[ix[i],"ability"] + c(-2,2) * lambda_hat_nh[ix[i], "s.e."],  #<3>
         col = oi_colors[9], lwd = 0.5)
   points(x = i, y = lambda_hat_nh[ix[i],"ability"], pch = 16, cex = 0.5, col = oi_colors[1])
+  team_name <- rownames(lambda_hat_nh)[ix[i]] 
+  abbr <- 
+    team_abbr |>
+    dplyr::filter(team == team_name) |> dplyr::pull(abbr)
+  if(i %% 2 == 0){
+      text(x = i, 
+       y = 0.25 + lambda_hat_nh[ix[i], "ability"]  + 2 * lambda_hat_nh[ix[i], "s.e."],
+       labels = abbr, cex = 0.7)
+  } else{
+      text(x = i, 
+       y = -0.25 + lambda_hat_nh[ix[i], "ability"]  - 2 * lambda_hat_nh[ix[i], "s.e."],
+       labels = abbr, cex = 0.7)
+  }
 }
 
 ```
@@ -740,7 +776,7 @@ cat("Game results:", outcomes, "\n")
 4. We simulate a game only if the series is not yet decided
 5. Simulate outcome of the match: `outcome = 1` means Wisconsin won and `outcome = 0` means Ohio State won
 6. Increment running tallies of each teams' wins based on `outcome`
-[^frozenfour]: In fact, these four teams reached the semi-finals (or Frozen Four) in the 2025 NCAA Tournament
+
 
 In this single simulation, Wisconsin loses the first game, wins the second and third game, loses the fourh game, and wins the fifth game.
 To estimate the probability that Wisconsin wins a 5 game series, we can repeat this simulation many, many times.

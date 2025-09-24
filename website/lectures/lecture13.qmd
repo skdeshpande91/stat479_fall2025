@@ -7,7 +7,18 @@ execute:
 
 ## Overview
 
+In [Lecture 12](lecture12.qmd), we used a Bradley-Terry model to estimate the latent strength of each Division I women's ice hockey team.
+The model posits that the log-odds of one team beating the other is simply the difference in these latent strengths.
+According to our model estimates, the Wisconsin Badgers and Ohio State Buckeyes were ranked 1st and 2nd among all teams.
+Using the estimated model parameters, we simulated a "best-of-5" series between the two teams, finding that Wisconsin was predicted to win such a series about 91% of the time.
 
+One major drawback of our initial model is that it fails to account for any potential home-court advantage.
+In other words, it assumes that the probability that Wisconsin beats Ohio State is the same whether the game was played at [La Bahn Arena](https://uwbadgers.com/sports/2015/8/21/GEN_2014010136.aspx) (the home of the Wisconin Badgers), the [Ohio State University Ice Rink](https://en.wikipedia.org/wiki/Ohio_State_University_Ice_Rink), or at a neutral site.
+
+In this lecture, we fit a refined version of the Bradley-Terry model that accounts for location.
+We introduce this model in @sec-bt-home and perform the necessary pre-processing in @sec-data-prep.
+Then, in @sec-fit, we fit the model using the **BradleyTerry2** package and examine the resulting power rankings.
+Finally, in @sec-frozen4 we simulate the semi-finals and finals of the 2025 NCAA Tournament under several different scenarios. 
 
 Before proceeding, we load in the data table containing all regular season Division I women's ice hockey games from the 2024-25 season that did not end in ties.
 ```{r}
@@ -55,9 +66,7 @@ $$
 [^identifiability]: Remember, this is restriction is needed because the $\lambda_{j}$'s are otherwise not identifiable. Without this restriction, the data gives us know way to distinguish between one set of values for the $\lambda_{j}$'s and another set that shifts all the values by the same fixed constant. See [Lecture 12](lecture12.qmd#sec-constraint) for more details.
 
 
-
-
-### Determining Location
+## Data Preparation {#sec-data-prep}
 
 Unfortunately, the data table we scraped from USCHO does not record the location of the game.
 USCHO publishes box scores for individual games on separate webpages with highly structured URLs.
@@ -68,15 +77,17 @@ https://www.uscho.com/gameday/division-i-women/2024-2025/2025-03-23/game-7949/
 Notice that after the date there is a unique game identifier (7949 in this case).
 Based on this, it is tempting to write a function that visits each individual site (e.g., by looping over the unique game ID's).
 Unfortunately, this strategy requires us to determine the unique game identifiers, which is not entirely straightforward.
-We instead impute the location information using a handful of heuristics.
-While these may not be perfect, we can argue that they are reasonable.
+We instead manually impute the location information with some heuristics.
 
-We will assume all non-tournament conference games[^type] and most tournament games are played at the home arena of the listed home team and not at a neutral site.
+### Determining Location
+
+We will assume all non-tournament conference games and most tournament games are played at the home arena of the listed home team and not at a neutral site.
 For instance, there were four games in [Icebreaker](https://hockeycommissioners.com/ice-breaker/womens-ice-breaker.php) tournament featured four games:
   * Penn State vs Cornell ([boxscore](https://www.uscho.com/gameday/division-i-women/2024-2025/2024-10-25/game-6337/))
   * Stonehill vs Ohio State ([boxscore](https://www.uscho.com/gameday/division-i-women/2024-2025/2024-10-25/game-6338/))
   * Cornell vs Ohio State ([boxscore](https://www.uscho.com/gameday/division-i-women/2024-2025/2024-10-26/game-6342/))
   * Stonehill vs Penn State ([boxscore](https://www.uscho.com/gameday/division-i-women/2024-2025/2024-10-26/game-6340/))
+  
 ```{r}
 #| label: find-icebreaker
 #| eval: true
@@ -85,11 +96,12 @@ no_ties |>
   dplyr::filter(grepl("IceBreaker", Notes)) |>
   dplyr::select(Date, Opponent, Home, Notes, Type)
 ```
+
 Inspecting the box scores pages for all four games, we see that they were all played at [Value City Arena](https://en.wikipedia.org/wiki/Value_City_Arena).
 Although this is located at the Ohio State University --- and is the home arena of their men's ice hockey team --- it is not the home arena of the women's ice hockey team.
 For the purposes of our analysis, we will assume that the games in this tournament are played at a neutral site.
 
-To record whether the game was played at the home arena of `Home` or at a neutral site, we will first identify all tournaments by pulling out the unique values in `Notes` that do not include the string `"SO"`
+To record whether the game was played at the home arena of `Home` or at a neutral site, we will first identify all tournaments by pulling out the unique values in `Notes` that do not include the string `"SO"`.
 
 ```{r}
 #| label: find-tournament
@@ -106,14 +118,15 @@ unik_notes
 We then manually inspect the box scores for each of the tournaments to determine whether they were played at any of the team's home arena.
 We find
   * The East/West Classic was played at [Ridder Arena](https://en.wikipedia.org/wiki/Ridder_Arena), which is the home arena of Minnesota. So, we will treat the the games between [Penn State and Bemidji State](https://www.uscho.com/gameday/division-i-women/2024-2025/2025-01-03/game-6120/) and between [Brown and Bemidji State](https://www.uscho.com/gameday/division-i-women/2024-2025/2025-01-04/game-6122/) as being played at a neutral site. But we will treat the games involving Minneosta as being played at their home arena.
-  * The Nutmeg Classic was played at Martire Family Arena, which is the home arena of Sacred Heart. So, we will treat games from this tournament that do not involve Sacred Heart can be considered a neutral site game.
+  * The Nutmeg Classic was played at [Martire Family Arena](https://www.sacredheart.edu/sacred-heart-life/fitness-recreation--sports/martire-family-arena/), which is the home arena of Sacred Heart. So, we will treat games from this tournament that do not involve Sacred Heart can be considered a neutral site game.
   * The [Mayor's Cup game between Brown and Providence](https://www.uscho.com/gameday/division-i-women/2024-2025/2024-11-30/game-6116/) was played at [Schneider Arena](https://friars.com/facilities/schneider-arena/6), which is the home arena of Providence.
   * The [Mayor's Cup game between Union and RPI](https://www.uscho.com/gameday/division-i-women/2024-2025/2025-01-25/game-6207/) was played at [MVP Arena](https://en.wikipedia.org/wiki/MVP_Arena), which is a neutral site
   * All games in the Smashville Showcase were played at a neutral site: they were played at the Ford Ice Center, which is not the home arena of any of St. Thomas, Merrimack, Clarkson, or Penn State. 
   * The Beanpot games between [Boston University and Harvard](https://www.uscho.com/gameday/division-i-women/2024-2025/2025-01-14/game-6170/) and [Boston College and Northeastern](https://www.uscho.com/gameday/division-i-women/2024-2025/2025-01-14/game-6169/) were played at [Matthews Arena](https://en.wikipedia.org/wiki/Matthews_Arena), which is the home arena of Northeastern. The games between [Boston College and Harvard](https://www.uscho.com/gameday/division-i-women/2024-2025/2025-01-21/game-6173/) and [Boston University and Northeastern](https://www.uscho.com/gameday/division-i-women/2024-2025/2025-01-21/game-6172/) were played at the T.D. Garden, which is a neutral site.
 
 
-The conference tournaments follow slightly different rules.
+Generally speaking, most conference tournament games were played at the home arena of the listed home team. 
+We find that:
 
   * All games in the [NEWHA](https://www.newhaonline.com/Tournament/2025_NEWHA_Tournament), and [AHA](https://atlantichockeyamerica.com/tournaments/?id=42&sport=whockey), and [HEA](https://hockeyeastonline.com/women/hockey-east-tournament/index.php) tournaments were played at the higher-ranked seeds home arena. So, none of these tournament games were played at a neutral site.
   * All but the last three games of the ECAC tournament were held at the listed home team's home arena. The last three games (St. Lawrence vs Colgate, Clarkson vs Cornell, and Colgate vs Cornell) were held at Cornell's home arena. So only the March 7, 2025 game between St. Lawrence and Colgate was held at a neutral site.
@@ -138,29 +151,14 @@ no_ties <-
       Date == "3/7/2025" & Home == "Minnesota" & Opponent == "Ohio State" ~ 1,
       Date == "3/8/2025" & Home == "Minnesota" & Opponent == "Wisconsin" ~ 1,
       .default = 0))
-
 ```
 
-### Fitting a Bradley-Terry Model with an Intercept
+## Fitting Our Model {#sec-fit}
 
-Fitting our augmented model with the **BradleyTerry2** package requires some additional re-formatting[^docs], beyond what we did in [Lecture 12](lecture12.qmd#sec-bt-est). 
-Basically, we need to create two more indicators listing 
-Namely, we need to create indicators `Home.athome` & `Opp.athom` for whether the teams listed in the columns `Home` and `Opponent` are playing at their home arenas.
-This can be done using the `neutral` variable we created earlier: 
-
-  * If `neutral = 0`, the game was not at a neutral site. So, we set `Home.athome = 1` and `Opp.athome = 0`.
-  * If `neutral = 1`, the game was a neutral site. So, we set `Home.athome = 0` and `Opp.athome = 0`.
-  
-```{r}
-#| label: add-athome-indicators
-no_ties <-
-  no_ties |>
-  dplyr::mutate(Home.athome = ifelse(neutral == 1, 0, 1),
-                Opp.athome = 0)
-```
-
-[^docs]: See [Section 3.3](https://cran.r-project.org/web/packages/BradleyTerry2/vignettes/BradleyTerry.html#sec:order) of the package vignette "Bradley-Terry Models in R" for details.
-
+Recall from [Lecture 12](lecture12.qmd#sec-bt-est) that we counted up the number of home and away team wins for every unique combination of home and away teams.
+Because we now wish to account for potential home advantages, we need to separate these counts based on the game location.
+To do this, we will subdivide the games in `no_ties` based on the combination of `Home`, `Opponent`, and `neutral` and count up the numbers of home and away team wins.
+In the code below, we also rename `Home` and `Opponent`.
 ```{r}
 #| label: prep-data
 #| eval: true
@@ -178,10 +176,16 @@ results <-
     home.team = factor(home.team, levels = unik_teams), 
     away.team = factor(away.team,levels = unik_teams),
     home.athome = ifelse(neutral == 1, 0, 1),
-    away.athome = 0) 
-
+    away.athome = 0) #<1>
 ```
+1. This is a bit redundant but is necessary to set up the call to `BTm()`.
 
+Fitting our more elaborate Bradley-Terry model requires somewhat more complicated syntax.
+Following the example from [Section 3.3][Section 3.3](https://cran.r-project.org/web/packages/BradleyTerry2/vignettes/BradleyTerry.html#sec:order) of the package vignette "Bradley-Terry Models in R", we create a temporary data frame `tmp_df` containing the numbers of home and away team wins for every combination of `home.team`, `away.team`, and `neutral`.
+We then add two more columns to this data frame, one for the home team (`home.team`) and one for the away team (`away.team`).
+These columns are themselves data frames[^dflist] with columns recording team identity and whether the team was playing at home.
+
+[^dflist]: R implements data frames using a `list` data type, with each column representing a separate list element. So, what we're really doing here is adding a list-valued element to a list, which is easier to interpret than a data frame-valued column in a data frame.
 
 ```{r}
 #| label: fit-model
@@ -195,30 +199,254 @@ fit <-
   BradleyTerry2::BTm(
     outcome = cbind(home.win, away.win),
     player1 = home.team, player2 = away.team,
-    formula = ~ team + at.home,
-    refcat = "New Hampshire",
-    id = "team",
+    formula = ~ team + at.home, #<1>
+    refcat = "New Hampshire", #<2>
+    id = "team", #<3>
     data = tmp_df) 
+```
+1. 
+2. `BTm` uses a somewhat non-standard `formula` interace. This specification tells `BTm()` to estimate a separate latent strength for each team and a parameter for the home advantage.
+3. The `id` argument specifies that "team" is the name of the factor used to identity teams
+
+[^type]: I.e., those with `Type` different from `"NC"`
+
+Inspecting the model parameters, we see $\hat{\lambda}_{0} \approx 0.311.$ 
+A change of this magnitude on the log-odds scale corresponds to a change of
+
+  * 26% (log-odds of -1) to 33% (log-odds of -0.689)
+  * 46% (log-odds of -0.156) to 54% (log-odds of 0.156) 
+  * 73% (log-odds of 1) to 79% (log-odds of 1.311)
+
+```{r}
+#| label: extract-coefficients
+#| eval: true
+#| echo: true
+coef(fit)
+```
+We can extract the latent team strengths using the `BradelyTerry::BTabilities` function
+```{r}
+#| label: extract-params
+#| echo: true
+#| eval: true
+lambda0_hat <- coef(fit)["at.home"] #<1>
+lambda_hat <- BradleyTerry2::BTabilities(fit)
+lambda_hat[c("Wisconsin", "Ohio State"),]
+```
+
+According to our model, if $\lambda_{WIS}$ and $\lambda_{OSU}$ are Wisconsin's and Ohio States' latent strength, then the log-odds of Wisconsin beating Ohio State are
+
+  * If Wisconsin is at home: $\lambda_{WIS} - \lambda_{OSU} + \lambda_{0}$
+  * If Ohio State is at home: $\lambda_{WIS} - \lambda_{OSU} - \lambda_{0}$
+  * If the game is at a neutral site: $\lambda_{WIS} - \lambda_{OSU}.$
+  
+Using the estimates $\hat{\lambda}_{0} \approx 0.311, \hat{\lambda}_{WIS} \approx 4.774,$ and $\hat{\lambda}_{OSU} \approx 3.274,$ the probabilities that Wisconsin beats Ohio State are
+
+```{r}
+#| label: wis-osu-single-game-probs
+#| eval: true
+#| echo: false
+diff <- lambda_hat["Wisconsin","ability"] - lambda_hat["Ohio State", "ability"]
+cat("At WIS:", round(100 * 1/(1 + exp(-1 * (diff + lambda0_hat))), digits = 2), "%\n")
+cat("AT OSU:", round(100 * 1/(1 + exp(-1 * (diff - lambda0_hat))), digits = 2), "%\n")
+cat("AT neutral site:", round(100 * 1/(1 + exp(-1 * (diff))), digits = 2), "%\n")
+```
+@fig-lambda-hat shows the estimated latent strengths of all teams along with approximate 95% confidence intervals.
+The high degree of overlap between these marginal intervals suggests that there may be considerable uncertainty in the relative rankings of some teams.
+Precisely quantifying this uncertainty in rankings (e.g., with the bootstrap) is left as an [Exercise](lecture13.qmd#sec-exercises).
+
+```{r}
+#| label: fig-lambda-hat
+#| eval: true
+#| echo: false
+#| output: false
+#| warning: false
+#| message: false
+#| fig-width: 8
+#| fig-asp: 0.5625
+#| fig-cap: "Power Rankings"
+team_abbr <- readr::read_csv("../../data/wd1hockey_teams.csv")
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+n_teams <- nrow(lambda_hat) 
+y_limit <- range(c(lambda_hat[,1] - 2*lambda_hat[,2], lambda_hat[,1] + 2*lambda_hat[,2]))
+oi_colors <- palette.colors(palette = "Okabe-Ito")
+ix <- order(lambda_hat[,1]) 
+plot(1, type = "n", 
+     main = "Latent strength",
+     xlim = c(0, n_teams), ylim = y_limit,
+     xaxt = "n", xlab = "",
+     ylab = "Estimated lambda")
+abline(h = 0, col = oi_colors[2], lwd = 0.5, lty = 2)
+for(i in 1:n_teams){
+  lines(x = c(i,i), 
+        y = lambda_hat[ix[i],"ability"] + c(-2,2) * lambda_hat[ix[i], "s.e."],  #<3>
+        col = oi_colors[9], lwd = 0.5)
+  points(x = i, y = lambda_hat[ix[i],"ability"], pch = 16, cex = 0.5, col = oi_colors[1])
+  team_name <- rownames(lambda_hat)[ix[i]]
+  abbr <- 
+    team_abbr |>
+    dplyr::filter(team == team_name) |> dplyr::pull(abbr)
+  if(i %% 2 == 0){
+      text(x = i, 
+       y = 0.25 + lambda_hat[ix[i], "ability"]  + 2 * lambda_hat[ix[i], "s.e."],
+       labels = abbr, cex = 0.7)
+  } else{
+      text(x = i, 
+       y = -0.25 + lambda_hat[ix[i], "ability"]  - 2 * lambda_hat[ix[i], "s.e."],
+       labels = abbr, cex = 0.7)
+  }
+}
+
+```
+
+
+## Frozen 4 Simulation {#sec-frozen4}
+
+Wisconsin, Ohio State, Cornell, and Minnesota qualified for the semi-finals of the 2025 NCAA Tournament[^frozen4].
+The teams were seeded as: (1) Wisconsin; (2) Ohio State; (3) Cornell; and (4) Minnesota.
+Following a standard bracket constrution, the first semi-final game (which we will label `SF1`) was played between the 1st and 4th seed (Wisconsin vs Minnesota) and the second semi-final game (which we will label `SF2`) was played between the 2nd and 3rd seed (Ohio State vs Cornell).
+
+
+### Simulating the Original Tournament {#sec-simulation-orig}
+
+To power our simulation, we will first enumerate all possible matchups between the four teams and compute the probability that the higher-seeded team wins.
+In computing these probabilities, we will account for the fact that all games were played at Ridder Arena, which is the home arena of Minnesota.
+
+In the following code block, we first create a table containing the team names and their seeds.
+Then, we enumerate all possible combinations of teams using `expand.grid()`.
+```{r}
+#| label: compute-orig-prob
+#| echo: true
+#| eval: true
+
+seeds <- data.frame(
+  Team = c("Wisconsin", "Ohio State", "Cornell", "Minnesota"),
+  Seed = 1:4)
+
+possible_matchups <-
+  expand.grid(Hi = seeds$Team, Lo = seeds$Team) |>
+  as.data.frame() |>
+  dplyr::inner_join(y = seeds |> dplyr::rename(Hi = Team, Hi.Seed=Seed), by = "Hi") |>
+  dplyr::inner_join(y = seeds |> dplyr::rename(Lo = Team, Lo.Seed=Seed), by = "Lo") |>
+  dplyr::filter(Hi.Seed < Lo.Seed) |>
+  dplyr::mutate(neutral = ifelse(Hi == "Minnesota" | Lo == "Minnesota", 0, 1)) |>
+  dplyr::mutate(
+    diff = lambda_hat[Hi, "ability"] - lambda_hat[Lo, "ability"],
+    prob = dplyr::case_when(
+      neutral == 1 ~ 1/(1 + exp(-1 * diff)),
+      neutral == 0 & Hi == "Minnesota" ~ 1/(1 + exp(-1 * (diff + lambda0_hat))),
+      neutral == 0 & Lo == "Minnesota" ~ 1/(1 + exp(-1 * (diff - lambda0_hat)))))
+```
+
+
+```{r}
+
+semis <- 
+  data.frame(Hi = c("Wisconsin", "Ohio State"), Lo = c("Minnesota", "Cornell")) |>
+  dplyr::left_join(possible_matchups |> dplyr::select(Hi, Lo, prob), by = c("Hi", "Lo"))
+
+# sf1
+set.seed(479)
+sf_outcomes <- rbinom(n = nrow(semis), size = 1, prob = semis$prob)
+sf_winners <- c(NA, NA)
+for(i in 1:nrow(semis)){
+  if(sf_outcomes[i] == 1) sf_winners[i] <- semis$Hi[i]
+  else sf_winners[i] <- semis$Lo[i]
+}
+cat("Semi-final outcomes:", sf_outcomes, "\n")
+cat("Semi-final winners:", sf_winners, "\n")
+```
+```{r}
+finals <- 
+  data.frame(Team1 = sf_winners[1], Team2 = sf_winners[2]) |>
+  dplyr::left_join(y = seeds |> dplyr::rename(Team1 = Team, Team1.Seed = Seed), by = "Team1") |>
+  dplyr::left_join(y = seeds |> dplyr::rename(Team2 = Team, Team2.Seed = Seed), by = "Team2") |>
+  dplyr::mutate(
+    Hi = ifelse(Team1.Seed < Team2.Seed, Team1, Team2),
+    Lo = ifelse(Team1.Seed < Team2.Seed, Team2, Team1)) |>
+  dplyr::select(Hi, Lo) |> 
+  dplyr::left_join(
+    y = possible_matchups |> dplyr::select(Hi, Lo, prob), by = c("Hi", "Lo"))
+
+final_outcome <- rbinom(n = 1, size = 1, prob = finals$prob)
+if(final_outcome == 1){
+  final_winner <- finals$Hi[1]
+} else{
+  final_winner <- finals$Lo
+}
+
+cat("Finals outcome:", final_outcome, "\n")
+cat("Finals winner:", final_winner, "\n")
+
+```
+
+We can run the simulation 5,000 times.
+In each iteration, we will save the eventual winner.
+
+```{r}
+n_sims <- 5000
+
+champion <- rep(NA, times = n_sims)
+
+
+for(r in 1:n_sims){
+  set.seed(479+r)
+  sf_outcomes <- rbinom(n = nrow(semis), size = 1, prob = semis$prob)
+  sf_winners <- c(NA, NA)
+  for(i in 1:nrow(semis)){
+    if(sf_outcomes[i] == 1) sf_winners[i] <- semis$Hi[i]
+    else sf_winners[i] <- semis$Lo[i]
+  }
+  
+  finals <- 
+    data.frame(Team1 = sf_winners[1], Team2 = sf_winners[2]) |>
+    dplyr::left_join(y = seeds |> dplyr::rename(Team1 = Team, Team1.Seed = Seed), 
+                     by = "Team1") |>
+    dplyr::left_join(y = seeds |> dplyr::rename(Team2 = Team, Team2.Seed = Seed), 
+                     by = "Team2") |>
+    dplyr::mutate(
+      Hi = ifelse(Team1.Seed < Team2.Seed, Team1, Team2),
+      Lo = ifelse(Team1.Seed < Team2.Seed, Team2, Team1)) |>
+    dplyr::select(Hi, Lo) |> 
+    dplyr::left_join(
+      y = possible_matchups |> dplyr::select(Hi, Lo, prob), 
+      by = c("Hi", "Lo"))
+  final_outcome <- rbinom(n = 1, size = 1, prob = finals$prob)
+  if(final_outcome == 1){
+    champion[r] <- finals$Hi[1]
+  } else{
+    champion[r] <- finals$Lo[1]
+  }
+}
+
+
 ```
 
 
 
-[^type]: I.e., those with `Type` different from `"NC"`
+
+
+### Simulating an Alternative Tournament {#sec-simulation-alt}
 
 
 
 
-Box scores for individual games 
+compute the probability of every team beating every other team based on our model estimates.
+In computing these probabilities, we will take care to 
 
 
 
+### Alternative Rules
 
+What if, instead of playing the semi-finals and finals at Ridder Arena, each game was held at the home arena of the higher-seeded team?
+What are the chances that Wisconsin would win the championship?
 
+To build this logic into our simulation, we need to 
 
+## Exercises
 
+1. Use the bootstrap to quantify the uncertainty in relative rankings of each team. To do this, you will need to re-sample individual games, re-compute the numbers of home & away team wins for every combination of teams and `neutral`, and fit a Bradley-Terry model. Report the number of bootstrap simulations in which Wisconsin was ranked 1st and also report a 95% bootstrap confidence interval for Wisconsin's overall rank.
 
-
-
+2. Build a simulation for the entire NCAA Tournament based on the estimating probabilities from our Bradley-Terry model that accounts for home advantage. In [this tournament](https://en.wikipedia.org/wiki/2025_NCAA_Division_I_women%27s_ice_hockey_tournament), the first round and quarterfinals were held on the campuses of the top-4 seeded teams (Wisconsin, Ohio State, Cornell, and Minnesota). Subsequent games were played at Ridder Arena at the University of Minnesota. Your simulation should involve only the 11 teams who actually played in the tournament
 
 
 
