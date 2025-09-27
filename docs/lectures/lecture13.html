@@ -75,6 +75,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-4bfb630b09c0e164834af1bb3207dbff.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -379,10 +382,18 @@ window.Quarto = {
    
   <ul>
   <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
-  <li><a href="#sec-bt-home" id="toc-sec-bt-home" class="nav-link" data-scroll-target="#sec-bt-home">Bradley-Terry Models with Home-Court Advantage</a>
+  <li><a href="#sec-bt-home" id="toc-sec-bt-home" class="nav-link" data-scroll-target="#sec-bt-home">Bradley-Terry Models with Home-Court Advantage</a></li>
+  <li><a href="#sec-data-prep" id="toc-sec-data-prep" class="nav-link" data-scroll-target="#sec-data-prep">Data Preparation</a>
   <ul class="collapse">
   <li><a href="#determining-location" id="toc-determining-location" class="nav-link" data-scroll-target="#determining-location">Determining Location</a></li>
   </ul></li>
+  <li><a href="#sec-fit" id="toc-sec-fit" class="nav-link" data-scroll-target="#sec-fit">Fitting Our Model</a></li>
+  <li><a href="#sec-frozen4" id="toc-sec-frozen4" class="nav-link" data-scroll-target="#sec-frozen4">Frozen 4 Simulation</a>
+  <ul class="collapse">
+  <li><a href="#sec-simulation-orig" id="toc-sec-simulation-orig" class="nav-link" data-scroll-target="#sec-simulation-orig">Simulating the Original Tournament</a></li>
+  <li><a href="#sec-simulation-alt" id="toc-sec-simulation-alt" class="nav-link" data-scroll-target="#sec-simulation-alt">Simulating an Alternative Tournament</a></li>
+  </ul></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
   </ul>
 </nav>
     </div>
@@ -410,6 +421,9 @@ window.Quarto = {
 
 <section id="overview" class="level2">
 <h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<p>In <a href="../lectures/lecture12.html">Lecture 12</a>, we used a Bradley-Terry model to estimate the latent strength of each Division I women’s ice hockey team. The model posits that the log-odds of one team beating the other is simply the difference in these latent strengths. According to our model estimates, the Wisconsin Badgers and Ohio State Buckeyes were ranked 1st and 2nd among all teams. Using the estimated model parameters, we simulated a “best-of-5” series between the two teams, finding that Wisconsin was predicted to win such a series about 91% of the time.</p>
+<p>One major drawback of our initial model is that it fails to account for any potential home-court advantage. In other words, it assumes that the probability that Wisconsin beats Ohio State is the same whether the game was played at <a href="https://uwbadgers.com/sports/2015/8/21/GEN_2014010136.aspx">La Bahn Arena</a> (the home of the Wisconin Badgers), the <a href="https://en.wikipedia.org/wiki/Ohio_State_University_Ice_Rink">Ohio State University Ice Rink</a>, or at a neutral site.</p>
+<p>In this lecture, we fit a refined version of the Bradley-Terry model that accounts for location. We introduce this model in <a href="#sec-bt-home" class="quarto-xref">Section&nbsp;2</a> and perform the necessary pre-processing in <a href="#sec-data-prep" class="quarto-xref">Section&nbsp;3</a>. Then, in <a href="#sec-fit" class="quarto-xref">Section&nbsp;4</a>, we fit the model using the <strong>BradleyTerry2</strong> package and examine the resulting power rankings. Finally, in <a href="#sec-frozen4" class="quarto-xref">Section&nbsp;5</a> we simulate the semi-finals and finals of the 2025 NCAA Tournament under several different scenarios.</p>
 <p>Before proceeding, we load in the data table containing all regular season Division I women’s ice hockey games from the 2024-25 season that did not end in ties.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"wd1hockey_regseason_2024_2025.RData"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -435,12 +449,21 @@ window.Quarto = {
 &amp;= \frac{1}{1 + e^{-1 \times (-\lambda_{0} + \lambda_{i} - \lambda_{j})}}.
 \end{align}
 \]</span></p>
-<section id="determining-location" class="level3">
-<h3 class="anchored" data-anchor-id="determining-location">Determining Location</h3>
+</section>
+<section id="sec-data-prep" class="level2">
+<h2 class="anchored" data-anchor-id="sec-data-prep">Data Preparation</h2>
 <p>Unfortunately, the data table we scraped from USCHO does not record the location of the game. USCHO publishes box scores for individual games on separate webpages with highly structured URLs. For instance, the URL for the webpage with the box score from the championship game between the Badgers and Buckeyes is</p>
 <pre><code>https://www.uscho.com/gameday/division-i-women/2024-2025/2025-03-23/game-7949/</code></pre>
-<p>Notice that after the date there is a unique game identifier (7949 in this case). Based on this, it is tempting to write a function that visits each individual site (e.g., by looping over the unique game ID’s). Unfortunately, this strategy requires us to determine the unique game identifiers, which is not entirely straightforward. We instead impute the location information using a handful of heuristics. While these may not be perfect, we can argue that they are reasonable.</p>
-<p>First, we will assume all conference games<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> are played at the home arena of the listed home team. Next, we will assume that with only a few execptions, tournament games are not played at the home areana of the listed home team. For instance, there were four games in <a href="https://hockeycommissioners.com/ice-breaker/womens-ice-breaker.php">Icebreaker</a> tournament featured four games: * Penn State vs Cornell (<a href="https://www.uscho.com/gameday/division-i-women/2024-2025/2024-10-25/game-6337/">boxscore</a>) * Stonehill vs Ohio State (<a href="https://www.uscho.com/gameday/division-i-women/2024-2025/2024-10-25/game-6338/">boxscore</a>) * Cornell vs Ohio State (<a href="https://www.uscho.com/gameday/division-i-women/2024-2025/2024-10-26/game-6342/">boxscore</a>) * Stonehill vs Penn State (<a href="https://www.uscho.com/gameday/division-i-women/2024-2025/2024-10-26/game-6340/">boxscore</a>)</p>
+<p>Notice that after the date there is a unique game identifier (7949 in this case). Based on this, it is tempting to write a function that visits each individual site (e.g., by looping over the unique game ID’s). Unfortunately, this strategy requires us to determine the unique game identifiers, which is not entirely straightforward. We instead manually impute the location information with some heuristics.</p>
+<section id="determining-location" class="level3">
+<h3 class="anchored" data-anchor-id="determining-location">Determining Location</h3>
+<p>We will assume all non-tournament conference games and most tournament games are played at the home arena of the listed home team and not at a neutral site. For instance, there were four games in <a href="https://hockeycommissioners.com/ice-breaker/womens-ice-breaker.php">Icebreaker</a> tournament featured four games:</p>
+<ul>
+<li>Penn State vs Cornell (<a href="https://www.uscho.com/gameday/division-i-women/2024-2025/2024-10-25/game-6337/">boxscore</a>)</li>
+<li>Stonehill vs Ohio State (<a href="https://www.uscho.com/gameday/division-i-women/2024-2025/2024-10-25/game-6338/">boxscore</a>)</li>
+<li>Cornell vs Ohio State (<a href="https://www.uscho.com/gameday/division-i-women/2024-2025/2024-10-26/game-6342/">boxscore</a>)</li>
+<li>Stonehill vs Penn State (<a href="https://www.uscho.com/gameday/division-i-women/2024-2025/2024-10-26/game-6340/">boxscore</a>)</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>no_ties <span class="sc">|&gt;</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="fu">grepl</span>(<span class="st">"IceBreaker"</span>, Notes)) <span class="sc">|&gt;</span></span>
@@ -455,11 +478,494 @@ window.Quarto = {
 4 10/26/2024 Stonehill  Penn State IceBreaker NC   </code></pre>
 </div>
 </div>
-<p>Inspecting the box scores pages for all four games, we see that they were all played at <a href="https://en.wikipedia.org/wiki/Value_City_Arena">Value City Arena</a></p>
-<p>Box scores for individual games</p>
-
-
+<p>Inspecting the box scores pages for all four games, we see that they were all played at <a href="https://en.wikipedia.org/wiki/Value_City_Arena">Value City Arena</a>. Although this is located at the Ohio State University — and is the home arena of their men’s ice hockey team — it is not the home arena of the women’s ice hockey team. For the purposes of our analysis, we will assume that the games in this tournament are played at a neutral site.</p>
+<p>To record whether the game was played at the home arena of <code>Home</code> or at a neutral site, we will first identify all tournaments by pulling out the unique values in <code>Notes</code> that do not include the string <code>"SO"</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>unik_notes <span class="ot">&lt;-</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  no_ties <span class="sc">|&gt;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Notes) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"SO"</span>, Notes)) <span class="sc">|&gt;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(Notes) <span class="sc">|&gt;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>()</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>unik_notes</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "IceBreaker"          "Nutmeg Classic"      "Smashville Showcase"
+ [4] "Mayor's Cup"         "East/West Classic"   "Beanpot"            
+ [7] "ECAC Tournament"     "AHA Tournament"      "HEA Tournament"     
+[10] "WCHA Tournament"     "NEWHA Tournament"   </code></pre>
+</div>
+</div>
+<p>We then manually inspect the box scores for each of the tournaments to determine whether they were played at any of the team’s home arena. We find * The East/West Classic was played at <a href="https://en.wikipedia.org/wiki/Ridder_Arena">Ridder Arena</a>, which is the home arena of Minnesota. So, we will treat the the games between <a href="https://www.uscho.com/gameday/division-i-women/2024-2025/2025-01-03/game-6120/">Penn State and Bemidji State</a> and between <a href="https://www.uscho.com/gameday/division-i-women/2024-2025/2025-01-04/game-6122/">Brown and Bemidji State</a> as being played at a neutral site. But we will treat the games involving Minneosta as being played at their home arena. * The Nutmeg Classic was played at <a href="https://www.sacredheart.edu/sacred-heart-life/fitness-recreation--sports/martire-family-arena/">Martire Family Arena</a>, which is the home arena of Sacred Heart. So, we will treat games from this tournament that do not involve Sacred Heart can be considered a neutral site game. * The <a href="https://www.uscho.com/gameday/division-i-women/2024-2025/2024-11-30/game-6116/">Mayor’s Cup game between Brown and Providence</a> was played at <a href="https://friars.com/facilities/schneider-arena/6">Schneider Arena</a>, which is the home arena of Providence. * The <a href="https://www.uscho.com/gameday/division-i-women/2024-2025/2025-01-25/game-6207/">Mayor’s Cup game between Union and RPI</a> was played at <a href="https://en.wikipedia.org/wiki/MVP_Arena">MVP Arena</a>, which is a neutral site * All games in the Smashville Showcase were played at a neutral site: they were played at the Ford Ice Center, which is not the home arena of any of St.&nbsp;Thomas, Merrimack, Clarkson, or Penn State. * The Beanpot games between <a href="https://www.uscho.com/gameday/division-i-women/2024-2025/2025-01-14/game-6170/">Boston University and Harvard</a> and <a href="https://www.uscho.com/gameday/division-i-women/2024-2025/2025-01-14/game-6169/">Boston College and Northeastern</a> were played at <a href="https://en.wikipedia.org/wiki/Matthews_Arena">Matthews Arena</a>, which is the home arena of Northeastern. The games between <a href="https://www.uscho.com/gameday/division-i-women/2024-2025/2025-01-21/game-6173/">Boston College and Harvard</a> and <a href="https://www.uscho.com/gameday/division-i-women/2024-2025/2025-01-21/game-6172/">Boston University and Northeastern</a> were played at the T.D. Garden, which is a neutral site.</p>
+<p>Generally speaking, most conference tournament games were played at the home arena of the listed home team. We find that:</p>
+<ul>
+<li>All games in the <a href="https://www.newhaonline.com/Tournament/2025_NEWHA_Tournament">NEWHA</a>, and <a href="https://atlantichockeyamerica.com/tournaments/?id=42&amp;sport=whockey">AHA</a>, and <a href="https://hockeyeastonline.com/women/hockey-east-tournament/index.php">HEA</a> tournaments were played at the higher-ranked seeds home arena. So, none of these tournament games were played at a neutral site.</li>
+<li>All but the last three games of the ECAC tournament were held at the listed home team’s home arena. The last three games (St.&nbsp;Lawrence vs Colgate, Clarkson vs Cornell, and Colgate vs Cornell) were held at Cornell’s home arena. So only the March 7, 2025 game between St.&nbsp;Lawrence and Colgate was held at a neutral site.</li>
+<li>All the but last three games of the WHCA tournament were held at the listed home team’s home arena. The last three (Minnesota vs Ohio State State, Minnesota Duluth vs Wisconsin, and Minnesota vs Wisconsin) were held at Minneosta Duluth’s home arena. So, the March 7, 2025 game between Minnesota and Ohio State and the March 8, 2025 game between Minnesota and Wisconsin were held at a neutral site.</li>
+</ul>
+<p>Based on these findings, we create a new variable in <code>no_ties</code>, which records whether the game was played at a neutral site.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>no_ties <span class="ot">&lt;-</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  no_ties <span class="sc">|&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">neutral =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">grepl</span>(<span class="st">"IceBreaker"</span>, Notes) <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">grepl</span>(<span class="st">"East/West"</span>, Notes) <span class="sc">&amp;</span> Home <span class="sc">!=</span> <span class="st">"Minnesota"</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">grepl</span>(<span class="st">"Nutmeg"</span>, Notes) <span class="sc">&amp;</span> Home <span class="sc">!=</span> <span class="st">"Sacred Heart"</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">grepl</span>(<span class="st">"Mayor"</span>, Notes) <span class="sc">&amp;</span> Home <span class="sc">==</span> <span class="st">"Rensselaer"</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">grepl</span>(<span class="st">"Smashville"</span>, Notes) <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">grepl</span>(<span class="st">"Beanpot"</span>, Notes) <span class="sc">&amp;</span> Home <span class="sc">!=</span> <span class="st">"Northeastern"</span> <span class="sc">~</span> <span class="dv">1</span>, </span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>      Date <span class="sc">==</span> <span class="st">"3/7/2025"</span> <span class="sc">&amp;</span> Home <span class="sc">==</span> <span class="st">"St. Lawrence"</span> <span class="sc">&amp;</span> Opponent <span class="sc">==</span> <span class="st">"Colgate"</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>      Date <span class="sc">==</span> <span class="st">"3/7/2025"</span> <span class="sc">&amp;</span> Home <span class="sc">==</span> <span class="st">"Minnesota"</span> <span class="sc">&amp;</span> Opponent <span class="sc">==</span> <span class="st">"Ohio State"</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>      Date <span class="sc">==</span> <span class="st">"3/8/2025"</span> <span class="sc">&amp;</span> Home <span class="sc">==</span> <span class="st">"Minnesota"</span> <span class="sc">&amp;</span> Opponent <span class="sc">==</span> <span class="st">"Wisconsin"</span> <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">.default =</span> <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
+</section>
+<section id="sec-fit" class="level2">
+<h2 class="anchored" data-anchor-id="sec-fit">Fitting Our Model</h2>
+<p>Recall from <a href="../lectures/lecture12.html#sec-bt-est">Lecture 12</a> that we counted up the number of home and away team wins for every unique combination of home and away teams. Because we now wish to account for potential home advantages, we need to separate these counts based on the game location. To do this, we will subdivide the games in <code>no_ties</code> based on the combination of <code>Home</code>, <code>Opponent</code>, and <code>neutral</code> and count up the numbers of home and away team wins. In the code below, we also rename <code>Home</code> and <code>Opponent</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-6"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-6-1"><a href="#annotated-cell-6-1" aria-hidden="true" tabindex="-1"></a>unik_teams <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">unique</span>(<span class="fu">c</span>(no_ties<span class="sc">$</span>Home, no_ties<span class="sc">$</span>Opponent)))</span>
+<span id="annotated-cell-6-2"><a href="#annotated-cell-6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-6-3"><a href="#annotated-cell-6-3" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-6-4"><a href="#annotated-cell-6-4" aria-hidden="true" tabindex="-1"></a>  no_ties <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-6-5"><a href="#annotated-cell-6-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">home.team =</span> Home, <span class="at">away.team =</span> Opponent) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-6-6"><a href="#annotated-cell-6-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(home.team, away.team, neutral) <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-6-7"><a href="#annotated-cell-6-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
+<span id="annotated-cell-6-8"><a href="#annotated-cell-6-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">home.win =</span> <span class="fu">sum</span>(Home_Winner), </span>
+<span id="annotated-cell-6-9"><a href="#annotated-cell-6-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">away.win =</span> <span class="fu">sum</span>(Opp_Winner), <span class="at">.groups =</span> <span class="st">'drop'</span>) <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-6-10"><a href="#annotated-cell-6-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="annotated-cell-6-11"><a href="#annotated-cell-6-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">home.team =</span> <span class="fu">factor</span>(home.team, <span class="at">levels =</span> unik_teams), </span>
+<span id="annotated-cell-6-12"><a href="#annotated-cell-6-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">away.team =</span> <span class="fu">factor</span>(away.team,<span class="at">levels =</span> unik_teams),</span>
+<span id="annotated-cell-6-13"><a href="#annotated-cell-6-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">home.athome =</span> <span class="fu">ifelse</span>(neutral <span class="sc">==</span> <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>),</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="1">1</button><span id="annotated-cell-6-14" class="code-annotation-target"><a href="#annotated-cell-6-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">away.athome =</span> <span class="dv">0</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-6" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-6" data-code-lines="14" data-code-annotation="1">This is a bit redundant but is necessary to set up the call to <code>BTm()</code>.</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Fitting our more elaborate Bradley-Terry model requires somewhat more complicated syntax. Following the example from <a href="https://cran.r-project.org/web/packages/BradleyTerry2/vignettes/BradleyTerry.html#sec:order">Section 3.3</a> of the package vignette “Bradley-Terry Models in R”, we create a temporary data frame <code>tmp_df</code> containing the numbers of home and away team wins for every combination of <code>home.team</code>, <code>away.team</code>, and <code>neutral</code>. We then add two more columns to this data frame, one for the home team (<code>home.team</code>) and one for the away team (<code>away.team</code>). These columns are themselves data frames<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> with columns recording team identity and whether the team was playing at home.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-7"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-7-1"><a href="#annotated-cell-7-1" aria-hidden="true" tabindex="-1"></a>tmp_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">home.win =</span> results<span class="sc">$</span>home.win, <span class="at">away.win =</span> results<span class="sc">$</span>away.win)</span>
+<span id="annotated-cell-7-2"><a href="#annotated-cell-7-2" aria-hidden="true" tabindex="-1"></a>tmp_df<span class="sc">$</span>home.team <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">team =</span> results<span class="sc">$</span>home.team, <span class="at">at.home =</span> results<span class="sc">$</span>home.athome)</span>
+<span id="annotated-cell-7-3"><a href="#annotated-cell-7-3" aria-hidden="true" tabindex="-1"></a>tmp_df<span class="sc">$</span>away.team <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">team =</span> results<span class="sc">$</span>away.team, <span class="at">at.home =</span> results<span class="sc">$</span>away.athome)</span>
+<span id="annotated-cell-7-4"><a href="#annotated-cell-7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-7-5"><a href="#annotated-cell-7-5" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-7-6"><a href="#annotated-cell-7-6" aria-hidden="true" tabindex="-1"></a>  BradleyTerry2<span class="sc">::</span><span class="fu">BTm</span>(</span>
+<span id="annotated-cell-7-7"><a href="#annotated-cell-7-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">outcome =</span> <span class="fu">cbind</span>(home.win, away.win),</span>
+<span id="annotated-cell-7-8"><a href="#annotated-cell-7-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">player1 =</span> home.team, <span class="at">player2 =</span> away.team,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="1">1</button><span id="annotated-cell-7-9" class="code-annotation-target"><a href="#annotated-cell-7-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">formula =</span> <span class="sc">~</span> team <span class="sc">+</span> at.home,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="2">2</button><span id="annotated-cell-7-10" class="code-annotation-target"><a href="#annotated-cell-7-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">refcat =</span> <span class="st">"New Hampshire"</span>,</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="3">3</button><span id="annotated-cell-7-11" class="code-annotation-target"><a href="#annotated-cell-7-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">id =</span> <span class="st">"team"</span>,</span>
+<span id="annotated-cell-7-12"><a href="#annotated-cell-7-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> tmp_df) </span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-7" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="9" data-code-annotation="1"><code>BTm</code> uses a somewhat non-standard <code>formula</code> interface. This specification tells <code>BTm()</code> to estimate a separate latent strength for each team and a parameter for the home advantage.</span>
+</dd>
+<dt data-target-cell="annotated-cell-7" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="10" data-code-annotation="2">Manually specify the reference team (whose <span class="math inline">\(\lambda\)</span> is set to 0)</span>
+</dd>
+<dt data-target-cell="annotated-cell-7" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="11" data-code-annotation="3">The <code>id</code> argument specifies that “team” is the name of the factor used to identity teams</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Inspecting the model parameters, we see <span class="math inline">\(\hat{\lambda}_{0} \approx 0.311.\)</span> A change of this magnitude on the log-odds scale corresponds to a change of</p>
+<ul>
+<li>26% (log-odds of -1) to 33% (log-odds of -0.689)</li>
+<li>46% (log-odds of -0.156) to 54% (log-odds of 0.156)</li>
+<li>73% (log-odds of 1) to 79% (log-odds of 1.311)</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">coef</span>(fit), <span class="at">digits =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       teamAssumption     teamBemidji State    teamBoston College 
+               -4.746                -0.753                 0.885 
+teamBoston University             teamBrown          teamClarkson 
+                1.135                 0.150                 1.225 
+          teamColgate       teamConnecticut           teamCornell 
+                2.075                 1.118                 2.636 
+        teamDartmouth   teamFranklin Pierce           teamHarvard 
+               -0.794                -3.949                -2.171 
+       teamHoly Cross        teamLindenwood               teamLIU 
+               -0.509                -1.474                -3.077 
+            teamMaine        teamMercyhurst         teamMerrimack 
+               -0.384                 0.511                -0.781 
+        teamMinnesota  teamMinnesota Duluth   teamMinnesota State 
+                2.766                 2.180                 0.782 
+     teamNortheastern        teamOhio State        teamPenn State 
+                1.026                 3.274                 2.026 
+             teamPost         teamPrinceton        teamProvidence 
+               -4.422                 0.907                 0.660 
+       teamQuinnipiac        teamRensselaer               teamRIT 
+                1.071                -0.300                -0.220 
+    teamRobert Morris      teamSacred Heart        teamSt. Anselm 
+               -1.614                -3.339                -4.023 
+  teamSt. Cloud State      teamSt. Lawrence     teamSt. Michael's 
+                1.288                 1.316                -5.913 
+       teamSt. Thomas         teamStonehill          teamSyracuse 
+                0.084                -4.174                -0.394 
+            teamUnion           teamVermont         teamWisconsin 
+               -0.057                -0.565                 4.774 
+             teamYale               at.home 
+                0.822                 0.311 </code></pre>
+</div>
+</div>
+<p>We can extract the latent team strengths using the <code>BradelyTerry::BTabilities</code> function</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-9"><pre class="sourceCode r code-annotation-code code-with-copy"><code class="sourceCode r"><span id="annotated-cell-9-1"><a href="#annotated-cell-9-1" aria-hidden="true" tabindex="-1"></a>lambda0_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(fit)[<span class="st">"at.home"</span>]</span>
+<span id="annotated-cell-9-2"><a href="#annotated-cell-9-2" aria-hidden="true" tabindex="-1"></a>lambda_hat <span class="ot">&lt;-</span> BradleyTerry2<span class="sc">::</span><span class="fu">BTabilities</span>(fit)</span>
+<span id="annotated-cell-9-3"><a href="#annotated-cell-9-3" aria-hidden="true" tabindex="-1"></a>lambda_hat[<span class="fu">c</span>(<span class="st">"Wisconsin"</span>, <span class="st">"Ohio State"</span>),]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            ability      s.e.
+Wisconsin  4.773946 0.9995582
+Ohio State 3.273501 0.7936477</code></pre>
+</div>
+</div>
+<p>According to our model, if <span class="math inline">\(\lambda_{WIS}\)</span> and <span class="math inline">\(\lambda_{OSU}\)</span> are Wisconsin’s and Ohio States’ latent strength, then the log-odds of Wisconsin beating Ohio State are</p>
+<ul>
+<li>If Wisconsin is at home: <span class="math inline">\(\lambda_{WIS} - \lambda_{OSU} + \lambda_{0}\)</span></li>
+<li>If Ohio State is at home: <span class="math inline">\(\lambda_{WIS} - \lambda_{OSU} - \lambda_{0}\)</span></li>
+<li>If the game is at a neutral site: <span class="math inline">\(\lambda_{WIS} - \lambda_{OSU}.\)</span></li>
+</ul>
+<p>Using the estimates <span class="math inline">\(\hat{\lambda}_{0} \approx 0.311, \hat{\lambda}_{WIS} \approx 4.774,\)</span> and <span class="math inline">\(\hat{\lambda}_{OSU} \approx 3.274,\)</span> the probabilities that Wisconsin beats Ohio State are</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>At WIS: 85.95 %</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>AT OSU: 76.67 %</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>AT neutral site: 81.76 %</code></pre>
+</div>
+</div>
+<p><a href="#fig-lambda-hat" class="quarto-xref">Figure&nbsp;1</a> shows the estimated latent strengths of all teams along with approximate 95% confidence intervals. The high degree of overlap between these marginal intervals suggests that there may be considerable uncertainty in the relative rankings of some teams. Precisely quantifying this uncertainty in rankings (e.g., with the bootstrap) is left as an <a href="../lectures/lecture13.html#sec-exercises">Exercise</a>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-lambda-hat" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-lambda-hat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="lecture13_files/figure-html/fig-lambda-hat-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: Power Rankings"><img src="lecture13_files/figure-html/fig-lambda-hat-1.png" class="img-fluid figure-img" width="768"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lambda-hat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Power Rankings
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-frozen4" class="level2">
+<h2 class="anchored" data-anchor-id="sec-frozen4">Frozen 4 Simulation</h2>
+<p>Wisconsin, Ohio State, Cornell, and Minnesota qualified for the semi-finals of the 2025 NCAA Tournament (known as the Frozen 4). The teams were seeded as: (1) Wisconsin; (2) Ohio State; (3) Cornell; and (4) Minnesota. Following a standard bracket construction, the first semi-final game (which we will label <code>SF1</code>) was played between the 1st and 4th seed (Wisconsin vs Minnesota) and the second semi-final game (which we will label <code>SF2</code>) was played between the 2nd and 3rd seed (Ohio State vs Cornell).</p>
+<section id="sec-simulation-orig" class="level3">
+<h3 class="anchored" data-anchor-id="sec-simulation-orig">Simulating the Original Tournament</h3>
+<p>To power our simulation, we will first enumerate all possible matchups between the four teams and compute the probability that the higher-seeded team wins. In computing these probabilities, we will account for the fact that all games were played at Ridder Arena, which is the home arena of Minnesota.</p>
+<p>In the following code block, we first create a table containing the team names and their seeds. Then, we enumerate all possible combinations of teams using <code>expand.grid()</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>seeds <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">Team =</span> <span class="fu">c</span>(<span class="st">"Wisconsin"</span>, <span class="st">"Ohio State"</span>, <span class="st">"Cornell"</span>, <span class="st">"Minnesota"</span>),</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">Seed =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>possible_matchups <span class="ot">&lt;-</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">expand.grid</span>(<span class="at">Hi =</span> seeds<span class="sc">$</span>Team, <span class="at">Lo =</span> seeds<span class="sc">$</span>Team) <span class="sc">|&gt;</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> seeds <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">Hi =</span> Team, <span class="at">Hi.Seed=</span>Seed), <span class="at">by =</span> <span class="st">"Hi"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> seeds <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">Lo =</span> Team, <span class="at">Lo.Seed=</span>Seed), <span class="at">by =</span> <span class="st">"Lo"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(Hi.Seed <span class="sc">&lt;</span> Lo.Seed) <span class="sc">|&gt;</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">neutral =</span> <span class="fu">ifelse</span>(Hi <span class="sc">==</span> <span class="st">"Minnesota"</span> <span class="sc">|</span> Lo <span class="sc">==</span> <span class="st">"Minnesota"</span>, <span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">diff =</span> lambda_hat[Hi, <span class="st">"ability"</span>] <span class="sc">-</span> lambda_hat[Lo, <span class="st">"ability"</span>],</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">prob =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>      neutral <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> <span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> diff)),</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>      neutral <span class="sc">==</span> <span class="dv">0</span> <span class="sc">&amp;</span> Hi <span class="sc">==</span> <span class="st">"Minnesota"</span> <span class="sc">~</span> <span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> (diff <span class="sc">+</span> lambda0_hat))),</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>      neutral <span class="sc">==</span> <span class="dv">0</span> <span class="sc">&amp;</span> Lo <span class="sc">==</span> <span class="st">"Minnesota"</span> <span class="sc">~</span> <span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> (diff <span class="sc">-</span> lambda0_hat)))))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-11"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-11-1"><a href="#annotated-cell-11-1" aria-hidden="true" tabindex="-1"></a>semis <span class="ot">&lt;-</span> </span>
+<span id="annotated-cell-11-2"><a href="#annotated-cell-11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">Hi =</span> <span class="fu">c</span>(<span class="st">"Wisconsin"</span>, <span class="st">"Ohio State"</span>), <span class="at">Lo =</span> <span class="fu">c</span>(<span class="st">"Minnesota"</span>, <span class="st">"Cornell"</span>)) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-11-3"><a href="#annotated-cell-11-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(possible_matchups <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(Hi, Lo, prob), <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Hi"</span>, <span class="st">"Lo"</span>))</span>
+<span id="annotated-cell-11-4"><a href="#annotated-cell-11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-11-5"><a href="#annotated-cell-11-5" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">479</span>)</span>
+<span id="annotated-cell-11-6"><a href="#annotated-cell-11-6" aria-hidden="true" tabindex="-1"></a>sf_winners <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="cn">NA</span>)</span>
+<span id="annotated-cell-11-7"><a href="#annotated-cell-11-7" aria-hidden="true" tabindex="-1"></a></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="1">1</button><span id="annotated-cell-11-8" class="code-annotation-target"><a href="#annotated-cell-11-8" aria-hidden="true" tabindex="-1"></a>sf_outcomes <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="at">n =</span> <span class="fu">nrow</span>(semis), <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> semis<span class="sc">$</span>prob)</span>
+<span id="annotated-cell-11-9"><a href="#annotated-cell-11-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(semis)){</span>
+<span id="annotated-cell-11-10"><a href="#annotated-cell-11-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(sf_outcomes[i] <span class="sc">==</span> <span class="dv">1</span>) sf_winners[i] <span class="ot">&lt;-</span> semis<span class="sc">$</span>Hi[i]</span>
+<span id="annotated-cell-11-11"><a href="#annotated-cell-11-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span> sf_winners[i] <span class="ot">&lt;-</span> semis<span class="sc">$</span>Lo[i]</span>
+<span id="annotated-cell-11-12"><a href="#annotated-cell-11-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="annotated-cell-11-13"><a href="#annotated-cell-11-13" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Semi-final outcomes:"</span>, sf_outcomes, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="annotated-cell-11-14"><a href="#annotated-cell-11-14" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Semi-final winners:"</span>, sf_winners, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-11" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-11" data-code-lines="8,10,11" data-code-annotation="1">The <span class="math inline">\(i\)</span>-th entry of <code>sf_outcomes</code> is 1 if the higher-seed in game <span class="math inline">\(i\)</span> wins and 0 if the lower-seed in game <span class="math inline">\(i\)</span> wins</span>
+</dd>
+</dl>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Semi-final outcomes: 0 1 
+Semi-final winners: Minnesota Ohio State </code></pre>
+</div>
+</div>
+<p>The winners of both semi-final matches play each other in the finals. In the code below, we create a data frame containing the team names and then determine which is the higher seed. We then join the corresponding probability of the higher-seeded team winning the game. Finally, we simulate the outcome of the match and record the winner.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>finals <span class="ot">&lt;-</span> </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">Team1 =</span> sf_winners[<span class="dv">1</span>], <span class="at">Team2 =</span> sf_winners[<span class="dv">2</span>]) <span class="sc">|&gt;</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> seeds <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">Team1 =</span> Team, <span class="at">Team1.Seed =</span> Seed), <span class="at">by =</span> <span class="st">"Team1"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> seeds <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">Team2 =</span> Team, <span class="at">Team2.Seed =</span> Seed), <span class="at">by =</span> <span class="st">"Team2"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">Hi =</span> <span class="fu">ifelse</span>(Team1.Seed <span class="sc">&lt;</span> Team2.Seed, Team1, Team2),</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">Lo =</span> <span class="fu">ifelse</span>(Team1.Seed <span class="sc">&lt;</span> Team2.Seed, Team2, Team1)) <span class="sc">|&gt;</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Hi, Lo) <span class="sc">|&gt;</span> </span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> possible_matchups <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(Hi, Lo, prob), <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Hi"</span>, <span class="st">"Lo"</span>))</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>final_outcome <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> finals<span class="sc">$</span>prob)</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(final_outcome <span class="sc">==</span> <span class="dv">1</span>){</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>  final_winner <span class="ot">&lt;-</span> finals<span class="sc">$</span>Hi[<span class="dv">1</span>]</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span>{</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  final_winner <span class="ot">&lt;-</span> finals<span class="sc">$</span>Lo[<span class="dv">1</span>]</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Finals outcome:"</span>, final_outcome, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Finals outcome: 1 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Finals winner:"</span>, final_winner, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Finals winner: Ohio State </code></pre>
+</div>
+</div>
+<p>In this simulation, Minnesota upset Wisconsin the first semi-finals; Ohio State beat Cornell in the second semi-finals; and Ohio State defeated Minnesota in the finals. Of course, if we run the simulation again with a different randomization seed, we might observe a different result. The code below runs simulates the Frozen 4 10,000 times. In each simulation iteration, we will save the winners of the two semi-final games (<code>SF1_winner</code> and <code>SF2_winner</code>); the two teams playing in the finals (<code>Finals_Hi</code> for the higher-seeded team and <code>Finals_Lo</code> for the lower-seeded team); and the eventual champion (<code>Champion</code>). By saving all these results, we can estimate the probabilities of not only simple events (e.g.&nbsp;<span class="math inline">\(\mathbb{P}(\textrm{Wisconsin wins the finals})\)</span>) but also joint probabilities like <span class="math display">\[\mathbb{P}(\textrm{Wisconsin makes it to and wins the finals})\]</span> and conditional probabilities like <span class="math display">\[
+\mathbb{P}(\textrm{Wisconsin wins the finals} \vert \textrm{Wisconsin makes it to the finals}).
+\]</span> by dividing the number of simulations in which Wisconsin wins the championship by beating Ohio State in the finals by the number of simulations in which Wisconsin plays Ohio State in the finals.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-14"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-14-1"><a href="#annotated-cell-14-1" aria-hidden="true" tabindex="-1"></a>n_sims <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
+<span id="annotated-cell-14-2"><a href="#annotated-cell-14-2" aria-hidden="true" tabindex="-1"></a></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="1">1</button><span id="annotated-cell-14-3" class="code-annotation-target"><a href="#annotated-cell-14-3" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="annotated-cell-14-4"><a href="#annotated-cell-14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">SF1_Winner =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims),</span>
+<span id="annotated-cell-14-5"><a href="#annotated-cell-14-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">SF2_Winner =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims),</span>
+<span id="annotated-cell-14-6"><a href="#annotated-cell-14-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">Finals_Hi =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims),</span>
+<span id="annotated-cell-14-7"><a href="#annotated-cell-14-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">Finals_Lo =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims),</span>
+<span id="annotated-cell-14-8"><a href="#annotated-cell-14-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">Champion =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims))</span>
+<span id="annotated-cell-14-9"><a href="#annotated-cell-14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-10"><a href="#annotated-cell-14-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-14-11"><a href="#annotated-cell-14-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(r <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_sims){</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="2">2</button><span id="annotated-cell-14-12" class="code-annotation-target"><a href="#annotated-cell-14-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">479</span><span class="sc">+</span>r)</span>
+<span id="annotated-cell-14-13"><a href="#annotated-cell-14-13" aria-hidden="true" tabindex="-1"></a>  sf_winners <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="cn">NA</span>)</span>
+<span id="annotated-cell-14-14"><a href="#annotated-cell-14-14" aria-hidden="true" tabindex="-1"></a>  sf_outcomes <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="at">n =</span> <span class="fu">nrow</span>(semis), <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> semis<span class="sc">$</span>prob)</span>
+<span id="annotated-cell-14-15"><a href="#annotated-cell-14-15" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(semis)){</span>
+<span id="annotated-cell-14-16"><a href="#annotated-cell-14-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(sf_outcomes[i] <span class="sc">==</span> <span class="dv">1</span>){</span>
+<span id="annotated-cell-14-17"><a href="#annotated-cell-14-17" aria-hidden="true" tabindex="-1"></a>      sf_winners[i] <span class="ot">&lt;-</span> semis<span class="sc">$</span>Hi[i]</span>
+<span id="annotated-cell-14-18"><a href="#annotated-cell-14-18" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span>{</span>
+<span id="annotated-cell-14-19"><a href="#annotated-cell-14-19" aria-hidden="true" tabindex="-1"></a>      sf_winners[i] <span class="ot">&lt;-</span> semis<span class="sc">$</span>Lo[i]</span>
+<span id="annotated-cell-14-20"><a href="#annotated-cell-14-20" aria-hidden="true" tabindex="-1"></a>    }</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="3">3</button><span id="annotated-cell-14-21" class="code-annotation-target"><a href="#annotated-cell-14-21" aria-hidden="true" tabindex="-1"></a>    results[r, <span class="fu">c</span>(<span class="st">"SF1_Winner"</span>, <span class="st">"SF2_Winner"</span>)] <span class="ot">&lt;-</span> sf_winners</span>
+<span id="annotated-cell-14-22"><a href="#annotated-cell-14-22" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="annotated-cell-14-23"><a href="#annotated-cell-14-23" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="annotated-cell-14-24"><a href="#annotated-cell-14-24" aria-hidden="true" tabindex="-1"></a>  finals <span class="ot">&lt;-</span> </span>
+<span id="annotated-cell-14-25"><a href="#annotated-cell-14-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.frame</span>(<span class="at">Team1 =</span> sf_winners[<span class="dv">1</span>], <span class="at">Team2 =</span> sf_winners[<span class="dv">2</span>]) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-14-26"><a href="#annotated-cell-14-26" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="annotated-cell-14-27"><a href="#annotated-cell-14-27" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> seeds <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">Team1 =</span> Team, <span class="at">Team1.Seed =</span> Seed), </span>
+<span id="annotated-cell-14-28"><a href="#annotated-cell-14-28" aria-hidden="true" tabindex="-1"></a>      <span class="at">by =</span> <span class="st">"Team1"</span>) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-14-29"><a href="#annotated-cell-14-29" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="annotated-cell-14-30"><a href="#annotated-cell-14-30" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> seeds <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">Team2 =</span> Team, <span class="at">Team2.Seed =</span> Seed), </span>
+<span id="annotated-cell-14-31"><a href="#annotated-cell-14-31" aria-hidden="true" tabindex="-1"></a>      <span class="at">by =</span> <span class="st">"Team2"</span>) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-14-32"><a href="#annotated-cell-14-32" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="annotated-cell-14-33"><a href="#annotated-cell-14-33" aria-hidden="true" tabindex="-1"></a>      <span class="at">Hi =</span> <span class="fu">ifelse</span>(Team1.Seed <span class="sc">&lt;</span> Team2.Seed, Team1, Team2),</span>
+<span id="annotated-cell-14-34"><a href="#annotated-cell-14-34" aria-hidden="true" tabindex="-1"></a>      <span class="at">Lo =</span> <span class="fu">ifelse</span>(Team1.Seed <span class="sc">&lt;</span> Team2.Seed, Team2, Team1)) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-14-35"><a href="#annotated-cell-14-35" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(Hi, Lo) <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-14-36"><a href="#annotated-cell-14-36" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="annotated-cell-14-37"><a href="#annotated-cell-14-37" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> possible_matchups <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(Hi, Lo, prob), </span>
+<span id="annotated-cell-14-38"><a href="#annotated-cell-14-38" aria-hidden="true" tabindex="-1"></a>      <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Hi"</span>, <span class="st">"Lo"</span>))</span>
+<span id="annotated-cell-14-39"><a href="#annotated-cell-14-39" aria-hidden="true" tabindex="-1"></a>  </span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="4">4</button><span id="annotated-cell-14-40" class="code-annotation-target"><a href="#annotated-cell-14-40" aria-hidden="true" tabindex="-1"></a>  results[r, <span class="st">"Finals_Hi"</span>] <span class="ot">&lt;-</span> finals<span class="sc">$</span>Hi[<span class="dv">1</span>]</span>
+<span id="annotated-cell-14-41"><a href="#annotated-cell-14-41" aria-hidden="true" tabindex="-1"></a>  results[r, <span class="st">"Finals_Lo"</span>] <span class="ot">&lt;-</span> finals<span class="sc">$</span>Lo[<span class="dv">1</span>]</span>
+<span id="annotated-cell-14-42"><a href="#annotated-cell-14-42" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="annotated-cell-14-43"><a href="#annotated-cell-14-43" aria-hidden="true" tabindex="-1"></a>  final_outcome <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> finals<span class="sc">$</span>prob)</span>
+<span id="annotated-cell-14-44"><a href="#annotated-cell-14-44" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="annotated-cell-14-45"><a href="#annotated-cell-14-45" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(final_outcome <span class="sc">==</span> <span class="dv">1</span>){</span>
+<span id="annotated-cell-14-46"><a href="#annotated-cell-14-46" aria-hidden="true" tabindex="-1"></a>    results[r, <span class="st">"Champion"</span>] <span class="ot">&lt;-</span> finals<span class="sc">$</span>Hi[<span class="dv">1</span>]</span>
+<span id="annotated-cell-14-47"><a href="#annotated-cell-14-47" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span>{</span>
+<span id="annotated-cell-14-48"><a href="#annotated-cell-14-48" aria-hidden="true" tabindex="-1"></a>    results[r, <span class="st">"Champion"</span>] <span class="ot">&lt;-</span> finals<span class="sc">$</span>Lo[<span class="dv">1</span>]</span>
+<span id="annotated-cell-14-49"><a href="#annotated-cell-14-49" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="annotated-cell-14-50"><a href="#annotated-cell-14-50" aria-hidden="true" tabindex="-1"></a>}</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-14" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-14" data-code-lines="3,4,5,6,7,8" data-code-annotation="1">Data frame to hold the simulation results</span>
+</dd>
+<dt data-target-cell="annotated-cell-14" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-14" data-code-lines="12" data-code-annotation="2">Manually setting our randomization seed ensures reproducibility. But we need to use a different seed in every simulation iteration. Otherwise, we will get identical results across replications and that can bias our final probability estimates.</span>
+</dd>
+<dt data-target-cell="annotated-cell-14" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-14" data-code-lines="21" data-code-annotation="3">Save the winners of the semi-finals</span>
+</dd>
+<dt data-target-cell="annotated-cell-14" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-14" data-code-lines="40,41" data-code-annotation="4">Save the high and low seeds of the finals</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>Looking at the first several rows in <code>results</code>, we find that Wisconsin won the championship in most of the simulations.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>results <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   SF1_Winner SF2_Winner  Finals_Hi  Finals_Lo   Champion
+1   Wisconsin Ohio State  Wisconsin Ohio State  Wisconsin
+2   Wisconsin Ohio State  Wisconsin Ohio State Ohio State
+3   Wisconsin    Cornell  Wisconsin    Cornell  Wisconsin
+4   Wisconsin Ohio State  Wisconsin Ohio State  Wisconsin
+5   Wisconsin    Cornell  Wisconsin    Cornell  Wisconsin
+6   Wisconsin Ohio State  Wisconsin Ohio State  Wisconsin
+7   Wisconsin Ohio State  Wisconsin Ohio State  Wisconsin
+8   Wisconsin Ohio State  Wisconsin Ohio State  Wisconsin
+9   Wisconsin    Cornell  Wisconsin    Cornell  Wisconsin
+10  Minnesota Ohio State Ohio State  Minnesota  Minnesota</code></pre>
+</div>
+</div>
+<p>In total, we find that Wisconsin won the championship in 7189 of the 10,000 simulation runs.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(results<span class="sc">$</span>Champion)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+   Cornell  Minnesota Ohio State  Wisconsin 
+       502        765       1544       7189 </code></pre>
+</div>
+</div>
+<p>Across the 10,000 simulations, we find that</p>
+<ul>
+<li>Wisconsin made the finals in 8496 simulations</li>
+<li>Wisconsin made and won the finals in 7189 simulations</li>
+</ul>
+<p>Based on these numbers, we conclude that the conditional probability of Wisconsin winning the finals given that it made it to the finals is about 84.6%</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(results<span class="sc">$</span>SF1_Winner <span class="sc">==</span> <span class="st">"Wisconsin"</span> <span class="sc">&amp;</span> results<span class="sc">$</span>Champion <span class="sc">==</span> <span class="st">"Wisconsin"</span>)<span class="sc">/</span><span class="fu">sum</span>(results<span class="sc">$</span>SF1_Winner <span class="sc">==</span> <span class="st">"Wisconsin"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.8461629</code></pre>
+</div>
+</div>
+</section>
+<section id="sec-simulation-alt" class="level3">
+<h3 class="anchored" data-anchor-id="sec-simulation-alt">Simulating an Alternative Tournament</h3>
+<p>What if, instead of playing the semi-finals and finals at Ridder Arena, each game was held at the home arena of the higher-seeded team? Intuitively, we might expect Wisconsin’s chances of winning the championship to be much higher if they played all their matches at La Bahn Arena. To verify this, we will re-run our simulation. The only change is in the individual matchup probabilities: whereas in our original simulation, we only added the home advantage for Minnesota’s games, in our new simulation, we will add the advantage to all games.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-18"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-18-1"><a href="#annotated-cell-18-1" aria-hidden="true" tabindex="-1"></a>alt_matchups <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-18-2"><a href="#annotated-cell-18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">expand.grid</span>(<span class="at">Hi =</span> seeds<span class="sc">$</span>Team, <span class="at">Lo =</span> seeds<span class="sc">$</span>Team) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-18-3"><a href="#annotated-cell-18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-18-4"><a href="#annotated-cell-18-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> seeds <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">Hi =</span> Team, <span class="at">Hi.Seed=</span>Seed), <span class="at">by =</span> <span class="st">"Hi"</span>) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-18-5"><a href="#annotated-cell-18-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> seeds <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">Lo =</span> Team, <span class="at">Lo.Seed=</span>Seed), <span class="at">by =</span> <span class="st">"Lo"</span>) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-18-6"><a href="#annotated-cell-18-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(Hi.Seed <span class="sc">&lt;</span> Lo.Seed) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-18-7"><a href="#annotated-cell-18-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-18" data-target-annotation="1">1</button><span id="annotated-cell-18-8" class="code-annotation-target"><a href="#annotated-cell-18-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">diff =</span> lambda_hat[Hi, <span class="st">"ability"</span>] <span class="sc">-</span> lambda_hat[Lo, <span class="st">"ability"</span>],</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-18" data-target-annotation="2">2</button><span id="annotated-cell-18-9" class="code-annotation-target"><a href="#annotated-cell-18-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">log_odds =</span> diff <span class="sc">+</span> lambda0_hat,</span>
+<span id="annotated-cell-18-10"><a href="#annotated-cell-18-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">prob =</span> <span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> (log_odds))))</span>
+<span id="annotated-cell-18-11"><a href="#annotated-cell-18-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-18-12"><a href="#annotated-cell-18-12" aria-hidden="true" tabindex="-1"></a>semis <span class="ot">&lt;-</span> </span>
+<span id="annotated-cell-18-13"><a href="#annotated-cell-18-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">Hi =</span> <span class="fu">c</span>(<span class="st">"Wisconsin"</span>, <span class="st">"Ohio State"</span>), <span class="at">Lo =</span> <span class="fu">c</span>(<span class="st">"Minnesota"</span>, <span class="st">"Cornell"</span>)) <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-18" data-target-annotation="3">3</button><span id="annotated-cell-18-14" class="code-annotation-target"><a href="#annotated-cell-18-14" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(alt_matchups <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(Hi, Lo, prob), <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Hi"</span>, <span class="st">"Lo"</span>))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-18" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-18" data-code-lines="8" data-code-annotation="1">This is the log-odds of the higher seed winning if the game were played at a neutral site</span>
+</dd>
+<dt data-target-cell="annotated-cell-18" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-18" data-code-lines="9" data-code-annotation="2">In this alternative, the higher seed always plays at a home, hence the additional <code>lambda0_hat</code> factor.</span>
+</dd>
+<dt data-target-cell="annotated-cell-18" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-18" data-code-lines="14" data-code-annotation="3">Recreate <code>semis</code> but include the new matchup probabilities for the alternative scenario</span>
+</dd>
+</dl>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-19"><pre class="sourceCode r code-annotation-code code-with-copy"><code class="sourceCode r"><span id="annotated-cell-19-1"><a href="#annotated-cell-19-1" aria-hidden="true" tabindex="-1"></a>n_sims <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
+<span id="annotated-cell-19-2"><a href="#annotated-cell-19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-19-3"><a href="#annotated-cell-19-3" aria-hidden="true" tabindex="-1"></a>alt_results <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="annotated-cell-19-4"><a href="#annotated-cell-19-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">SF1_Winner =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims),</span>
+<span id="annotated-cell-19-5"><a href="#annotated-cell-19-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">SF2_Winner =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims),</span>
+<span id="annotated-cell-19-6"><a href="#annotated-cell-19-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">Finals_Hi =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims),</span>
+<span id="annotated-cell-19-7"><a href="#annotated-cell-19-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">Finals_Lo =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims),</span>
+<span id="annotated-cell-19-8"><a href="#annotated-cell-19-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">Champion =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_sims))</span>
+<span id="annotated-cell-19-9"><a href="#annotated-cell-19-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-19-10"><a href="#annotated-cell-19-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(r <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_sims){</span>
+<span id="annotated-cell-19-11"><a href="#annotated-cell-19-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">479</span><span class="sc">+</span>r)</span>
+<span id="annotated-cell-19-12"><a href="#annotated-cell-19-12" aria-hidden="true" tabindex="-1"></a>  sf_winners <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="cn">NA</span>)</span>
+<span id="annotated-cell-19-13"><a href="#annotated-cell-19-13" aria-hidden="true" tabindex="-1"></a>  sf_outcomes <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="at">n =</span> <span class="fu">nrow</span>(semis), <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> semis<span class="sc">$</span>prob)</span>
+<span id="annotated-cell-19-14"><a href="#annotated-cell-19-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(semis)){</span>
+<span id="annotated-cell-19-15"><a href="#annotated-cell-19-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(sf_outcomes[i] <span class="sc">==</span> <span class="dv">1</span>){</span>
+<span id="annotated-cell-19-16"><a href="#annotated-cell-19-16" aria-hidden="true" tabindex="-1"></a>      sf_winners[i] <span class="ot">&lt;-</span> semis<span class="sc">$</span>Hi[i]</span>
+<span id="annotated-cell-19-17"><a href="#annotated-cell-19-17" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span>{</span>
+<span id="annotated-cell-19-18"><a href="#annotated-cell-19-18" aria-hidden="true" tabindex="-1"></a>      sf_winners[i] <span class="ot">&lt;-</span> semis<span class="sc">$</span>Lo[i]</span>
+<span id="annotated-cell-19-19"><a href="#annotated-cell-19-19" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="annotated-cell-19-20"><a href="#annotated-cell-19-20" aria-hidden="true" tabindex="-1"></a>    alt_results[r, <span class="fu">c</span>(<span class="st">"SF1_Winner"</span>, <span class="st">"SF2_Winner"</span>)] <span class="ot">&lt;-</span> sf_winners</span>
+<span id="annotated-cell-19-21"><a href="#annotated-cell-19-21" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="annotated-cell-19-22"><a href="#annotated-cell-19-22" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="annotated-cell-19-23"><a href="#annotated-cell-19-23" aria-hidden="true" tabindex="-1"></a>  finals <span class="ot">&lt;-</span> </span>
+<span id="annotated-cell-19-24"><a href="#annotated-cell-19-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.frame</span>(<span class="at">Team1 =</span> sf_winners[<span class="dv">1</span>], <span class="at">Team2 =</span> sf_winners[<span class="dv">2</span>]) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-19-25"><a href="#annotated-cell-19-25" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="annotated-cell-19-26"><a href="#annotated-cell-19-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> seeds <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">Team1 =</span> Team, <span class="at">Team1.Seed =</span> Seed), </span>
+<span id="annotated-cell-19-27"><a href="#annotated-cell-19-27" aria-hidden="true" tabindex="-1"></a>      <span class="at">by =</span> <span class="st">"Team1"</span>) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-19-28"><a href="#annotated-cell-19-28" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="annotated-cell-19-29"><a href="#annotated-cell-19-29" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> seeds <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">Team2 =</span> Team, <span class="at">Team2.Seed =</span> Seed), </span>
+<span id="annotated-cell-19-30"><a href="#annotated-cell-19-30" aria-hidden="true" tabindex="-1"></a>      <span class="at">by =</span> <span class="st">"Team2"</span>) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-19-31"><a href="#annotated-cell-19-31" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="annotated-cell-19-32"><a href="#annotated-cell-19-32" aria-hidden="true" tabindex="-1"></a>      <span class="at">Hi =</span> <span class="fu">ifelse</span>(Team1.Seed <span class="sc">&lt;</span> Team2.Seed, Team1, Team2),</span>
+<span id="annotated-cell-19-33"><a href="#annotated-cell-19-33" aria-hidden="true" tabindex="-1"></a>      <span class="at">Lo =</span> <span class="fu">ifelse</span>(Team1.Seed <span class="sc">&lt;</span> Team2.Seed, Team2, Team1)) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-19-34"><a href="#annotated-cell-19-34" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(Hi, Lo) <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-19-35"><a href="#annotated-cell-19-35" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="annotated-cell-19-36"><a href="#annotated-cell-19-36" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> possible_matchups <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(Hi, Lo, prob), </span>
+<span id="annotated-cell-19-37"><a href="#annotated-cell-19-37" aria-hidden="true" tabindex="-1"></a>      <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Hi"</span>, <span class="st">"Lo"</span>))</span>
+<span id="annotated-cell-19-38"><a href="#annotated-cell-19-38" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="annotated-cell-19-39"><a href="#annotated-cell-19-39" aria-hidden="true" tabindex="-1"></a>  alt_results[r, <span class="st">"Finals_Hi"</span>] <span class="ot">&lt;-</span> finals<span class="sc">$</span>Hi[<span class="dv">1</span>]</span>
+<span id="annotated-cell-19-40"><a href="#annotated-cell-19-40" aria-hidden="true" tabindex="-1"></a>  alt_results[r, <span class="st">"Finals_Lo"</span>] <span class="ot">&lt;-</span> finals<span class="sc">$</span>Lo[<span class="dv">1</span>]</span>
+<span id="annotated-cell-19-41"><a href="#annotated-cell-19-41" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="annotated-cell-19-42"><a href="#annotated-cell-19-42" aria-hidden="true" tabindex="-1"></a>  final_outcome <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> finals<span class="sc">$</span>prob)</span>
+<span id="annotated-cell-19-43"><a href="#annotated-cell-19-43" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="annotated-cell-19-44"><a href="#annotated-cell-19-44" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(final_outcome <span class="sc">==</span> <span class="dv">1</span>){</span>
+<span id="annotated-cell-19-45"><a href="#annotated-cell-19-45" aria-hidden="true" tabindex="-1"></a>    alt_results[r, <span class="st">"Champion"</span>] <span class="ot">&lt;-</span> finals<span class="sc">$</span>Hi[<span class="dv">1</span>]</span>
+<span id="annotated-cell-19-46"><a href="#annotated-cell-19-46" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span>{</span>
+<span id="annotated-cell-19-47"><a href="#annotated-cell-19-47" aria-hidden="true" tabindex="-1"></a>    alt_results[r, <span class="st">"Champion"</span>] <span class="ot">&lt;-</span> finals<span class="sc">$</span>Lo[<span class="dv">1</span>]</span>
+<span id="annotated-cell-19-48"><a href="#annotated-cell-19-48" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="annotated-cell-19-49"><a href="#annotated-cell-19-49" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>In the alternative competition, where the higher-seeded team plays at home, we estimate that Wisconsin would win the championship about 77% of the time, up from the 71% in the version of the tournament played a neutral site.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(alt_results<span class="sc">$</span>Champion)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+   Cornell  Minnesota Ohio State  Wisconsin 
+       360        418       1533       7689 </code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="exercises" class="level2">
+<h2 class="anchored" data-anchor-id="exercises">Exercises</h2>
+<ol type="1">
+<li><p>Use the bootstrap to quantify the uncertainty in relative rankings of each team. To do this, you will need to re-sample individual games, re-compute the numbers of home &amp; away team wins for every combination of teams and <code>neutral</code>, and fit a Bradley-Terry model. Report the number of bootstrap simulations in which Wisconsin was ranked 1st and also report a 95% bootstrap confidence interval for Wisconsin’s overall rank.</p></li>
+<li><p>Build a simulation for the entire NCAA Tournament based on the estimating probabilities from our Bradley-Terry model that accounts for home advantage. In <a href="https://en.wikipedia.org/wiki/2025_NCAA_Division_I_women%27s_ice_hockey_tournament">this tournament</a>, the first round and quarterfinals were held on the campuses of the top-4 seeded teams (Wisconsin, Ohio State, Cornell, and Minnesota). Subsequent games were played at Ridder Arena at the University of Minnesota. Your simulation should involve only the 11 teams who actually played in the tournament</p></li>
+</ol>
+
+
 </section>
 
 
@@ -467,7 +973,7 @@ window.Quarto = {
 
 <ol>
 <li id="fn1"><p>Remember, this is restriction is needed because the <span class="math inline">\(\lambda_{j}\)</span>’s are otherwise not identifiable. Without this restriction, the data gives us know way to distinguish between one set of values for the <span class="math inline">\(\lambda_{j}\)</span>’s and another set that shifts all the values by the same fixed constant. See <a href="../lectures/lecture12.html#sec-constraint">Lecture 12</a> for more details.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>I.e., those with <code>Type</code> different from <code>"NC"</code><a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>R implements data frames using a <code>list</code> data type, with each column representing a separate list element. So, what we’re really doing here is adding a list-valued element to a list, which is easier to interpret than a data frame-valued column in a data frame.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -909,6 +1415,38 @@ window.Quarto = {
   });
   </script>
 </div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
 
 
 
