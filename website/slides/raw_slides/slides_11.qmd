@@ -1,0 +1,501 @@
+---
+title: "STAT 479 Lecture 11"
+subtitle: "Pitch Framing"
+format: revealjs
+execute:
+  cache: true
+---
+
+## Motivation{.smaller}
+
+::: {#fig-mccann-castro layout-ncol=2}
+
+![Pitch called a ball](lecture11_mccann.png){#fig-mccann}
+
+
+![Pitch called a strike](lecture11_castro.png){#fig-castro}
+
+:::
+
+* Both pitches miss the strike zone and should, by rule, be called balls
+* But pitch on the right was called a strike
+
+. . . 
+
+* How much do catchers influence umpires' calls?
+
+## Framing{.smaller}
+
+- Ability of catcher to receive pitch so as to increase $\mathbb{P}(\textrm{called strike})$
+- Ability to "steal a strike" / "turn balls into strikes"
+- Studied by the sabermetrics community since 2008
+- Lots of popular press attention b/w 2014 & 2016
+
+## Jonathan Lucroy Needs a Raise{.smaller}
+
+> According to Baseball Prospectus, Lucroy produced 121 stolen strikes last season and in the past five seasons clocks in at more than 1,000, the most in MLB. And if you believe the metrics, these stolen strikes have been worth about 18 wins during his five-year career -- just shy of what Giancarlo Stanton's entire output has added up to during the same time. Still, Lucroy's discreetly prodigious output has been underestimated. By fans. By the media. By his own team. And certainly by the game's salary structure. Even in today's post-Moneyball world, pitch framing is viewed through a skeptical lens; a value-added talent, sure, but one for which teams are reluctant to pay. While Stanton cashed in with a 13-year, $325 million contract this offseason and Mike Trout begins the first year of his $144.5 million deal, Lucroy was actually more valuable last year. For that he earned $2 million; this year, he'll make $3 million.
+
+> Put another way: The most impactful player in baseball today is the game's 17th highest-paid catcher.
+
+## Overview{.smaller}
+
+- Goal: estimate how many runs catcher saves his team
+- Multilevel model to predict $\mathbb{P}(\textrm{called strike})$
+  - Random intercepts for batter, pitcher, catcher
+  - Fixed effect: baseline called strike prob. based on previous season
+- "Runs Saved Above Replacement"
+
+# Value of a Called Strike
+
+## Elaborated Run Expectancy{.smaller}
+
+- Lectures 6--8: run expectancy at the at-bat level
+- Today: run expectancy at the *pitch* level
+- $\rho(\textrm{o}, \textrm{counts})$:
+  - Avg. runs scored following pitch in given count & game state
+  - 3 **o**uts $\times$ 12 counts
+
+```{r}
+#| label: load-data
+#| eval: true
+#| echo: false
+load("../../lectures/statcast2024.RData")
+load("../../lectures/statcast2023.RData")
+load("../../lectures/player2024_lookup.RData")
+
+```
+
+## Identifying Taken Pitches I{.smaller}
+
+* `description`: pitch-level descriptor
+```{r}
+#| label: tabulate-description
+#| eval: true
+#| echo: true
+table(statcast2024$description)
+```
+
+## Identifying Taken Pitches II{.smaller}
+
+- Manually classify `description` values as called balls or strikes
+```{r}
+#| label: description-table
+#| eval: true
+#| echo: true
+
+swing_descriptions <- 
+  c("bunt_foul_tip", "foul", "foul_bunt", "foul_tip",
+    "hit_into_play", "missed_bunt", "swinging_strike",
+    "swinging_strike_block")
+
+taken2024 <- statcast2024 |>
+  dplyr::filter(!description %in% swing_descriptions) |> 
+  dplyr::mutate(
+    Y = ifelse(description == "called_strike", 1, 0), 
+    Count = paste(balls, strikes, sep = "-")) |> 
+  dplyr::select(
+    Y, plate_x, plate_z, Count, Outs,
+    batter, pitcher, fielder_2, 
+    stand, p_throws, RunsRemaining, sz_top, sz_bot) |> 
+  dplyr::mutate(
+    Count = factor(Count),
+    batter = factor(batter),
+    pitcher = factor(pitcher),
+    fielder_2 = factor(fielder_2),
+    stand = factor(stand),
+    p_throws = factor(p_throws))
+```
+
+## Pitch-level Run Expectancy {.smaller}
+
+- Only use taken pitches in each out-base runner-count state
+  - `er_balls`: run expectancy following a called ball in given state
+  - `er_strikes`: run expectancy following called strike in given state
+
+:::{.panel-tabset}
+
+### Code
+```{r}
+#| label: er-taken
+#| echo: true
+#| eval: true
+er_balls <-
+  taken2024 |>
+  dplyr::filter(Y == 0) |>
+  dplyr::group_by(Count, Outs) |>
+  dplyr::summarise(er_ball = mean(RunsRemaining), .groups = 'drop')
+
+er_strikes <-
+  taken2024 |>
+  dplyr::filter(Y == 1) |>
+  dplyr::group_by(Count, Outs) |>
+  dplyr::summarise(er_strike = mean(RunsRemaining), .groups = 'drop')
+
+er_taken <-
+  er_balls |>
+  dplyr::left_join(y = er_strikes, by = c("Count", "Outs")) |>
+  dplyr::mutate(value = er_ball - er_strike)
+```
+
+### Run Expectancy Matrix
+```{r}
+#| label: view-er-taken
+#| eval: true
+#| echo: false
+er_taken |> dplyr::slice_head(n=10)
+```
+
+:::
+
+## Most & Least Valuable Called Strikes
+
+- For fielding team, a called strike
+  * In a 3-2 count w/ 0 outs *saves* 0.8 runs
+  * In a 0-1 count w/ 2 outs *saves* 0.07 runs
+
+```{r}
+#| label: er-taken-sorted
+#| eval: true
+#| echo: false
+er_taken |> dplyr::arrange(dplyr::desc(value)) |> dplyr::slice(c(1, 2, dplyr::n()-1, dplyr::n()))
+```
+
+```{r}
+#| label: append-er-taken
+#| eval: true
+#| echo: false
+taken2024 <-
+  taken2024 |>
+  dplyr::left_join(y = er_taken |> dplyr::select(Count, Outs, value), by = c("Count", "Outs"))
+```
+
+
+
+# Multilevel Modeling
+
+## Pitch Location {.smaller}
+
+- `plate_x` and `plate_z` coordinates of pitch as it cross front of home plate
+- `plate_x` measured from *catcher*'s perspective (right-handed batters stand on the *left*)
+```{r}
+#| label: fig-calls-24
+#| fig-align: center
+#| fig-width: 4
+#| fig-asp: 1.2
+#| fig-cap: All called balls and strikes
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+plot(1, type = "n",
+     xlim = c(-2.5, 2.5), ylim = c(0, 6), #<1>
+     xlab = "", ylab = "",
+     main = "Called pitches (2024)",
+     xaxt = "n", yaxt = "n", bty = "n")
+points(x = taken2024$plate_x, y = taken2024$plate_z,
+       pch = 16, cex = 0.25,
+       col = ifelse(taken2024$Y == 1, rgb(1, 0, 0, 0.25), rgb(0,0,1,0.25))) #<2>
+rect(xleft = -8.5/12, 
+     ybottom = mean(taken2024$sz_bot, na.rm = TRUE),
+     xright = 8.5/12,
+     ytop = mean(taken2024$sz_top, na.rm = TRUE))
+```
+
+## High-Level Model{.smaller}
+
+- Level 1: Fixed effects of location ($x$ and $z$) may be non-linear
+$$
+\log \left( \frac{\mathbb{P}(Y_{i} = 1)}{\mathbb{P}(Y_{i} = 0)} \right) = B_{b[i]} + C_{c[i]} + P_{p[i]} + f(x_{i}, z_{i})
+$$
+
+- Level 2: Random intercepts for **B**atter, **P**ither, **C**atcher
+$$
+\begin{align}
+B_{i} &= \mu_{B} + u^{(B)}_{b[i]}; u^{(B)}_{b} \sim \mathcal{N}(0,\sigma^{2(B)}) \\
+C_{i} &= \mu_{C} + u^{(C)}_{c[i]}; u^{(C)}_{c} \sim \mathcal{N}(0,\sigma^{2(C)}) \\
+P_{i} &= \mu_{P} + u^{(P)}_{p[i]}; u^{(P)}_{p} \sim \mathcal{N}(0,\sigma^{2(P)})
+\end{align}
+$$
+
+. . . 
+
+- Idea #1: Assume $f(x,z) = \beta_{X}x + \beta_{Z}z$
+  - Problem: assumes $\mathbb{P}(\textrm{called strike})$ is monotonic
+
+## Adjusting for Historical Tendencies
+
+- Instead of trying to pre-specify functional form of $f(x,z)$
+$$
+\log \left( \frac{\mathbb{P}(Y_{i} = 1)}{\mathbb{P}(Y_{i} = 0)} \right) = B_{b[i]} + C_{c[i]} + P_{p[i]} + \beta_{p} \log\left(\frac{\hat{p}(x_{i}, z_{i})}{1 - \hat{p}(x_{i}, z_{i})}\right)
+$$
+
+- $\hat{p}(x,z)$: **baseline** called strike prob. estimated from 2023 season
+
+## Historical GAM{.smaller}
+
+- Filter out pitches too far away from strike zone
+  - `plate_x` outside [-1.5, 1.5]
+  - `plate_z` outside [1,6]
+```{r}
+#| label: preprocess-2023
+#| eval: true
+#| echo: false
+taken2023 <-
+  statcast2023 |>
+  dplyr::filter(!description %in% swing_descriptions) |> 
+  dplyr::mutate(
+    Y = ifelse(description == "called_strike", 1, 0)) |> 
+  dplyr::select(Y, plate_x, plate_z, stand, p_throws) |> 
+  dplyr::filter(!is.na(plate_x) & !is.na(plate_z)) |>
+  dplyr::filter(abs(plate_x) <= 1.5 & plate_z >= 1 & plate_z <= 6) |>
+  dplyr::mutate(
+    stand = factor(stand),
+    p_throws = factor(p_throws))
+```
+
+```{r}
+#| label: fit-hgam
+#| eval: true
+#| echo: true
+#| message: false
+library(mgcv)
+hgam_fit <- 
+  bam(formula = Y ~ stand + p_throws + s(plate_x, plate_z),  
+      family = binomial(link="logit"), 
+      data = taken2023)
+```
+
+## Historical Called Strike Probability
+```{r}
+#| label: fig-hgam-RR
+#| fig-width: 5
+#| fig-height: 6
+#| fig-align: "center"
+#| fig-cap: Historical called strike probabilities for a right-handed batter facing a right-handed pitcher.
+grid_sep <- 0.05
+x_grid <- seq(-1.5, 1.5, by = grid_sep)
+z_grid <- seq(0, 6, by = grid_sep)
+col_list <- colorBlindness::Blue2DarkRed18Steps 
+plate_grid <- 
+  expand.grid(plate_x = x_grid, plate_z = z_grid) |>
+  dplyr::mutate(stand = "R", p_throws = "R") |> #<1>
+  dplyr::mutate(stand = factor(stand, levels = c("L", "R")), #<2>
+                p_throws = factor(p_throws, levels = c("L", "R"))) #<2>
+
+grid_preds <-
+  predict(object = hgam_fit,
+          newdata = plate_grid,
+          type = "response")
+grid_prob_cols <- 
+  rgb(colorRamp(col_list,bias=1)(grid_preds)/255)
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+plot(1, type = "n", 
+     xlim = c(-1.5, 1.5), ylim = c(0,6),
+     main = "Historical called strike probabilities",
+     xlab = "", ylab = "", 
+     xaxt = "n", yaxt = "n")
+for(i in 1:nrow(plate_grid)){
+  rect(xleft = plate_grid$plate_x[i] - grid_sep/2, 
+       ybot = plate_grid$plate_z[i] - grid_sep/2,
+       xright = plate_grid$plate_x[i] + grid_sep/2,
+       ytop = plate_grid$plate_z[i] + grid_sep/2,
+       col = adjustcolor(grid_prob_cols[i], alpha.f = 0.5), #<3>
+       border = NA)
+}
+rect(xleft = -8.5/12, 
+     ybottom = mean(taken2024$sz_bot, na.rm = TRUE),
+     xright = 8.5/12,
+     ytop = mean(taken2024$sz_top, na.rm = TRUE))
+```
+
+## Appending Baseline{.smaller}
+
+- Historical GAM trained on 2023 data
+- Use it to make predictions on all 2024 taken pitches
+
+```{r}
+#| label: append-hgam-2024
+#| eval: true
+#| echo: true
+baseline <- 
+  predict(object = hgam_fit,
+          newdata = taken2024, 
+          type = "link")
+taken2024 <-
+  taken2024 |>
+  dplyr::mutate(baseline = baseline) |>
+  dplyr::filter(abs(plate_x) <= 1.5 & plate_z >= 1 & plate_z <= 6)
+```
+
+## Fitting our Model{.smaller}
+
+```{r}
+#| label: fit-multilevel
+#| echo: true
+#| eval: true
+#| message: false
+library(lme4)
+multilevel_fit <-
+  glmer(formula = Y ~ 1 + (1 | fielder_2) + (1 | batter)  + (1 | pitcher) +  baseline, 
+        family = binomial(link = "logit"),
+        data = taken2024)
+summary(multilevel_fit)
+```
+
+## Extracting $u^{(C)}_{c}${.smaller}
+
+- Model: $C_{c} = \mu_{C} + u^{(C)}_{c}$ where $u^{(C)}_{c} \sim \mathcal{N}(0,\sigma^{2}_{c})$
+- Reminder: cannot directly estimate catcher-specific intercepts $C_{c}$ or global average $\mu_{C}$
+- We can extract deviations $u^{(C)}_{c}$ using `ranef()`
+
+```{r}
+#| label: catcher-ranef
+#| eval: true
+#| echo: true
+tmp <- ranef(multilevel_fit)
+catcher_u <- 
+  data.frame(
+    fielder_2 = as.integer(rownames(tmp[["fielder_2"]])), #<1>
+    catcher_u = tmp[["fielder_2"]][,1])
+```
+
+# Runs Saved Above Replacement
+
+## Defining Replacement Level{.smaller}
+
+- Non-replacement: top $30 \times 2$ catchers sorted by number of pitches caught
+- $\overline{u}^{(C)}_{R}$: average $u^{(C)}_{c}$ among all replacement-level catchers
+
+```{r}
+#| label: define-replacement-catcher
+#| eval: true
+#| echo: true
+catcher_counts <-
+  statcast2024 |>
+  dplyr::group_by(fielder_2) |>
+  dplyr::summarise(count = dplyr::n()) |>
+  dplyr::arrange(dplyr::desc(count))
+
+catcher_threshold <- 
+  catcher_counts |>
+  dplyr::slice(60) |>
+  dplyr::pull(count)
+
+catcher_u <-
+  catcher_u |>
+  dplyr::left_join(y = catcher_counts, by = "fielder_2")
+
+repl_u <-
+  catcher_u |>
+  dplyr::filter(count < catcher_threshold) |>
+  dplyr::pull(catcher_u) |>
+  mean()
+```
+
+## Counterfactual Predictions {.smaller}
+
+- For every taken pitch, use model to predict
+  * Called strike prob. with original catcher
+  * Called strike prob. with a replacement-level catcher
+  
+. . . 
+
+- Original log-odds: 
+
+$$
+\mu_{C} + u_{c[i]}^{(C)} + B_{b[i]} + P_{p[i]} + \hat{\beta}_{p} \times \log\left(\frac{\hat{p}(x_{i}, z_{i})}{1 - \hat{p}(x_{i}, z_{i})} \right)
+$$
+
+. . . 
+
+- Counter-factual log-odds:
+
+$$
+\mu_{C} + \overline{u}_{R}^{(C)} + B_{b[i]} + P_{p[i]} + \hat{\beta}_{p} \times \log\left(\frac{\hat{p}(x_{i}, z_{i})}{1 - \hat{p}(x_{i}, z_{i})} \right)
+$$
+
+## Computing Counterfactual Predictions
+
+:::{.panel-tabset}
+
+### Original
+```{r}
+#| label: get-ml-prediction
+#| eval: true
+#| echo: true
+ml_preds <-
+  predict(object = multilevel_fit,
+          newdata = taken2024,
+          type = "link")
+taken2024 <- taken2024 |>
+  dplyr::mutate(fitted_log_odds = ml_preds)
+```
+
+### Counterfactual
+- Subtract original $u^{(C)}_{c}$ and add $\overline{u}^{(C)}_{R}$ to log-odds
+
+```{r}
+#| label: compute-repl-log-odds
+#| eval: true
+#| echo: true
+taken2024 <-
+  taken2024 |>
+  dplyr::left_join(
+    y = catcher_u |> dplyr::select(fielder_2, catcher_u) |>
+      dplyr::mutate(fielder_2 = factor(fielder_2)),
+    by = "fielder_2") |>
+  dplyr::mutate(repl_log_odds = fitted_log_odds - catcher_u + repl_u) 
+```
+
+:::
+
+## Computing RSAR{.smaller}
+
+:::{.panel-tabset}
+
+### Crediting Catcher
+
+- Weight change in called strike prob. by value of called strike
+```{r}
+#| label: credit-catcher
+#| eval: true
+#| echo: true
+
+taken2024 <-
+  taken2024 |>
+  dplyr::mutate(
+    fitted_prob = 1/(1 + exp(-1 * fitted_log_odds)),
+    repl_prob = 1/(1 + exp(-1 * repl_log_odds)),
+    rsar = value * (fitted_prob - repl_prob))
+```
+
+### Totals
+
+- Sum `rsar` value across whole season
+```{r}
+#| label: total-rsar
+#| eval: true
+#| echo: true
+rsar <-
+  taken2024 |>
+  dplyr::group_by(fielder_2) |>
+  dplyr::summarise(rsar = sum(rsar), n = dplyr::n()) |> 
+  dplyr::rename(key_mlbam = fielder_2) |>
+  dplyr::left_join(player2024_lookup |>
+                     dplyr::select(key_mlbam, Name) |>
+                     dplyr::mutate(key_mlbam = factor(key_mlbam)), by = "key_mlbam")
+```
+
+### Top-10 RSAR
+
+```{r}
+#| label: top-10-rsar
+#| eval: true
+#| echo: true
+rsar |> 
+  dplyr::arrange(dplyr::desc(rsar)) |>
+  dplyr::select(Name, rsar) |>
+  dplyr::slice_head(n = 10)
+```
+
+:::
+
+
+
