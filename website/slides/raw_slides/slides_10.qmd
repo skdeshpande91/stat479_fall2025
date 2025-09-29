@@ -1,0 +1,1005 @@
+---
+title: "STAT 479 Lecture 10"
+subtitle: "NFL WAR"
+format: revealjs
+execute:
+  cache: true
+---
+
+## Recap: EPA in Football{.smaller}
+
+- 86-yard touchdown by Ladd McConckey on a pass from Justin Herbert ([video link](https://www.youtube.com/watch?v=Hu9flYe2VrA))
+  - Thrown on a 3rd and 26 from Chargers' 14 yard line. EP = -1.54
+  - Chargers generated 7 - (-1.54) = 8.54 points of EP
+- 64-yard touch down by Kavontae Turpin on a pass from Cooper Rush ([video link](https://www.youtube.com/watch?v=U0Zp_is-X18))
+  - Thrown on 3rd and 10 from Cowboys' 36 yard line. EP = 0.77
+  - Cowboys generated 7 - 0.77 = 6.23 points of EP
+  
+. . .
+
+- How should we divide credit between QB and receiver?
+- What about running? 
+
+
+## Plan {.smaller}
+- Estimate EPA **per-play** for each passer, receiver, & rusher
+- Separately model three phases:
+  - Passing I: EPA due to actions while ball is in the air
+  - Passing II: EPA due to yards after catch
+  - Rushing
+- Multi-level modeling:
+  - Random intercepts for passers, receivers, rushers
+  - Must adjust for important fixed effects
+
+. . .
+
+- W/ per-play EPA can compare actual production to replacement "shadow"
+- These contrasts will lead to a version of WAR
+
+
+# Data Preparation
+
+## Overview 
+- Focus on 2024-25 regular season
+- Need roster data so define position-specific replacement level
+```{r}
+#| label: load-pbp-roster
+#| warning: false
+#| message: false
+#| output: false
+pbp2024 <-
+  nflfastR::load_pbp(season = 2024) |>
+  dplyr::filter(season_type == "REG") 
+roster2024 <-
+  nflfastR::fast_scraper_roster(seasons = 2024) |>
+  dplyr::filter(!is.na(gsis_id))
+```
+
+## Passing Data{.smaller}
+- Extract all passing plays (`play_type == "pass"`)
+- For each pass, record
+  - `posteam`, `defteam`, `posteamtype`
+  - `passer_player_id`, `receiver_player_id`
+  - `shotgun`, `no_huddle`, `qb_hit`, `pass_location`
+  - `air_yards`, `yards_after_catch`, `completed_pass`
+
+```{r}
+#| label: build-pass2024
+#| eval: true
+#| echo: false
+pass2024 <-
+  pbp2024 |>
+  dplyr::filter(
+    play_type == "pass" &
+    !is.na(posteam) & 
+    !grepl("TWO-POINT CONVERSION ATTEMPT", desc) & #<1>
+    !grepl("sack", desc)  ) |> #<2>
+  dplyr::filter(passer_player_id != receiver_player_id) |> #<3>
+  dplyr::select(
+    passer_player_id,
+    receiver_player_id,
+    posteam, defteam,
+    air_yards, shotgun, 
+    qb_hit, no_huddle,
+    posteam_type, 
+    pass_location,
+    yards_after_catch,
+    epa, air_epa, yac_epa, complete_pass, desc) |>
+  dplyr::mutate(gsis_id = receiver_player_id) |> #<4>
+  dplyr::left_join(y = roster2024 |> dplyr::select(gsis_id, position), by = "gsis_id") |> #<5>
+  dplyr::rename(receiver_position = position) |> #<6>
+  dplyr::select(-gsis_id) #<7> 
+```
+
+```{r}
+#| label: tabulate-pass-location
+#| eval: true
+#| echo: true
+table(pass2024$pass_location)
+```
+
+## Air vs YAC EPA{.smaller}
+- Teams generate EPA on completed passes while
+  - The ball is in the air
+  - On the ground, after the catch
+- **nflfastR** decomposes `epa` into `air_epa` and `yac_epa`
+- Completed passes: imagine pausing game as soon as catch completed
+  - EP at the intermediate state used to compute `air_epa` and `yac_epa`
+- Sacks: no good definition for `air_epa` & `yac_epa`
+  - We will treat sacks as rushing plays
+
+## Rushing Data{.smaller}
+- Include columns for
+  - `passer_player_id` & `rusher_player_id`
+  - `shotgun` & `no_huddle`
+  - `run_location` & `run_gap`
+- Must manually specify `rusher_player_id` on sacks
+
+```{r}
+#| label: add-position
+#| eval: true
+#| echo: false
+rush2024 <-
+  pbp2024 |>
+  dplyr::filter(
+    !grepl("TWO-POINT CONVERSION ATTEMPT", desc)) |>
+  dplyr::filter(
+    !grepl("No play", desc, ignore.case = TRUE)) |> #<1>
+  dplyr::filter(
+    play_type == "run" |
+    grepl("sack", desc, ignore.case = TRUE)) |>
+  dplyr::select(
+    game_id, play_id,
+    posteam, defteam, 
+    passer_player_id, #<2>
+    rusher_player_id,
+    posteam_type,
+    shotgun, no_huddle,
+    run_location, run_gap, 
+    epa, desc) |>
+  dplyr::mutate(
+    rusher_player_id = 
+      dplyr::case_when(
+        is.na(rusher_player_id) & grepl("sack", desc, ignore.case = TRUE) ~ passer_player_id,
+        .default = rusher_player_id)) |>
+  dplyr::mutate(gsis_id = rusher_player_id) |>
+  dplyr::left_join(y = roster2024 |> dplyr::select(gsis_id, position), by = "gsis_id") |>
+  dplyr::rename(rusher_position = position) |>
+  dplyr::select(-gsis_id)
+```
+
+## Run Context I {.smaller}
+
+- `run_location` indicates direction
+```{r}
+#| label: tabulate-run-location
+#| eval: true
+#| echo: false
+table(rush2024$run_location)
+```
+- `run_gap`: 
+  - `"guard"`: runs through B gap (b/w guard & tackles)
+  - `"tackle"`: run through C gape (outside tackle or b/w tackle & end)
+  - `"end"`: run through D gap (outside TE)
+  - `NA`: run through A gap (b/w center & guard)
+  
+```{r}
+#| label: tabulate-gap-location
+#| eval: true
+#| echo: false
+table(rush2024[,c("run_gap", "run_location")], useNA = 'always')
+```
+
+## Run Context II{.smaller}
+- We will create a new variable `run_context`
+- Concatenate `run_location` & `run_gap` when both not `NA`
+- For "A" gap runs, `run_context = "middle"`
+- For sacks & fumbles, set `run_context = "other"`
+- Additionally add `posteam`: proxy for offensive linemen & blockers
+
+```{r}
+#| label: run-context
+#| eval: true
+#| echo: true
+rush2024 <-
+  rush2024 |>
+  dplyr::mutate(
+    run_context = dplyr::case_when(
+      run_location == "middle" ~ paste(posteam, "middle", sep = "_"),
+      is.na(run_location) & is.na(run_gap) ~ paste(posteam, "other", sep = "_"),
+      .default = paste(posteam, run_gap, run_location, sep = "_")))
+```
+
+## Team Strengths{.smaller}
+- Important to account for teammates & opponent quality (recall [Lecture 4](../../lectures/lecture04.qmd#sec-pm-issues))
+  - Don't overly reward players on good teams
+  - Don't overly penalize players on bad teams
+- Measure passing & rushing strength with mean EPA
+- Add columns to `pass2024` and `rush2024`
+```{r}
+#| label: get-strength
+#| eval: true
+#| echo: true
+pass_strength <-
+  pass2024 |>
+  dplyr::group_by(posteam) |>
+  dplyr::summarise(pass_strength = mean(epa,na.rm = TRUE))
+rush_strength <-
+  rush2024 |>
+  dplyr::group_by(posteam) |>
+  dplyr::summarise(rush_strength = mean(epa, na.rm = TRUE))
+
+pass2024 <-
+  pass2024 |>
+  dplyr::inner_join(pass_strength, by = "posteam") |>
+  dplyr::inner_join(rush_strength, by = "posteam")
+
+rush2024 <-
+  rush2024 |>
+  dplyr::inner_join(pass_strength, by = "posteam") |>
+  dplyr::inner_join(rush_strength, by = "posteam")
+```
+
+# Modeling Passing EPA
+
+## Composite Outcomes{.smaller}
+- $\Delta$: observed EPA on a passing play 
+- $\delta_{\textrm{air}}$ and $\delta_{\textrm{yac}}$: `air_epa` and `yac_epa` given by **nflfastR**
+- Decompose $\Delta = \Delta_{\textrm{air}} + \Delta_{\textrm{yac}}$ where
+$$
+\Delta_{\textrm{air}} = 
+\begin{cases}
+\delta_{\textrm{air}} & \textrm{if the pass is caught} \\
+\Delta & \textrm{if the pass is incomplete,}
+\end{cases}
+$$
+and 
+$$
+\Delta_{\textrm{yac}} = 
+\begin{cases}
+\delta_{\textrm{yac}} & \textrm{if the pass is caught} \\
+0 & \textrm{if the pass is incomplete.}
+\end{cases}
+$$
+
+```{r}
+#| label: define-composite-outcomes
+#| eval: true
+#| echo: false
+pass2024 <-
+  pass2024 |>
+  dplyr::mutate(
+    Delta_air = ifelse(complete_pass == 1, air_epa, epa),
+    Delta_yac = ifelse(complete_pass == 1, yac_epa, 0),
+    passer_player_id = factor(passer_player_id),
+    receiver_player_id = factor(receiver_player_id),
+    posteam = factor(posteam),
+    defteam = factor(defteam),
+    pass_location = factor(pass_location),
+    receiver_position = factor(receiver_position))
+```
+
+## Modeling $\Delta_{\textrm{air}}$ {.smaller}
+$$
+\begin{align}
+\Delta_{i, \textrm{air}} &= Q_{q[i]} + C_{c[i]} + D_{d[i]} + \boldsymbol{\mathbf{x}}_{i}^{\top}\boldsymbol{\beta} + \epsilon_{i}\\
+Q_{q} &\sim N(\mu_{Q}, \sigma^{2}_{Q})\\
+C_{c} &\sim N(\mu_{C}, \sigma^{2}_{C})\\
+D_{d} &\sim N(\mu_{D}, \sigma^{2}_{D}).
+\end{align}
+$$
+
+- Fixed effects include:
+  - `air_yards`, `shotgun`, `qb_hit`, `no_huddle`
+  - `postteam_type` (i.e. Home/Away), `pass_location`
+  - `receiver_position` & `rush_strength`
+- Random intercepts for **Q**uarterback, re**C**eiver, and **D**efense
+
+## Air Model Results{.smaller}
+```{r}
+#| label: fit-air-model
+#| eval: true
+#| echo: true
+
+library(lme4)
+
+air_model <-
+  lmer(Delta_air ~ 1 + (1|passer_player_id) + (1 | receiver_player_id) + (1 | defteam ) #<1>
+       + air_yards + shotgun + qb_hit + no_huddle + posteam_type + pass_location + receiver_position + rush_strength, #<2>
+       data = pass2024)
+summary(air_model)
+```
+
+## Model Interpretation {.smaller}
+
+- $Q_{q}$ : Per-pass EP added through air by passer $q$ *after adjusting for fixed effects*
+- $C_{c}$: per-pass EP added when ball in air by receiver $c$ *after adjusting for fixed effects*
+- $D_{d}$: per-pass EP added by *offensive team* when ball in air while facing defense $d$
+  - Negative $D_{d}$ are good for the defense!
+- Model: $Q_{q}, C_{c}$ and $D_{d}$ noisy deviations from league-wide averages $\mu_{Q}, \mu_{C},$ and $\mu_{D}.$
+
+. . . 
+
+- Cannot estimate the individual $Q_{q}$'s, $C_{c}$'s, or $D_{d}$'s
+- Cannot estimate the global averages $\mu_{Q}, \mu_{C},$ or $\mu_{D}$
+- These parameters are not *identifiable* with the data alone
+- Luckily: we can estimate deviations (e.g., $Q_{q} - \mu_{Q}$)
+
+
+## Individual Points Added over Average {.smaller}
+
+:::{.panel-tabset}
+
+### Definition
+
+- For passer $q$, let $\textrm{IPA}^{(Q)}_{\textrm{air}, q} = Q_{q} - \mu_{Q}$
+  - How much more EP does $q$ add per play than league-average
+- Similarly $\textrm{IPA}^{(C)}_{\textrm{air}, c}$ and $\textrm{IPA}^{(D)}_{\textrm{air}, d}.$
+
+### Code
+```{r}
+#| label: get-air-ipas
+#| eval: true
+#| echo: true
+tmp_air <- ranef(air_model) 
+
+air_passer_effects <-
+  data.frame(
+    gsis_id = rownames(tmp_air[["passer_player_id"]]), 
+    ipa_air_pass = tmp_air[["passer_player_id"]][,1])
+air_receiver_effects <-
+  data.frame(
+    gsis_id = rownames(tmp_air[["receiver_player_id"]]),
+    ipa_air_rec = tmp_air[["receiver_player_id"]][,1])
+air_defense_effects <-
+  data.frame(
+    Team = rownames(tmp_air[["defteam"]]),
+    tpa_air_def = tmp_air[["defteam"]][,1])
+```
+
+### Top & Bottom 5 Passers
+
+```{r}
+#| label: top-bot-5-ipa-air-pass
+#| eval: true
+#| echo: true
+air_passer_effects |>
+  dplyr::inner_join(y = roster2024 |> dplyr::select(gsis_id, full_name), by = "gsis_id") |>
+  dplyr::select(full_name, ipa_air_pass) |>
+  dplyr::arrange(dplyr::desc(ipa_air_pass)) |>
+  dplyr::slice(c(1:5, (dplyr::n()-4):dplyr::n()))
+```
+
+:::
+
+## Modeling $\Delta_{\textrm{yac}}$ {.smaller}
+
+- Fit a nearly-identical multilevel model using only **completed passes**
+
+```{r}
+#| label: fit-yac-model
+#| eval: true
+#| echo: true
+completions <-
+  pass2024 |>
+  dplyr::filter(complete_pass==1)
+
+yac_model <-
+  lmer(Delta_yac ~ 1 + (1|passer_player_id) + (1 | receiver_player_id) + (1 | defteam ) 
+       + air_yards + shotgun + qb_hit + no_huddle + posteam_type + pass_location + receiver_position + rush_strength, 
+       data = completions)
+```
+
+## Dealing with Singularities{.smaller}
+
+- Estimated no passer-to-passer variation
+- Intuitive: once catch is made, who threw it doesn't make a difference in terms of EPA.
+```{r}
+#| label: summarize-yac-model
+summary(yac_model)
+```
+
+## Computing IPA for YAC {.smaller}
+- Using `ranef`, we can extract YAC-specific IPAs for passers, receivers, and defenses
+- Top-10 based on $\textrm{IPA}^{(C)}_{\textrm{yac}, c}$ contains many well-known receivers
+```{r}
+#| label: yac-ipa
+#| eval: true
+#| echo: false
+tmp_yac <- ranef(yac_model)
+
+yac_passer_effects <-
+  data.frame(
+    gsis_id = rownames(tmp_yac[["passer_player_id"]]), 
+    ipa_yac_pass = tmp_yac[["passer_player_id"]][,1])
+yac_receiver_effects <-
+  data.frame(
+    gsis_id = rownames(tmp_yac[["receiver_player_id"]]),
+    ipa_yac_rec = tmp_yac[["receiver_player_id"]][,1])
+yac_defense_effects <-
+  data.frame(
+    Team = rownames(tmp_yac[["defteam"]]),
+    tpa_yac_def = tmp_yac[["defteam"]][,1])
+
+yac_receiver_effects |>
+  dplyr::inner_join(y = roster2024 |> dplyr::select(gsis_id, full_name), by = "gsis_id") |>
+  dplyr::arrange(dplyr::desc(ipa_yac_rec)) |>
+  dplyr::slice_head(n = 10) |>
+  dplyr::select(full_name, ipa_yac_rec)
+```
+
+
+# Rushing Model
+
+## Handling QB Runs{.smaller}
+
+- Play-by-play data doesn't distinguish between
+  - Designed QB runs
+  - Scrambles on broken plays
+- We will fit two separate models for EPA on rushing plays
+
+```{r}
+#| label: convert-rush-categorical
+#| eval: true
+#| echo: false
+rush2024 <-
+  rush2024 |>
+  dplyr::mutate(
+    rusher_player_id = factor(rusher_player_id),
+    posteam = factor(posteam),
+    defteam = factor(defteam),
+    posteam_type = factor(posteam_type),
+    rusher_position == factor(rusher_position),
+    run_context = factor(run_context))
+```
+```{r}
+#| label: extract-qb-runs
+#| eval: true
+#| echo: true
+qb_runs <-
+  rush2024 |>
+  dplyr::filter(rusher_position == "QB")
+
+nonqb_runs <-
+  rush2024 |>
+  dplyr::filter(rusher_position != "QB")
+```
+
+## Multilevel Models {.smaller}
+
+:::{.panel-tabset}
+
+### Overview
+- QB Run Model:
+  - Fixed effects: `shotgun`, `no_huddle`, `posteam_type`, `pass_strength`
+  - Random intercepts: `rusher_player_id` & `defteam`
+- Non-QB Model
+  - Fixed effects: same as QB-model + `rusher_position` & `run_context`
+  - Random intercepts: same as QB-model
+
+- Use `ranef()` to extract $\textrm{IPA}^{(R)}_{r}$ for **R**unner **r**
+
+### Code
+```{r}
+#| label: fit-run-models
+#| eval: true
+#| echo: true
+qbrun_fit <-
+  lmer(epa ~ 1 + (1 | rusher_player_id) + (1 | defteam) +
+         shotgun + no_huddle + posteam_type + pass_strength, #<1>
+       data = qb_runs)
+nonqb_run_fit <-
+  lmer(epa ~ 1 + (1 | rusher_player_id) + (1 | defteam) +  
+         shotgun + no_huddle + posteam_type + rusher_position + run_context + pass_strength, #<2>
+       data = nonqb_runs)
+```
+
+### Top $\textrm{IPA}^{(R)}_{r}$ Values
+
+
+```{r}
+#| label: top-run-ipa
+#| eval: true
+#| echo: false
+tmp_qbrun <- ranef(qbrun_fit)
+qbrun_effects <-
+  data.frame(
+    gsis_id = rownames(tmp_qbrun[["rusher_player_id"]]), 
+    ipa_qbrun = tmp_qbrun[["rusher_player_id"]][,1])
+
+tmp_run <- ranef(nonqb_run_fit) 
+run_effects <-
+  data.frame(
+    gsis_id = rownames(tmp_run[["rusher_player_id"]]),
+    ipa_run = tmp_run[["rusher_player_id"]][,1])
+
+run_effects |>
+  dplyr::left_join(y = roster2024 |> dplyr::select(gsis_id, full_name), by = "gsis_id") |>
+  dplyr::select(full_name, ipa_run) |>
+  dplyr::arrange(dplyr::desc(ipa_run)) |>
+  dplyr::slice_head(n = 10)
+```
+:::
+
+# Creating NFL WAR
+
+## Total Individual Points Added Above Average {.smaller}
+
+- For every offensive player, estimate how more EP they add **per-play** than league-average
+  - Through the air ($\textrm{IPA}^{(Q)}_{\textrm{air}, q}$, $\textrm{IPA}^{(C)}_{\textrm{air}, c}$)
+  - After the catch ($\textrm{IPA}^{(Q)}_{\textrm{yac}, q}$, $\textrm{IPA}^{(C)}_{\textrm{yac}, c}$)
+  - Rushing ($\textrm{IPA}^{(R)}_{r}$)
+
+- Multiplying $\textrm{IPA}$ by number of attempts yields $\textrm{IPAA}$: total points added above average 
+
+## Computing IPAA {.smaller}
+
+:::{.panel-tabset}
+
+### Code
+```{r}
+#| label: pass-ipaa
+#| eval: true
+#| echo: true
+passer_ipaa <-
+  pass2024 |>
+  dplyr::group_by(passer_player_id) |> 
+  dplyr::summarise(n_pass = dplyr::n()) |>
+  dplyr::rename(gsis_id = passer_player_id) |> 
+  dplyr::left_join(air_passer_effects, by = "gsis_id") |> 
+  dplyr::left_join(yac_passer_effects, by = "gsis_id") |> 
+  dplyr::mutate(
+    ipaa_air_pass = ipa_air_pass * n_pass,
+    ipaa_yac_pass = ipa_yac_pass * n_pass) |>
+  dplyr::left_join(y = roster2024 |> dplyr::select(gsis_id, full_name, position), by = "gsis_id")
+```
+
+### Passers
+```{r}
+#| label: pass-ipaa-top10
+#| eval: true
+#| echo: true
+passer_ipaa |>
+  dplyr::select(full_name, n_pass, ipa_air_pass, ipa_yac_pass, ipaa_air_pass, ipaa_yac_pass) |>
+  dplyr::arrange(dplyr::desc(ipaa_air_pass)) |>
+  dplyr::slice_head(n = 10)
+```
+
+
+
+### Receivers
+
+```{r}
+#| label: rec-ipaa
+#| eval: true
+#| echo: false
+receiver_ipaa <-
+  pass2024 |>
+  dplyr::group_by(receiver_player_id) |>
+  dplyr::summarise(n_rec = dplyr::n()) |> 
+  dplyr::rename(gsis_id = receiver_player_id) |> 
+  dplyr::left_join(air_receiver_effects, by = "gsis_id") |> 
+  dplyr::left_join(yac_receiver_effects, by = "gsis_id") |>
+  dplyr::mutate(
+   ipaa_air_rec = ipa_air_rec * n_rec,
+   ipaa_yac_rec = ipa_yac_rec * n_rec) |>
+  dplyr::left_join(y = roster2024 |> dplyr::select(gsis_id, full_name, position), by = "gsis_id")
+
+receiver_ipaa |>
+  dplyr::select(full_name, n_rec, ipa_air_rec, ipa_yac_rec, ipaa_air_rec, ipaa_yac_rec) |>
+  dplyr::arrange(dplyr::desc(ipaa_air_rec)) |>
+  dplyr::slice_head(n = 10)
+```
+
+### QB Rushing
+```{r}
+#| label: ipaa-qb-run
+#| eval: true
+#| echo: false
+qbrun_ipaa <-
+  qb_runs |>
+  dplyr::group_by(rusher_player_id) |>
+  dplyr::summarise(n_qbrun = dplyr::n()) |>
+  dplyr::rename(gsis_id = rusher_player_id) |>
+  dplyr::left_join(y = qbrun_effects, by = "gsis_id") |>
+  dplyr::mutate(ipaa_qbrun = n_qbrun * ipa_qbrun) |>
+  dplyr::left_join(y = roster2024 |> dplyr::select(gsis_id, full_name, position), by = "gsis_id")
+
+qbrun_ipaa |> 
+  dplyr::select(full_name, ipa_qbrun, n_qbrun, ipaa_qbrun) |>
+  dplyr::arrange(dplyr::desc(ipaa_qbrun)) |> 
+  dplyr::slice_head(n = 10)
+
+```
+
+### Non-QB Rushing
+```{r}
+#| label: nonqb-run-ipaa
+#| eval: true
+#| echo: false
+run_ipaa <-
+  nonqb_runs |>
+  dplyr::group_by(rusher_player_id) |>
+  dplyr::summarise(n_run = dplyr::n()) |>
+  dplyr::rename(gsis_id = rusher_player_id) |>
+  dplyr::left_join(y = run_effects, by = "gsis_id") |>
+  dplyr::mutate(ipaa_run = n_run * ipa_run) |>
+  dplyr::left_join(y = roster2024 |> dplyr::select(gsis_id, full_name, position), by = "gsis_id")
+
+
+run_ipaa |>
+  dplyr::select(full_name, ipa_run, n_run, ipaa_run) |>
+  dplyr::arrange(dplyr::desc(ipaa_run)) |>
+  dplyr::slice_head(n = 10)
+```
+
+:::
+
+## Replacement Level {.smaller}
+
+- Multilevel models involved global-averages $\mu_{Q}, \mu_{C}, \mu_{R}$
+  - Represent the average latent intercept across theoretical super-population
+  - Assumption: observed players are randomly sampled from this super-population
+- Not strictly correct to say IPA measures contribution above "league-average"
+
+. . .
+
+- Will define roster-based thresholds for "replacement level"
+- Construct a replacement-level "shadow"
+  - Compute average $\textrm{IPA}$ for replacement-level players
+  - Shadow IPAA: multiply avg. replacement-level IPA by attempts
+  - Compare observed IPAA to shadow IPAA
+
+## Defining Replacement Level {.smaller}
+- Most rosters: 3 running backs, 4 wide receivers, 2 tight ends
+- Create separate thresholds for position & type of play
+- For passing plays:
+
+  * Top $32 \times 4$ WRs sorted by `n_rec`
+  * Top $32 \times 2$ TEs sorted by `n_rec`
+  * Top $32 \times 3$ RB
+
+- For running plays
+
+  * Top $32 \times 3$ RBs sorted by `n_runs`
+  * Top $32 \times 1$ WR & TEs sorted by `n_runs`
+
+## Running IPAR{.smaller}
+
+:::{.panel-tabset}
+
+### Threshold
+```{r}
+#| label: run-repl-level
+#| eval: true
+#| echo: true
+rb_run_threshold <- run_ipaa |> 
+  dplyr::filter(position == "RB") |>
+  dplyr::arrange(desc(n_run)) |>
+  dplyr::slice(96) |>
+  dplyr::pull(n_run)
+
+wrte_run_threshold <- run_ipaa |>
+  dplyr::filter(position %in% c("WR", "TE")) |>
+  dplyr::arrange(desc(n_run)) |>
+  dplyr::slice(32) |>
+  dplyr::pull(n_run)
+```
+
+### Players
+```{r}
+#| label: id-repl-runner
+#| echo: true
+#| eval: true
+run_ipaa <- 
+  run_ipaa |>
+  dplyr::mutate(
+    repl_wrte = dplyr::case_when(
+      position %in% c("WR", "TE") & n_run < wrte_run_threshold ~ 1,
+      position %in% c("WR", "TE") & n_run >= wrte_run_threshold ~ 0,
+      !position %in% c("WR", "TE") ~ NA),
+    repl_rb = dplyr::case_when(
+      position == "RB" & n_run < rb_run_threshold ~ 1,
+      position == "RB" & n_run >= rb_run_threshold ~ 0,
+      position != "RB" ~ NA))
+```
+
+### Replacement IPA
+
+- Compute average IPA for all replacement-level players
+```{r}
+#| label: run-repl-ipa
+#| eval: true
+#| echo: true
+repl_wrte_ipa_run <-  run_ipaa |>
+  dplyr::filter(repl_wrte == 1) |>
+  dplyr::pull(ipa_run) |>
+  mean(na.rm = TRUE)
+
+repl_rb_ipa_run <- run_ipaa |>
+  dplyr::filter(repl_rb == 1) |>
+  dplyr::pull(ipa_run) |>
+  mean(na.rm = TRUE)
+```
+
+### Shadow
+```{r}
+#| label: run-ipar
+#| eval: true
+#| echo: true
+run_ipar <- run_ipaa |>
+  dplyr::filter(position %in% c("WR", "RB", "TE")) |>
+   dplyr::mutate(
+    shadow_run = dplyr::case_when(
+      position %in% c("WR", "TE") ~ n_run * repl_wrte_ipa_run,
+      position == "RB" ~ n_run * repl_rb_ipa_run),
+    ipar_run = ipaa_run - shadow_run)
+```
+
+```{r}
+#| label: run-ipar-top10
+#| eval: true
+#| echo: false
+run_ipar |>
+  dplyr::arrange(dplyr::desc(ipar_run)) |>
+  dplyr::select(full_name, ipaa_run, ipar_run) |>
+  dplyr::slice_head(n = 10)
+```
+:::
+
+## Computing Remaining IPAR's {.smaller}
+
+- Virtually same process for both passing IPAR's
+- Top 10 YAC IPAR
+
+```{r}
+#| label: passing-ipar
+#| eval: true
+#| echo: false
+
+wr_pass_threshold <- 
+  receiver_ipaa |>
+  dplyr::filter(position == "WR") |>
+  dplyr::arrange(desc(n_rec)) |>
+  dplyr::slice(128) |> #<1>
+  dplyr::pull(n_rec)
+
+te_pass_threshold <-
+  receiver_ipaa |>
+  dplyr::filter(position == "TE") |>
+  dplyr::arrange(desc(n_rec)) |>
+  dplyr::slice(64) |> #<1>
+  dplyr::pull(n_rec)
+
+rb_pass_threshold <-
+  receiver_ipaa |>
+  dplyr::filter(position == "RB") |>
+  dplyr::arrange(desc(n_rec)) |>
+  dplyr::slice(32) |> #<1>
+  dplyr::pull(n_rec)
+
+receiver_ipaa <-
+  receiver_ipaa |>
+  dplyr::mutate(
+    repl_wr = dplyr::case_when(
+      position == "WR" & n_rec < wr_pass_threshold ~ 1,
+      position == "WR" & n_rec >= wr_pass_threshold ~ 0,
+      position != "WR" ~ NA),
+    repl_te = dplyr::case_when(
+      position == "TE" & n_rec < te_pass_threshold ~ 1,
+      position == "TE" & n_rec >= te_pass_threshold ~ 0,
+      position != "TE" ~ NA),
+    repl_rb = dplyr::case_when(
+      position == "RB" & n_rec < rb_pass_threshold ~ 1,
+      position == "RB" & n_rec >= rb_pass_threshold ~ 0,
+      position != "RB" ~ NA))
+
+repl_wr_ipa_air <- 
+  receiver_ipaa |>
+  dplyr::filter(repl_wr == 1) |>
+  dplyr::pull(ipa_air_rec) |>
+  mean(na.rm = TRUE)
+repl_wr_ipa_yac <-
+  receiver_ipaa |>
+  dplyr::filter(repl_wr == 1) |>
+  dplyr::pull(ipa_yac_rec) |>
+  mean(na.rm = TRUE)
+
+repl_te_ipa_air <- 
+  receiver_ipaa |>
+  dplyr::filter(repl_te == 1) |>
+  dplyr::pull(ipa_air_rec) |>
+  mean(na.rm=TRUE)
+repl_te_ipa_yac <-
+  receiver_ipaa |>
+  dplyr::filter(repl_te == 1) |>
+  dplyr::pull(ipa_yac_rec) |>
+  mean(na.rm = TRUE)
+
+repl_rb_ipa_air <- 
+  receiver_ipaa |>
+  dplyr::filter(repl_rb == 1) |>
+  dplyr::pull(ipa_air_rec) |>
+  mean(na.rm = TRUE)
+repl_rb_ipa_yac <-
+  receiver_ipaa |>
+  dplyr::filter(repl_rb == 1) |>
+  dplyr::pull(ipa_yac_rec) |>
+  mean(na.rm = TRUE)
+
+receiver_ipar <-
+  receiver_ipaa |>
+  dplyr::filter(position %in% c("WR","RB", "TE")) |>
+  dplyr::mutate(
+    shadow_air_rec = dplyr::case_when(
+      position == "WR" ~ n_rec * repl_wr_ipa_air,
+      position == "TE" ~ n_rec * repl_te_ipa_air,
+      position == "RB" ~ n_rec * repl_rb_ipa_air),
+    shadow_yac_rec = dplyr::case_when(
+      position == "WR" ~ n_rec * repl_wr_ipa_yac,
+      position == "TE" ~ n_rec * repl_te_ipa_yac,
+      position == "RB" ~ n_rec * repl_rb_ipa_yac),
+    ipar_air_rec = ipaa_air_rec - shadow_air_rec,
+    ipar_yac_rec = ipaa_yac_rec - shadow_yac_rec)
+
+```
+
+
+
+
+```{r}
+#| label: rec-ipar-top10
+#| eval: true
+#| echo: false
+receiver_ipar |>
+  dplyr::arrange(dplyr::desc(ipar_yac_rec)) |>
+  dplyr::select(full_name, ipaa_yac_rec, ipar_yac_rec) |>
+  dplyr::slice_head(n = 10)
+```
+
+## Replacement-level QB {.smaller}
+
+- Every offensive play runs through the QB
+- Idea 1: designate one QB per team as non-replacement
+  - E.g., QB w/ most rushing & passing attempts
+  - Problem: assumes every NFL team ahs at least one non-replacement QB
+- Idea 2: sort QBs by total number of passes & rushes & take top-32
+- Top-10 IPAR via passing
+```{r}
+#| label: qb-ipar
+#| echo: false
+#| eval: true
+qb_ipaa <-
+  passer_ipaa |>
+  dplyr::filter(position == "QB") |>
+  dplyr::select(gsis_id, full_name, n_pass, ipa_air_pass, ipaa_air_pass) |>
+  dplyr::left_join(y = qbrun_ipaa |> dplyr::select(gsis_id, n_qbrun, ipa_qbrun, ipaa_qbrun), by = "gsis_id") |>
+  dplyr::mutate(n_plays = n_pass + n_qbrun)
+
+qb_threshold <-
+  qb_ipaa |>
+  dplyr::arrange(dplyr::desc(n_plays)) |>
+  dplyr::slice(32) |>
+  dplyr::pull(n_plays)
+
+qb_ipaa <-
+  qb_ipaa |>
+  dplyr::mutate(repl_qb = ifelse(n_plays < qb_threshold, 1, 0))
+
+repl_qb_ipa_air <-
+  qb_ipaa |>
+  dplyr::filter(repl_qb == 1) |>
+  dplyr::pull(ipa_air_pass) |>
+  mean(na.rm = TRUE)
+
+repl_qb_ipa_qbrun <-
+  qb_ipaa |>
+  dplyr::filter(repl_qb == 1) |>
+  dplyr::pull(ipa_qbrun) |>
+  mean(na.rm = TRUE)
+
+qb_ipar <-
+  qb_ipaa |>
+  dplyr::mutate(
+    shadow_air = n_pass * repl_qb_ipa_air,
+    shadow_qbrun = n_qbrun * repl_qb_ipa_qbrun,
+    ipar_air_pass = ipaa_air_pass - shadow_air,
+    ipar_qbrun = ipaa_qbrun - shadow_qbrun)
+```
+
+```{r}
+#| label: qb-ipar-pass
+#| eval: true
+#| echo: false
+qb_ipar |>
+  dplyr::arrange(dplyr::desc(ipar_air_pass)) |>
+  dplyr::select(full_name, ipa_air_pass, ipar_air_pass) |>
+  dplyr::slice_head(n = 10)
+```
+
+## Converting Points to Wins{.smaller}
+
+- IPAR are on point-differential scale
+- Find $\alpha$ & $\beta$ s.t. $\textrm{Wins} \approx \alpha + \beta \times \textrm{PtsDiff}$ 
+- Then multiply IPAR values by $\beta$ 
+
+```{r}
+#| label: fig-wins-score-plot
+#| eval: true
+#| echo: false
+#| fig-width: 6
+#| fig-asp: 0.5625
+#| fig-align: center
+#| fig-cap: Scoring differential is positively associated with wins
+
+schedules <-
+  nflreadr::load_schedules(seasons = 2015:2024) |> #<1>
+  dplyr::filter(game_type == "REG") |>
+  dplyr::select(season, away_team, home_team, home_score, away_score, result) |>
+  dplyr::mutate(winning_team = ifelse(result > 0, home_team, away_team),
+                losing_team = ifelse(result < 0, home_team, away_team),
+                winning_ptsdiff = ifelse(winning_team == home_team, result, -1*result),
+                losing_ptsdiff = ifelse(losing_team == home_team, result, -1*result))
+
+win_diff <-
+  schedules |>
+  dplyr::group_by(season, winning_team) |>
+  dplyr::summarise(wins = dplyr::n(), win_diff = sum(winning_ptsdiff), .groups = 'drop') |>
+  dplyr::rename(team = winning_team)
+
+loss_diff <-
+  schedules |>
+  dplyr::group_by(season, losing_team) |>
+  dplyr::summarise(loss = dplyr::n(), loss_diff = sum(losing_ptsdiff), .groups = 'drop') |>
+  dplyr::rename(team = losing_team)
+
+records <-
+  win_diff |>
+  dplyr::full_join(y = loss_diff, by = c("season", "team")) |>
+  dplyr::mutate(scoring_differential = win_diff + loss_diff)
+
+win_score_fit <-
+  lm(wins~scoring_differential, data = records)
+alpha <- coefficients(win_score_fit)[1]
+beta <- coefficients(win_score_fit)[2]
+
+oi_colors <- palette.colors(palette = "Okabe-Ito")
+
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+plot(records$scoring_differential,
+     records$wins,
+     xlab = "Total scoring margin",
+     ylab = "Wins",
+     main = "Wins vs Score Differential",
+     pch = 16, cex = 0.5)
+abline(a = alpha, b = beta, col = oi_colors[3])
+```
+
+## Skill-Position WAR{.smaller}
+
+- Convert each IPAR to wins scale & then sum
+- Top-10 Skill Positions
+
+```{r}
+#| label: compute-war
+#| eval: true
+#| echo: false
+
+all_skill_players <-
+  unique(c(run_ipar$gsis_id, receiver_ipar$gsis_id))
+
+skill_war <-
+  data.frame(gsis_id = all_skill_players) |>
+  dplyr::left_join(y = roster2024 |> dplyr::select(gsis_id, full_name, position, team), by = "gsis_id") |>
+  dplyr::left_join(y = run_ipar |> dplyr::select(gsis_id, n_run, ipar_run), by = "gsis_id") |>
+  dplyr::left_join(y = receiver_ipar |> dplyr::select(gsis_id, n_rec, ipar_air_rec, ipar_yac_rec), by = "gsis_id") |>
+  tidyr::replace_na(list(ipar_run=0, ipar_air_rec=0, ipar_yac_rec=0)) |>
+  dplyr::mutate(
+    war_air_rec = ipar_air_rec * beta,
+    war_yac_rec = ipar_yac_rec * beta,
+    war_run = ipar_run * beta,
+    war = war_air_rec + war_yac_rec + war_run)
+
+qb_war <-
+  qb_ipar |>
+  dplyr::select(gsis_id, full_name, n_pass, n_qbrun, ipar_air_pass, ipar_qbrun) |>
+  dplyr::left_join(y = roster2024 |> dplyr::select(gsis_id, team, position), by = "gsis_id") |>
+  tidyr::replace_na(list(ipar_air_pass=0, ipar_qbrun=0)) |>
+  dplyr::mutate(
+    war_air_pass = ipar_air_pass * beta,
+    war_qbrun = ipar_qbrun * beta,
+    war = war_air_pass + war_qbrun)
+
+```
+
+```{r}
+#| label: top10-skill-war
+#| eval: true
+#| echo: false
+skill_war |>
+  dplyr::arrange(dplyr::desc(war)) |>
+  dplyr::select(full_name, war) |>
+  dplyr::slice_head(n=10)
+
+```
+

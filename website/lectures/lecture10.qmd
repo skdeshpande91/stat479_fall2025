@@ -15,7 +15,7 @@ In [Lecture 9](lecture09.qmd#sec-intro), we looked at two touchdowns from the 20
   
 The McConckey touchdown was thrown on a 3rd and 26 from the Charger's 14 yard line.
 From that position, teams are expected to score about -1.54 points; that is, starting from that positions, teams, on average, give up points rather than score them.
-Over the course of the play, the Chargers offense generated around 8.54 points of EPA.
+Over the course of the play, the Chargers offense generated around 8.54 points of EP.
 The Turpin touchdown, on the other hand, was thrown on a 3rd and 10 from the Cowboys' 36 yard line, a position from which teams score about 0.77 on average.
 The Cowboys offense generated about 6.23 points of EPA during that play.
 How much of the created EPA on these plays should be credited to the quarterbacks and how much should be credited to the receivers?
@@ -210,7 +210,7 @@ The spaces between the linemen are known as "gaps" and are conventionally labell
 Sometimes, but not always, a tight end lines up next to one or both of the tackles. 
 When that happens, the space between the tackle and end is labelled "C" gap and the space outside the tight end is known as "D" gap.
 
-Although the naming convention is very prevalent within football (i.e, amongs coaches and players), the NFL play-by-play data does not use this convention. 
+Although the naming convention is very prevalent within football (i.e, amongst coaches and players), the NFL play-by-play data does not use this convention. 
 Instead, the variable `run_gap` takes the value `guard` for runs through the "B" gap, `tackle` for runs through the "C" gap, and `end` for runs through the "D" gap.
 For runs through the "B", "C", or "D" gap, the variable `run_location` takes on the value "left" or "right", to indicate which side of the line 
 But for runs through the "A" gap, `run_gap` is NA and `run_location` is equal to "middle".
@@ -376,7 +376,7 @@ The quantity $\mu_{Q}$ represents the global average of these latent quantities.
 Similarly, $C_{c}$ is the latent measurement of how many expected points receiver $c$ adds while the pass is in the air[^route] after accounting for the fixed effects and the quality of the passer and of the opposing defense.
 And $D_{d}$ is the latent measurement of how many expected points are added for the *offensive* team by defensive team $d$ while the pass is in the air.
 Since EPA is signed so that positive values are considered good for the offense, large *negative* values of $D_{d}$ are treated as good for the defense.
-In our model, the random intercepts $Q_{q}, C_{c},$ and $D_{d}$ are all modeled as noisy deviations away from league-wise averages $\mu_{Q}, \mu_{C},$ and $\mu_{D}.$
+In our model, the random intercepts $Q_{q}, C_{c},$ and $D_{d}$ are all modeled as noisy deviations away from league-wide averages $\mu_{Q}, \mu_{C},$ and $\mu_{D}.$
 
 [^route]: E.g., via his route running.
 
@@ -417,8 +417,9 @@ air_defense_effects <-
 1. Extract the passer, receiver, and defensive random intercepts in a large list
 2. Because we will eventually append player names by `inner_join()`'ing with `roster2024`, we'll record the passer IDs in a column called `gsis_id`.
 
-Taking a quick look at the top-10 (resp. bottom-10) IPA passer values, we see a number of highly regarded (resp. heavily criticized) quarterbacks.
+Taking a quick look at the top-5 (resp. bottom-5) IPA passer values, we see a number of highly regarded (resp. heavily criticized) quarterbacks.
 ```{r}
+#| label: top-bot-5-ipa-air-pass
 air_passer_effects |>
   dplyr::inner_join(y = roster2024 |> dplyr::select(gsis_id, full_name), by = "gsis_id") |>
   dplyr::select(full_name, ipa_air_pass) |>
@@ -450,6 +451,7 @@ While fitting the model, `lmer` printed a message saying that the fit was singul
 The manual page for `isSingular`, which the message instructs us to visit, contains lots of information about singular models.
 Briefly, when fitting complicated multilevel models with lots of random effects, it can sometimes be the case that some of the "between" group variances are estimated to be exactly zero.
 Quoting from the manual
+
 > While singular models are statistically well-defined ... there are real concerns that (1) singular fits correspond to overfitted models that may have poor power; (2) chances of numerical problems or mis-convergence are higher for singular models ... ; (3) standard inferential procedures such as Wald statistics and likelihood ratio tests may be inappropriate.
 
 Taking a look at the model summary, we see that the passer-to-passer variation has been set to zero.
@@ -471,7 +473,7 @@ So, at this point we have a choice: either we move forward with our model or we 
 Recall that we ultimately plan to aggregate the IPA from air yards, YAC, and rushing for all offensive players.
 If we move forward with our existing model, the YAC IPA values for passers are already set to zero.
 But if we re-fit the model, we will have to manually set these values to zero.
-To avoid this extra step, we'll continue to use our current[^homework].
+To avoid this extra step, we'll continue to use our current model[^homework].
 
 [^homework]: But you should check whether our downstream results change if we estimate the YAC IPA values for receivers using a reduced model that excludes the passer random intercept!
 
@@ -1014,6 +1016,7 @@ Here are the top-10 skill-position players based on our WAR calculations are
 #| label: top10-skill-war
 skill_war |>
   dplyr::arrange(dplyr::desc(war)) |>
+  dplyr::select(full_name, war) |>
   dplyr::slice_head(n=10)
 ```
 And here are the top-10 quarterbacks based on our WAR calculations
@@ -1021,6 +1024,7 @@ And here are the top-10 quarterbacks based on our WAR calculations
 #| label: top10-qb-war
 qb_war |>
   dplyr::arrange(dplyr::desc(war)) |>
+  dplyr::select(full_name, war) |>
   dplyr::slice_head(n = 10)
 ```
 

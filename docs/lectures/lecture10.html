@@ -284,6 +284,10 @@ window.Quarto = {
     <a class="dropdown-item" href="../slides/lecture09.html">
  <span class="dropdown-text">Lecture 9: Multilevel Models</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture10.html">
+ <span class="dropdown-text">Lecture 10: NFL WAR</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item">
@@ -454,7 +458,7 @@ window.Quarto = {
 <li>A 86-yard touchdown by Ladd McConckey on a pass from Justin Herbert (<a href="https://www.youtube.com/watch?v=Hu9flYe2VrA">video link</a>)</li>
 <li>A 64-yard touchdown by Kavontae Turpin on a pass from Cooper Rush (<a href="https://www.youtube.com/watch?v=U0Zp_is-X18">video link</a>)</li>
 </ul>
-<p>The McConckey touchdown was thrown on a 3rd and 26 from the Charger’s 14 yard line. From that position, teams are expected to score about -1.54 points; that is, starting from that positions, teams, on average, give up points rather than score them. Over the course of the play, the Chargers offense generated around 8.54 points of EPA. The Turpin touchdown, on the other hand, was thrown on a 3rd and 10 from the Cowboys’ 36 yard line, a position from which teams score about 0.77 on average. The Cowboys offense generated about 6.23 points of EPA during that play. How much of the created EPA on these plays should be credited to the quarterbacks and how much should be credited to the receivers? Which players</p>
+<p>The McConckey touchdown was thrown on a 3rd and 26 from the Charger’s 14 yard line. From that position, teams are expected to score about -1.54 points; that is, starting from that positions, teams, on average, give up points rather than score them. Over the course of the play, the Chargers offense generated around 8.54 points of EP. The Turpin touchdown, on the other hand, was thrown on a 3rd and 10 from the Cowboys’ 36 yard line, a position from which teams score about 0.77 on average. The Cowboys offense generated about 6.23 points of EPA during that play. How much of the created EPA on these plays should be credited to the quarterbacks and how much should be credited to the receivers? Which players</p>
 <p>In this lecture, we will use multilevel modeling to answer these questions. We separately model EPA on passing and running plays. For passing plays, we will decompose the EPA into two parts, the expected points gained while the pass is in the air and the expected points gained on the ground after the catch (if the pass was caught). Each of our multilevel models will include random intercepts for players nested by their position (e.g., passer and receiver in the passing EPA models) and will also adjust for several important fixed effects. From these models, we will determine how many more expected points per play each player adds relative to the league average. Finally, like we did in <a href="../lectures/lecture08.html">Lecture 8</a>, we will translate these expected points added to the win scale and conclude with a version of wins above replacement for offensive players in football. Our development closely follows the nflWAR model introduced by <span class="citation" data-cites="Yurko2019_nflWAR">Yurko, Ventura, and Horowitz (<a href="#ref-Yurko2019_nflWAR" role="doc-biblioref">2019</a>)</span> but makes some simplifications.</p>
 <!--
 Briefly, we will model EPA using random player intercepts, which account for the fact that players are generally nested within different positions, while simultaneously adjusting for several important fixed effects.
@@ -637,7 +641,7 @@ We will also fit two separate multilevel models of EPA on rushing plays, one for
 <section id="sec-run-context" class="level4">
 <h4 class="anchored" data-anchor-id="sec-run-context">Run Context</h4>
 <p>The data table <code>rush2024</code> contains two variables that describe the run play. The first, <code>run_location</code>, records whether the run was towards the left, right or middle of the offensive line. To describe <code>run_gap</code>, we need to introduce a little bit of additional notation. Every offensive play in American football begins with 5 offensive players (the “linemen”) on the line of scrimmage. The center is responsible for snapping the ball to the quarterback — thereby starting the play — and is positioned in the middle of the line. Next to the center are the two guards and next to the guards are the two tackles. The spaces between the linemen are known as “gaps” and are conventionally labelled with letters: “A” gap between the center and guard; “B” gap between guard and tackle, and “C” gap outside the tackle. Sometimes, but not always, a tight end lines up next to one or both of the tackles. When that happens, the space between the tackle and end is labelled “C” gap and the space outside the tight end is known as “D” gap.</p>
-<p>Although the naming convention is very prevalent within football (i.e, amongs coaches and players), the NFL play-by-play data does not use this convention. Instead, the variable <code>run_gap</code> takes the value <code>guard</code> for runs through the “B” gap, <code>tackle</code> for runs through the “C” gap, and <code>end</code> for runs through the “D” gap. For runs through the “B”, “C”, or “D” gap, the variable <code>run_location</code> takes on the value “left” or “right”, to indicate which side of the line But for runs through the “A” gap, <code>run_gap</code> is NA and <code>run_location</code> is equal to “middle”.</p>
+<p>Although the naming convention is very prevalent within football (i.e, amongst coaches and players), the NFL play-by-play data does not use this convention. Instead, the variable <code>run_gap</code> takes the value <code>guard</code> for runs through the “B” gap, <code>tackle</code> for runs through the “C” gap, and <code>end</code> for runs through the “D” gap. For runs through the “B”, “C”, or “D” gap, the variable <code>run_location</code> takes on the value “left” or “right”, to indicate which side of the line But for runs through the “A” gap, <code>run_gap</code> is NA and <code>run_location</code> is equal to “middle”.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(rush2024[,<span class="fu">c</span>(<span class="st">"run_gap"</span>, <span class="st">"run_location"</span>)], <span class="at">useNA =</span> <span class="st">'always'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -831,7 +835,7 @@ receiver_positionWR  2.254500   0.573040   3.934
 rush_strength        0.307995   0.118268   2.604</code></pre>
 </div>
 </div>
-<p>For each passer <span class="math inline">\(q,\)</span> <span class="math inline">\(Q_{q}\)</span> is a <em>latent</em><a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> quantity measuring how many expected points passer <span class="math inline">\(q\)</span> adds through the air, after you account for the fixed effects and also the quality of the intended receiver and the defense. The quantity <span class="math inline">\(\mu_{Q}\)</span> represents the global average of these latent quantities. Similarly, <span class="math inline">\(C_{c}\)</span> is the latent measurement of how many expected points receiver <span class="math inline">\(c\)</span> adds while the pass is in the air<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> after accounting for the fixed effects and the quality of the passer and of the opposing defense. And <span class="math inline">\(D_{d}\)</span> is the latent measurement of how many expected points are added for the <em>offensive</em> team by defensive team <span class="math inline">\(d\)</span> while the pass is in the air. Since EPA is signed so that positive values are considered good for the offense, large <em>negative</em> values of <span class="math inline">\(D_{d}\)</span> are treated as good for the defense. In our model, the random intercepts <span class="math inline">\(Q_{q}, C_{c},\)</span> and <span class="math inline">\(D_{d}\)</span> are all modeled as noisy deviations away from league-wise averages <span class="math inline">\(\mu_{Q}, \mu_{C},\)</span> and <span class="math inline">\(\mu_{D}.\)</span></p>
+<p>For each passer <span class="math inline">\(q,\)</span> <span class="math inline">\(Q_{q}\)</span> is a <em>latent</em><a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> quantity measuring how many expected points passer <span class="math inline">\(q\)</span> adds through the air, after you account for the fixed effects and also the quality of the intended receiver and the defense. The quantity <span class="math inline">\(\mu_{Q}\)</span> represents the global average of these latent quantities. Similarly, <span class="math inline">\(C_{c}\)</span> is the latent measurement of how many expected points receiver <span class="math inline">\(c\)</span> adds while the pass is in the air<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> after accounting for the fixed effects and the quality of the passer and of the opposing defense. And <span class="math inline">\(D_{d}\)</span> is the latent measurement of how many expected points are added for the <em>offensive</em> team by defensive team <span class="math inline">\(d\)</span> while the pass is in the air. Since EPA is signed so that positive values are considered good for the offense, large <em>negative</em> values of <span class="math inline">\(D_{d}\)</span> are treated as good for the defense. In our model, the random intercepts <span class="math inline">\(Q_{q}, C_{c},\)</span> and <span class="math inline">\(D_{d}\)</span> are all modeled as noisy deviations away from league-wide averages <span class="math inline">\(\mu_{Q}, \mu_{C},\)</span> and <span class="math inline">\(\mu_{D}.\)</span></p>
 <p>Unfortunately, we cannot estimate <span class="math inline">\(\mu_{Q}, \mu_{C},\)</span> and <span class="math inline">\(\mu_{D}\)</span> because these parameters are not <strong>identified</strong>. Without going into too many technical details<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>, there are infinitely many settings of the values of these three parameters that yield exactly the same fit to the data. Because we cannot estimate <span class="math inline">\(\mu_{Q}, \mu_{C},\)</span> and <span class="math inline">\(\mu_{D},\)</span> we are unable to obtain estimates for the random intercepts <span class="math inline">\(Q_{q}, C_{c},\)</span> and <span class="math inline">\(D_{d}\)</span> like we did in <a href="../lectures/lecture09.html">Lecture 9</a>. We are, however, able to estimate the deviations <span class="math inline">\(Q_{q} - \mu_{Q},\)</span> <span class="math inline">\(C_{c} - \mu_{C},\)</span> and <span class="math inline">\(D_{d} - \mu_{D}.\)</span> For each passer <span class="math inline">\(q\)</span>, the quantity <span class="math inline">\(Q_{q} - \mu_{Q}\)</span> measures many more expected points per play passer <span class="math inline">\(q\)</span> adds through the air <em>than the league average</em>. Following <span class="citation" data-cites="Yurko2019_nflWAR">Yurko, Ventura, and Horowitz (<a href="#ref-Yurko2019_nflWAR" role="doc-biblioref">2019</a>)</span>, we will refer to this number as passer <span class="math inline">\(q\)</span>’s individual points added over average or <span class="math inline">\(\textrm{IPA}^{(Q)}_{\textrm{air},q}\)</span><a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>. We can similarly define <span class="math inline">\(\textrm{IPA}^{(C)}_{\textrm{air}, c}\)</span> for receivers. For each defense <span class="math inline">\(d,\)</span> let <span class="math inline">\(D_{d} - \mu_{D}\)</span> is the number of points per passing play over league average given up by the defensive team while the bar is in the air. We will denote this quantity by <span class="math inline">\(\textrm{TPA}^{(D)}_{\textrm{air},d},\)</span> with negative <span class="math inline">\(\textrm{TPA}\)</span> values corresponding to better defenses.</p>
 <p>We can extract the IPA and TPA values using the function <code>ranef()</code>.</p>
 <div class="cell">
@@ -862,7 +866,7 @@ rush_strength        0.307995   0.118268   2.604</code></pre>
 </dl>
 </div>
 </div>
-<p>Taking a quick look at the top-10 (resp. bottom-10) IPA passer values, we see a number of highly regarded (resp. heavily criticized) quarterbacks.</p>
+<p>Taking a quick look at the top-5 (resp. bottom-5) IPA passer values, we see a number of highly regarded (resp. heavily criticized) quarterbacks.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>air_passer_effects <span class="sc">|&gt;</span></span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> roster2024 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(gsis_id, full_name), <span class="at">by =</span> <span class="st">"gsis_id"</span>) <span class="sc">|&gt;</span></span>
@@ -900,7 +904,10 @@ rush_strength        0.307995   0.118268   2.604</code></pre>
 <pre><code>boundary (singular) fit: see help('isSingular')</code></pre>
 </div>
 </div>
-<p>While fitting the model, <code>lmer</code> printed a message saying that the fit was singular. The manual page for <code>isSingular</code>, which the message instructs us to visit, contains lots of information about singular models. Briefly, when fitting complicated multilevel models with lots of random effects, it can sometimes be the case that some of the “between” group variances are estimated to be exactly zero. Quoting from the manual &gt; While singular models are statistically well-defined … there are real concerns that (1) singular fits correspond to overfitted models that may have poor power; (2) chances of numerical problems or mis-convergence are higher for singular models … ; (3) standard inferential procedures such as Wald statistics and likelihood ratio tests may be inappropriate.</p>
+<p>While fitting the model, <code>lmer</code> printed a message saying that the fit was singular. The manual page for <code>isSingular</code>, which the message instructs us to visit, contains lots of information about singular models. Briefly, when fitting complicated multilevel models with lots of random effects, it can sometimes be the case that some of the “between” group variances are estimated to be exactly zero. Quoting from the manual</p>
+<blockquote class="blockquote">
+<p>While singular models are statistically well-defined … there are real concerns that (1) singular fits correspond to overfitted models that may have poor power; (2) chances of numerical problems or mis-convergence are higher for singular models … ; (3) standard inferential procedures such as Wald statistics and likelihood ratio tests may be inappropriate.</p>
+</blockquote>
 <p>Taking a look at the model summary, we see that the passer-to-passer variation has been set to zero.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(yac_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -972,7 +979,7 @@ boundary (singular) fit: see help('isSingular')</code></pre>
 </div>
 </div>
 <p>This phenomenon makes some intuitive sense: once the catch is made, there is very little for the passer, who is typically several yards away, to contribute. The <a href="https://rdrr.io/cran/lme4/man/isSingular.html">manual entry for <code>isSingular()</code></a> goes on to say that “There is not yet consensus about how to deal with singularity, or more generally to choose which random-effects specifications (from a range of choices of varying complexity to use)”<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a> and suggests that one option is to “avoid fitting overly complex models in the first place.” So, at this point we have a choice: either we move forward with our model or we re-fit it without the passer random intercepts.</p>
-<p>Recall that we ultimately plan to aggregate the IPA from air yards, YAC, and rushing for all offensive players. If we move forward with our existing model, the YAC IPA values for passers are already set to zero. But if we re-fit the model, we will have to manually set these values to zero. To avoid this extra step, we’ll continue to use our current<a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a>.</p>
+<p>Recall that we ultimately plan to aggregate the IPA from air yards, YAC, and rushing for all offensive players. If we move forward with our existing model, the YAC IPA values for passers are already set to zero. But if we re-fit the model, we will have to manually set these values to zero. To avoid this extra step, we’ll continue to use our current model<a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>tmp_yac <span class="ot">&lt;-</span> <span class="fu">ranef</span>(yac_model)</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -1562,52 +1569,42 @@ Figure&nbsp;1: Scoring differential is positively associated with wins
 <div class="cell">
 <div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>skill_war <span class="sc">|&gt;</span></span>
 <span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(war)) <span class="sc">|&gt;</span></span>
-<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(full_name, war) <span class="sc">|&gt;</span></span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>      gsis_id         full_name position team n_run     ipar_run n_rec
-1  00-0039040     De'Von Achane       RB  MIA   203 29.664608808    87
-2  00-0034844    Saquon Barkley       RB  PHI   346 38.467788479    43
-3  00-0036900     Ja'Marr Chase       WR  CIN     3  0.064225554   175
-4  00-0039139      Jahmyr Gibbs       RB  DET   250 25.923785492    63
-5  00-0033858       Jonnu Smith       TE  MIA     2 -0.032029431   111
-6  00-0036963 Amon-Ra St. Brown       WR  DET     2 -0.003518778   141
-7  00-0039338      Brock Bowers       TE   LV     5 -0.069345894   153
-8  00-0032764     Derrick Henry       RB  BAL   325 20.091003420    22
-9  00-0039075        Puka Nacua       WR   LA    11  0.053233996   106
-10 00-0036322  Justin Jefferson       WR  MIN     1  0.002778183   153
-   ipar_air_rec ipar_yac_rec  war_air_rec war_yac_rec       war_run       war
-1     0.0690579    14.466115  0.001938669  0.40610855  8.327773e-01 1.2408245
-2     0.4847627     2.197136  0.013608788  0.06168040  1.079910e+00 1.1551989
-3     6.2418395    31.257835  0.175227726  0.87750403  1.803010e-03 1.0545348
-4    -1.2572827     6.203777 -0.035295810  0.17415921  7.277608e-01 0.8666242
-5    10.7653664    19.354982  0.302217105  0.54335416 -8.991651e-04 0.8446721
-6    20.7627215     8.044577  0.582873763  0.22583615 -9.878297e-05 0.8086111
-7    -3.6140405    30.181512 -0.101457287  0.84728831 -1.946754e-03 0.7438843
-8    -0.7543523     3.393370 -0.021176999  0.09526238  5.640166e-01 0.6381019
-9     5.1775439    16.442442  0.145349660  0.46159017  1.494443e-03 0.6084343
-10   12.6382021     8.777840  0.354793394  0.24642111  7.799217e-05 0.6012925</code></pre>
+<pre><code>           full_name       war
+1      De'Von Achane 1.2408245
+2     Saquon Barkley 1.1551989
+3      Ja'Marr Chase 1.0545348
+4       Jahmyr Gibbs 0.8666242
+5        Jonnu Smith 0.8446721
+6  Amon-Ra St. Brown 0.8086111
+7       Brock Bowers 0.7438843
+8      Derrick Henry 0.6381019
+9         Puka Nacua 0.6084343
+10  Justin Jefferson 0.6012925</code></pre>
 </div>
 </div>
 <p>And here are the top-10 quarterbacks based on our WAR calculations</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>qb_war <span class="sc">|&gt;</span></span>
 <span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(war)) <span class="sc">|&gt;</span></span>
-<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(full_name, war) <span class="sc">|&gt;</span></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 10 × 11
-   gsis_id    full_name   n_pass n_qbrun ipar_air_pass ipar_qbrun team  position
-   &lt;chr&gt;      &lt;chr&gt;        &lt;int&gt;   &lt;int&gt;         &lt;dbl&gt;      &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;   
- 1 00-0039910 Jayden Dan…    461     184        -8.14        90.9 WAS   QB      
- 2 00-0034857 Josh Allen     459     108         3.55        78.7 BUF   QB      
- 3 00-0034796 Lamar Jack…    454     150        16.6         52.0 BAL   QB      
- 4 00-0036389 Jalen Hurts    334     167         5.94        55.5 PHI   QB      
- 5 00-0039164 Anthony Ri…    247      94       -16.6         65.1 IND   QB      
- 6 00-0037834 Brock Purdy    440      92        14.8         31.7 SF    QB      
- 7 00-0039732 Bo Nix         546     102       -13.3         51.6 DEN   QB      
- 8 00-0035228 Kyler Murr…    520     102         0.547       36.8 ARI   QB      
- 9 00-0035710 Daniel Jon…    317      88         5.41        27.1 MIN   QB      
-10 00-0033873 Patrick Ma…    552      74         4.87        27.3 KC    QB      
-# ℹ 3 more variables: war_air_pass &lt;dbl&gt;, war_qbrun &lt;dbl&gt;, war &lt;dbl&gt;</code></pre>
+<pre><code># A tibble: 10 × 2
+   full_name            war
+   &lt;chr&gt;              &lt;dbl&gt;
+ 1 Jayden Daniels     2.32 
+ 2 Josh Allen         2.31 
+ 3 Lamar Jackson      1.93 
+ 4 Jalen Hurts        1.72 
+ 5 Anthony Richardson 1.36 
+ 6 Brock Purdy        1.31 
+ 7 Bo Nix             1.08 
+ 8 Kyler Murray       1.05 
+ 9 Daniel Jones       0.912
+10 Patrick Mahomes    0.903</code></pre>
 </div>
 </div>
 </section>

@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-html/tabby.min.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.7.31">
+
+  <title>STAT479 – STAT 479 Lecture 10</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="../../site_libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="../../site_libs/revealjs/dist/reveal.css">
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      { color: #003b4f; background-color: #f1f3f5; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #003b4f; } /* Normal */
+    code span.al { color: #ad0000; } /* Alert */
+    code span.an { color: #5e5e5e; } /* Annotation */
+    code span.at { color: #657422; } /* Attribute */
+    code span.bn { color: #ad0000; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #003b4f; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #20794d; } /* Char */
+    code span.cn { color: #8f5902; } /* Constant */
+    code span.co { color: #5e5e5e; } /* Comment */
+    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+    code span.dt { color: #ad0000; } /* DataType */
+    code span.dv { color: #ad0000; } /* DecVal */
+    code span.er { color: #ad0000; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #ad0000; } /* Float */
+    code span.fu { color: #4758ab; } /* Function */
+    code span.im { color: #00769e; } /* Import */
+    code span.in { color: #5e5e5e; } /* Information */
+    code span.kw { color: #003b4f; font-weight: bold; } /* Keyword */
+    code span.op { color: #5e5e5e; } /* Operator */
+    code span.ot { color: #003b4f; } /* Other */
+    code span.pp { color: #ad0000; } /* Preprocessor */
+    code span.sc { color: #5e5e5e; } /* SpecialChar */
+    code span.ss { color: #20794d; } /* SpecialString */
+    code span.st { color: #20794d; } /* String */
+    code span.va { color: #111111; } /* Variable */
+    code span.vs { color: #20794d; } /* VerbatimString */
+    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../../site_libs/revealjs/dist/theme/quarto-9a1a2c3d5c7ea7f04258c8f180195b78.css">
+  <link href="../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="../../site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="../../site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="../../site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+</head>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">STAT 479 Lecture 10</h1>
+  <p class="subtitle">NFL WAR</p>
+
+<div class="quarto-title-authors">
+</div>
+
+</section>
+<section id="recap-epa-in-football" class="slide level2 smaller">
+<h2>Recap: EPA in Football</h2>
+<ul>
+<li>86-yard touchdown by Ladd McConckey on a pass from Justin Herbert (<a href="https://www.youtube.com/watch?v=Hu9flYe2VrA">video link</a>)
+<ul>
+<li>Thrown on a 3rd and 26 from Chargers’ 14 yard line. EP = -1.54</li>
+<li>Chargers generated 7 - (-1.54) = 8.54 points of EP</li>
+</ul></li>
+<li>64-yard touch down by Kavontae Turpin on a pass from Cooper Rush (<a href="https://www.youtube.com/watch?v=U0Zp_is-X18">video link</a>)
+<ul>
+<li>Thrown on 3rd and 10 from Cowboys’ 36 yard line. EP = 0.77</li>
+<li>Cowboys generated 7 - 0.77 = 6.23 points of EP</li>
+</ul></li>
+</ul>
+<div class="fragment">
+<ul>
+<li>How should we divide credit between QB and receiver?</li>
+<li>What about running?</li>
+</ul>
+</div>
+</section>
+<section id="plan" class="slide level2 smaller">
+<h2>Plan</h2>
+<ul>
+<li>Estimate EPA <strong>per-play</strong> for each passer, receiver, &amp; rusher</li>
+<li>Separately model three phases:
+<ul>
+<li>Passing I: EPA due to actions while ball is in the air</li>
+<li>Passing II: EPA due to yards after catch</li>
+<li>Rushing</li>
+</ul></li>
+<li>Multi-level modeling:
+<ul>
+<li>Random intercepts for passers, receivers, rushers</li>
+<li>Must adjust for important fixed effects</li>
+</ul></li>
+</ul>
+<div class="fragment">
+<ul>
+<li>W/ per-play EPA can compare actual production to replacement “shadow”</li>
+<li>These contrasts will lead to a version of WAR</li>
+</ul>
+</div>
+</section>
+<section>
+<section id="data-preparation" class="title-slide slide level1 center">
+<h1>Data Preparation</h1>
+
+</section>
+<section id="overview" class="slide level2">
+<h2>Overview</h2>
+<ul>
+<li>Focus on 2024-25 regular season</li>
+<li>Need roster data so define position-specific replacement level</li>
+</ul>
+</section>
+<section id="passing-data" class="slide level2 smaller">
+<h2>Passing Data</h2>
+<ul>
+<li>Extract all passing plays (<code>play_type == "pass"</code>)</li>
+<li>For each pass, record
+<ul>
+<li><code>posteam</code>, <code>defteam</code>, <code>posteamtype</code></li>
+<li><code>passer_player_id</code>, <code>receiver_player_id</code></li>
+<li><code>shotgun</code>, <code>no_huddle</code>, <code>qb_hit</code>, <code>pass_location</code></li>
+<li><code>air_yards</code>, <code>yards_after_catch</code>, <code>completed_pass</code></li>
+</ul></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a><span class="fu">table</span>(pass2024<span class="sc">$</span>pass_location)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+  left middle  right 
+  6373   3810   6817 </code></pre>
+</div>
+</div>
+</section>
+<section id="air-vs-yac-epa" class="slide level2 smaller">
+<h2>Air vs YAC EPA</h2>
+<ul>
+<li>Teams generate EPA on completed passes while
+<ul>
+<li>The ball is in the air</li>
+<li>On the ground, after the catch</li>
+</ul></li>
+<li><strong>nflfastR</strong> decomposes <code>epa</code> into <code>air_epa</code> and <code>yac_epa</code></li>
+<li>Completed passes: imagine pausing game as soon as catch completed
+<ul>
+<li>EP at the intermediate state used to compute <code>air_epa</code> and <code>yac_epa</code></li>
+</ul></li>
+<li>Sacks: no good definition for <code>air_epa</code> &amp; <code>yac_epa</code>
+<ul>
+<li>We will treat sacks as rushing plays</li>
+</ul></li>
+</ul>
+</section>
+<section id="rushing-data" class="slide level2 smaller">
+<h2>Rushing Data</h2>
+<ul>
+<li>Include columns for
+<ul>
+<li><code>passer_player_id</code> &amp; <code>rusher_player_id</code></li>
+<li><code>shotgun</code> &amp; <code>no_huddle</code></li>
+<li><code>run_location</code> &amp; <code>run_gap</code></li>
+</ul></li>
+<li>Must manually specify <code>rusher_player_id</code> on sacks</li>
+</ul>
+</section>
+<section id="run-context-i" class="slide level2 smaller">
+<h2>Run Context I</h2>
+<ul>
+<li><code>run_location</code> indicates direction</li>
+</ul>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>
+  left middle  right 
+  5425   3565   5172 </code></pre>
+</div>
+</div>
+<ul>
+<li><code>run_gap</code>:
+<ul>
+<li><code>"guard"</code>: runs through B gap (b/w guard &amp; tackles)</li>
+<li><code>"tackle"</code>: run through C gape (outside tackle or b/w tackle &amp; end)</li>
+<li><code>"end"</code>: run through D gap (outside TE)</li>
+<li><code>NA</code>: run through A gap (b/w center &amp; guard)</li>
+</ul></li>
+</ul>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>        run_location
+run_gap  left middle right &lt;NA&gt;
+  end    1958      0  1805    0
+  guard  1822      0  1739    0
+  tackle 1645      0  1628    0
+  &lt;NA&gt;      0   3565     0 1447</code></pre>
+</div>
+</div>
+</section>
+<section id="run-context-ii" class="slide level2 smaller">
+<h2>Run Context II</h2>
+<ul>
+<li>We will create a new variable <code>run_context</code></li>
+<li>Concatenate <code>run_location</code> &amp; <code>run_gap</code> when both not <code>NA</code></li>
+<li>For “A” gap runs, <code>run_context = "middle"</code></li>
+<li>For sacks &amp; fumbles, set <code>run_context = "other"</code></li>
+<li>Additionally add <code>posteam</code>: proxy for offensive linemen &amp; blockers</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a>rush2024 <span class="ot">&lt;-</span></span>
+<span id="cb5-2"><a></a>  rush2024 <span class="sc">|&gt;</span></span>
+<span id="cb5-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb5-4"><a></a>    <span class="at">run_context =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb5-5"><a></a>      run_location <span class="sc">==</span> <span class="st">"middle"</span> <span class="sc">~</span> <span class="fu">paste</span>(posteam, <span class="st">"middle"</span>, <span class="at">sep =</span> <span class="st">"_"</span>),</span>
+<span id="cb5-6"><a></a>      <span class="fu">is.na</span>(run_location) <span class="sc">&amp;</span> <span class="fu">is.na</span>(run_gap) <span class="sc">~</span> <span class="fu">paste</span>(posteam, <span class="st">"other"</span>, <span class="at">sep =</span> <span class="st">"_"</span>),</span>
+<span id="cb5-7"><a></a>      <span class="at">.default =</span> <span class="fu">paste</span>(posteam, run_gap, run_location, <span class="at">sep =</span> <span class="st">"_"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="team-strengths" class="slide level2 smaller">
+<h2>Team Strengths</h2>
+<ul>
+<li>Important to account for teammates &amp; opponent quality (recall <a href="../../lectures/lecture04.html#sec-pm-issues">Lecture 4</a>)
+<ul>
+<li>Don’t overly reward players on good teams</li>
+<li>Don’t overly penalize players on bad teams</li>
+</ul></li>
+<li>Measure passing &amp; rushing strength with mean EPA</li>
+<li>Add columns to <code>pass2024</code> and <code>rush2024</code></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a>pass_strength <span class="ot">&lt;-</span></span>
+<span id="cb6-2"><a></a>  pass2024 <span class="sc">|&gt;</span></span>
+<span id="cb6-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(posteam) <span class="sc">|&gt;</span></span>
+<span id="cb6-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">pass_strength =</span> <span class="fu">mean</span>(epa,<span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb6-5"><a></a>rush_strength <span class="ot">&lt;-</span></span>
+<span id="cb6-6"><a></a>  rush2024 <span class="sc">|&gt;</span></span>
+<span id="cb6-7"><a></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(posteam) <span class="sc">|&gt;</span></span>
+<span id="cb6-8"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">rush_strength =</span> <span class="fu">mean</span>(epa, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb6-9"><a></a></span>
+<span id="cb6-10"><a></a>pass2024 <span class="ot">&lt;-</span></span>
+<span id="cb6-11"><a></a>  pass2024 <span class="sc">|&gt;</span></span>
+<span id="cb6-12"><a></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(pass_strength, <span class="at">by =</span> <span class="st">"posteam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb6-13"><a></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(rush_strength, <span class="at">by =</span> <span class="st">"posteam"</span>)</span>
+<span id="cb6-14"><a></a></span>
+<span id="cb6-15"><a></a>rush2024 <span class="ot">&lt;-</span></span>
+<span id="cb6-16"><a></a>  rush2024 <span class="sc">|&gt;</span></span>
+<span id="cb6-17"><a></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(pass_strength, <span class="at">by =</span> <span class="st">"posteam"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb6-18"><a></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(rush_strength, <span class="at">by =</span> <span class="st">"posteam"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section></section>
+<section>
+<section id="modeling-passing-epa" class="title-slide slide level1 center">
+<h1>Modeling Passing EPA</h1>
+
+</section>
+<section id="composite-outcomes" class="slide level2 smaller">
+<h2>Composite Outcomes</h2>
+<ul>
+<li><span class="math inline">\(\Delta\)</span>: observed EPA on a passing play</li>
+<li><span class="math inline">\(\delta_{\textrm{air}}\)</span> and <span class="math inline">\(\delta_{\textrm{yac}}\)</span>: <code>air_epa</code> and <code>yac_epa</code> given by <strong>nflfastR</strong></li>
+<li>Decompose <span class="math inline">\(\Delta = \Delta_{\textrm{air}} + \Delta_{\textrm{yac}}\)</span> where <span class="math display">\[
+\Delta_{\textrm{air}} =
+\begin{cases}
+\delta_{\textrm{air}} &amp; \textrm{if the pass is caught} \\
+\Delta &amp; \textrm{if the pass is incomplete,}
+\end{cases}
+\]</span> and <span class="math display">\[
+\Delta_{\textrm{yac}} =
+\begin{cases}
+\delta_{\textrm{yac}} &amp; \textrm{if the pass is caught} \\
+0 &amp; \textrm{if the pass is incomplete.}
+\end{cases}
+\]</span></li>
+</ul>
+</section>
+<section id="modeling-delta_textrmair" class="slide level2 smaller">
+<h2>Modeling <span class="math inline">\(\Delta_{\textrm{air}}\)</span></h2>
+<p><span class="math display">\[
+\begin{align}
+\Delta_{i, \textrm{air}} &amp;= Q_{q[i]} + C_{c[i]} + D_{d[i]} + \boldsymbol{\mathbf{x}}_{i}^{\top}\boldsymbol{\beta} + \epsilon_{i}\\
+Q_{q} &amp;\sim N(\mu_{Q}, \sigma^{2}_{Q})\\
+C_{c} &amp;\sim N(\mu_{C}, \sigma^{2}_{C})\\
+D_{d} &amp;\sim N(\mu_{D}, \sigma^{2}_{D}).
+\end{align}
+\]</span></p>
+<ul>
+<li>Fixed effects include:
+<ul>
+<li><code>air_yards</code>, <code>shotgun</code>, <code>qb_hit</code>, <code>no_huddle</code></li>
+<li><code>postteam_type</code> (i.e.&nbsp;Home/Away), <code>pass_location</code></li>
+<li><code>receiver_position</code> &amp; <code>rush_strength</code></li>
+</ul></li>
+<li>Random intercepts for <strong>Q</strong>uarterback, re<strong>C</strong>eiver, and <strong>D</strong>efense</li>
+</ul>
+</section>
+<section id="air-model-results" class="slide level2 smaller">
+<h2>Air Model Results</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-4"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy"><code class="sourceCode r"><span id="annotated-cell-4-1"><a href="#annotated-cell-4-1"></a><span class="fu">library</span>(lme4)</span>
+<span id="annotated-cell-4-2"><a href="#annotated-cell-4-2"></a></span>
+<span id="annotated-cell-4-3"><a href="#annotated-cell-4-3"></a>air_model <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-4-4"><a href="#annotated-cell-4-4"></a>  <span class="fu">lmer</span>(Delta_air <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>passer_player_id) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> receiver_player_id) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> defteam )</span>
+<span id="annotated-cell-4-5"><a href="#annotated-cell-4-5"></a>       <span class="sc">+</span> air_yards <span class="sc">+</span> shotgun <span class="sc">+</span> qb_hit <span class="sc">+</span> no_huddle <span class="sc">+</span> posteam_type <span class="sc">+</span> pass_location <span class="sc">+</span> receiver_position <span class="sc">+</span> rush_strength,</span>
+<span id="annotated-cell-4-6"><a href="#annotated-cell-4-6"></a>       <span class="at">data =</span> pass2024)</span>
+<span id="annotated-cell-4-7"><a href="#annotated-cell-4-7"></a><span class="fu">summary</span>(air_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed model fit by REML ['lmerMod']
+Formula: Delta_air ~ 1 + (1 | passer_player_id) + (1 | receiver_player_id) +  
+    (1 | defteam) + air_yards + shotgun + qb_hit + no_huddle +  
+    posteam_type + pass_location + receiver_position + rush_strength
+   Data: pass2024
+
+REML criterion at convergence: 56640.3
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-9.6663 -0.4475 -0.0140  0.4521  4.2381 
+
+Random effects:
+ Groups             Name        Variance Std.Dev.
+ receiver_player_id (Intercept) 0.011544 0.10745 
+ passer_player_id   (Intercept) 0.002242 0.04735 
+ defteam            (Intercept) 0.001354 0.03680 
+ Residual                       1.622752 1.27387 
+Number of obs: 17000, groups:  
+receiver_player_id, 492; passer_player_id, 99; defteam, 32
+
+Fixed effects:
+                     Estimate Std. Error t value
+(Intercept)         -2.642055   0.573232  -4.609
+air_yards            0.035027   0.001077  32.537
+shotgun             -0.081497   0.028132  -2.897
+qb_hit              -0.276667   0.036182  -7.647
+no_huddle            0.134666   0.029805   4.518
+posteam_typehome    -0.008663   0.019728  -0.439
+pass_locationmiddle  0.172170   0.026424   6.516
+pass_locationright  -0.034797   0.022336  -1.558
+receiver_positionDL  4.627420   1.401649   3.301
+receiver_positionLB  3.750986   1.070748   3.503
+receiver_positionOL  2.527147   0.729736   3.463
+receiver_positionQB  3.661843   0.934966   3.917
+receiver_positionRB  1.922465   0.573394   3.353
+receiver_positionTE  2.279044   0.573261   3.976
+receiver_positionWR  2.254500   0.573040   3.934
+rush_strength        0.307995   0.118268   2.604</code></pre>
+</div>
+</div>
+</section>
+<section id="model-interpretation" class="slide level2 smaller">
+<h2>Model Interpretation</h2>
+<ul>
+<li><span class="math inline">\(Q_{q}\)</span> : Per-pass EP added through air by passer <span class="math inline">\(q\)</span> <em>after adjusting for fixed effects</em></li>
+<li><span class="math inline">\(C_{c}\)</span>: per-pass EP added when ball in air by receiver <span class="math inline">\(c\)</span> <em>after adjusting for fixed effects</em></li>
+<li><span class="math inline">\(D_{d}\)</span>: per-pass EP added by <em>offensive team</em> when ball in air while facing defense <span class="math inline">\(d\)</span>
+<ul>
+<li>Negative <span class="math inline">\(D_{d}\)</span> are good for the defense!</li>
+</ul></li>
+<li>Model: <span class="math inline">\(Q_{q}, C_{c}\)</span> and <span class="math inline">\(D_{d}\)</span> noisy deviations from league-wide averages <span class="math inline">\(\mu_{Q}, \mu_{C},\)</span> and <span class="math inline">\(\mu_{D}.\)</span></li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Cannot estimate the individual <span class="math inline">\(Q_{q}\)</span>’s, <span class="math inline">\(C_{c}\)</span>’s, or <span class="math inline">\(D_{d}\)</span>’s</li>
+<li>Cannot estimate the global averages <span class="math inline">\(\mu_{Q}, \mu_{C},\)</span> or <span class="math inline">\(\mu_{D}\)</span></li>
+<li>These parameters are not <em>identifiable</em> with the data alone</li>
+<li>Luckily: we can estimate deviations (e.g., <span class="math inline">\(Q_{q} - \mu_{Q}\)</span>)</li>
+</ul>
+</div>
+</section>
+<section id="individual-points-added-over-average" class="slide level2 smaller">
+<h2>Individual Points Added over Average</h2>
+<div class="panel-tabset">
+<ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-1-1">Definition</a></li><li><a href="#tabset-1-2">Code</a></li><li><a href="#tabset-1-3">Top &amp; Bottom 5 Passers</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1">
+<ul>
+<li>For passer <span class="math inline">\(q\)</span>, let <span class="math inline">\(\textrm{IPA}^{(Q)}_{\textrm{air}, q} = Q_{q} - \mu_{Q}\)</span>
+<ul>
+<li>How much more EP does <span class="math inline">\(q\)</span> add per play than league-average</li>
+</ul></li>
+<li>Similarly <span class="math inline">\(\textrm{IPA}^{(C)}_{\textrm{air}, c}\)</span> and <span class="math inline">\(\textrm{IPA}^{(D)}_{\textrm{air}, d}.\)</span></li>
+</ul>
+</div>
+<div id="tabset-1-2">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a>tmp_air <span class="ot">&lt;-</span> <span class="fu">ranef</span>(air_model) </span>
+<span id="cb8-2"><a></a></span>
+<span id="cb8-3"><a></a>air_passer_effects <span class="ot">&lt;-</span></span>
+<span id="cb8-4"><a></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb8-5"><a></a>    <span class="at">gsis_id =</span> <span class="fu">rownames</span>(tmp_air[[<span class="st">"passer_player_id"</span>]]), </span>
+<span id="cb8-6"><a></a>    <span class="at">ipa_air_pass =</span> tmp_air[[<span class="st">"passer_player_id"</span>]][,<span class="dv">1</span>])</span>
+<span id="cb8-7"><a></a>air_receiver_effects <span class="ot">&lt;-</span></span>
+<span id="cb8-8"><a></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb8-9"><a></a>    <span class="at">gsis_id =</span> <span class="fu">rownames</span>(tmp_air[[<span class="st">"receiver_player_id"</span>]]),</span>
+<span id="cb8-10"><a></a>    <span class="at">ipa_air_rec =</span> tmp_air[[<span class="st">"receiver_player_id"</span>]][,<span class="dv">1</span>])</span>
+<span id="cb8-11"><a></a>air_defense_effects <span class="ot">&lt;-</span></span>
+<span id="cb8-12"><a></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb8-13"><a></a>    <span class="at">Team =</span> <span class="fu">rownames</span>(tmp_air[[<span class="st">"defteam"</span>]]),</span>
+<span id="cb8-14"><a></a>    <span class="at">tpa_air_def =</span> tmp_air[[<span class="st">"defteam"</span>]][,<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-1-3">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a>air_passer_effects <span class="sc">|&gt;</span></span>
+<span id="cb9-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> roster2024 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(gsis_id, full_name), <span class="at">by =</span> <span class="st">"gsis_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(full_name, ipa_air_pass) <span class="sc">|&gt;</span></span>
+<span id="cb9-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(ipa_air_pass)) <span class="sc">|&gt;</span></span>
+<span id="cb9-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, (dplyr<span class="sc">::</span><span class="fu">n</span>()<span class="sc">-</span><span class="dv">4</span>)<span class="sc">:</span>dplyr<span class="sc">::</span><span class="fu">n</span>()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                  full_name ipa_air_pass
+1                Joe Burrow   0.06736333
+2               Sam Darnold   0.04033663
+3             Lamar Jackson   0.03292716
+4            Tua Tagovailoa   0.03281935
+5               Brock Purdy   0.03000549
+6                 Drew Lock  -0.02737783
+7                    Bo Nix  -0.02808707
+8  Dorian Thompson-Robinson  -0.03832239
+9           Spencer Rattler  -0.05005097
+10       Anthony Richardson  -0.07074920</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="modeling-delta_textrmyac" class="slide level2 smaller">
+<h2>Modeling <span class="math inline">\(\Delta_{\textrm{yac}}\)</span></h2>
+<ul>
+<li>Fit a nearly-identical multilevel model using only <strong>completed passes</strong></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a>completions <span class="ot">&lt;-</span></span>
+<span id="cb11-2"><a></a>  pass2024 <span class="sc">|&gt;</span></span>
+<span id="cb11-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(complete_pass<span class="sc">==</span><span class="dv">1</span>)</span>
+<span id="cb11-4"><a></a></span>
+<span id="cb11-5"><a></a>yac_model <span class="ot">&lt;-</span></span>
+<span id="cb11-6"><a></a>  <span class="fu">lmer</span>(Delta_yac <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>passer_player_id) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> receiver_player_id) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> defteam ) </span>
+<span id="cb11-7"><a></a>       <span class="sc">+</span> air_yards <span class="sc">+</span> shotgun <span class="sc">+</span> qb_hit <span class="sc">+</span> no_huddle <span class="sc">+</span> posteam_type <span class="sc">+</span> pass_location <span class="sc">+</span> receiver_position <span class="sc">+</span> rush_strength, </span>
+<span id="cb11-8"><a></a>       <span class="at">data =</span> completions)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="dealing-with-singularities" class="slide level2 smaller">
+<h2>Dealing with Singularities</h2>
+<ul>
+<li>Estimated no passer-to-passer variation</li>
+<li>Intuitive: once catch is made, who threw it doesn’t make a difference in terms of EPA.</li>
+</ul>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed model fit by REML ['lmerMod']
+Formula: Delta_yac ~ 1 + (1 | passer_player_id) + (1 | receiver_player_id) +  
+    (1 | defteam) + air_yards + shotgun + qb_hit + no_huddle +  
+    posteam_type + pass_location + receiver_position + rush_strength
+   Data: completions
+
+REML criterion at convergence: 32367.4
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-8.9533 -0.5437 -0.2533  0.2882  7.4637 
+
+Random effects:
+ Groups             Name        Variance  Std.Dev.
+ receiver_player_id (Intercept) 0.0190108 0.1379  
+ passer_player_id   (Intercept) 0.0000000 0.0000  
+ defteam            (Intercept) 0.0006814 0.0261  
+ Residual                       0.9296857 0.9642  
+Number of obs: 11627, groups:  
+receiver_player_id, 468; passer_player_id, 90; defteam, 32
+
+Fixed effects:
+                     Estimate Std. Error t value
+(Intercept)          1.710173   0.689922   2.479
+air_yards           -0.022666   0.001214 -18.675
+shotgun             -0.046899   0.025546  -1.836
+qb_hit               0.037119   0.039172   0.948
+no_huddle           -0.174386   0.027107  -6.433
+posteam_typehome    -0.007157   0.018083  -0.396
+pass_locationmiddle -0.057884   0.024339  -2.378
+pass_locationright   0.011441   0.020532   0.557
+receiver_positionDL -1.567487   1.193518  -1.313
+receiver_positionLB -0.728621   0.974493  -0.748
+receiver_positionOL -1.046652   0.781368  -1.340
+receiver_positionQB -0.728794   0.974704  -0.748
+receiver_positionRB -0.515251   0.689574  -0.747
+receiver_positionTE -0.837277   0.689576  -1.214
+receiver_positionWR -0.847828   0.689446  -1.230
+rush_strength        0.382583   0.105680   3.620</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>optimizer (nloptwrap) convergence code: 0 (OK)
+boundary (singular) fit: see help('isSingular')</code></pre>
+</div>
+</div>
+</section>
+<section id="computing-ipa-for-yac" class="slide level2 smaller">
+<h2>Computing IPA for YAC</h2>
+<ul>
+<li>Using <code>ranef</code>, we can extract YAC-specific IPAs for passers, receivers, and defenses</li>
+<li>Top-10 based on <span class="math inline">\(\textrm{IPA}^{(C)}_{\textrm{yac}, c}\)</span> contains many well-known receivers</li>
+</ul>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>         full_name ipa_yac_rec
+1  Marvin Mims Jr.   0.4038113
+2    Khalil Shakir   0.2763021
+3  KaVontae Turpin   0.2225070
+4    Xavier Worthy   0.2179003
+5     Tucker Kraft   0.2141390
+6     Brock Bowers   0.1885809
+7    Austin Ekeler   0.1830305
+8   Antonio Gibson   0.1818104
+9    Ja'Marr Chase   0.1778265
+10  Raheem Mostert   0.1729994</code></pre>
+</div>
+</div>
+</section></section>
+<section>
+<section id="rushing-model" class="title-slide slide level1 center">
+<h1>Rushing Model</h1>
+
+</section>
+<section id="handling-qb-runs" class="slide level2 smaller">
+<h2>Handling QB Runs</h2>
+<ul>
+<li>Play-by-play data doesn’t distinguish between
+<ul>
+<li>Designed QB runs</li>
+<li>Scrambles on broken plays</li>
+</ul></li>
+<li>We will fit two separate models for EPA on rushing plays</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a>qb_runs <span class="ot">&lt;-</span></span>
+<span id="cb15-2"><a></a>  rush2024 <span class="sc">|&gt;</span></span>
+<span id="cb15-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(rusher_position <span class="sc">==</span> <span class="st">"QB"</span>)</span>
+<span id="cb15-4"><a></a></span>
+<span id="cb15-5"><a></a>nonqb_runs <span class="ot">&lt;-</span></span>
+<span id="cb15-6"><a></a>  rush2024 <span class="sc">|&gt;</span></span>
+<span id="cb15-7"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(rusher_position <span class="sc">!=</span> <span class="st">"QB"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="multilevel-models" class="slide level2 smaller">
+<h2>Multilevel Models</h2>
+<div class="panel-tabset">
+<ul id="tabset-2" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-2-1">Overview</a></li><li><a href="#tabset-2-2">Code</a></li><li><a href="#tabset-2-3">Top <span class="math inline">\(\textrm{IPA}^{(R)}_{r}\)</span> Values</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1">
+<ul>
+<li>QB Run Model:
+<ul>
+<li>Fixed effects: <code>shotgun</code>, <code>no_huddle</code>, <code>posteam_type</code>, <code>pass_strength</code></li>
+<li>Random intercepts: <code>rusher_player_id</code> &amp; <code>defteam</code></li>
+</ul></li>
+<li>Non-QB Model
+<ul>
+<li>Fixed effects: same as QB-model + <code>rusher_position</code> &amp; <code>run_context</code></li>
+<li>Random intercepts: same as QB-model</li>
+</ul></li>
+<li>Use <code>ranef()</code> to extract <span class="math inline">\(\textrm{IPA}^{(R)}_{r}\)</span> for <strong>R</strong>unner <strong>r</strong></li>
+</ul>
+</div>
+<div id="tabset-2-2">
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-17"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy"><code class="sourceCode r"><span id="annotated-cell-17-1"><a href="#annotated-cell-17-1"></a>qbrun_fit <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-17-2"><a href="#annotated-cell-17-2"></a>  <span class="fu">lmer</span>(epa <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> rusher_player_id) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> defteam) <span class="sc">+</span></span>
+<span id="annotated-cell-17-3"><a href="#annotated-cell-17-3"></a>         shotgun <span class="sc">+</span> no_huddle <span class="sc">+</span> posteam_type <span class="sc">+</span> pass_strength,</span>
+<span id="annotated-cell-17-4"><a href="#annotated-cell-17-4"></a>       <span class="at">data =</span> qb_runs)</span>
+<span id="annotated-cell-17-5"><a href="#annotated-cell-17-5"></a>nonqb_run_fit <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-17-6"><a href="#annotated-cell-17-6"></a>  <span class="fu">lmer</span>(epa <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> rusher_player_id) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> defteam) <span class="sc">+</span>  </span>
+<span id="annotated-cell-17-7"><a href="#annotated-cell-17-7"></a>         shotgun <span class="sc">+</span> no_huddle <span class="sc">+</span> posteam_type <span class="sc">+</span> rusher_position <span class="sc">+</span> run_context <span class="sc">+</span> pass_strength,</span>
+<span id="annotated-cell-17-8"><a href="#annotated-cell-17-8"></a>       <span class="at">data =</span> nonqb_runs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-2-3">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>         full_name    ipa_run
+1    De'Von Achane 0.13626662
+2   Saquon Barkley 0.10131412
+3     Jahmyr Gibbs 0.09383069
+4      Jerome Ford 0.08473154
+5    Chuba Hubbard 0.08423388
+6     J.K. Dobbins 0.07766485
+7  Emari Demercado 0.07656891
+8    Dameon Pierce 0.06755530
+9      Rico Dowdle 0.06517368
+10     Taysom Hill 0.06219509</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section></section>
+<section>
+<section id="creating-nfl-war" class="title-slide slide level1 center">
+<h1>Creating NFL WAR</h1>
+
+</section>
+<section id="total-individual-points-added-above-average" class="slide level2 smaller">
+<h2>Total Individual Points Added Above Average</h2>
+<ul>
+<li>For every offensive player, estimate how more EP they add <strong>per-play</strong> than league-average
+<ul>
+<li>Through the air (<span class="math inline">\(\textrm{IPA}^{(Q)}_{\textrm{air}, q}\)</span>, <span class="math inline">\(\textrm{IPA}^{(C)}_{\textrm{air}, c}\)</span>)</li>
+<li>After the catch (<span class="math inline">\(\textrm{IPA}^{(Q)}_{\textrm{yac}, q}\)</span>, <span class="math inline">\(\textrm{IPA}^{(C)}_{\textrm{yac}, c}\)</span>)</li>
+<li>Rushing (<span class="math inline">\(\textrm{IPA}^{(R)}_{r}\)</span>)</li>
+</ul></li>
+<li>Multiplying <span class="math inline">\(\textrm{IPA}\)</span> by number of attempts yields <span class="math inline">\(\textrm{IPAA}\)</span>: total points added above average</li>
+</ul>
+</section>
+<section id="computing-ipaa" class="slide level2 smaller">
+<h2>Computing IPAA</h2>
+<div class="panel-tabset">
+<ul id="tabset-3" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-3-1">Code</a></li><li><a href="#tabset-3-2">Passers</a></li><li><a href="#tabset-3-3">Receivers</a></li><li><a href="#tabset-3-4">QB Rushing</a></li><li><a href="#tabset-3-5">Non-QB Rushing</a></li></ul>
+<div class="tab-content">
+<div id="tabset-3-1">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a>passer_ipaa <span class="ot">&lt;-</span></span>
+<span id="cb17-2"><a></a>  pass2024 <span class="sc">|&gt;</span></span>
+<span id="cb17-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(passer_player_id) <span class="sc">|&gt;</span> </span>
+<span id="cb17-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">n_pass =</span> dplyr<span class="sc">::</span><span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb17-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">gsis_id =</span> passer_player_id) <span class="sc">|&gt;</span> </span>
+<span id="cb17-6"><a></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(air_passer_effects, <span class="at">by =</span> <span class="st">"gsis_id"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb17-7"><a></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(yac_passer_effects, <span class="at">by =</span> <span class="st">"gsis_id"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb17-8"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb17-9"><a></a>    <span class="at">ipaa_air_pass =</span> ipa_air_pass <span class="sc">*</span> n_pass,</span>
+<span id="cb17-10"><a></a>    <span class="at">ipaa_yac_pass =</span> ipa_yac_pass <span class="sc">*</span> n_pass) <span class="sc">|&gt;</span></span>
+<span id="cb17-11"><a></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> roster2024 <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(gsis_id, full_name, position), <span class="at">by =</span> <span class="st">"gsis_id"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-3-2">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a>passer_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb18-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(full_name, n_pass, ipa_air_pass, ipa_yac_pass, ipaa_air_pass, ipaa_yac_pass) <span class="sc">|&gt;</span></span>
+<span id="cb18-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(ipaa_air_pass)) <span class="sc">|&gt;</span></span>
+<span id="cb18-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 6
+   full_name      n_pass ipa_air_pass ipa_yac_pass ipaa_air_pass ipaa_yac_pass
+   &lt;chr&gt;           &lt;int&gt;        &lt;dbl&gt;        &lt;dbl&gt;         &lt;dbl&gt;         &lt;dbl&gt;
+ 1 Joe Burrow        628       0.0674            0         42.3              0
+ 2 Sam Darnold       512       0.0403            0         20.7              0
+ 3 Lamar Jackson     454       0.0329            0         14.9              0
+ 4 Brock Purdy       440       0.0300            0         13.2              0
+ 5 Tua Tagovailoa    388       0.0328            0         12.7              0
+ 6 Justin Herbert    484       0.0262            0         12.7              0
+ 7 Baker Mayfield    562       0.0198            0         11.1              0
+ 8 C.J. Stroud       509       0.0166            0          8.45             0
+ 9 Russell Wilson    306       0.0231            0          7.07             0
+10 Geno Smith        554       0.0110            0          6.07             0</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-3-3">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 6
+   full_name         n_rec ipa_air_rec ipa_yac_rec ipaa_air_rec ipaa_yac_rec
+   &lt;chr&gt;             &lt;int&gt;       &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;        &lt;dbl&gt;
+ 1 Tee Higgins         109      0.182     -0.0741          19.9       -8.07 
+ 2 Amon-Ra St. Brown   141      0.139      0.0563          19.6        7.93 
+ 3 Ladd McConkey       112      0.148     -0.0124          16.5       -1.38 
+ 4 Terry McLaurin      117      0.118     -0.0612          13.7       -7.16 
+ 5 DeVonta Smith        89      0.142     -0.0383          12.7       -3.41 
+ 6 Jauan Jennings      113      0.111     -0.118           12.6      -13.3  
+ 7 Jakobi Meyers       129      0.0928     0.00289         12.0        0.373
+ 8 Justin Jefferson    153      0.0746     0.0566          11.4        8.66 
+ 9 Courtland Sutton    135      0.0812    -0.156           11.0      -21.1  
+10 Jonnu Smith         111      0.0910     0.166           10.1       18.4  </code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-3-4">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 4
+   full_name          ipa_qbrun n_qbrun ipaa_qbrun
+   &lt;chr&gt;                  &lt;dbl&gt;   &lt;int&gt;      &lt;dbl&gt;
+ 1 Jayden Daniels         0.469     184       86.3
+ 2 Josh Allen             0.703     108       75.9
+ 3 Anthony Richardson     0.667      94       62.7
+ 4 Jalen Hurts            0.307     167       51.3
+ 5 Bo Nix                 0.481     102       49.1
+ 6 Lamar Jackson          0.322     150       48.2
+ 7 Kyler Murray           0.336     102       34.3
+ 8 Brock Purdy            0.319      92       29.4
+ 9 Patrick Mahomes        0.344      74       25.5
+10 Daniel Jones           0.283      88       24.9</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-3-5">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 4
+   full_name      ipa_run n_run ipaa_run
+   &lt;chr&gt;            &lt;dbl&gt; &lt;int&gt;    &lt;dbl&gt;
+ 1 Saquon Barkley  0.101    346     35.1
+ 2 De'Von Achane   0.136    203     27.7
+ 3 Jahmyr Gibbs    0.0938   250     23.5
+ 4 Chuba Hubbard   0.0842   250     21.1
+ 5 Derrick Henry   0.0520   325     16.9
+ 6 Rico Dowdle     0.0652   235     15.3
+ 7 J.K. Dobbins    0.0777   195     15.1
+ 8 Bijan Robinson  0.0477   304     14.5
+ 9 Najee Harris    0.0481   263     12.7
+10 Chase Brown     0.0505   229     11.6</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="replacement-level" class="slide level2 smaller">
+<h2>Replacement Level</h2>
+<ul>
+<li>Multilevel models involved global-averages <span class="math inline">\(\mu_{Q}, \mu_{C}, \mu_{R}\)</span>
+<ul>
+<li>Represent the average latent intercept across theoretical super-population</li>
+<li>Assumption: observed players are randomly sampled from this super-population</li>
+</ul></li>
+<li>Not strictly correct to say IPA measures contribution above “league-average”</li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Will define roster-based thresholds for “replacement level”</li>
+<li>Construct a replacement-level “shadow”
+<ul>
+<li>Compute average <span class="math inline">\(\textrm{IPA}\)</span> for replacement-level players</li>
+<li>Shadow IPAA: multiply avg. replacement-level IPA by attempts</li>
+<li>Compare observed IPAA to shadow IPAA</li>
+</ul></li>
+</ul>
+</div>
+</section>
+<section id="defining-replacement-level" class="slide level2 smaller">
+<h2>Defining Replacement Level</h2>
+<ul>
+<li><p>Most rosters: 3 running backs, 4 wide receivers, 2 tight ends</p></li>
+<li><p>Create separate thresholds for position &amp; type of play</p></li>
+<li><p>For passing plays:</p>
+<ul>
+<li>Top <span class="math inline">\(32 \times 4\)</span> WRs sorted by <code>n_rec</code></li>
+<li>Top <span class="math inline">\(32 \times 2\)</span> TEs sorted by <code>n_rec</code></li>
+<li>Top <span class="math inline">\(32 \times 3\)</span> RB</li>
+</ul></li>
+<li><p>For running plays</p>
+<ul>
+<li>Top <span class="math inline">\(32 \times 3\)</span> RBs sorted by <code>n_runs</code></li>
+<li>Top <span class="math inline">\(32 \times 1\)</span> WR &amp; TEs sorted by <code>n_runs</code></li>
+</ul></li>
+</ul>
+</section>
+<section id="running-ipar" class="slide level2 smaller">
+<h2>Running IPAR</h2>
+<div class="panel-tabset">
+<ul id="tabset-4" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-4-1">Threshold</a></li><li><a href="#tabset-4-2">Players</a></li><li><a href="#tabset-4-3">Replacement IPA</a></li><li><a href="#tabset-4-4">Shadow</a></li></ul>
+<div class="tab-content">
+<div id="tabset-4-1">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a></a>rb_run_threshold <span class="ot">&lt;-</span> run_ipaa <span class="sc">|&gt;</span> </span>
+<span id="cb23-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">==</span> <span class="st">"RB"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb23-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(<span class="fu">desc</span>(n_run)) <span class="sc">|&gt;</span></span>
+<span id="cb23-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="dv">96</span>) <span class="sc">|&gt;</span></span>
+<span id="cb23-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(n_run)</span>
+<span id="cb23-6"><a></a></span>
+<span id="cb23-7"><a></a>wrte_run_threshold <span class="ot">&lt;-</span> run_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb23-8"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>, <span class="st">"TE"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb23-9"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(<span class="fu">desc</span>(n_run)) <span class="sc">|&gt;</span></span>
+<span id="cb23-10"><a></a>  dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="dv">32</span>) <span class="sc">|&gt;</span></span>
+<span id="cb23-11"><a></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(n_run)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-4-2">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a></a>run_ipaa <span class="ot">&lt;-</span> </span>
+<span id="cb24-2"><a></a>  run_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb24-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb24-4"><a></a>    <span class="at">repl_wrte =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb24-5"><a></a>      position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>, <span class="st">"TE"</span>) <span class="sc">&amp;</span> n_run <span class="sc">&lt;</span> wrte_run_threshold <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb24-6"><a></a>      position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>, <span class="st">"TE"</span>) <span class="sc">&amp;</span> n_run <span class="sc">&gt;=</span> wrte_run_threshold <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb24-7"><a></a>      <span class="sc">!</span>position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>, <span class="st">"TE"</span>) <span class="sc">~</span> <span class="cn">NA</span>),</span>
+<span id="cb24-8"><a></a>    <span class="at">repl_rb =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb24-9"><a></a>      position <span class="sc">==</span> <span class="st">"RB"</span> <span class="sc">&amp;</span> n_run <span class="sc">&lt;</span> rb_run_threshold <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb24-10"><a></a>      position <span class="sc">==</span> <span class="st">"RB"</span> <span class="sc">&amp;</span> n_run <span class="sc">&gt;=</span> rb_run_threshold <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb24-11"><a></a>      position <span class="sc">!=</span> <span class="st">"RB"</span> <span class="sc">~</span> <span class="cn">NA</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-4-3">
+<ul>
+<li>Compute average IPA for all replacement-level players</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a></a>repl_wrte_ipa_run <span class="ot">&lt;-</span>  run_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb25-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(repl_wrte <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb25-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(ipa_run) <span class="sc">|&gt;</span></span>
+<span id="cb25-4"><a></a>  <span class="fu">mean</span>(<span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb25-5"><a></a></span>
+<span id="cb25-6"><a></a>repl_rb_ipa_run <span class="ot">&lt;-</span> run_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb25-7"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(repl_rb <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb25-8"><a></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(ipa_run) <span class="sc">|&gt;</span></span>
+<span id="cb25-9"><a></a>  <span class="fu">mean</span>(<span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-4-4">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a></a>run_ipar <span class="ot">&lt;-</span> run_ipaa <span class="sc">|&gt;</span></span>
+<span id="cb26-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>, <span class="st">"RB"</span>, <span class="st">"TE"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb26-3"><a></a>   dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb26-4"><a></a>    <span class="at">shadow_run =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb26-5"><a></a>      position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"WR"</span>, <span class="st">"TE"</span>) <span class="sc">~</span> n_run <span class="sc">*</span> repl_wrte_ipa_run,</span>
+<span id="cb26-6"><a></a>      position <span class="sc">==</span> <span class="st">"RB"</span> <span class="sc">~</span> n_run <span class="sc">*</span> repl_rb_ipa_run),</span>
+<span id="cb26-7"><a></a>    <span class="at">ipar_run =</span> ipaa_run <span class="sc">-</span> shadow_run)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 3
+   full_name      ipaa_run ipar_run
+   &lt;chr&gt;             &lt;dbl&gt;    &lt;dbl&gt;
+ 1 Saquon Barkley     35.1     38.5
+ 2 De'Von Achane      27.7     29.7
+ 3 Jahmyr Gibbs       23.5     25.9
+ 4 Chuba Hubbard      21.1     23.5
+ 5 Derrick Henry      16.9     20.1
+ 6 Rico Dowdle        15.3     17.6
+ 7 Bijan Robinson     14.5     17.5
+ 8 J.K. Dobbins       15.1     17.1
+ 9 Najee Harris       12.7     15.2
+10 Chase Brown        11.6     13.8</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="computing-remaining-ipars" class="slide level2 smaller">
+<h2>Computing Remaining IPAR’s</h2>
+<ul>
+<li>Virtually same process for both passing IPAR’s</li>
+<li>Top 10 YAC IPAR</li>
+</ul>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 3
+   full_name        ipaa_yac_rec ipar_yac_rec
+   &lt;chr&gt;                   &lt;dbl&gt;        &lt;dbl&gt;
+ 1 Ja'Marr Chase            31.1         31.3
+ 2 Brock Bowers             28.9         30.2
+ 3 Khalil Shakir            27.6         27.7
+ 4 DJ Moore                 22.5         22.6
+ 5 Brian Thomas Jr.         22.4         22.5
+ 6 Xavier Worthy            21.4         21.4
+ 7 Marvin Mims Jr.          21.0         21.0
+ 8 Jonnu Smith              18.4         19.4
+ 9 Puka Nacua               16.4         16.4
+10 Tucker Kraft             14.8         15.4</code></pre>
+</div>
+</div>
+</section>
+<section id="replacement-level-qb" class="slide level2 smaller">
+<h2>Replacement-level QB</h2>
+<ul>
+<li>Every offensive play runs through the QB</li>
+<li>Idea 1: designate one QB per team as non-replacement
+<ul>
+<li>E.g., QB w/ most rushing &amp; passing attempts</li>
+<li>Problem: assumes every NFL team ahs at least one non-replacement QB</li>
+</ul></li>
+<li>Idea 2: sort QBs by total number of passes &amp; rushes &amp; take top-32</li>
+<li>Top-10 IPAR via passing</li>
+</ul>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 3
+   full_name      ipa_air_pass ipar_air_pass
+   &lt;chr&gt;                 &lt;dbl&gt;         &lt;dbl&gt;
+ 1 Joe Burrow           0.0674         44.6 
+ 2 Sam Darnold          0.0403         22.6 
+ 3 Lamar Jackson        0.0329         16.6 
+ 4 Brock Purdy          0.0300         14.8 
+ 5 Justin Herbert       0.0262         14.5 
+ 6 Tua Tagovailoa       0.0328         14.2 
+ 7 Baker Mayfield       0.0198         13.2 
+ 8 C.J. Stroud          0.0166         10.4 
+ 9 Russell Wilson       0.0231          8.21
+10 Geno Smith           0.0110          8.13</code></pre>
+</div>
+</div>
+</section>
+<section id="converting-points-to-wins" class="slide level2 smaller">
+<h2>Converting Points to Wins</h2>
+<ul>
+<li>IPAR are on point-differential scale</li>
+<li>Find <span class="math inline">\(\alpha\)</span> &amp; <span class="math inline">\(\beta\)</span> s.t. <span class="math inline">\(\textrm{Wins} \approx \alpha + \beta \times \textrm{PtsDiff}\)</span></li>
+<li>Then multiply IPAR values by <span class="math inline">\(\beta\)</span></li>
+</ul>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-wins-score-plot" class="quarto-float quarto-figure quarto-figure-center" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-wins-score-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="slides_10_files/figure-revealjs/fig-wins-score-plot-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: Scoring differential is positively associated with wins"><img data-src="slides_10_files/figure-revealjs/fig-wins-score-plot-1.png" class="quarto-figure quarto-figure-center" width="576"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-wins-score-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Scoring differential is positively associated with wins
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="skill-position-war" class="slide level2 smaller">
+<h2>Skill-Position WAR</h2>
+<ul>
+<li>Convert each IPAR to wins scale &amp; then sum</li>
+<li>Top-10 Skill Positions</li>
+</ul>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>           full_name       war
+1      De'Von Achane 1.2408245
+2     Saquon Barkley 1.1551989
+3      Ja'Marr Chase 1.0545348
+4       Jahmyr Gibbs 0.8666242
+5        Jonnu Smith 0.8446721
+6  Amon-Ra St. Brown 0.8086111
+7       Brock Bowers 0.7438843
+8      Derrick Henry 0.6381019
+9         Puka Nacua 0.6084343
+10  Justin Jefferson 0.6012925</code></pre>
+</div>
+</div>
+
+
+</section></section>
+    </div>
+  <div class="quarto-auto-generated-content" style="display: none;">
+<div class="footer footer-default">
+
+</div>
+</div></div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="../../site_libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="../../site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="../../site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="../../site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="../../site_libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="../../site_libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="../../site_libs/revealjs/plugin/search/search.js"></script>
+  <script src="../../site_libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="../../site_libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'jumpToSlide': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'smaller': false,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: false,
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'none',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1050,
+
+        height: 700,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        math: {
+          mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/MathJax.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
+        },
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    
+    <script>
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+      // slide changes (different for each slide format).
+      (function () {
+        // dispatch for htmlwidgets
+        function fireSlideEnter() {
+          const event = window.document.createEvent("Event");
+          event.initEvent("slideenter", true, true);
+          window.document.dispatchEvent(event);
+        }
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+          fireSlideEnter();
+
+          // dispatch for shiny
+          if (window.jQuery) {
+            if (previousSlide) {
+              window.jQuery(previousSlide).trigger("hidden");
+            }
+            if (currentSlide) {
+              window.jQuery(currentSlide).trigger("shown");
+            }
+          }
+        }
+
+        // hookup for slidy
+        if (window.w3c_slidy) {
+          window.w3c_slidy.add_observer(function (slide_num) {
+            // slide_num starts at position 1
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+          });
+        }
+
+      })();
+    </script>
+
+    <script id="quarto-html-after-body" type="application/javascript">
+      window.document.addEventListener("DOMContentLoaded", function (event) {
+        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+        tabsets.forEach(function(tabset) {
+          const tabby = new Tabby('#' + tabset.id);
+        });
+        const isCodeAnnotation = (el) => {
+          for (const clz of el.classList) {
+            if (clz.startsWith('code-annotation-')) {                     
+              return true;
+            }
+          }
+          return false;
+        }
+        const onCopySuccess = function(e) {
+          // button target
+          const button = e.trigger;
+          // don't keep focus
+          button.blur();
+          // flash "checked"
+          button.classList.add('code-copy-button-checked');
+          var currentTitle = button.getAttribute("title");
+          button.setAttribute("title", "Copied!");
+          let tooltip;
+          if (window.bootstrap) {
+            button.setAttribute("data-bs-toggle", "tooltip");
+            button.setAttribute("data-bs-placement", "left");
+            button.setAttribute("data-bs-title", "Copied!");
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
+                customClass: "code-copy-button-tooltip",
+                offset: [0, -8]});
+            tooltip.show();    
+          }
+          setTimeout(function() {
+            if (tooltip) {
+              tooltip.hide();
+              button.removeAttribute("data-bs-title");
+              button.removeAttribute("data-bs-toggle");
+              button.removeAttribute("data-bs-placement");
+            }
+            button.setAttribute("title", currentTitle);
+            button.classList.remove('code-copy-button-checked');
+          }, 1000);
+          // clear code selection
+          e.clearSelection();
+        }
+        const getTextToCopy = function(trigger) {
+            const codeEl = trigger.previousElementSibling.cloneNode(true);
+            for (const childEl of codeEl.children) {
+              if (isCodeAnnotation(childEl)) {
+                childEl.remove();
+              }
+            }
+            return codeEl.innerText;
+        }
+        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+          text: getTextToCopy
+        });
+        clipboard.on('success', onCopySuccess);
+        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+            text: getTextToCopy,
+            container: window.document.getElementById('quarto-embedded-source-code-modal')
+          });
+          clipboardModal.on('success', onCopySuccess);
+        }
+          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+          var mailtoRegex = new RegExp(/^mailto:/);
+            var filterRegex = new RegExp('/' + window.location.host + '/');
+          var isInternal = (href) => {
+              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+          }
+          // Inspect non-navigation links and adorn them if external
+         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+          for (var i=0; i<links.length; i++) {
+            const link = links[i];
+            if (!isInternal(link.href)) {
+              // undo the damage that might have been done by quarto-nav.js in the case of
+              // links that we want to consider external
+              if (link.dataset.originalHref !== undefined) {
+                link.href = link.dataset.originalHref;
+              }
+            }
+          }
+        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+          const config = {
+            allowHTML: true,
+            maxWidth: 500,
+            delay: 100,
+            arrow: false,
+            appendTo: function(el) {
+                return el.closest('section.slide') || el.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'light-border',
+            placement: 'bottom-start',
+          };
+          if (contentFn) {
+            config.content = contentFn;
+          }
+          if (onTriggerFn) {
+            config.onTrigger = onTriggerFn;
+          }
+          if (onUntriggerFn) {
+            config.onUntrigger = onUntriggerFn;
+          }
+            config['offset'] = [0,0];
+            config['maxWidth'] = 700;
+          window.tippy(el, config); 
+        }
+        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+        for (var i=0; i<noterefs.length; i++) {
+          const ref = noterefs[i];
+          tippyHover(ref, function() {
+            // use id or data attribute instead here
+            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+            try { href = new URL(href).hash; } catch {}
+            const id = href.replace(/^#\/?/, "");
+            const note = window.document.getElementById(id);
+            if (note) {
+              return note.innerHTML;
+            } else {
+              return "";
+            }
+          });
+        }
+            let selectedAnnoteEl;
+            const selectorForAnnotation = ( cell, annotation) => {
+              let cellAttr = 'data-code-cell="' + cell + '"';
+              let lineAttr = 'data-code-annotation="' +  annotation + '"';
+              const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+              return selector;
+            }
+            const selectCodeLines = (annoteEl) => {
+              const doc = window.document;
+              const targetCell = annoteEl.getAttribute("data-target-cell");
+              const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+              const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+              const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+              const lineIds = lines.map((line) => {
+                return targetCell + "-" + line;
+              })
+              let top = null;
+              let height = null;
+              let parent = null;
+              if (lineIds.length > 0) {
+                  //compute the position of the single el (top and bottom and make a div)
+                  const el = window.document.getElementById(lineIds[0]);
+                  top = el.offsetTop;
+                  height = el.offsetHeight;
+                  parent = el.parentElement.parentElement;
+                if (lineIds.length > 1) {
+                  const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+                  const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+                  height = bottom - top;
+                }
+                if (top !== null && height !== null && parent !== null) {
+                  // cook up a div (if necessary) and position it 
+                  let div = window.document.getElementById("code-annotation-line-highlight");
+                  if (div === null) {
+                    div = window.document.createElement("div");
+                    div.setAttribute("id", "code-annotation-line-highlight");
+                    div.style.position = 'absolute';
+                    parent.appendChild(div);
+                  }
+                  div.style.top = top - 2 + "px";
+                  div.style.height = height + 4 + "px";
+                  div.style.left = 0;
+                  let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+                  if (gutterDiv === null) {
+                    gutterDiv = window.document.createElement("div");
+                    gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                    gutterDiv.style.position = 'absolute';
+                    const codeCell = window.document.getElementById(targetCell);
+                    const gutter = codeCell.querySelector('.code-annotation-gutter');
+                    gutter.appendChild(gutterDiv);
+                  }
+                  gutterDiv.style.top = top - 2 + "px";
+                  gutterDiv.style.height = height + 4 + "px";
+                }
+                selectedAnnoteEl = annoteEl;
+              }
+            };
+            const unselectCodeLines = () => {
+              const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+              elementsIds.forEach((elId) => {
+                const div = window.document.getElementById(elId);
+                if (div) {
+                  div.remove();
+                }
+              });
+              selectedAnnoteEl = undefined;
+            };
+              // Handle positioning of the toggle
+          window.addEventListener(
+            "resize",
+            throttle(() => {
+              elRect = undefined;
+              if (selectedAnnoteEl) {
+                selectCodeLines(selectedAnnoteEl);
+              }
+            }, 10)
+          );
+          function throttle(fn, ms) {
+          let throttle = false;
+          let timer;
+            return (...args) => {
+              if(!throttle) { // first call gets through
+                  fn.apply(this, args);
+                  throttle = true;
+              } else { // all the others get throttled
+                  if(timer) clearTimeout(timer); // cancel #2
+                  timer = setTimeout(() => {
+                    fn.apply(this, args);
+                    timer = throttle = false;
+                  }, ms);
+              }
+            };
+          }
+            const annoteTargets = window.document.querySelectorAll('.code-annotation-anchor');
+            for (let i=0; i<annoteTargets.length; i++) {
+              const annoteTarget = annoteTargets[i];
+              const targetCell = annoteTarget.getAttribute("data-target-cell");
+              const targetAnnotation = annoteTarget.getAttribute("data-target-annotation");
+              const contentFn = () => {
+                const content = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+                if (content) {
+                  const tipContent = content.cloneNode(true);
+                  tipContent.classList.add("code-annotation-tip-content");
+                  return tipContent.outerHTML;
+                }
+              }
+              const config = {
+                allowHTML: true,
+                content: contentFn,
+                onShow: (instance) => {
+                  selectCodeLines(instance.reference);
+                  instance.reference.classList.add('code-annotation-active');
+                  window.tippy.hideAll();
+                },
+                onHide: (instance) => {
+                  unselectCodeLines();
+                  instance.reference.classList.remove('code-annotation-active');
+                },
+                maxWidth: 300,
+                delay: [50, 0],
+                duration: [200, 0],
+                offset: [5, 10],
+                arrow: true,
+                appendTo: function(el) {
+                  return el.parentElement.parentElement.parentElement;
+                },
+                interactive: true,
+                interactiveBorder: 10,
+                theme: 'light-border',
+                placement: 'right',
+                popperOptions: {
+                  modifiers: [
+                  {
+                    name: 'flip',
+                    options: {
+                      flipVariations: false, // true by default
+                      allowedAutoPlacements: ['right'],
+                      fallbackPlacements: ['right', 'top', 'top-start', 'top-end', 'bottom', 'bottom-start', 'bottom-end', 'left'],
+                    },
+                  },
+                  {
+                    name: 'preventOverflow',
+                    options: {
+                      mainAxis: false,
+                      altAxis: false
+                    }
+                  }
+                  ]        
+                }      
+              };
+              window.tippy(annoteTarget, config); 
+            }
+        const findCites = (el) => {
+          const parentEl = el.parentElement;
+          if (parentEl) {
+            const cites = parentEl.dataset.cites;
+            if (cites) {
+              return {
+                el,
+                cites: cites.split(' ')
+              };
+            } else {
+              return findCites(el.parentElement)
+            }
+          } else {
+            return undefined;
+          }
+        };
+        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+        for (var i=0; i<bibliorefs.length; i++) {
+          const ref = bibliorefs[i];
+          const citeInfo = findCites(ref);
+          if (citeInfo) {
+            tippyHover(citeInfo.el, function() {
+              var popup = window.document.createElement('div');
+              citeInfo.cites.forEach(function(cite) {
+                var citeDiv = window.document.createElement('div');
+                citeDiv.classList.add('hanging-indent');
+                citeDiv.classList.add('csl-entry');
+                var biblioDiv = window.document.getElementById('ref-' + cite);
+                if (biblioDiv) {
+                  citeDiv.innerHTML = biblioDiv.innerHTML;
+                }
+                popup.appendChild(citeDiv);
+              });
+              return popup.innerHTML;
+            });
+          }
+        }
+      });
+      </script>
+    <script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+    (function() {
+      let previousOnload = window.onload;
+      window.onload = () => {
+        if (previousOnload) {
+          previousOnload();
+        }
+        lightboxQuarto.on('slide_before_load', (data) => {
+          const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+          const href = trigger.getAttribute('href');
+          if (href !== null) {
+            const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+            if (imgEl !== null) {
+              const srcAttr = imgEl.getAttribute("src");
+              if (srcAttr && srcAttr.startsWith("data:")) {
+                slideConfig.href = srcAttr;
+              }
+            }
+          } 
+        });
+      
+        lightboxQuarto.on('slide_after_load', (data) => {
+          const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(slideNode);
+          }
+        });
+      
+      };
+      
+    })();
+              </script>
+    
+
+</body></html>
