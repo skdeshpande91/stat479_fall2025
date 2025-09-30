@@ -2988,11 +2988,18 @@
     "text": "More Data Preparation\n\ndef_atbat2024: at-bat level data table containing\n\nPitcher & fielder identities\nBatted ball locations & fielder position\nEnding values of type and events: i.e. end_type and end_events\n\nUseful for determining at-bat level outcomes\n\nNarrative descriptions: des\n\nSee lecture notes for full code"
   },
   {
-    "objectID": "slides/raw_slides/slides_08.html#unique-events",
-    "href": "slides/raw_slides/slides_08.html#unique-events",
+    "objectID": "slides/raw_slides/slides_08.html#unique-events-i",
+    "href": "slides/raw_slides/slides_08.html#unique-events-i",
     "title": "STAT 479: Lecture 8",
-    "section": "Unique Events",
-    "text": "Unique Events\n\nend_type: did last pitch of at-bat end in Strike, Ball, or contact (X)?\nevents: more granular description of at-bat outcome\nAll events when contact is made\n\n\ntable(def_atbat2024$end_events[def_atbat2024$end_type == \"X\"], useNA = 'always')\n\n\n                   double               double_play               field_error \n                     7608                       336                      1093 \n                field_out           fielders_choice       fielders_choice_out \n                    72233                       373                       306 \n                force_out grounded_into_double_play                  home_run \n                     3408                      3152                      5326 \n                 sac_bunt                   sac_fly       sac_fly_double_play \n                      446                      1222                        13 \n                   single                    triple               triple_play \n                    25363                       685                         1 \n                     &lt;NA&gt; \n                        0 \n\n\n\n\nAll events for balls and strikes\n\n\ntable(def_atbat2024$end_events[def_atbat2024$end_type != \"X\"], useNA = 'always')\n\n\n                             catcher_interf          hit_by_pitch \n                  308                    97                  1977 \n            strikeout strikeout_double_play          truncated_pa \n                40145                   107                   304 \n                 walk                  &lt;NA&gt; \n                14029                     0"
+    "section": "Unique Events I",
+    "text": "Unique Events I\n\nend_type: did last pitch of at-bat end in Strike, Ball, or contact (X)?\nevents: more granular description of at-bat outcome\nAll events when contact is made\n\n\ntable(def_atbat2024$end_events[def_atbat2024$end_type == \"X\"], useNA = 'always')\n\n\n                   double               double_play               field_error \n                     7608                       336                      1093 \n                field_out           fielders_choice       fielders_choice_out \n                    72233                       373                       306 \n                force_out grounded_into_double_play                  home_run \n                     3408                      3152                      5326 \n                 sac_bunt                   sac_fly       sac_fly_double_play \n                      446                      1222                        13 \n                   single                    triple               triple_play \n                    25363                       685                         1 \n                     &lt;NA&gt; \n                        0"
+  },
+  {
+    "objectID": "slides/raw_slides/slides_08.html#unique-events-ii",
+    "href": "slides/raw_slides/slides_08.html#unique-events-ii",
+    "title": "STAT 479: Lecture 8",
+    "section": "Unique Events II",
+    "text": "Unique Events II\n\nAll events for balls and strikes\n\n\ntable(def_atbat2024$end_events[def_atbat2024$end_type != \"X\"], useNA = 'always')\n\n\n                             catcher_interf          hit_by_pitch \n                  308                    97                  1977 \n            strikeout strikeout_double_play          truncated_pa \n                40145                   107                   304 \n                 walk                  &lt;NA&gt; \n                14029                     0"
   },
   {
     "objectID": "slides/raw_slides/slides_08.html#extract-balls-in-play",
@@ -3027,7 +3034,7 @@
     "href": "slides/raw_slides/slides_08.html#generalized-additive-model",
     "title": "STAT 479: Lecture 8",
     "section": "Generalized Additive Model",
-    "text": "Generalized Additive Model\n\\[\n\\log\\left(\\frac{\\mathbb{P}(\\textrm{out})}{1 - \\mathbb{P}(\\textrm{out})} \\right) = s(x,y),\n\\] - \\(s(x,y)\\) is a smooth function in both \\(x\\) and \\(y\\) - Technically: \\(s(x,y) = \\sum_{d=1}^{D}{\\beta_{d}\\phi_{d}(x,y)}\\) - \\(\\phi_{1}, \\ldots, \\phi_{D}\\): fixed set of spline functions - \\(\\phi_{d}\\) piecewise polynomial localized to small spatial region - Can be fit using the mgcv package"
+    "text": "Generalized Additive Model\n\\[\n\\log\\left(\\frac{\\mathbb{P}(\\textrm{out})}{1 - \\mathbb{P}(\\textrm{out})} \\right) = s(x,y),\n\\]\n\n\\(s(x,y)\\) is a smooth function in both \\(x\\) and \\(y\\)\n\nTechnically: \\(s(x,y) = \\sum_{d=1}^{D}{\\beta_{d}\\phi_{d}(x,y)}\\)\n\\(\\phi_{1}, \\ldots, \\phi_{D}\\): fixed set of spline functions\n\\(\\phi_{d}\\) piecewise polynomial localized to small spatial region\n\nCan be fit using the mgcv package"
   },
   {
     "objectID": "slides/raw_slides/slides_08.html#gam-estimates",
@@ -3090,7 +3097,7 @@
     "href": "slides/raw_slides/slides_08.html#run-value-by-fielding-position",
     "title": "STAT 479: Lecture 8",
     "section": "Run Value by Fielding Position",
-    "text": "Run Value by Fielding Position\n\nDefinition\n\nFor each at-bat \\(i\\) assign \\(w_{i,\\ell}\\delta_{i}^{(f)}\\) to player at position \\(\\ell\\)\nSums these values for each player-position to get \\(\\textrm{RAA}_{\\ell}^{(f)}\\)\n\nSome players play multiple positions in the field\n\n\\(\\textrm{RAA}_{\\ell}^{(f)}\\): run value created by playing position \\(\\ell\\)\n\nFirst Base (code)\n\nraa_f3 &lt;-\n  def_atbat2024 |&gt;\n  dplyr::mutate(RAA_f3 = delta_f * w3) |&gt;\n  dplyr::group_by(fielder_3) |&gt;\n  dplyr::summarize(RAA_f3 = sum(RAA_f3, na.rm = TRUE)) |&gt;\n  dplyr::rename(key_mlbam = fielder_3)\n\nFirst Base (Top-10)\n\nraa_f3 |&gt;\n  dplyr::inner_join(y = player2024_lookup, by = \"key_mlbam\") |&gt;\n  dplyr::select(Name, RAA_f3) |&gt;\n  dplyr::arrange(dplyr::desc(RAA_f3)) |&gt;\n  dplyr::slice_head(n = 10)\n\n# A tibble: 10 × 2\n   Name              RAA_f3\n   &lt;chr&gt;              &lt;dbl&gt;\n 1 Carlos Santana      55.7\n 2 Christian Walker    54.6\n 3 Paul Goldschmidt    52.4\n 4 Bryce Harper        51.1\n 5 Matt Olson          51.0\n 6 Ryan Mountcastle    48.7\n 7 Vladimir Guerrero   47.1\n 8 Michael Toglia      46.5\n 9 Freddie Freeman     46.2\n10 Josh Naylor         46.2"
+    "text": "Run Value by Fielding Position\n\nDefinitionFirst Base (code)First Base (Top-10)\n\n\n\nFor each at-bat \\(i\\) assign \\(w_{i,\\ell}\\delta_{i}^{(f)}\\) to player at position \\(\\ell\\)\nSums these values for each player-position to get \\(\\textrm{RAA}_{\\ell}^{(f)}\\)\n\nSome players play multiple positions in the field\n\n\\(\\textrm{RAA}_{\\ell}^{(f)}\\): run value created by playing position \\(\\ell\\)\n\n\n\n\nraa_f3 &lt;-\n  def_atbat2024 |&gt;\n  dplyr::mutate(RAA_f3 = delta_f * w3) |&gt;\n  dplyr::group_by(fielder_3) |&gt;\n  dplyr::summarize(RAA_f3 = sum(RAA_f3, na.rm = TRUE)) |&gt;\n  dplyr::rename(key_mlbam = fielder_3)\n\n\n\n\nraa_f3 |&gt;\n  dplyr::inner_join(y = player2024_lookup, by = \"key_mlbam\") |&gt;\n  dplyr::select(Name, RAA_f3) |&gt;\n  dplyr::arrange(dplyr::desc(RAA_f3)) |&gt;\n  dplyr::slice_head(n = 10)\n\n# A tibble: 10 × 2\n   Name              RAA_f3\n   &lt;chr&gt;              &lt;dbl&gt;\n 1 Carlos Santana      55.7\n 2 Christian Walker    54.6\n 3 Paul Goldschmidt    52.4\n 4 Bryce Harper        51.1\n 5 Matt Olson          51.0\n 6 Ryan Mountcastle    48.7\n 7 Vladimir Guerrero   47.1\n 8 Michael Toglia      46.5\n 9 Freddie Freeman     46.2\n10 Josh Naylor         46.2"
   },
   {
     "objectID": "slides/raw_slides/slides_08.html#total-fielding-run-value-textrmraaf",
@@ -3125,7 +3132,7 @@
     "href": "slides/raw_slides/slides_08.html#replacement-level-1",
     "title": "STAT 479: Lecture 8",
     "section": "Replacement Level",
-    "text": "Replacement Level\n\nQuoting from FanGraphs &gt; Replacement level is simply the level of production you could get from a player that would cost you nothing but the league minimum salary to acquire.\n\n. . . - Definition is fairly arbitrary! &gt; we believe that a team making the MLB minimum would win about 29.7% of its games in a give year, or roughly 47-48 per team"
+    "text": "Replacement Level\n\nQuoting from FanGraphs\n\n\nReplacement level is simply the level of production you could get from a player that would cost you nothing but the league minimum salary to acquire.\n\n\n\nDefinition is fairly arbitrary!\n\n\nwe believe that a team making the MLB minimum would win about 29.7% of its games in a give year, or roughly 47-48 per team"
   },
   {
     "objectID": "slides/raw_slides/slides_08.html#roster-based-definition",
@@ -3146,7 +3153,7 @@
     "href": "slides/raw_slides/slides_08.html#replacement-level-per-at-bat-raa",
     "title": "STAT 479: Lecture 8",
     "section": "Replacement-Level Per-At-Bat RAA",
-    "text": "Replacement-Level Per-At-Bat RAA\n\nIf we replace Ohtani w/ a replacement-level player, what \\(\\textrm{RAA}\\) values would they achieve?\nIdea: multiple Ohtani’s number of at-bats by average per-at-bat \\(\\textrm{RAA}\\) of replacement-level players\nDivide total \\(\\textrm{RAA}\\) for all replacement-level players by total number of at-bats\n\n\nrepl_position_raa &lt;-\n  raa |&gt;\n  dplyr::filter(key_mlbam %in% repl_position_players) |&gt;\n  dplyr::inner_join(y = position_pa, by = \"key_mlbam\") |&gt;\n  dplyr::select(Name, key_mlbam, RAA, n)\n\nrepl_pitch_raa &lt;-\n  raa |&gt;\n  dplyr::filter(key_mlbam %in% repl_pitchers) |&gt;\n  dplyr::inner_join(y = pitcher_pa, by = \"key_mlbam\") |&gt;\n  dplyr::select(Name, key_mlbam, RAA, n) \n\nrepl_avg_pos &lt;- sum(repl_position_raa$RAA)/sum(repl_position_raa$n)\nrepl_avg_pitch &lt;- sum(repl_pitch_raa$RAA)/sum(repl_pitch_raa$n)\n\ncat(\"Replacement-level per-at-bat RAA (position players):\", round(repl_avg_pos, digits = 4), \"\\n\")\ncat(\"Replacement-level per-at-bat RAA (pitchers):\", round(repl_avg_pitch, digits = 4),\"\\n\")\n\nReplacement-level per-at-bat RAA (position players): -0.002 \nReplacement-level per-at-bat RAA (pitchers): -0.0243"
+    "text": "Replacement-Level Per-At-Bat RAA\n\nIf we replace Ohtani w/ a replacement-level player, what \\(\\textrm{RAA}\\) values would they achieve?\nIdea: multiply Ohtani’s number of at-bats by average per-at-bat \\(\\textrm{RAA}\\) of replacement-level players\nDivide total \\(\\textrm{RAA}\\) for all replacement-level players by total number of at-bats\n\n\nrepl_position_raa &lt;-\n  raa |&gt;\n  dplyr::filter(key_mlbam %in% repl_position_players) |&gt;\n  dplyr::inner_join(y = position_pa, by = \"key_mlbam\") |&gt;\n  dplyr::select(Name, key_mlbam, RAA, n)\n\nrepl_pitch_raa &lt;-\n  raa |&gt;\n  dplyr::filter(key_mlbam %in% repl_pitchers) |&gt;\n  dplyr::inner_join(y = pitcher_pa, by = \"key_mlbam\") |&gt;\n  dplyr::select(Name, key_mlbam, RAA, n) \n\nrepl_avg_pos &lt;- sum(repl_position_raa$RAA)/sum(repl_position_raa$n)\nrepl_avg_pitch &lt;- sum(repl_pitch_raa$RAA)/sum(repl_pitch_raa$n)\n\ncat(\"Replacement-level per-at-bat RAA (position players):\", round(repl_avg_pos, digits = 4), \"\\n\")\ncat(\"Replacement-level per-at-bat RAA (pitchers):\", round(repl_avg_pitch, digits = 4),\"\\n\")\n\nReplacement-level per-at-bat RAA (position players): -0.002 \nReplacement-level per-at-bat RAA (pitchers): -0.0243"
   },
   {
     "objectID": "slides/raw_slides/slides_08.html#position-player-war",
@@ -3154,6 +3161,13 @@
     "title": "STAT 479: Lecture 8",
     "section": "Position Player WAR",
     "text": "Position Player WAR\n\nCompare player’s RAA to what replacement-level would achieve in same opportunities\n1 Win = 10 Runs\n\n\nCodeTop-10\n\n\n\nposition_war &lt;-\n  raa |&gt;\n  dplyr::filter(!key_mlbam %in% repl_position_players) |&gt;\n  dplyr::inner_join(y = position_pa, by = \"key_mlbam\") |&gt; \n  dplyr::select(Name, key_mlbam, RAA, n) |&gt;\n  dplyr::mutate(shadowRAA = n * repl_avg_pos) |&gt;\n  dplyr::mutate(WAR = (RAA - shadowRAA)/10)\n\n\n\n\n\n# A tibble: 10 × 6\n   Name              key_mlbam   RAA     n shadowRAA   WAR\n   &lt;chr&gt;                 &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;     &lt;dbl&gt; &lt;dbl&gt;\n 1 Bobby Witt           677951 165.    694     -1.36 16.6 \n 2 Gunnar Henderson     683002 117.    702     -1.37 11.8 \n 3 Elly De La Cruz      682829 114.    679     -1.33 11.5 \n 4 Jose Ramirez         608070 113.    657     -1.28 11.5 \n 5 Zach Neto            687263 110.    590     -1.15 11.1 \n 6 Marcus Semien        543760 108.    701     -1.37 10.9 \n 7 Ketel Marte          606466 101.    562     -1.10 10.2 \n 8 Vladimir Guerrero    665489  99.0   671     -1.31 10.0 \n 9 Francisco Lindor     596019  98.5   689     -1.35  9.98\n10 Jose Altuve          514888  98.2   661     -1.29  9.95"
+  },
+  {
+    "objectID": "slides/raw_slides/slides_08.html#looking-ahead",
+    "href": "slides/raw_slides/slides_08.html#looking-ahead",
+    "title": "STAT 479: Lecture 8",
+    "section": "Looking Ahead",
+    "text": "Looking Ahead\n\nTonight: Guest lecture by Namita Nanadakumar (Seattle Kraken)\n\n6:00pm in Morgridge Hall 1524\nSponsored by Sports Analytics Club\n\nAdjusted Office Hours:\n\nToday: 4pm - 5:30pm in MH 5586\nWednesday: 4pm - 5pm in MH 5586 (not 3pm!)\n\nBefore Lecture 9: please read Chapters 7 & 8 of Beyond Multiple Linear Regression"
   },
   {
     "objectID": "slides/raw_slides/slides_10.html#recap-epa-in-football",

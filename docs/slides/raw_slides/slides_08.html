@@ -349,8 +349,8 @@ Figure&nbsp;3: New coordinate system
 <h1>Estimating Out Probabilities</h1>
 
 </section>
-<section id="unique-events" class="slide level2 smaller">
-<h2>Unique Events</h2>
+<section id="unique-events-i" class="slide level2 smaller">
+<h2>Unique Events I</h2>
 <ul>
 <li><p><code>end_type</code>: did last pitch of at-bat end in <strong>S</strong>trike, <strong>B</strong>all, or contact (<strong>X</strong>)?</p></li>
 <li><p><code>events</code>: more granular description of at-bat outcome</p></li>
@@ -374,7 +374,9 @@ Figure&nbsp;3: New coordinate system
                         0 </code></pre>
 </div>
 </div>
-<div class="fragment">
+</section>
+<section id="unique-events-ii" class="slide level2 smaller">
+<h2>Unique Events II</h2>
 <ul>
 <li>All <code>events</code> for balls and strikes</li>
 </ul>
@@ -388,7 +390,6 @@ Figure&nbsp;3: New coordinate system
                 40145                   107                   304 
                  walk                  &lt;NA&gt; 
                 14029                     0 </code></pre>
-</div>
 </div>
 </div>
 </section>
@@ -515,7 +516,16 @@ Figure&nbsp;6: Logistic regression forecasts of out probabilities as a function 
 <h2>Generalized Additive Model</h2>
 <p><span class="math display">\[
 \log\left(\frac{\mathbb{P}(\textrm{out})}{1 - \mathbb{P}(\textrm{out})} \right) = s(x,y),
-\]</span> - <span class="math inline">\(s(x,y)\)</span> is a <strong>smooth</strong> function in both <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> - Technically: <span class="math inline">\(s(x,y) = \sum_{d=1}^{D}{\beta_{d}\phi_{d}(x,y)}\)</span> - <span class="math inline">\(\phi_{1}, \ldots, \phi_{D}\)</span>: fixed set of <em>spline</em> functions - <span class="math inline">\(\phi_{d}\)</span> piecewise polynomial localized to small spatial region - Can be fit using the <strong>mgcv</strong> package</p>
+\]</span></p>
+<ul>
+<li><span class="math inline">\(s(x,y)\)</span> is a <strong>smooth</strong> function in both <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>
+<ul>
+<li>Technically: <span class="math inline">\(s(x,y) = \sum_{d=1}^{D}{\beta_{d}\phi_{d}(x,y)}\)</span></li>
+<li><span class="math inline">\(\phi_{1}, \ldots, \phi_{D}\)</span>: fixed set of <em>spline</em> functions</li>
+<li><span class="math inline">\(\phi_{d}\)</span> piecewise polynomial localized to small spatial region</li>
+</ul></li>
+<li>Can be fit using the <strong>mgcv</strong> package</li>
+</ul>
 </section>
 <section id="gam-estimates" class="slide level2">
 <h2>GAM Estimates</h2>
@@ -787,10 +797,12 @@ Figure&nbsp;12
 </div>
 </div>
 </section>
-<section id="run-value-by-fielding-position" class="slide level2">
+<section id="run-value-by-fielding-position" class="slide level2 smaller">
 <h2>Run Value by Fielding Position</h2>
-<div class="panel-set">
-<h3 id="definition">Definition</h3>
+<div class="panel-tabset">
+<ul id="tabset-8" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-8-1">Definition</a></li><li><a href="#tabset-8-2">First Base (code)</a></li><li><a href="#tabset-8-3">First Base (Top-10)</a></li></ul>
+<div class="tab-content">
+<div id="tabset-8-1">
 <ul>
 <li>For each at-bat <span class="math inline">\(i\)</span> assign <span class="math inline">\(w_{i,\ell}\delta_{i}^{(f)}\)</span> to player at position <span class="math inline">\(\ell\)</span></li>
 <li>Sums these values for each player-position to get <span class="math inline">\(\textrm{RAA}_{\ell}^{(f)}\)</span>
@@ -799,7 +811,8 @@ Figure&nbsp;12
 </ul></li>
 <li><span class="math inline">\(\textrm{RAA}_{\ell}^{(f)}\)</span>: run value created by playing position <span class="math inline">\(\ell\)</span></li>
 </ul>
-<h3 id="first-base-code">First Base (code)</h3>
+</div>
+<div id="tabset-8-2">
 <div class="cell">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a></a>raa_f3 <span class="ot">&lt;-</span></span>
 <span id="cb14-2"><a></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
@@ -808,7 +821,8 @@ Figure&nbsp;12
 <span id="cb14-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">summarize</span>(<span class="at">RAA_f3 =</span> <span class="fu">sum</span>(RAA_f3, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
 <span id="cb14-6"><a></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> fielder_3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<h3 id="first-base-top-10">First Base (Top-10)</h3>
+</div>
+<div id="tabset-8-3">
 <div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a>raa_f3 <span class="sc">|&gt;</span></span>
 <span id="cb15-2"><a></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> player2024_lookup, <span class="at">by =</span> <span class="st">"key_mlbam"</span>) <span class="sc">|&gt;</span></span>
@@ -829,6 +843,8 @@ Figure&nbsp;12
  8 Michael Toglia      46.5
  9 Freddie Freeman     46.2
 10 Josh Naylor         46.2</code></pre>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -898,9 +914,19 @@ Figure&nbsp;12
 <section id="replacement-level-1" class="slide level2">
 <h2>Replacement Level</h2>
 <ul>
-<li>Quoting from <a href="https://library.fangraphs.com/misc/war/replacement-level/">FanGraphs</a> &gt; Replacement level is simply the level of production you could get from a player that would cost you nothing but the league minimum salary to acquire.</li>
+<li>Quoting from <a href="https://library.fangraphs.com/misc/war/replacement-level/">FanGraphs</a></li>
 </ul>
-<p>. . . - Definition is fairly arbitrary! &gt; we believe that a team making the MLB minimum would win about 29.7% of its games in a give year, or roughly 47-48 per team</p>
+<blockquote>
+<p>Replacement level is simply the level of production you could get from a player that would cost you nothing but the league minimum salary to acquire.</p>
+</blockquote>
+<div class="fragment">
+<ul>
+<li>Definition is fairly arbitrary!</li>
+</ul>
+<blockquote>
+<p>we believe that a team making the MLB minimum would win about 29.7% of its games in a give year, or roughly 47-48 per team</p>
+</blockquote>
+</div>
 </section>
 <section id="roster-based-definition" class="slide level2 smaller">
 <h2>Roster-based Definition</h2>
@@ -924,9 +950,9 @@ Figure&nbsp;12
 <section id="identifying-non-replacement-players" class="slide level2">
 <h2>Identifying Non-Replacement Players</h2>
 <div class="panel-tabset">
-<ul id="tabset-8" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-8-1">Player Lists</a></li><li><a href="#tabset-8-2">Count PAs</a></li><li><a href="#tabset-8-3">Replacement Thresholds</a></li></ul>
+<ul id="tabset-9" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-9-1">Player Lists</a></li><li><a href="#tabset-9-2">Count PAs</a></li><li><a href="#tabset-9-3">Replacement Thresholds</a></li></ul>
 <div class="tab-content">
-<div id="tabset-8-1">
+<div id="tabset-9-1">
 <div class="cell">
 <div class="sourceCode cell-code" id="annotated-cell-21"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy"><code class="sourceCode r"><span id="annotated-cell-21-1"><a href="#annotated-cell-21-1"></a>all_players <span class="ot">&lt;-</span> <span class="fu">unique</span>(</span>
 <span id="annotated-cell-21-2"><a href="#annotated-cell-21-2"></a>  <span class="fu">c</span>(def_atbat2024<span class="sc">$</span>batter, def_atbat2024<span class="sc">$</span>pitcher, def_atbat2024<span class="sc">$</span>fielder_2,</span>
@@ -936,7 +962,7 @@ Figure&nbsp;12
 <span id="annotated-cell-21-6"><a href="#annotated-cell-21-6"></a>position_players <span class="ot">&lt;-</span> all_players[<span class="sc">!</span>all_players <span class="sc">%in%</span> pitchers]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<div id="tabset-8-2">
+<div id="tabset-9-2">
 <div class="cell">
 <div class="sourceCode cell-code" id="annotated-cell-22"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy"><code class="sourceCode r"><span id="annotated-cell-22-1"><a href="#annotated-cell-22-1"></a>position_pa <span class="ot">&lt;-</span></span>
 <span id="annotated-cell-22-2"><a href="#annotated-cell-22-2"></a>  def_atbat2024 <span class="sc">|&gt;</span></span>
@@ -954,7 +980,7 @@ Figure&nbsp;12
 <span id="annotated-cell-22-14"><a href="#annotated-cell-22-14"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">key_mlbam =</span> pitcher)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<div id="tabset-8-3">
+<div id="tabset-9-3">
 <div class="cell">
 <div class="sourceCode cell-code" id="annotated-cell-23"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy"><code class="sourceCode r"><span id="annotated-cell-23-1"><a href="#annotated-cell-23-1"></a>repl_position_players <span class="ot">&lt;-</span> position_pa<span class="sc">$</span>key_mlbam[<span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">390</span>)]</span>
 <span id="annotated-cell-23-2"><a href="#annotated-cell-23-2"></a>repl_pitchers <span class="ot">&lt;-</span> pitcher_pa<span class="sc">$</span>key_mlbam[<span class="sc">-</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">360</span>)]</span>
@@ -970,11 +996,11 @@ Cut-off for pitchers: 204 </code></pre>
 </div>
 </div>
 </section>
-<section id="replacement-level-per-at-bat-raa" class="slide level2">
+<section id="replacement-level-per-at-bat-raa" class="slide level2 smaller">
 <h2>Replacement-Level Per-At-Bat RAA</h2>
 <ul>
 <li>If we replace Ohtani w/ a replacement-level player, what <span class="math inline">\(\textrm{RAA}\)</span> values would they achieve?</li>
-<li>Idea: multiple Ohtani’s number of at-bats by average per-at-bat <span class="math inline">\(\textrm{RAA}\)</span> of replacement-level players</li>
+<li>Idea: multiply Ohtani’s number of at-bats by average per-at-bat <span class="math inline">\(\textrm{RAA}\)</span> of replacement-level players</li>
 <li>Divide total <span class="math inline">\(\textrm{RAA}\)</span> for all replacement-level players by total number of at-bats</li>
 </ul>
 <div class="cell">
@@ -1001,16 +1027,16 @@ Replacement-level per-at-bat RAA (pitchers): -0.0243 </code></pre>
 </div>
 </div>
 </section>
-<section id="position-player-war" class="slide level2">
+<section id="position-player-war" class="slide level2 smaller">
 <h2>Position Player WAR</h2>
 <ul>
 <li>Compare player’s RAA to what replacement-level would achieve in same opportunities</li>
 <li>1 Win = 10 Runs</li>
 </ul>
 <div class="panel-tabset">
-<ul id="tabset-9" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-9-1">Code</a></li><li><a href="#tabset-9-2">Top-10</a></li></ul>
+<ul id="tabset-10" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-10-1">Code</a></li><li><a href="#tabset-10-2">Top-10</a></li></ul>
 <div class="tab-content">
-<div id="tabset-9-1">
+<div id="tabset-10-1">
 <div class="cell">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a>position_war <span class="ot">&lt;-</span></span>
 <span id="cb21-2"><a></a>  raa <span class="sc">|&gt;</span></span>
@@ -1021,7 +1047,7 @@ Replacement-level per-at-bat RAA (pitchers): -0.0243 </code></pre>
 <span id="cb21-7"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">WAR =</span> (RAA <span class="sc">-</span> shadowRAA)<span class="sc">/</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<div id="tabset-9-2">
+<div id="tabset-10-2">
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 10 × 6
@@ -1042,6 +1068,22 @@ Replacement-level per-at-bat RAA (pitchers): -0.0243 </code></pre>
 </div>
 </div>
 </div>
+</section>
+<section id="looking-ahead" class="slide level2 smaller">
+<h2>Looking Ahead</h2>
+<ul>
+<li>Tonight: Guest lecture by Namita Nanadakumar (Seattle Kraken)
+<ul>
+<li>6:00pm in Morgridge Hall 1524</li>
+<li>Sponsored by Sports Analytics Club</li>
+</ul></li>
+<li>Adjusted Office Hours:
+<ul>
+<li>Today: 4pm - 5:30pm in MH 5586</li>
+<li>Wednesday: 4pm - 5pm in MH 5586 (not 3pm!)</li>
+</ul></li>
+<li>Before Lecture 9: please read Chapters <a href="https://bookdown.org/roback/bookdown-BeyondMLR/ch-corrdata.html">7</a> &amp; <a href="https://bookdown.org/roback/bookdown-BeyondMLR/ch-multilevelintro.html">8</a> of <a href="https://bookdown.org/roback/bookdown-BeyondMLR/"><em>Beyond Multiple Linear Regression</em></a></li>
+</ul>
 <!--
 ## Pitch Trajectory Variables{.smaller}
 

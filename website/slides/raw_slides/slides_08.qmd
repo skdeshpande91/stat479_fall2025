@@ -192,7 +192,7 @@ def_atbat2024 <-
 
 # Estimating Out Probabilities
 
-## Unique Events {.smaller}
+## Unique Events I {.smaller}
 - `end_type`: did last pitch of at-bat end in **S**trike, **B**all, or contact (**X**)? 
 - `events`: more granular description of at-bat outcome
 
@@ -204,9 +204,10 @@ def_atbat2024 <-
 table(def_atbat2024$end_events[def_atbat2024$end_type == "X"], useNA = 'always')
 ```
 
-. . .
+## Unique Events II {.smaller}
 
 - All `events` for balls and strikes
+
 ```{r}
 #| label: sanity-2
 #| eval: true
@@ -414,6 +415,7 @@ points(x = 0, y = 90*sqrt(2), pch = 16, cex = 0.8, col = "white")
 $$
 \log\left(\frac{\mathbb{P}(\textrm{out})}{1 - \mathbb{P}(\textrm{out})} \right) = s(x,y),
 $$
+
 - $s(x,y)$ is a **smooth** function in both $x$ and $y$
   - Technically: $s(x,y) = \sum_{d=1}^{D}{\beta_{d}\phi_{d}(x,y)}$ 
   - $\phi_{1}, \ldots, \phi_{D}$: fixed set of *spline* functions
@@ -585,7 +587,7 @@ raa_p |>
 ## Fielder Out Probabilities
 
 ```{r}
-#| label: fig-fielder-out-probs 
+#| label: fielder-out-probs 
 #| eval: true
 #| echo: false
 library(mgcv)
@@ -898,9 +900,9 @@ points(x = 0, y = 90*sqrt(2), pch = 16, cex = 0.8, col = "white")
 
 
 
-## Run Value by Fielding Position
+## Run Value by Fielding Position{.smaller}
 
-:::{.panel-set}
+:::{.panel-tabset}
 ### Definition
 - For each at-bat $i$ assign $w_{i,\ell}\delta_{i}^{(f)}$ to player at position $\ell$
 - Sums these values for each player-position to get $\textrm{RAA}_{\ell}^{(f)}$
@@ -1077,10 +1079,13 @@ raa |> dplyr::arrange(dplyr::desc(RAA)) |> dplyr::slice_head(n=10)
 
 ## Replacement Level
 - Quoting from [FanGraphs](https://library.fangraphs.com/misc/war/replacement-level/)
+
 > Replacement level is simply the level of production you could get from a player that would cost you nothing but the league minimum salary to acquire. 
 
 . . . 
+
 - Definition is fairly arbitrary!
+
 > we believe that a team making the MLB minimum would win about 29.7% of its games in a give year, or roughly 47-48 per team
 
 ## Roster-based Definition{.smaller}
@@ -1147,10 +1152,10 @@ cat("Cut-off for pitchers:", pitcher_pa$n[360], "\n")
 :::
 
 
-## Replacement-Level Per-At-Bat RAA
+## Replacement-Level Per-At-Bat RAA{.smaller}
 
 - If we replace Ohtani w/ a replacement-level player, what $\textrm{RAA}$ values would they achieve?
-- Idea: multiple Ohtani's number of at-bats by average per-at-bat $\textrm{RAA}$ of replacement-level players
+- Idea: multiply Ohtani's number of at-bats by average per-at-bat $\textrm{RAA}$ of replacement-level players
 - Divide total $\textrm{RAA}$ for all replacement-level players by total number of at-bats
 
 ```{r}
@@ -1176,7 +1181,8 @@ cat("Replacement-level per-at-bat RAA (position players):", round(repl_avg_pos, 
 cat("Replacement-level per-at-bat RAA (pitchers):", round(repl_avg_pitch, digits = 4),"\n")
 ```
 
-## Position Player WAR
+## Position Player WAR{.smaller}
+
 - Compare player's RAA to what replacement-level would achieve in same opportunities
 - 1 Win = 10 Runs
 
@@ -1209,7 +1215,17 @@ position_war |>
 
 :::
 
+## Looking Ahead{.smaller}
 
+- Tonight: Guest lecture by Namita Nanadakumar (Seattle Kraken)
+  - 6:00pm in Morgridge Hall 1524
+  - Sponsored by Sports Analytics Club
+  
+- Adjusted Office Hours:
+  - Today: 4pm - 5:30pm in MH 5586
+  - Wednesday: 4pm - 5pm in MH 5586 (not 3pm!)
+  
+- Before Lecture 9: please read Chapters [7](https://bookdown.org/roback/bookdown-BeyondMLR/ch-corrdata.html) & [8](https://bookdown.org/roback/bookdown-BeyondMLR/ch-multilevelintro.html) of [*Beyond Multiple Linear Regression*](https://bookdown.org/roback/bookdown-BeyondMLR/)
 
 
 
