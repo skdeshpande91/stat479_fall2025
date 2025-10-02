@@ -551,10 +551,6 @@ passer_player_id00-0027973
 10     Keenan Allen -5.911163</code></pre>
 </div>
 </div>
-<p>. . .</p>
-<ul>
-<li>How can a punter have the highest per-pass EPA???</li>
-</ul>
 </div>
 </div>
 </div>
@@ -690,6 +686,14 @@ Figure&nbsp;2: The variability in per-pass decreases dramatically as the number 
 <li>Create temporary table <code>lmer_alpha</code> with player name, id, and estimate</li>
 <li>Join <code>lmer_alpha</code> to <code>alphas</code> (so we can compare with OLS estimates)</li>
 </ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a></a>lmer_alpha <span class="ot">&lt;-</span> <span class="fu">data.frame</span>( </span>
+<span id="cb22-2"><a></a>    <span class="at">lmer =</span> tmp[[<span class="st">"passer_player_id"</span>]][,<span class="dv">1</span>], </span>
+<span id="cb22-3"><a></a>    <span class="at">gsis_id =</span> <span class="fu">rownames</span>(tmp[[<span class="st">"passer_player_id"</span>]])) </span>
+<span id="cb22-4"><a></a></span>
+<span id="cb22-5"><a></a>alphas <span class="ot">&lt;-</span> alphas <span class="sc">|&gt;</span></span>
+<span id="cb22-6"><a></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(<span class="at">y =</span> lmer_alpha, <span class="at">by =</span> <span class="st">"gsis_id"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </div>
 <div id="tabset-3-2">
 <div class="cell">
@@ -711,7 +715,7 @@ Figure&nbsp;2: The variability in per-pass decreases dramatically as the number 
 </div>
 </div>
 </section>
-<section id="visualizing-multilevel-estimates" class="slide level2">
+<section id="visualizing-multilevel-estimates" class="slide level2 smaller">
 <h2>Visualizing Multilevel Estimates</h2>
 <ul>
 <li>Multilevel model <em>pulls</em> player-specific means to global mean
@@ -721,7 +725,7 @@ Figure&nbsp;2: The variability in per-pass decreases dramatically as the number 
 </ul>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div id="fig-shrinkage" class="quarto-float quarto-figure quarto-figure-center" data-fig-align="center" width="768">
+<div id="fig-shrinkage" class="quarto-float quarto-figure quarto-figure-center" width="768" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig">
 <div aria-describedby="fig-shrinkage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <a href="slides_09_files/figure-revealjs/fig-shrinkage-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;3: "><img data-src="slides_09_files/figure-revealjs/fig-shrinkage-1.png" id="fig-shrinkage" class="quarto-figure quarto-figure-center" width="768"></a>
@@ -740,18 +744,18 @@ Figure&nbsp;3
 <li>Simple model doesn’t account for formation, whether QB was hit while throwing, etc.</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a></a>pass2024 <span class="ot">&lt;-</span></span>
-<span id="cb23-2"><a></a>  pbp2024 <span class="sc">|&gt;</span></span>
-<span id="cb23-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(play_type <span class="sc">==</span> <span class="st">"pass"</span> <span class="sc">&amp;</span> season_type <span class="sc">==</span> <span class="st">"REG"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb23-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"TWO-POINT CONVERSION ATTEMPT"</span>, desc) <span class="sc">&amp;</span></span>
-<span id="cb23-5"><a></a>                  <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"sacked"</span>, desc)) <span class="sc">|&gt;</span></span>
-<span id="cb23-6"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(epa, passer_player_id, </span>
-<span id="cb23-7"><a></a>                air_yards, </span>
-<span id="cb23-8"><a></a>                posteam_type, shotgun, no_huddle, qb_hit,</span>
-<span id="cb23-9"><a></a>                pass_location,</span>
-<span id="cb23-10"><a></a>                desc) <span class="sc">|&gt;</span></span>
-<span id="cb23-11"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">posteam_type =</span> <span class="fu">factor</span>(posteam_type),</span>
-<span id="cb23-12"><a></a>                <span class="at">pass_location =</span> <span class="fu">factor</span>(pass_location))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a></a>pass2024 <span class="ot">&lt;-</span></span>
+<span id="cb24-2"><a></a>  pbp2024 <span class="sc">|&gt;</span></span>
+<span id="cb24-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(play_type <span class="sc">==</span> <span class="st">"pass"</span> <span class="sc">&amp;</span> season_type <span class="sc">==</span> <span class="st">"REG"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb24-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"TWO-POINT CONVERSION ATTEMPT"</span>, desc) <span class="sc">&amp;</span></span>
+<span id="cb24-5"><a></a>                  <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"sacked"</span>, desc)) <span class="sc">|&gt;</span></span>
+<span id="cb24-6"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(epa, passer_player_id, </span>
+<span id="cb24-7"><a></a>                air_yards, </span>
+<span id="cb24-8"><a></a>                posteam_type, shotgun, no_huddle, qb_hit,</span>
+<span id="cb24-9"><a></a>                pass_location,</span>
+<span id="cb24-10"><a></a>                desc) <span class="sc">|&gt;</span></span>
+<span id="cb24-11"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">posteam_type =</span> <span class="fu">factor</span>(posteam_type),</span>
+<span id="cb24-12"><a></a>                <span class="at">pass_location =</span> <span class="fu">factor</span>(pass_location))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="including-fixed-effects" class="slide level2">
@@ -769,10 +773,10 @@ Figure&nbsp;3
 <section id="fitting-our-elaborated-model" class="slide level2 scrollable">
 <h2>Fitting Our Elaborated Model</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a></a>ml_fit_full <span class="ot">&lt;-</span></span>
-<span id="cb24-2"><a></a>  lme4<span class="sc">::</span><span class="fu">lmer</span>(<span class="at">formula =</span> epa <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>passer_player_id) <span class="sc">+</span> </span>
-<span id="cb24-3"><a></a>               air_yards <span class="sc">+</span> posteam_type <span class="sc">+</span> shotgun <span class="sc">+</span></span>
-<span id="cb24-4"><a></a>               no_huddle <span class="sc">+</span> qb_hit <span class="sc">+</span> pass_location, <span class="at">data =</span> pass2024)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a></a>ml_fit_full <span class="ot">&lt;-</span></span>
+<span id="cb25-2"><a></a>  lme4<span class="sc">::</span><span class="fu">lmer</span>(<span class="at">formula =</span> epa <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>passer_player_id) <span class="sc">+</span> </span>
+<span id="cb25-3"><a></a>               air_yards <span class="sc">+</span> posteam_type <span class="sc">+</span> shotgun <span class="sc">+</span></span>
+<span id="cb25-4"><a></a>               no_huddle <span class="sc">+</span> qb_hit <span class="sc">+</span> pass_location, <span class="at">data =</span> pass2024)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="cell-output cell-output-stdout">

@@ -292,9 +292,6 @@ alphas |>
   dplyr::select(full_name, ols)
 ```
 
-. . .
-
-- How can a punter have the highest per-pass EPA???
 
 :::
 
@@ -422,6 +419,9 @@ tmp[["passer_player_id"]] |> dplyr::slice_head(n = 5)
 - Join `lmer_alpha` to `alphas` (so we can compare with OLS estimates)
 
 ```{r}
+#| label: get-alphas
+#| eval: true
+#| echo: true
 lmer_alpha <- data.frame( 
     lmer = tmp[["passer_player_id"]][,1], 
     gsis_id = rownames(tmp[["passer_player_id"]])) 
@@ -442,7 +442,7 @@ alphas |>
 ```
 :::
 
-## Visualizing Multilevel Estimates
+## Visualizing Multilevel Estimates{.smaller}
 
 - Multilevel model *pulls* player-specific means to global mean
   - Amount of data dictates degree to which original estimate is pulled
