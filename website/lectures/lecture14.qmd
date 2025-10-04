@@ -1,0 +1,223 @@
+---
+title: "Lecture 14: Markov Chains I"
+format: html
+execute: 
+  cache: true
+---
+
+## Overview {#sec-overview}
+
+
+In [Lecture 6](lecture06.qmd), we introduced a state-based representation of baseball: each half-inning consists of several at-bats, each of which can be characterized by (i) the number of outs and (ii) configuration of the baserunners.
+We then estimated the expected number of runs that team can expect to score following at-bats that begin in each of the 24 combinatiosn of outs and baserunner configurations.
+Today, we will focus less on evaluating what happens in each at-bat (e.g., using run expectancy or run value) and more on how the game transitions from state-to-state.
+That is, we will try to understand how often teams transition from the state 1 out with no runners on to the state 1 out with a runner on first.
+
+
+
+In @sec-markov-chain, we briefly introduce the relavant mathematical details about Markov chains.
+Then, in @sec-half-inning, we 
+
+
+## Markov Chains {#sec-markov-chain}
+
+:::{.callout-note}
+## Definition
+
+An infinite sequence of random variables $\left\{X_{n}\right\}_{n = 1}^{\infty}$ is called a **Markov chain** if the probability distribution of $X_{n}$ depends only on $X_{n-1}.$
+:::
+
+Think of a Markov chain as a random walk: the state that it visits next depends on its past history only through its current
+
+### Example
+
+### Transition & Absorbing States
+
+
+
+
+
+
+
+## A Markov Chain Model for Half-Innings {#sec-model}
+
+Our goal is to build a Markov chain model for a half-inning of baseball.
+To do this, we need to estimate the transition probabilities between every pair of game states, which are indexed by the 3 possible values of outs (0,1, and 2) and 8 possible baserunner configurations.
+Each of these 24 states are transition states.
+We also have one absorbing state, which corresponds to the end of the half-inning (i.e., 3 outs and no runners on base).
+
+
+
+
+### Data Preparation
+
+We will use the at-bat data we built in [Lecture 6](lecture06.qmd).
+In addition to game, inning, and at-bat identifiers, the most important variables for this analysis are `Outs`, `BaseRunner`, `end_Outs`, and `end_BaseRunner`.
+Recall that we also created the variable `GameState` by concatenating the values of `Outs` and `BaseRunner`.
+For this analysis, we will discard all at-bats from the 9th inning (or later)[^ninth]
+
+[^ninth]: If the home team is leading at the end of the top of the 9th inning, they do not bat. And if they are tied or trailing when they come up to bat in the 9th inning and score, the game immediately ends. 
+
+```{r}
+#| label: load-atbat
+#| eval: true
+#| echo: true
+load("atbat2024.RData")
+atbat2024 <-
+  atbat2024 |>
+  dplyr::filter(inning < 9)
+table(atbat2024$GameState)
+
+```
+
+
+When building `atbat2024`, we set `end_Outs = 3` and `end_BaseRunner = NA` for the last at-bat of each half-inning.
+For our Markov chain model, it will be convenient to set `end_BaseRunner = "000"` for these at-bats.
+We will additionally create a column `end_GameState` that concatenates `end_Outs` and `end_BaseRunner`
+```{r}
+#| label: add-end-state
+#| eval: true
+#| echo: true
+atbat2024 <-
+  atbat2024 |>
+  dplyr::mutate(
+    end_BaseRunner = ifelse(end_Outs == 3, "000", end_BaseRunner),
+    end_GameState = paste(end_Outs, end_BaseRunner, sep = "."))
+
+table(atbat2024$end_GameState)
+```
+
+Finally, it will be convenient to keep a list of all the unique starting and ending states.
+```{r}
+#| label: unik-start-end
+#| eval: true
+#| echo: true
+
+outs <- c(0,1,2, 3)
+br <- c("000", "100", "010", "001", "110", "101", "011", "111")
+unik_states <-
+  expand.grid(Outs = outs, BaseRunner = br) |>
+  as.data.frame() |>
+  dplyr::filter(Outs <= 2 | Outs == 3 & BaseRunner == "000") |>
+  dplyr::arrange(Outs) |>
+  dplyr::mutate(
+    id = dplyr::row_number(),
+    GameState = paste(Outs, BaseRunner, sep = ".")) |?
+  dplyr::select(id, Outs, BaseRuner, GameState)
+
+
+#unik_start <-
+#  atbat2024 |>
+#  dplyr::select(Outs, BaseRunner, GameState) |>
+#  unique()
+
+#unik_end <-
+#  atbat2024 |>
+#  dplyr::select(end_Outs, end_BaseRunner, end_GameState) |>
+#  unique()
+```
+
+### Estimating State Transitions
+
+A natural estimate of the the probability for transitioning from state $s = (\textrm{o}, \textrm{br})$ to the state $s' = (\textrm{o}', \textrm{br}')$ is divide the number of at-bats that start in state $s$ and end in state $s'$ by the number of at-bats that start in state $s.$
+
+We first build a table that counts the number of at-bats starting in every state
+```{r}
+#| label: count-start-states
+#| eval: true
+#| echo: true
+
+start_counts <-
+  atbat2024 |>
+  dplyr::group_by(GameState) |>
+  dplyr::summarise(n_start = dplyr::n(), .groups = "drop")
+```
+
+Next, by grouping by each of `GameState` and `end_GameState`, we can count the number of times an at-bat started in some state $s$ and ended in state $s'.$
+
+```{r}
+#| label: end-counts
+#| eval: true
+#| echo: true
+end_counts <-
+  atbat2024 |>
+  dplyr::group_by(GameState, end_GameState) |>
+  dplyr::summarise(n_start_end = dplyr::n(), .groups = "drop")
+```
+
+To compute our transition probability estimates, we start by enumerating all possible combinations of starting and ending state.
+Then, we will append columns containing the starting state counts `n_start` and the counts of each pair of state transitions (i.e., `n_start_end`).
+For certain pairs of transitions that do not appear in our data (e.g., `0.000` to `3.000`), we will manually set `n_start_end = 0`.
+Finally, we will divide `n_start_end` by `n_start`
+```{r}
+transitions <-
+  expand.grid(GameState = unik_states$GameState,
+              end_GameState = unik_states$GameState) |>
+  as.data.frame() |>
+  dplyr::left_join(y = start_counts, by = "GameState") |> #<1>
+  dplyr::left_join(y = end_counts, by = c("GameState", "end_GameState")) |> #<2>
+  tidyr::replace_na(replace = list(n_start_end=0)) |> #<3>
+  dplyr::mutate(prob = n_start_end/n_start) #<4>
+```
+1. Appends the starting state counts
+2. Appends the counts of each transition from `GameState` to `end_GameState`
+3. Manually sets `n_start_end = 0` for transitions that are not observed in the data
+4. Estimate the transition probability
+
+We can look at a handful of transition probabilities
+
+```{r}
+#| label: view-transitions
+#| eval: true
+#| echo:  true
+
+transitions |>
+  dplyr::arrange(dplyr::desc(prob)) |>
+  dplyr::slice_head(n = 10) |>
+  dplyr::mutate(prob = round(prob, digits = 3))
+
+```
+To form a transition matrix, we will first "widen" the table `transitions` using the function [`tiyr::pivot_wider()`](https://tidyr.tidyverse.org/reference/pivot_wider.html).
+We see that each row of the resulting, temporary table, which we call `tmp`, corresponds to a starting game state value and there are columns for each of the ending game states.
+
+```{r}
+#| label: transition-matrix-1
+#| eval: true
+#| echo: true
+tmp <-
+  transitions |>
+  dplyr::select(GameState, end_GameState, prob) |>
+  tidyr::pivot_wider(names_from = "end_GameState",
+                      values_from = "prob")
+tmp |> 
+  dplyr::select(GameState, `0.000`, `0.100`, `1.000`, `2.000`) |> 
+  dplyr::slice_head(n = 10)
+```
+
+To turn this into a matrix whose row and column names are the possible starting and ending game states, we will drop the column `GameState` from `tmp`, convert it into a matrix, and then assign the rownames.
+
+```{r}
+#| label: transition-matrix-2
+#| eval: true
+#| echo: true
+
+state_names <- tmp |> dplyr::pull(GameState)
+transition_matrix <-
+  tmp |>
+  dplyr::select(-GameState) |>
+  as.matrix()
+rownames(transition_matrix) <- state_names
+
+round(transition_matrix[1:5, 1:5], digits = 3)
+```
+
+
+## Simulating a Half-Inning {#sec-simulation}
+
+
+Imagine that the game starts at 
+
+
+### 
+
+### Estimating Expected Runs
