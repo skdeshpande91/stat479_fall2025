@@ -8,88 +8,71 @@ execute:
 ## Overview {#sec-overview}
 
 
-In [Lecture 6](lecture06.qmd), we introduced a state-based representation of baseball: each half-inning consists of several at-bats, each of which can be characterized by (i) the number of outs and (ii) configuration of the baserunners.
-We then estimated the expected number of runs that team can expect to score following at-bats that begin in each of the 24 combinatiosn of outs and baserunner configurations.
+In [Lecture 6](lecture06.qmd), we introduced a state-based representation of baseball: each half-inning consists of several at-bats, each of which can be characterized by (i) the number of outs and (ii) configuration of the base-runners.
+We then estimated the expected number of runs that team can expect to score following at-bats that begin in each of the 24 combinations of outs and base-runner configurations.
 Today, we will focus less on evaluating what happens in each at-bat (e.g., using run expectancy or run value) and more on how the game transitions from state-to-state.
-That is, we will try to understand how often teams transition from the state 1 out with no runners on to the state 1 out with a runner on first.
 
 
+To motivate our work, let's reconsider our running example from [Lecture 6](lecture06.qmd), the March 20, 2024 game between the Dodgers and Padres.
+Specifically, let's load the table `atbat2024` created in [Lecture 7](lecture07.qmd) and look at the sequence of game states that the Dodgers visited during the 8th inning.
 
-In @sec-markov-chain, we briefly introduce the relavant mathematical details about Markov chains.
-Then, in @sec-half-inning, we 
+```{r}
+#| label: load-atbat2024
+load("atbat2024.RData")
+dodgers_inning <- 
+  atbat2024 |>
+  dplyr::filter(game_pk == 745444 & inning == 8 & inning_topbot == "Top")
+dodgers_inning |> dplyr::select(at_bat_number, Outs, BaseRunner, end_events, end_Outs, end_BaseRunner)
+```
 
+We see that the inning consisted of 8 at-bats.
+During the first at-bat, in which Max Muncy was walked, the game transitioned from the state `0.000` (i.e., no outs and no runners on base) to the state `0.100` (i.e., no outs and a runner on 1st).
+During the 6th at-bat, when Mookie Betts drove in a run off a single, the game state did not change: at the beginning and end of the at-bat there was 1 out and runners on 1st and 2nd base.
 
-## Markov Chains {#sec-markov-chain}
+If we were to replay this half-inning over and over again, how often would the half-inning end after 8 at-bats?
+How often would the the first at-bat result in a batter reaching first base?
+How unusual is it to reach the state `0.111` from the state `0.110`? 
 
-:::{.callout-note}
-## Definition
-
-An infinite sequence of random variables $\left\{X_{n}\right\}_{n = 1}^{\infty}$ is called a **Markov chain** if the probability distribution of $X_{n}$ depends only on $X_{n-1}.$
-:::
-
-Think of a Markov chain as a random walk: the state that it visits next depends on its past history only through its current
-
-### Example
-
-### Transition & Absorbing States
-
-
-
-
-
-
-
-## A Markov Chain Model for Half-Innings {#sec-model}
-
-Our goal is to build a Markov chain model for a half-inning of baseball.
-To do this, we need to estimate the transition probabilities between every pair of game states, which are indexed by the 3 possible values of outs (0,1, and 2) and 8 possible baserunner configurations.
-Each of these 24 states are transition states.
-We also have one absorbing state, which corresponds to the end of the half-inning (i.e., 3 outs and no runners on base).
-
-
+We will introduce a simple probabilistic model of these state transitions --- a **Markov chain** --- that allows us to answer such questions.
+We briefly introduce the relevant mathematical details about Markov chains in @sec-markov-chain and work through some simple examples of Markov chains with two (@sec-two-state) and three (@sec-three-state) states.
+Then in @sec-half-inning, we build a Markov chain model to simulate an entire half-inning of baseball.
+Using this simulation, we study the distributions of the number of at-bats in a half-inning (@sec-halfinning-length) and the number of runs scored in a half-inning (@sec-runs-scored).
 
 
 ### Data Preparation
 
-We will use the at-bat data we built in [Lecture 6](lecture06.qmd).
-In addition to game, inning, and at-bat identifiers, the most important variables for this analysis are `Outs`, `BaseRunner`, `end_Outs`, and `end_BaseRunner`.
-Recall that we also created the variable `GameState` by concatenating the values of `Outs` and `BaseRunner`.
-For this analysis, we will discard all at-bats from the 9th inning (or later)[^ninth]
+The first at-bat in any half-inning of baseball has a deterministic game state: it always in the state `0.000`, with no outs and no runners on base.
+The starting state of the next at-bat is, in contrast, non-deterministic.
+Sometimes the first batter gets out out, in which the game transitions to the state `1.000`.
+But other times, the first batter gets base on with single (`0.1000`), double (`0.010`), or triple (`0.001`).
+More rarely, the batter scores a home run and the game state remains at `0.000`.
+Put another way, although the first game state visited in a half-inning is deterministic, the second game state visited is random. 
 
-[^ninth]: If the home team is leading at the end of the top of the 9th inning, they do not bat. And if they are tied or trailing when they come up to bat in the 9th inning and score, the game immediately ends. 
+From each possible second state, the game could move into multiple possible third states.
+Continuing this logic until the end of the half-inning, when the game state has `Outs = 3` and `BaseRunner` is undefined, the whole sequence of states visited is stochastic.
+If a team were to play the half-inning over and over again, the exact number of states visited (i.e., at-bats) and the precise sequence might vary from repetition to repetition.
 
+
+
+In our data table `atbat2024,` the variable `GameState` records the value of $G_{t}$ and was formed by concatenating the variables `Outs` and `BaseRunner`.
+In the code below, we create the variable `end_GameState` recording the ending state of each at-bat.
+We also create a table of all 25 unique states.
 ```{r}
-#| label: load-atbat
-#| eval: true
-#| echo: true
-load("atbat2024.RData")
-atbat2024 <-
-  atbat2024 |>
-  dplyr::filter(inning < 9)
-table(atbat2024$GameState)
-
-```
-
-
-When building `atbat2024`, we set `end_Outs = 3` and `end_BaseRunner = NA` for the last at-bat of each half-inning.
-For our Markov chain model, it will be convenient to set `end_BaseRunner = "000"` for these at-bats.
-We will additionally create a column `end_GameState` that concatenates `end_Outs` and `end_BaseRunner`
-```{r}
-#| label: add-end-state
+#| label: add-end-gamestate
 #| eval: true
 #| echo: true
 atbat2024 <-
   atbat2024 |>
   dplyr::mutate(
-    end_BaseRunner = ifelse(end_Outs == 3, "000", end_BaseRunner),
+    end_BaseRunner = ifelse(end_Outs == 3, "000", end_BaseRunner), #<1>
     end_GameState = paste(end_Outs, end_BaseRunner, sep = "."))
-
-table(atbat2024$end_GameState)
 ```
+1. For simplicity, we will set `end_BaseRunner = "000"` when `end_Outs == 3` (i.e., the inning is over).
 
-Finally, it will be convenient to keep a list of all the unique starting and ending states.
+It will later be convenient for us to keep a table listing the single game states as well as the corresponding number of outs and baserunner configurations.
+
 ```{r}
-#| label: unik-start-end
+#| label: unik-states
 #| eval: true
 #| echo: true
 
@@ -98,28 +81,269 @@ br <- c("000", "100", "010", "001", "110", "101", "011", "111")
 unik_states <-
   expand.grid(Outs = outs, BaseRunner = br) |>
   as.data.frame() |>
-  dplyr::filter(Outs <= 2 | Outs == 3 & BaseRunner == "000") |>
+  dplyr::filter(Outs <= 2 | Outs == 3 & BaseRunner == "000") |> #<1>
   dplyr::arrange(Outs) |>
   dplyr::mutate(
-    id = dplyr::row_number(),
-    GameState = paste(Outs, BaseRunner, sep = ".")) |?
-  dplyr::select(id, Outs, BaseRuner, GameState)
+    GameState = paste(Outs, BaseRunner, sep = ".")) |> 
+  dplyr::select(Outs, BaseRunner, GameState)
+```
+1. Remove impossible combinations like 3 outs and runners on 1st and 2nd base.
 
 
-#unik_start <-
-#  atbat2024 |>
-#  dplyr::select(Outs, BaseRunner, GameState) |>
-#  unique()
 
-#unik_end <-
-#  atbat2024 |>
-#  dplyr::select(end_Outs, end_BaseRunner, end_GameState) |>
-#  unique()
+## Markov Chains {#sec-markov-chain}
+
+Formally, let us denote the game state at the start of at-bat $t$ of a half-inning as $G_{t}.$
+There are 25 possible values for each $G_{t}$: the 24 different combinations of `Outs` (0,1, and 2) and `BaseRunner` ("000", "100", "010", "001", "110", "101", "011", and "111") and the one state corresponding to the end of the half-inning.
+As discussed in @sec-overview, although $G_{1}$ is always equal to `0.000`, the remaining $G_{t}$'s are random and the length of the sequence of states visited in the half-inning is also random.
+
+
+Formally, this involves coming up with a **joint** probability distribution for the (possibly infinite) sequence $G_{1}, G_{2}, \ldots.$
+That is, for every possible sequence of states visited, we would need to assign a probability.
+Once we do this, we could compute things like the probability of a half-inning lasting at least 5 at-bats by finding all sequences of length 5 or more and adding up the corresponding probabilities[^equiv].
+Similarly, if we wanted to know the probability that the half-inning began by visiting the states `0.000`, `0.100`, `0.110`, and `0.111`, we would find all sequences with that starting sub-sequence and add up the probabilities.
+
+Of course, calculating the probability for every possible sequence of every possible length is practically impossible.
+Luckily, it turns out that the probability distribution of a sequence of random variables $\{X_{t}\}$ is fully determined by the sequence of *conditional* distributions of the form $X_{t} \vert X_{t-1}, \ldots, X_{1}.$
+In other words, it suffices to specify a probability distribution over the next state visited based on its past history.
+
+A **Markov chain** is a probabilistic model in which the probability of the next state visited depends only on the current state and not all the previous states.
+
+
+:::{.callout-note}
+
+## Definition: Markov Chain
+An sequence of random variables $\left\{X_{t}\right\}_{n = 1}^{\infty}$ is called a **Markov chain** if for all $t \geq 1$, all sets $A,$ and trajectories $x_{1}, \ldots, x_{t-1}$
+$$
+\mathbb{P}(X_{t} \in A \vert X_{t-1} = x_{t-1}, \ldots, X_{1} = x_{1}) = \mathbb{P}(X_{t} \in A \vert X_{t-1} = x_{t-1}).
+$$
+:::
+
+When the set of states is discrete (e.g., out-baserunner combinations), Markov chains are fully characterized by a **transition probability** matrix.
+If there are $S$ different states, labelled without loss of generality as $s = 1, \ldots, S,$ then the $(s,s')$ entry of the transition probability matrix is exactly $\mathbb{P}(X_{t} = s' \vert X_{t-1} = s)$, the probability of transitioning from state $s$ to state $s'.$
+
+### Example: A 2-state Markov Chain {#sec-two-state}
+
+Suppose a system exists in one of two states `1` and `2.
+Further suppose that 
+  * When the system is in state `1`, it can remain there with probability 0.9 and it can move to state `2` with probability 0.1.
+  * When the system is in state `2`, it remains there with probability 0.2 and it moves to state `1` with probability 0.8.
+
+If we let $X_{t}$ be the state of the system at time $t,$ the transition matrix for the Markov chain $\{X_{t}\}$ is 
+$$
+\begin{pmatrix}
+0.9 & 0.1 \\
+0.8 & 0.2
+\end{pmatrix}
+$$
+The following code *simulate* 10 time steps from this Markov chain starting from the state `2`
+
+```{r}
+#| label: two-state-single-sim
+#| eval: true
+#| echo: true
+
+set.seed(129) 
+states <- c(1,2) #<1>
+transition_matrix <- matrix(c(0.9, 0.1, 0.8, 0.2), nrow = 2, ncol = 2, byrow = TRUE) #<2>
+
+n_steps <- 10
+init_state <- 2
+states_visited <- rep(NA, times = n_steps)
+
+states_visited[1] <- init_state #<2>
+
+for(t in 2:n_steps){
+  prev_state <- states_visited[t-1] #<3>
+  probs <- transition_matrix[prev_state,] #<3>
+  next_state <- sample(states, size = 1, prob = probs) #<4>
+  states_visited[t] <- next_state
+}
+
+states_visited
+
+```
+1. Collection of all possible states
+2. Setting `byrow = TRUE` forces R to build the matrix in row-major order instead of column-major (see [this Wikipedia entry](https://en.wikipedia.org/wiki/Row-_and_column-major_order))
+3. Look up the current state and probabilities of moving to every other state from it. Note that this is a **row** of the transition matrix.
+4. Sample the next state based on the relevant row of the transition matrix
+
+In this example, we see that the chain immediately transitions from state 2 to state 1; remains in state 2 for 8 steps; and then return to state 2.
+
+### Absorbing States
+
+In our two-state example, the chain is able to transition from state 1 to state 2 and from state 2 to state 1.
+We consequently say that states 1 and 2 **communicate** with one another.
+
+Suppose that $\{X_{t}\}$ is a Markov chain defined over the states $\{1, 2, \ldots, S\}$ and let $\boldsymbol{\mathbf{P}}$ be its transition matrix.
+
+:::{.callout-note}
+## Definition: Absorbing State
+A state $s$ is called an **absorbing state** if for all $s' \neq s,$ $\mathbb{P}(X_{t} = s' \vert X_{t-1} = s) = 0$ and $\mathbb{P}(X_{t} = s \vert X_{t-1} = s) = 1.$
+:::
+
+That is, an absorbing state is one from which there are no out-going transitions: once the chain reaches an absorbing state, it cannot leave. 
+In our baseball analysis, the state `3.000` corresponding to the end of the half-inning is an absorbing.
+
+As an illustration, here is the transition matrix for 3-state Markov chain model with one absorbing state (`3`)
+$$
+\begin{pmatrix}
+0.5 & 0.25 & 0.25 \\
+0.25 & 0.25 & 0.5 \\
+0 & 0 & 1
+\end{pmatrix}
+$$
+If the chain is currently in state `1`, it (i) remains in state `1` 50% of the time and (ii) moves to states `2` 25% of the time; and (iii) moves to state `3` 25% of the time.
+If the chain is currently in state `2`, it (i) moves to state `1` 25% of the time; (ii) remains in state `2` 25\% of the time; and moves to state `3` 50% of the time.
+
+The following code simulates 10 steps of the Markov chain beginning in state `1`.
+```{r}
+#| label: three-state-one-sim
+set.seed(129) 
+states <- c(1,2, 3) #<1>
+transition_matrix <- 
+  matrix(c(0.25, 0.5, 0.25,
+           0.25, 0.25, 0.5,
+           0, 0, 1), nrow = 3, ncol = 3, byrow = TRUE) #<2>
+
+n_steps <- 10
+init_state <- 1
+states_visited <- rep(NA, times = n_steps)
+
+states_visited[1] <- init_state #<2>
+
+for(t in 2:n_steps){
+  prev_state <- states_visited[t-1] #<3>
+  probs <- transition_matrix[prev_state,] #<3>
+  next_state <- sample(states, size = 1, prob = probs) #<4>
+  states_visited[t] <- next_state
+}
+
+states_visited
+
+```
+In this particular simulation, the chain begins in state `1`, moves to state `2,` and then moves to the absorbing state `3`.
+The following code block repeats the simulation 10 times, each time starting at state `1` and simulating 10 steps of the Markov chain.
+Sometimes, the chain immediately moves from `1` to the absorbing state `3`.
+But other times, the chain hops between states `1` and `2` before eventually being absorbed.
+
+```{r}
+#| label: absorb-simulation-10
+n_sims <- 10
+n_steps <- 10
+init_state <- 1
+states_visited <- rep(NA, times = n_steps)
+
+for(r in 1:n_sims){
+  set.seed(479+r) #<1>
+  states_visited <- rep(NA, times = n_steps)
+  states_visited[1] <- init_state
+  for(t in 2:n_steps){
+    states_visited[t] <-  #<2>
+      sample(states, size = 1, #<2>
+              prob = transition_matrix[states_visited[t-1],]) #<2>
+  }
+  cat("Simulation ", r, ":", states_visited, "\n") #<3>
+}
+```
+1. Setting seed ensures reproducibility. Allowing the seed to change systematically with replication number ensures we don't get the exact same results across replications.
+2. There is actually no need to introduce the intermediate variables `prev_state` and `next_state`
+3. Prints out the sequence of states visited 
+
+### Example: Simulating Time to Absorption {#sec-three-state}
+
+In our 3-state example, let $T^{A}_{1}$ be the number of steps the chain takes until it hits state `3` starting from state `1`:
+$$
+T^{A}_{1} = \min\left\{t \geq 1 : X_{t} = 3\right\}.
+$$
+We can use simulation to study the distribution of $T^{A}_{1}$ and to estimate quantities like $\mathbb{P}(T^{A}_{1} > 3)$ or $\mathbb{P}(T^{A}_{1} = 5).$
+
+The following code block uses a `while()` loop to simulate the Markov chain for several iterations until either (i) the absorbing state `3` is reached or (ii) some maximum number of iterations is hit[^maxiteration].
+Unlike our earlier simulation code, we will not save the full trajectory of states visited.
+Instead, we will only keep track of the number of iterations needed until the chain reaches state `3`.
+
+[^maxiteration]: It is possible to construct Markov chains where some absorbing states are never reached from certain initial states. Without a stopping criterion based on the number of iterations, the `while()` could continue indefinitely.
+
+
+```{r}
+#| label: three-state-absorption
+#| eval: true
+#| echo: true
+
+n_sims <- 1e4 #<1>
+max_iterations <- 1e3 #<2>
+states <- c(1,2,3)
+transition_matrix <- 
+  matrix(c(0.25, 0.5, 0.25,
+           0.25, 0.25, 0.5,
+           0, 0, 1), nrow = 3, ncol = 3, byrow = TRUE)
+absorption_time <- rep(NA, times = n_sims)
+for(r in 1:n_sims){
+  if(r %% 1000 == 0) print(paste("Simulation", r, "at", Sys.time())) #<3>
+  
+  iteration_counter <- 1 #<4>
+  current_state <- 1 #<4>
+  while(current_state != 3 & iteration_counter < max_iterations){ #<5>
+    
+    current_state <-
+      sample(states, size = 1,
+             prob = transition_matrix[current_state,]) #<6>
+    
+    iteration_counter <- iteration_counter + 1 #<7>
+  }
+  if(iteration_counter < max_iterations & current_state == 3){ #<8>
+    absorption_time[r] <- iteration_counter #<8>
+  } #<8>
+}
+```
+1. Number of simulation runs
+2. Maximum number of Markov chain iterations/steps per simulation
+3. When running large simulations, it's helpful to print out your progress after a fixed number of iterations (in this case 100). `Sys.time()` prints the system time.
+4. In each simulation (i.e., iteration of the outer `for` loop), we need to re-set the counter tracking the number of steps for which we simulate the Markov chain (i.e., iteration counter in the inner `while()` loop) and re-set the `current_state` variable to the starting state (in this case, `1`).
+5. Before starting each iteration, the `while()` loop checks that the chain isn't in state `3` and we haven't yet hit the maximum number of iterations. 
+6. R evaluates the whole expression on the right-hand side of the `<-` before assigning it to whatever is on the left-hand side. So, there is no danger here of simultaneously accessing and over-writing the variable `current_state`, which appears on both sides.
+7. In a `while()` loop, it's imperative to increment the iterator!
+8. The condition fails only when the chain has not reached the absorbing state within the maximum number of allowed iterations (`max_iterations`). 
+
+Because there are only 3 states and the probabilities of transitioning to state `3` from states `1` and `2` are relatively high, simulating the Markov chain until it hits state `3` takes very little time.
+Tabulating the different values in `absorption_time`, we see that the chain
+  1. Immediately transitioned from state `1` to state `3` in one step (so that $T^{A}_{1} = 2$) in 2440 of the 10,000 simulations
+  2. Reached state `3` in exactly two steps (so $T^{A}_{1} = 2$) in 3214 of the 10,000 simulations
+  3. Reached state `3` after 20 or more steps in just 2 of the 10,000 simulation
+  4. Always reached state `3` within the maximum number of iterations (as indicated by the fact that there are no `NA` values in `absorption_time`)
+  
+```{r}
+#| label: tabulate-absorption-time
+#| eval: true
+#| echo: true
+table(absorption_time, useNA = 'always')
+
 ```
 
-### Estimating State Transitions
 
-A natural estimate of the the probability for transitioning from state $s = (\textrm{o}, \textrm{br})$ to the state $s' = (\textrm{o}', \textrm{br}')$ is divide the number of at-bats that start in state $s$ and end in state $s'$ by the number of at-bats that start in state $s.$
+## A Markov Chain Model for Half-Innings {#sec-half-inning}
+
+Our goal is to build a Markov chain model for a half-inning of baseball.
+To do this, we need to estimate the transition probabilities between every pair of the 24 non-absorbing states and the absorbing state corresponding to the end of the half-inning.
+Because the 9th inning (and any extra innings) can end before a team has amassed three outs[^ninth], we exclude all data from the 9th inning and beyond.
+
+
+[^ninth]: For instance, if the home team begins the bottom of the 9th inning tied and their first batter hits a homerun, then the game ends immediately.
+
+```{r}
+#| label: remove-ninth-inning
+#| eval: true
+#| echo: true
+
+atbat2024 <-
+  atbat2024 |>
+  dplyr::filter(inning < 9)
+```
+
+
+### Estimating Transition Probabilities {#sec-estimate-transitions}
+
+A natural estimate of the the probability for transitioning from state $s$ to the state $s' $ is divide the number of at-bats that start in state $s$ and end in state $s'$ by the number of at-bats that start in state $s.$
 
 We first build a table that counts the number of at-bats starting in every state
 ```{r}
@@ -150,24 +374,26 @@ Then, we will append columns containing the starting state counts `n_start` and 
 For certain pairs of transitions that do not appear in our data (e.g., `0.000` to `3.000`), we will manually set `n_start_end = 0`.
 Finally, we will divide `n_start_end` by `n_start`
 ```{r}
+#| label: estimate-transition-probs
+#| eval: true
+#| echo: true
 transitions <-
   expand.grid(GameState = unik_states$GameState,
-              end_GameState = unik_states$GameState) |>
+              end_GameState = unik_states$GameState) |> #<1>
   as.data.frame() |>
-  dplyr::left_join(y = start_counts, by = "GameState") |> #<1>
+  dplyr::left_join(y = start_counts, by = "GameState") |> #<2>
   dplyr::left_join(y = end_counts, by = c("GameState", "end_GameState")) |> #<2>
   tidyr::replace_na(replace = list(n_start_end=0)) |> #<3>
   dplyr::mutate(prob = n_start_end/n_start) #<4>
 ```
-1. Appends the starting state counts
-2. Appends the counts of each transition from `GameState` to `end_GameState`
-3. Manually sets `n_start_end = 0` for transitions that are not observed in the data
+1. Enumerate all 625 possible combinations of starting and ending states of an at-bat
+2. Append columns with the number of at-bats (i) starting in each state and (ii) starting & ending in each combination of states
+3. Manually set `n_start_end = 0` for transitions that are not observed in the data
 4. Estimate the transition probability
 
-We can look at a handful of transition probabilities
-
+It is perhaps unsurprising to see that some of the highest transition probabilities are from 2-out states (e.g., `2.000` or `2.100`) to the absorbing 3-out state.
 ```{r}
-#| label: view-transitions
+#| label: view-top-transitions
 #| eval: true
 #| echo:  true
 
@@ -175,11 +401,10 @@ transitions |>
   dplyr::arrange(dplyr::desc(prob)) |>
   dplyr::slice_head(n = 10) |>
   dplyr::mutate(prob = round(prob, digits = 3))
-
 ```
+
 To form a transition matrix, we will first "widen" the table `transitions` using the function [`tiyr::pivot_wider()`](https://tidyr.tidyverse.org/reference/pivot_wider.html).
 We see that each row of the resulting, temporary table, which we call `tmp`, corresponds to a starting game state value and there are columns for each of the ending game states.
-
 ```{r}
 #| label: transition-matrix-1
 #| eval: true
@@ -193,8 +418,12 @@ tmp |>
   dplyr::select(GameState, `0.000`, `0.100`, `1.000`, `2.000`) |> 
   dplyr::slice_head(n = 10)
 ```
+Looking at these selected entries, we find that the estimated transition probability from `0.000` to `2.000` is zero.
+This makes some intuitive sense as the batting team cannot, with no outs and no runners on base, lost two outs in a single at-bat.
+We also see that the transition probabilities from 1 out states (e.g., `1.000` and `1.1000`) to the no-out states (e.g., `0.000`, `0.110`, etc.) are also estimated to be zero.
+Transitions like `0.100` to `0.000` correspond to situations in which the at-bat begins with a runner on first base and ends with the batter hitting a homerun and driving in the runner. 
 
-To turn this into a matrix whose row and column names are the possible starting and ending game states, we will drop the column `GameState` from `tmp`, convert it into a matrix, and then assign the rownames.
+We can now turn this table into a matrix row and column names are the possible starting and ending game states, we will drop the column `GameState` from `tmp`, convert it into a matrix, and then assign the rownames.
 
 ```{r}
 #| label: transition-matrix-2
@@ -212,12 +441,232 @@ round(transition_matrix[1:5, 1:5], digits = 3)
 ```
 
 
-## Simulating a Half-Inning {#sec-simulation}
+### Simulating a Half-Inning {#sec-simulation}
+
+Now that we have estimated the transition probabilities between all pairs of game states, we are in a position to *simulate* a single half-inning of baseball.
+In the following code, we set the initial state to `0.000`, since an innings begins with no outs and no runners on base.
+Then, we use a `while()` loop to simulate a Markov chain that randomly walks between the states (according to the transition matrix) until it hits the absorbing state `3.000`.
+We set the maximum iterations to be 30, which is an admittedly gross over-estimate on the number of at-bats that can take place in a single half-inning.
+
+```{r}
+#| label: half-inning1
+#| eval: true
+#| echo: true
+
+max_iterations <- 30
+states_visited <- rep(NA, times = max_iterations)
+
+iteration_counter <- 1
+states_visited[1] <- "0.000" #<1>
+current_state <- "0.000" #<2>
+set.seed(479)
+while(current_state != "3.000" & iteration_counter < max_iterations){
+  
+  current_state <-
+    sample(unik_states$GameState, size = 1,
+           prob = transition_matrix[current_state,])
+  iteration_counter <- iteration_counter + 1 #<3>
+  states_visited[iteration_counter] <- current_state #<4>
+}
+states_visited[1:(iteration_counter)] #<5>
+```
+1. The first state is always `0.000`
+2. Variable that keeps track of the current state of the Markov chain.
+3. We increment `iteration_counter` as soon as we draw the next state
+4. Save the next state in `states_visited`
+5. Only print out the states visited until the inning ends.
+
+This simulated half-inning consisted of 5 at-bats.
+The first at-bat started in state `0.000` and ended in `0.010`, which means that the first batter in the inning hit a double.
+The second at-bat started in state `0.010` but ended in `1.010`, which means that the second batter got out.
+Similarly, the third at-bat moved the game from `1.010` to `2.010`, which means that the third batter also got out.
+During the fourth simulated at-bat, however, the game state transitions from `2.010` to `2.000`.
+The only way for this to happen is for the batter to score and drive in the runner who was initially on second. 
+
+### Length of a Half-Inning {#sec-halfinning-length}
+
+Like we did in @sec-three-state, we can use simulation to estimate the distribution of the number of at-bats in a half-inning.
+Unlike that simulation, however, we will keep track of the whole sequence of states visited instead of the absorption time.
+
+```{r}
+#| label: half-inning2
+#| eval: true
+#| echo: true
+
+n_sim <- 5e4
+max_iterations <- 30
+states_visited <- matrix(NA, nrow = n_sim, ncol = max_iterations)
+
+for(r in 1:n_sim){
+  set.seed(479+r)
+  states_visited[r,1] <- "0.000"
+  current_state <- "0.000"
+  iteration_counter <- 1
+  while(current_state != "3.000" & iteration_counter < max_iterations){
+    
+    current_state <-
+      sample(x = unik_states$GameState,
+             size = 1, replace = 1,
+             prob = transition_matrix[current_state,])
+    iteration_counter <- iteration_counter+1
+    states_visited[r,iteration_counter] <- current_state
+  }
+}
+```
+
+Here are the first several rows of `states_visited`, which record the sequence of game states reached in some of our simulations
+
+```{r}
+#| label: first-ten-sims
+#| eval: true
+#| echo: true
+states_visited[1:10, 1:8]
+```
+We find, for instance, that in simulations 1, 4, 6, and 7, the pitching team retired the batting side in 3 at-bats.
+In Simulation 5, the last at-bat began in the state `1.100` and ended in `3.000`.
+From this we infer that the last at-bat involved an inning-ending double play.
+
+To determine how many at-bats there were in each simulated half-inning, we will first determine which entry in every row is equal to `3.000`.
+In the case of simulation 1, for instance, `3.000` is the 4th entry of row 1.
+Since the inning ends as soon as the game enters the state `3.000`, we need to subtract one from this number to compute the number of at-bats in the half-inning.
+
+```{r}
+#| label: inning-length
+#| eval: true
+#| echo: true
+
+inning_length <-
+  apply(states_visited, 
+        MARGIN = 1, #<1>
+        FUN = function(x){ return(which(x == "3.000") - 1)} ) #<2>
+table(inning_length)
+```
+In 19,138 of our 50,000 simulations, the inning ended after exactly 3 at-bats.
+And in `{r} sum(inning_length <= 6)` the inning ended with 6 or fewer at-bats.
+Interestingly, there are two simulations in which the half-inning included 15 at-bats.
+Here is the sequence of states visited in that first simulation
+```{r}
+#| label: states-15-inning
+#| eval: true
+#| echo: true
+states_visited[which(inning_length == 15)[1], 1:15]
+```
+In this simulated half-inning, the batting team drove in runs in the 4th, 6th, 7th, 8th, 9th, 13th, and 14th at-bats.
+
+### Runs Scored in a Half-Inning {#sec-runs-scored}
+
+To count how runs were scored in each of our 50,000 simulated half-innings, we need to determine how many runs were scored during each simulated at-bat.
+If we let $O_{t}$ and $B_{t}$ be the number of outs and runners at the **start** of at-bat $t$ and $O^{\star}_{t}$ and $B^{\star}_{t}$ be the numbers of outs and runners at the **end** of at-bat $t$, it is not difficult to verify that the number of runs scored during at-bat $t$ is
+$$
+(O_{t} + B_{t} + 1) - (O_{t}^{\star} + B_{t}^{\star}).
+$$
+As an example, suppose at an at-bat starts in state `1.110` and ends in state `1.000`.
+The only way for such a transition to occur is for the batter to hit a homerun and drive in runs from 1st and 2nd base.
+That is, three runs are scored during such an at-bat.
+We verify that $O_{t} = 1, B_{t} = 2, O_{t}^{\star} = 1$ and $B_{t}^{\star} = 0.$
+So, as expected $(O_{t} + B_{t} + 1) - (O_{t}^{\star} + B_{t}^{\star}) = 3.$
+
+We can elaborate our Markov chain simulation to count the number of runs scored in each at-bat.
+To do this, we will need to look up how many outs and baserunners there are based on each game-state.
+Rather than determining this programmatically, we can manually update the table `unik_states`.
+
+```{r}
+#| label: add-n-runner
+#| eval: true
+#| echo: true
+unik_states <-
+  unik_states |>
+  dplyr::mutate(
+    n_runners = 
+      dplyr::case_when(
+        BaseRunner == "000" ~ 0,
+        BaseRunner %in% c("100", "010", "001") ~ 1,
+        BaseRunner %in% c("110", "101", "011") ~ 2,
+        BaseRunner == "111" ~ 3))
+```
 
 
-Imagine that the game starts at 
+We now elaborate our Markov chain simulation code to (i) get the number of outs and baserunners at the beginning and end of each simulated at-bat and (ii) add the number of runs scored in the at-bat to a running tally of runs scored in the half-inning.
+
+:::{.callout-warning}
+## Warning
+This code takes several minutes. The lines looking up the number of outs and base-runners corresponding to each game state introduce some computational redundancies.
+:::
+
+```{r}
+#| label: runs-scored-simulation
+#| eval: true
+#| echo: true
+
+n_sim <- 5e4
+max_iterations <- 30
+states_visited <- matrix(NA, nrow = n_sim, ncol = max_iterations)
+
+runs_scored <- rep(NA, times = n_sim) #<1>
+
+for(r in 1:n_sim){
+  set.seed(479+r)
+  if(r %% 5000 == 0) print(paste("Simulation", r, "at", Sys.time()))
+  states_visited[r,1] <- "0.000"
+  current_state <- "0.000"
+  iteration_counter <- 1
+  runs <- 0 #<2>
+  
+  n_outs_start <- 0 #<3>
+  n_runners_start <- 0 #<3>
+  n_outs_end <- 0 #<3>
+  n_runners_end <- 0 #<3>
+  
+  while(current_state != "3.000" & iteration_counter < max_iterations){
+    
+    n_outs_start <- #<4>
+      unik_states |> dplyr::filter(GameState == current_state) |> dplyr::pull(Outs) #<4>
+    n_runners_start <- #<4>
+      unik_states |> dplyr::filter(GameState == current_state) |> dplyr::pull(n_runners) #<4>
+    
+    current_state <-
+      sample(x = unik_states$GameState,
+             size = 1, replace = 1,
+             prob = transition_matrix[current_state,])
+    iteration_counter <- iteration_counter+1
+    states_visited[r,iteration_counter] <- current_state
+    
+    n_outs_end <- #<4>
+      unik_states |> dplyr::filter(GameState == current_state) |> dplyr::pull(Outs) #<4>
+    n_runners_end <- #<4>
+      unik_states |> dplyr::filter(GameState == current_state) |> dplyr::pull(n_runners) #<4>
+
+    runs <- #<5>
+      runs + #<5>
+      (n_outs_start + n_runners_start + 1) - #<5>
+      (n_outs_end + n_runners_end) #<5>
+  }
+  runs_scored[r] <- runs #<6>
+}
+```
+1. Container to save the number of runs scored in each simulated half-inning
+2. Variable that will store the running tally of runs scored 
+3. Temporary variables storing the numbers of outs and baserunners at the start and end of an at-bat
+4. At the start of a simulated at-bat, get the numbers of outs and runners
+5. At the end of a simulated at-bat, get the numbers of outs and runners
+6. Add the number of runs scored in the current at-bat to the running tally
 
 
-### 
+## Looking Ahead {#sec-looking-ahead}
 
-### Estimating Expected Runs
+In [Lecture 15](lecture15.qmd), we will lean on some mathematical properties of Markov chains to  understand how many more at-bats a team can expect to have in a half-inning given the current game state.
+We will then estimate team-specific transition probability matrices, which will enable somewhat more granular Markov chain simulations.
+So that we don't have to re-compute it, we will save the transition matrix and the set of unique states
+```{r}
+#| label: save
+#| eval: true
+#| echo: true
+save(transition_matrix, unik_states, file = "atbat2024_markov_chain.RData")
+```
+
+
+
+## Exercises
+
+1. When simulating the number of runs scored in the half-inning, we initialized our Markov chains from `0.000`, which is the state at the start of every half-inning. By initializing at some other state --- say `1.000` --- we can study the distribution of runs scored **after** an at-bat beginning in that state. Use a Markov chain simulation to estimate the run expectancy for every state and compare it to the matrix we estimated in [Lecture 6](lecture06.qmd).
+
