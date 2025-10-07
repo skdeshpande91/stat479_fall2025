@@ -110,7 +110,7 @@ probs[2,1] * probs[2,3] * probs[4,2] +
 
 In our 4-team round-robin tournament, what is the probability that Team 3 finishes in the top-2 in terms of wins[^group]?
 To compute this probability by hand, we would need to enumerate all the possible ways in which Team 3 can finish in the top-2 positions after all 6 matches.
-While not impossible to do in our 4-team example, such manual computation becomes unweildly as we increase the number of teams.
+While not impossible to do in our 4-team example, such manual computation becomes challenging as we increase the number of teams.
 
 [^group]: Many competitions features a round-robin "group stage" with the top-2 finishers for each group advancing to a single-elimination tournament to decide the champion.
 
@@ -121,6 +121,9 @@ We can then compute the proportion of simulations in which Team 3 finishes in th
 To perform this simulation, we begin by enumerating each pair of teams using the `combn()` function.
 
 ```{r}
+#| label: combn-example
+#| eval: true
+#| echo: true
 combn(x = 1:4, m = 2)
 ```
 The function `combn()` returns an array with two rows (one for each team) and columns for every game in the tournament.
@@ -128,6 +131,9 @@ It will be more useful for us to convert this into a data table with rows for ea
 In this table, we will label the teams `player1` and `player2` and also append a column containing the probability that `player1` beats `player2`
 
 ```{r}
+#| label: design-example
+#| eval: true
+#| echo: true
 design <- 
   combn(x = 1:4, m = 2) |> 
   t() |> #<1>
@@ -393,7 +399,8 @@ In addition to the recording the date and time of each game, our data table `wd1
 #| eval: true
 #| echo: false
 set.seed(479)
-wd1hockey_2024_2025 |> dplyr::slice_sample(n=10)
+wd1hockey_2024_2025 |>
+  dplyr::slice_sample(n=10)
 ```
 
 In the following subsections, we will investigate what the columns `Type` and `Notes` record.
@@ -437,7 +444,7 @@ team_abbr <- readr::read_csv(file = "wd1hockey_teams.csv")
 team_abbr <- readr::read_csv(file = "../../data/wd1hockey_teams.csv")
 ```
 
-To whether the home team won a match, we first check whether `HomeScore` and `OppScore` are identical.
+To see whether the home team won a match, we first check whether `HomeScore` and `OppScore` are identical.
 If not, then we can check whether `HomeScore > OppScore`.
 But if they are the same, we can determine the winner by parsing the text in `Notes`.
 The following code block implement a function that executes this procedure.
@@ -595,7 +602,7 @@ fit <-
     outcome = cbind(home.win, away.win), #<1> 
     player1 = home.team, player2 = away.team, #<2>
     refcat = "Assumption", #<3>
-    data = results) 
+    data = results) #<4>
 ```
 1. The `outcome` argument needs to be a two-column matrix giving the number of home & away team wins for pair of home & away teams. 
 2. We use `player1` and `player2` to indicate the home and way teams
@@ -679,7 +686,7 @@ fit_nh <- update(fit, refcat = "New Hampshire")
 lambda_hat_nh <- BradleyTerry2::BTabilities(fit_nh)
 lambda_hat_nh[c("Assumption", "New Hampshire", "Wisconsin", "Ohio State"),]
 ```
-Visualizing these shifted we find
+Visualizing these shifted $\hat{\lambda}_{j}$' we find that some teams are significantly stronger than New Hampshire and others are substantially weaker.
 
 ```{r}
 #| label: fig-lambda-hat-nh

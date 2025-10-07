@@ -221,6 +221,14 @@ window.Quarto = {
     <a class="dropdown-item" href="../lectures/lecture13.html">
  <span class="dropdown-text">Lecture 13: Tournament Simulation</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture14.html">
+ <span class="dropdown-text">Lecture 14: Markov Chains I</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture15.html">
+ <span class="dropdown-text">Lecture 15: Markov Chains II</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
@@ -271,6 +279,10 @@ window.Quarto = {
         <li>
     <a class="dropdown-item" href="../slides/lecture11.html">
  <span class="dropdown-text">Lecture 11: Pitch Framing</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture12.html">
+ <span class="dropdown-text">Lecture 12: Bradley-Terry Models I</span></a>
   </li>  
     </ul>
   </li>
@@ -377,6 +389,18 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="../lectures/lecture13.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Lecture 13: Tournament Simulation</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture14.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 14: Markov Chains I</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture15.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 15: Markov Chains II</span></a>
   </div>
 </li>
     </ul>
@@ -535,7 +559,7 @@ window.Quarto = {
 </section>
 <section id="sec-ex-tournament" class="level3">
 <h3 class="anchored" data-anchor-id="sec-ex-tournament">Example: Tournament Simulation</h3>
-<p>In our 4-team round-robin tournament, what is the probability that Team 3 finishes in the top-2 in terms of wins<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>? To compute this probability by hand, we would need to enumerate all the possible ways in which Team 3 can finish in the top-2 positions after all 6 matches. While not impossible to do in our 4-team example, such manual computation becomes unweildly as we increase the number of teams.</p>
+<p>In our 4-team round-robin tournament, what is the probability that Team 3 finishes in the top-2 in terms of wins<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>? To compute this probability by hand, we would need to enumerate all the possible ways in which Team 3 can finish in the top-2 positions after all 6 matches. While not impossible to do in our 4-team example, such manual computation becomes challenging as we increase the number of teams.</p>
 <p>A much more elegant solution is to estimate this probability via simulation. Specifically, we can use the estimated match outcome probabilities to simulate each of the 6 games in our tournament many, many times. We can then compute the proportion of simulations in which Team 3 finishes in the top-2 in terms of wins.</p>
 <p>To perform this simulation, we begin by enumerating each pair of teams using the <code>combn()</code> function.</p>
 <div class="cell">
@@ -847,7 +871,7 @@ window.Quarto = {
 <div class="cell">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>team_abbr <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="at">file =</span> <span class="st">"wd1hockey_teams.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>To whether the home team won a match, we first check whether <code>HomeScore</code> and <code>OppScore</code> are identical. If not, then we can check whether <code>HomeScore &gt; OppScore</code>. But if they are the same, we can determine the winner by parsing the text in <code>Notes</code>. The following code block implement a function that executes this procedure.</p>
+<p>To see whether the home team won a match, we first check whether <code>HomeScore</code> and <code>OppScore</code> are identical. If not, then we can check whether <code>HomeScore &gt; OppScore</code>. But if they are the same, we can determine the winner by parsing the text in <code>Notes</code>. The following code block implement a function that executes this procedure.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Function that determines if the home team won the game</summary>
@@ -1002,7 +1026,7 @@ window.Quarto = {
 <button class="code-annotation-anchor" data-target-cell="annotated-cell-27" data-target-annotation="1">1</button><span id="annotated-cell-27-3" class="code-annotation-target"><a href="#annotated-cell-27-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">outcome =</span> <span class="fu">cbind</span>(home.win, away.win),</span>
 <button class="code-annotation-anchor" data-target-cell="annotated-cell-27" data-target-annotation="2">2</button><span id="annotated-cell-27-4" class="code-annotation-target"><a href="#annotated-cell-27-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">player1 =</span> home.team, <span class="at">player2 =</span> away.team,</span>
 <button class="code-annotation-anchor" data-target-cell="annotated-cell-27" data-target-annotation="3">3</button><span id="annotated-cell-27-5" class="code-annotation-target"><a href="#annotated-cell-27-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">refcat =</span> <span class="st">"Assumption"</span>,</span>
-<span id="annotated-cell-27-6"><a href="#annotated-cell-27-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> results) </span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-27" data-target-annotation="4">4</button><span id="annotated-cell-27-6" class="code-annotation-target"><a href="#annotated-cell-27-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> results)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-hidden code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-27" data-target-annotation="1">1</dt>
@@ -1016,6 +1040,10 @@ window.Quarto = {
 <dt data-target-cell="annotated-cell-27" data-target-annotation="3">3</dt>
 <dd>
 <span data-code-cell="annotated-cell-27" data-code-lines="5" data-code-annotation="3">We manually specify the reference team for whom we set <span class="math inline">\(\lambda = 0.\)</span></span>
+</dd>
+<dt data-target-cell="annotated-cell-27" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-27" data-code-lines="6" data-code-annotation="4"><code>BTm</code> looks for the variables referenced in the <code>outcome</code>, <code>player1</code>, and <code>player2</code> arguments within the data table passed in the <code>data</code> argument.</span>
 </dd>
 </dl>
 </div>
@@ -1120,7 +1148,7 @@ Wisconsin      4.679297 0.9932217
 Ohio State     3.184629 0.7887300</code></pre>
 </div>
 </div>
-<p>Visualizing these shifted we find</p>
+<p>Visualizing these shifted <span class="math inline">\(\hat{\lambda}_{j}\)</span>’ we find that some teams are significantly stronger than New Hampshire and others are substantially weaker.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-lambda-hat-nh" class="quarto-float quarto-figure quarto-figure-center anchored">

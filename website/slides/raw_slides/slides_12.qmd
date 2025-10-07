@@ -1,0 +1,634 @@
+---
+title: "STAT 479 Lecture 12"
+subtitle: "Bradley-Terry Models I"
+format: revealjs
+execute:
+  cache: true
+---
+
+
+# Motivation
+
+## NCAA D1 Women's Hockey (2024-25) {.smaller}
+- WIS went 38-1-2 & won the National Championship
+- OSU went 29-8-0 & lost against WIS
+- Head-to-Head: 2-1-1
+
+. . . 
+
+- How much better was WIS than OSU?
+
+. . . 
+
+$$
+\mathbb{P}(\textrm{WIS beats OSU}) = \textrm{???}
+$$
+
+
+
+<!--
+# Match Result Data
+
+## Raw Data{.smaller}
+
+- Results from all D1 hockey games from www.uscho.org
+
+- Simple but not scalable: copy & paste directly into spreadsheet
+
+## HTML Basics I {.smaller}
+
+- Most websites content specified in **H**yper**T**ext **M**arkup **L**anguage
+- Hierarchical structure involving 
+  - Elements: delimited by starting and ending tags (e.g. `<tag>` and `</tag>`)
+  - Content: everything between tags
+  - Attributes: optional, specified inside tag brackets `<` and `>`
+
+```
+<html>
+<head>
+  <title>Page title</title>
+</head>
+<body>
+  <h1 id='first'>A heading</h1>
+  <p>Some text &amp; <b>some bold text.</b></p>
+  <img src='myimg.png' width='100' height='100'>
+</body>
+```
+
+- We generally want to extract contents 
+- `id` & `class` attributes used by **C**ascading **S**tyle **S**heets (CSS) to control visual appearance
+
+## HTML Basics II {.smaller}
+
+- Common HTML elements include
+  - `<head>`: machine-readable meta-data like title, style sheet specification, etc.
+  - `<body>`: main content (only one per document)
+  - Section headings: `<h1>` (highest), `<h2>`, ... `<h6>` (lowest)
+  - Lists (`<ol>` & `<ul>`) and list elements (`<li>`)
+  - `<p>`: paragraph, often (but not always) for blocks of text
+  - In-line tags affecting formatting: `<i>` (italics) `<b>` (bold)
+  
+- See [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements) for large list
+
+## Reading HTML w/ **rvest** {.smaller}
+
+- **rvest**: R package for scraping data from websites
+- Basic function `read_html`
+```{r}
+#| label: read-course-page
+#| eval: true
+#| echo: true
+html <- rvest::read_html("https://skdeshpande91.github.io/stat479_fall2025/lectures/lecture12.html")
+html
+```
+
+
+
+
+
+## CSS Selectors
+
+- CSS help define the visual styling of HTML documents
+- Define patterns for locating HTML elements w/in document
+- This property makes them especially useful for scraping
+
+- `html_elements()`: selects all HTML elements matching a particular CSS selector
+
+:::{.panel-tabset}
+
+## Level 1 Headings
+```{r}
+#| label: html-elements-h1
+#| eval: true
+#| echo: true
+html |> rvest::html_elements(css = "h1")
+```
+
+## Level 2 Headings
+```{r}
+#| label: html-elements-h2
+#| eval: true
+#| echo: true
+html |> rvest::html_elements(css = "h2")
+```
+:::
+
+## Paragraphs
+```{r}
+#| label: html-elements-p
+#| eval: true
+#| echo: true
+html |> rvest::html_elements(css = "p")
+
+```
+
+## Selector Gadget
+
+- For more complex selections, [Selector Gadget](https://rvest.tidyverse.org/articles/selectorgadget.html) is really helpful
+  - Interactive way to determine the appropriate CSS selector
+  - Save it to your Bookmarks
+  
+-->
+
+# Bradley-Terry Models
+
+## The Basic Model
+
+- Suppose there are $n$ games played between $p$ teams
+- For each team $j$, there is a **latent** strength $\lambda_{j}$
+$$
+\mathbb{P}(\textrm{team i beats team j}) = \frac{e^{\lambda_{i}}}{e^{\lambda_{i}} + e^{\lambda_{j}}} = \frac{1}{1 + e^{-1 \times (\lambda_{i} - \lambda_{j})}}
+$$
+
+- Log-odds of $i$ beating $j$: $\lambda_{i} - \lambda_{j}.$
+
+## Example: 4 Team Round-Robin
+
+- Suppose $\lambda_{1} = 1, \lambda_{2} = 0.5, \lambda_{3} = 0.3$ and $\lambda_{4} = 0.$
+$$
+\mathbb{P}(\textrm{team 1 beats team 2}) = \frac{e^{1}}{e^{1} + e^{0.5}} \approx 62\%
+$$
+
+
+:::{.panel-tabset}
+
+
+### Single Prob.
+```{r}
+#| label: basic-bt-example
+#| echo: true
+#| eval: true
+lambda <- c(1, 0.5, 0.3, 0)
+1/(1 + exp(-1 * (lambda[1] - lambda[2]))) #<1>
+```
+
+### `outer`
+```{r}
+#| label: outer-demo
+#| eval: true
+#| echo: true
+outer(X = lambda, Y = lambda, FUN = "-") #<1>
+```
+
+### Pairwise Probs.
+```{r}
+#| label: example-pairwise-probs
+#| eval: true
+#| echo: true
+probs <- 1/(1 + exp(-1 * outer(X = lambda, Y = lambda, FUN = "-")))
+diag(probs) <- NA
+round(probs, digits = 3)
+```
+
+
+:::
+
+## Example: Tournament Simulation I{.smaller}
+
+- Consider tournament w/ 4 teams and $\lambda_{1} = 1, \lambda_{2} = 0.5, \lambda_{3} = 0.3$ and $\lambda_{4} = 0.$
+- What is prob. that Team 3 finishes in top-2 in terms of wins?
+
+- Enumerate all pairwise probabilities
+```{r}
+#| label: design-example
+#| eval: true
+#| echo: false
+design <- 
+  combn(x = 1:4, m = 2) |> 
+  t() |> #<1>
+  as.data.frame() |> #<2>
+  dplyr::rename(player1 = V1, player2 = V2) |> #<3>
+  dplyr::rowwise() |>
+  dplyr::mutate(prob = probs[player1, player2]) |> #<4>
+  dplyr::ungroup()
+design
+```
+
+## Example: Tournament Simulation II{.smaller}
+
+- Flip 6 coins, one per match
+  - Heads: `player1` wins; Tails: `player2` wins
+- `rbinom(n, size, prob)`: simulate from a **Binomial** distribution
+- Coin flips are special case with `size = 1`
+  - `n`: number of coins to flip
+  - `prob`: prob. of each coin landing heads
+```{r}
+#| label: simulate-rr4-outcome-single
+#| eval: true
+#| echo: true
+set.seed(479)
+outcomes <- rbinom(n = 6, size = 1, prob = design$prob)
+cbind(design, outcomes)
+```
+
+## Example: Tournament Simulation III{.smaller}
+
+:::{.panel-tabset}
+
+### Temporary Table
+- List players & winner of each match
+```{r}
+#| label: example-tmp-outcomes
+#| eval: true
+#| echo: true
+tmp_df <-
+  design |>
+  dplyr::select(player1, player2) |>
+  dplyr::mutate(
+    outcome = outcomes,
+    winner = ifelse(outcome == 1, player1, player2),
+    player1 = factor(player1, levels = 1:4),
+    player2 = factor(player2, levels = 1:4),
+    winner = factor(winner, levels = 1:4))
+tmp_df
+```
+
+### Count Wins
+- Count wins by grouping on `winner` & counting occurrences
+- If one team loses all games, they won't appear in grouped summary
+- `complete`: fills in missing combinations
+```{r}
+#| label: example-count-wins
+#| eval: true
+#| echo: true
+wins <-
+  tmp_df |>
+  dplyr::group_by(winner) |>
+  dplyr::summarise(Wins = dplyr::n()) |>
+  dplyr::rename(Team = winner) |>
+  tidyr::complete(Team, fill = list(Wins = 0))
+wins
+```
+
+:::
+
+## Example: Tournament Simulation IV{.smaller}
+
+:::{.panel-tabset}
+
+### Code
+- Replay tournament 5000 times
+```{r}
+#| label: simulate-rr4
+#| eval: true
+#| echo: true
+
+n_sims <- 5000
+simulated_wins <- matrix(data = NA, nrow = n_sims, ncol = 4)
+for(r in 1:n_sims){
+  set.seed(479+r)
+  outcomes <- rbinom(n = 6, size = 1, prob = design$prob)
+  wins <-
+    design |>
+    dplyr::select(player1, player2) |>
+    dplyr::mutate(
+      outcome = outcomes,
+      winner = ifelse(outcome == 1, player1, player2),
+      winner = factor(winner, levels = unique(c(design$player1, design$player2)))) |>
+  dplyr::group_by(winner) |>
+  dplyr::summarise(Wins = dplyr::n()) |>
+  dplyr::rename(Team = winner) |>
+  tidyr::complete(Team, fill = list(Wins = 0))
+  simulated_wins[r,] <- wins |> dplyr::pull(Wins)
+}
+```
+
+### Team 1's Performance
+
+```{r}
+#| label: tabulate-rr4-team1
+#| eval: true
+#| echo: true
+table(simulated_wins[,1])
+```
+
+### Ranking w/ Ties
+- We will rank teams by *negative* number of wins
+- In case of ties: assign **minimum** possible rank
+- E.g.: say Teams 1 & 2 won 2 games each and 3 & 4 won 1 game each
+  - Teams 1 & 2 tied for 1st and Teams 3 & 4 ties for 3rd
+```{r}
+#| label: rank-tie-example
+#| eval: true
+#| echo: true
+rank(-1*c(2,2,1,1), ties.method = "min")
+```
+
+### Team Rankings
+
+- $\mathbb{P}(\textrm{Team 3 is in top-2}) \approx 53.1%$ 
+
+```{r}
+#| label: rank-rr4
+#| eval: true
+#| echo: true
+simulated_ranks <-
+  t(
+    apply(-1*simulated_wins, MARGIN = 1,  
+        FUN = rank, ties.method = "min")) 
+ table(simulated_ranks[,3])
+ 
+ round(mean(simulated_ranks[,3] <= 2), digits = 3)
+```
+
+:::
+
+## Identifiability{.smaller}
+
+- Basic BT model: $\textrm{P}(i \textrm{beats} j)$ depends only on **difference** $\lambda_{i} - \lambda_{j}$
+- Probabilities unchanged after constant shift. E.g.: $\lambda_{j} \rightarrow \lambda_{j} + 5$ for all $j$
+- Practically: we can only estiamtes latent strengths **up to an additive constant**
+- Often we fix one $\lambda_{j} = 0$ (a "reference team")
+
+# Fitting BT Models
+
+
+## Overview{.smaller}
+
+- Goal: Estimate $\lambda_{j}$'s for all D1 Women's Hockey Teams
+- Requirement: a data table (one row per match) recording
+  - Identities of the two teams
+  - Identity of the winner
+- Scrape from USCHO website
+  - Before 10/6: code on course website worked
+  - After 10/6: USCHO changed their backend (so scraping code won't work...)
+- Will post a complete data table on Canvas
+
+## Preview of Data
+
+```{r}
+#| label: data-view
+#| eval: true
+#| echo: false
+load("wd1hockey_2024_2025.RData")
+set.seed(479)
+wd1hockey_2024_2025 |>
+  dplyr::slice_sample(n=10)
+```
+
+
+## Data Preparation{.smaller}
+
+- Appending a column for the winner
+  - Most games, `HomeScore` differs from `OppScore`
+  - Often when `HomeScore==OppScore`, game decided in shoot out
+- To determine winner of shootouts, must parse team name & abbreviation
+  - E.g. "WIS" for Wisconsin; "OSU" for Ohio State; etc.
+- Add column recording whether home team or away team won
+- Extract exhibition & tournament games
+  - Mostly by parsing the `Notes` column
+- See [lecture notes](../../lectures/lecture12.qmd#sec-scraping) for details
+
+## The **BradleyTerry2** Package {.smaller}
+
+- We will use the [**BradleyTerry2**](https://github.com/hturner/BradleyTerry2) package
+```{r}
+#| label: install-bt2
+#| eval: false
+#| echo: true
+devtools::install_github("hturner/BradleyTerry2")
+```
+
+- Package has rather specific syntax, so it's important to read [documentation](https://cran.r-project.org/web/packages/BradleyTerry2/vignettes/BradleyTerry.html)
+
+```{r}
+#| label: prepare-data
+#| eval: true
+#| echo: false
+#| output: false
+#| message: false
+#| warning: false
+team_abbr <- readr::read_csv(file = "../../../data/wd1hockey_teams.csv")
+
+load("../../lectures/wd1hockey_regseason_2024_2025.RData")
+unik_teams <- sort(unique(c(no_ties$Home, no_ties$Opponent)))
+
+
+results <-
+  no_ties |>
+  dplyr::rename(home.team = Home, away.team = Opponent) |>
+  dplyr::group_by(home.team, away.team) |> 
+  dplyr::summarise(
+    home.win = sum(Home_Winner), 
+    away.win = sum(Opp_Winner), .groups = 'drop') |> 
+  dplyr::mutate(
+    home.team = factor(home.team, levels = unik_teams), 
+    away.team = factor(away.team,levels = unik_teams)) 
+```
+
+- **BradleyTerry2** expects a data table w/
+  - Separate row for each home team - away team pair
+  - Two columns recording the number of home & away team wins
+
+```{r}
+#| label: view-wisco-home
+#| eval: true
+#| echo: true
+set.seed(123)
+results |> dplyr::filter(home.team == "Wisconsin") |> dplyr::slice_sample(n=5)
+```
+
+
+## Model Fitting{.smaller}
+
+:::{.panel-tabset}
+
+### Code
+- `BTm` allows us to manually specify reference team (w/ $\lambda_{j} = 0$)
+```{r}
+#| label: fit-bt
+#| eval: true
+#| echo: true
+
+fit <-
+  BradleyTerry2::BTm(
+    outcome = cbind(home.win, away.win),  
+    player1 = home.team, player2 = away.team, 
+    refcat = "Assumption", 
+    data = results) 
+```
+
+### Summary
+```{r}
+#| label: summarize-bt-fit
+#| eval: true
+#| echo: true
+summary(fit)
+```
+
+### Extracting $\hat{\lambda}_{j}$'s
+
+```{r}
+#| label: extract-lambda
+#| eval: true
+#| echo: true
+lambda_hat <- BradleyTerry2::BTabilities(fit)
+lambda_hat[c("Wisconsin", "Ohio State", "Cornell", "Minnesota"),]
+```
+
+:::
+
+## Estimated Team Strengths
+
+```{r}
+#| label: fig-lambda-hat-raw
+#| eval: true
+#| echo: false
+#| fig-width: 8
+#| fig-asp: 0.5625
+#| fig-cap: Most teams are favored against the reference team (Assumption College)
+
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+oi_colors <- palette.colors(palette = "Okabe-Ito")
+
+n_teams <- nrow(lambda_hat) #<1>
+y_limit <- range(c(lambda_hat[,1] - 2*lambda_hat[,2], lambda_hat[,1] + 2*lambda_hat[,2])) #<1>
+
+ix <- order(lambda_hat[,1]) #<2>
+plot(1, type = "n", 
+     main = "Latent strength (relative to Assumption)",
+     xlim = c(0, n_teams), ylim = y_limit,
+     xaxt = "n", xlab = "",
+     ylab = "Estimated lambda")
+abline(h = 0, col = oi_colors[2], lwd = 0.5, lty = 2)
+for(i in 1:n_teams){
+  lines(x = c(i,i), 
+        y = lambda_hat[ix[i],"ability"] + c(-2,2) * lambda_hat[ix[i], "s.e."],  #<3>
+        col = oi_colors[9], lwd = 0.5)
+  points(x = i, y = lambda_hat[ix[i],"ability"], pch = 16, cex = 0.5, col = oi_colors[1])
+    team_name <- rownames(lambda_hat)[ix[i]]
+  abbr <- 
+    team_abbr |>
+    dplyr::filter(team == team_name) |> dplyr::pull(abbr)
+  if(i %% 2 == 0){
+      text(x = i, 
+       y = 0.25 + lambda_hat[ix[i], "ability"]  + 2 * lambda_hat[ix[i], "s.e."],
+       labels = abbr, cex = 0.7)
+  } else{
+      text(x = i, 
+       y = -0.25 + lambda_hat[ix[i], "ability"]  - 2 * lambda_hat[ix[i], "s.e."],
+       labels = abbr, cex = 0.7)
+  }
+}
+
+```
+
+## Changing Reference Team
+
+:::{.panel-tabset}
+
+### Code
+```{r}
+#| label: update-refcat
+#| eval: true
+#| echo: true
+fit_nh <- update(fit, refcat = "New Hampshire")
+lambda_hat_nh <- BradleyTerry2::BTabilities(fit_nh)
+lambda_hat_nh[c("Assumption", "New Hampshire", "Wisconsin", "Ohio State"),]
+```
+
+### Visualization
+```{r}
+#| label: fig-lambda-hat-nh
+#| eval: true
+#| echo: false
+#| fig-width: 8
+#| fig-asp: 0.5625
+#| fig-cap: "Some teams are significantly stronger and some teams are significantly weaker than New Hampshire"
+
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+n_teams <- nrow(lambda_hat_nh) 
+y_limit <- range(c(lambda_hat_nh[,1] - 2*lambda_hat_nh[,2], lambda_hat_nh[,1] + 2*lambda_hat_nh[,2]))
+
+ix <- order(lambda_hat_nh[,1]) 
+plot(1, type = "n", 
+     main = "Latent strength (relative to UNH)",
+     xlim = c(0, n_teams), ylim = y_limit,
+     xaxt = "n", xlab = "",
+     ylab = "Estimated lambda")
+abline(h = 0, col = oi_colors[2], lwd = 0.5, lty = 2)
+for(i in 1:n_teams){
+  lines(x = c(i,i), 
+        y = lambda_hat_nh[ix[i],"ability"] + c(-2,2) * lambda_hat_nh[ix[i], "s.e."],  #<3>
+        col = oi_colors[9], lwd = 0.5)
+  points(x = i, y = lambda_hat_nh[ix[i],"ability"], pch = 16, cex = 0.5, col = oi_colors[1])
+  team_name <- rownames(lambda_hat_nh)[ix[i]] 
+  abbr <- 
+    team_abbr |>
+    dplyr::filter(team == team_name) |> dplyr::pull(abbr)
+  if(i %% 2 == 0){
+      text(x = i, 
+       y = 0.25 + lambda_hat_nh[ix[i], "ability"]  + 2 * lambda_hat_nh[ix[i], "s.e."],
+       labels = abbr, cex = 0.7)
+  } else{
+      text(x = i, 
+       y = -0.25 + lambda_hat_nh[ix[i], "ability"]  - 2 * lambda_hat_nh[ix[i], "s.e."],
+       labels = abbr, cex = 0.7)
+  }
+}
+```
+:::
+
+# Best-of-5?
+
+## NCAA D1 Championship
+
+- Currently, championship decided w/ a single game
+  - 2024-25: WIS defeated OSU in overtime
+
+- According to our model, WIS would win 81% of the time
+```{r}
+#| label: wi-osu-single-pred
+#| eval: true
+#| echo: true
+1/(1 + exp(-1 * (lambda_hat["Wisconsin", "ability"] - lambda_hat["Ohio State", "ability"])))
+```
+
+- What if NCAA moved to a best-of-5 series?
+
+## Simulating Series Once {.smaller}
+```{r}
+#| label: simulate-series-single
+#| eval: true
+#| echo: true
+wi_wins <- 0 
+osu_wins <- 0 
+
+wi_prob <- 
+  1/(1 + exp(-1 * (lambda_hat["Wisconsin", "ability"] - lambda_hat["Ohio State", "ability"]))) #<2>
+
+game_counter <- 0 
+outcomes <- rep(NA, times= 5)
+set.seed(481)
+while( wi_wins  < 3 & osu_wins < 3 & game_counter < 5){ 
+  game_counter <- game_counter + 1
+  outcomes[game_counter] <- rbinom(n = 1, size = 1, prob = wi_prob) 
+  
+  if(outcomes[game_counter] == 1) wi_wins <- wi_wins + 1 
+  else if(outcomes[game_counter] == 0) osu_wins <- osu_wins + 1 
+
+}
+if(wi_wins == 3){ 
+  winner <- "Wisconsin"
+} else if(osu_wins == 3){
+  winner <- "Ohio State"
+} else{
+  winner <- NA
+}
+ 
+cat("Series ended after", game_counter, " games. Winner = ", winner, "\n")
+cat("Wisconsin: ", wi_wins, " Ohio State: ", osu_wins, "\n")
+cat("Game results:", outcomes, "\n")
+```
+
+## Repeated Simulations{.smaller}
+
+- Repeating the simulation 5,000 times (each time w/ different seed)
+  - WIS won series ~95% of the time
+  - Series ended in 3 games about 55% of the time
+  - Series went to 5 games about 13% of the time
+
+## Looking Ahead
+
+- Basic BT model does not account for home-team advantage
+- [Lecture 13](../../lectures/lecture13.qmd): simulate entire Frozen 4
