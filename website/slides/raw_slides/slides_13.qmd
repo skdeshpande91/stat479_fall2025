@@ -1,0 +1,422 @@
+---
+title: "STAT 479 Lecture 13"
+subtitle: "Bradley-Terry Models II"
+format: revealjs
+execute:
+  cache: true
+---
+
+## Recap of Lecture 12
+
+- Bradley-Terry model: team $j$ has latent strength $\lambda_{j}$
+- $\textrm{Log-odds}(i \textrm{beats} j) = \lambda_{i} - \lambda_{j}$
+$$
+\mathbb{P}(i \textrm{beats} j ) = \frac{1}{1 + e^{-(\lambda_{i} - \lambda_{j})}} = \frac{e^{\lambda_{i}}}{e^{\lambda_{i}} + e^{\lambda_{j}}}.
+$$
+ 
+. . . 
+
+
+- 2024 NCAA D1 Women's Hockey results: $\hat{\lambda}_{\textrm{WIS}} \approx 4.68$ & $\hat{\lambda}_{\textrm{OSU}} \approx 3.18$
+```{r}
+#| label: wis-osu-simple
+#| echo: true
+#| eval: true
+1/(1 + exp(-1 * (4.68 - 3.18)))
+```
+
+
+## BT with Home Advantage I
+
+- Basic BT model: $\mathbb{P}(i \textrm{beats} j)$ does not depend on location
+- Elaborated model: introduce a latent intercept $\lambda_{0}$ so that
+$$
+\begin{align*}
+\mathbb{P}(\textrm{team i beats team j at i's home}) &= \frac{e^{\lambda_{i} + \lambda_{0}}}{e^{\lambda_{i} + \lambda_{0}} + e^{\lambda_{j}}} \\
+& \\
+&= \frac{1}{1 + e^{-1 \times (\lambda_{i} + \lambda_{0} - \lambda_{j})}}
+\end{align*}
+$$
+
+## BT w/ Home Advantage II
+
+- Probability that $i$ beats $j$ now depends on location
+- At $i$'s home: $\frac{e^{\lambda_{0} + \lambda_{i}}}{e^{\lambda_{0} + \lambda_{i}} + e^{\lambda_{j}}}$
+
+. . .
+
+- At $j$'s home: $\frac{e^{\lambda_{i}}}{e^{\lambda_{i}} + e^{\lambda_{j} + \lambda_{0}}}$
+
+. . . 
+
+- At a neutral site: $\frac{e^{\lambda_{i}}}{e^{\lambda_{i}} + e^{\lambda_{j}}}$
+
+## Data Preparation I
+
+- Data scraped from USCHO does not record game location
+- Step 1: is game at neutral site
+- Manually impute using some heuristics
+  - Most regular season games at listed home team's home
+  - Tournaments on case-by-case basis
+
+- See [course notes](../../lectures/lecture13.qmd#sec-data-prep) for details
+
+## Data Preparation II
+
+- Add neutral site indicator 
+
+```{r}
+#| label: add-neutral-site
+#| eval: true
+#| echo: true
+
+load("wd1hockey_regseason_2024_2025.RData")
+
+no_ties <-
+  no_ties |>
+  dplyr::mutate(
+    neutral = dplyr::case_when(
+      grepl("IceBreaker", Notes) ~ 1,
+      grepl("East/West", Notes) & Home != "Minnesota" ~ 1,
+      grepl("Nutmeg", Notes) & Home != "Sacred Heart" ~ 1,
+      grepl("Mayor", Notes) & Home == "Rensselaer" ~ 1,
+      grepl("Smashville", Notes) ~ 1,
+      grepl("Beanpot", Notes) & Home != "Northeastern" ~ 1, 
+      Date == "3/7/2025" & Home == "St. Lawrence" & Opponent == "Colgate" ~ 1,
+      Date == "3/7/2025" & Home == "Minnesota" & Opponent == "Ohio State" ~ 1,
+      Date == "3/8/2025" & Home == "Minnesota" & Opponent == "Wisconsin" ~ 1,
+      .default = 0))
+```
+
+## Data Preparation III{.smaller}
+
+- **BradleyTerry2** expects data in following format
+  - One row per combination of home team, away team, and location
+  - Columns counting  home team and away team wins
+- New columns `home.team` and `away.team`
+  - These variables are themselves data frames 
+  - Columns recording team identity & whether they are at home
+```{r}
+#| label: prep-data
+#| eval: true
+#| echo: true
+unik_teams <- sort(unique(c(no_ties$Home, no_ties$Opponent)))
+
+results <-
+  no_ties |>
+  dplyr::rename(home.team = Home, away.team = Opponent) |>
+  dplyr::group_by(home.team, away.team, neutral) |> 
+  dplyr::summarise(
+    home.win = sum(Home_Winner), 
+    away.win = sum(Opp_Winner), .groups = 'drop') |> 
+  dplyr::mutate(
+    home.team = factor(home.team, levels = unik_teams), 
+    away.team = factor(away.team,levels = unik_teams),
+    home.athome = ifelse(neutral == 1, 0, 1),
+    away.athome = 0)
+```
+
+## Model Fitting
+
+:::{.panel-tabset}
+
+### Temporary Data Table
+
+```{r}
+#| label: tmp-df
+#| eval: true
+#| echo: true
+tmp_df <- data.frame(home.win = results$home.win, away.win = results$away.win)
+tmp_df$home.team <- data.frame(team = results$home.team, at.home = results$home.athome)
+tmp_df$away.team <- data.frame(team = results$away.team, at.home = results$away.athome)
+
+```
+
+### Model Fit
+
+```{r}
+#| label: fit-model
+#| eval: true
+#| echo: true
+fit <-
+  BradleyTerry2::BTm(
+    outcome = cbind(home.win, away.win),
+    player1 = home.team, player2 = away.team,
+    formula = ~ team + at.home, #<1>
+    refcat = "New Hampshire", #<2>
+    id = "team", #<3>
+    data = tmp_df) 
+```
+
+
+### Summary
+```{r}
+#| label: model-summary
+#| eval: true
+#| echo: true
+summary(fit)
+```
+
+:::
+
+## Fitted Probabilities
+
+:::{.panel-tabset}
+
+### Estimates
+```{r}
+#| label: extract-params
+#| echo: true
+#| eval: true
+lambda0_hat <- coef(fit)["at.home"] 
+lambda_hat <- BradleyTerry2::BTabilities(fit)
+cat("Intercept: ", lambda0_hat, "\n")
+cat("WIS: ", lambda_hat["Wisconsin", "ability"], "\n")
+cat("OSU: ", lambda_hat["Ohio State", "ability"], "\n")
+```
+
+### Log-Odds
+
+- Log-odds that WIS beats OSU:
+  - At WIS: $\hat{\lambda}_{\textrm{WIS}} + \hat{\lambda}_{0} - \hat{\lambda}_{\textrm{OSU}}.$
+  - At OSU: $\hat{\lambda}_{\textrm{WIS}} - (\hat{\lambda_{\textrm{OSU}}} + \hat{\lambda}_{0}).$
+  - Neutral site: $\hat{\lambda}_{\textrm{WIS}} - \hat{\lambda}_{\textrm{OSU}}.$
+
+### Probabilities
+
+- `diff`: quantifies different in team strengths ($\textrm{WIS} - \textrm{OSU}$)
+
+```{r}
+#| label: wis-osu-single-game-probs
+#| eval: true
+#| echo: true
+diff <- lambda_hat["Wisconsin","ability"] - lambda_hat["Ohio State", "ability"]
+cat("At WIS:", round(100 * 1/(1 + exp(-1 * (diff + lambda0_hat))), digits = 2), "%\n")
+cat("AT OSU:", round(100 * 1/(1 + exp(-1 * (diff - lambda0_hat))), digits = 2), "%\n")
+cat("AT neutral site:", round(100 * 1/(1 + exp(-1 * (diff))), digits = 2), "%\n")
+```
+
+:::
+
+# Frozen 4 Simulation
+
+## Background
+
+- Single-elimination tournament w/ last four teams
+- WIS, OSU, COR, and MIN
+- First semi-final (SF1): WIS vs MIN
+- Second semi-final (SF2): OSU vs COR
+- Finals: winner SF1 vs winner SF2
+- All games played at Ridder Arena (MIN's home ice)
+
+## Computing Matchup Probabilities{.smaller}
+
+- `diff`: difference in team strengths (log-odds scale)
+- `prob`: $\mathbb{P}(\textrm{higher seed beats lower seed})$
+
+```{r}
+#| label: compute-orig-prob
+#| echo: true
+#| eval: true
+
+seeds <- data.frame(
+  Team = c("Wisconsin", "Ohio State", "Cornell", "Minnesota"),
+  Seed = 1:4)
+
+possible_matchups <-
+  expand.grid(Hi = seeds$Team, Lo = seeds$Team) |>
+  as.data.frame() |>
+  dplyr::inner_join(y = seeds |> dplyr::rename(Hi = Team, Hi.Seed=Seed), by = "Hi") |>
+  dplyr::inner_join(y = seeds |> dplyr::rename(Lo = Team, Lo.Seed=Seed), by = "Lo") |>
+  dplyr::filter(Hi.Seed < Lo.Seed) |>
+  dplyr::mutate(neutral = ifelse(Hi == "Minnesota" | Lo == "Minnesota", 0, 1)) |>
+  dplyr::mutate(
+    diff = lambda_hat[Hi, "ability"] - lambda_hat[Lo, "ability"],
+    prob = dplyr::case_when(
+      neutral == 1 ~ 1/(1 + exp(-1 * diff)),
+      neutral == 0 & Hi == "Minnesota" ~ 1/(1 + exp(-1 * (diff + lambda0_hat))),
+      neutral == 0 & Lo == "Minnesota" ~ 1/(1 + exp(-1 * (diff - lambda0_hat)))))
+```
+
+## Matchup Probabilities
+
+```{r}
+#| label: matchup-prob
+#| eval: true
+#| echo: false
+possible_matchups
+```
+
+
+## Semi-Final Simulation
+```{r}
+#| label: simulate-semifinals
+#| eval: true
+#| echo: true
+semis <- 
+  data.frame(Hi = c("Wisconsin", "Ohio State"), Lo = c("Minnesota", "Cornell")) |>
+  dplyr::left_join(possible_matchups |> dplyr::select(Hi, Lo, prob), by = c("Hi", "Lo"))
+
+set.seed(479)
+sf_winners <- c(NA, NA)
+
+sf_outcomes <- rbinom(n = nrow(semis), size = 1, prob = semis$prob) #<1>
+for(i in 1:nrow(semis)){
+  if(sf_outcomes[i] == 1) sf_winners[i] <- semis$Hi[i] #<1>
+  else sf_winners[i] <- semis$Lo[i] #<1>
+}
+cat("Semi-final outcomes:", sf_outcomes, "\n")
+cat("Semi-final winners:", sf_winners, "\n")
+```
+
+
+## Finals Simulation
+```{r}
+#| label: simulate-finals
+#| eval: true
+#| echo: true
+
+finals <- 
+  data.frame(Team1 = sf_winners[1], Team2 = sf_winners[2]) |>
+  dplyr::left_join(y = seeds |> dplyr::rename(Team1 = Team, Team1.Seed = Seed), by = "Team1") |>
+  dplyr::left_join(y = seeds |> dplyr::rename(Team2 = Team, Team2.Seed = Seed), by = "Team2") |>
+  dplyr::mutate(
+    Hi = ifelse(Team1.Seed < Team2.Seed, Team1, Team2),
+    Lo = ifelse(Team1.Seed < Team2.Seed, Team2, Team1)) |>
+  dplyr::select(Hi, Lo) |> 
+  dplyr::left_join(
+    y = possible_matchups |> dplyr::select(Hi, Lo, prob), by = c("Hi", "Lo"))
+
+final_outcome <- rbinom(n = 1, size = 1, prob = finals$prob)
+if(final_outcome == 1){
+  final_winner <- finals$Hi[1]
+} else{
+  final_winner <- finals$Lo[1]
+}
+
+cat("Finals outcome:", final_outcome, "\n")
+cat("Finals winner:", final_winner, "\n")
+
+```
+
+## Repeated Simulations
+
+- Embed earlier code into large `for` loop 
+- In each iteration, we will save
+  - Semi-finals winners:`SF1_winner` and `SF2_winner`
+  - Teams in finals: `Finals_Hi` and `Finals_Lo`
+  - Eventual Champion `Champion`
+
+- Using simulations, we will estimate
+  - $\mathbb{P}(\textrm{WIS makes it to and wins the finals})$
+  - $\mathbb{P}(\textrm{WIS wins the finals} \vert \textrm{Wisconsin makes it to the finals}).$
+  
+```{r}
+#| label: simulation
+#| eval: true
+#| echo: false
+n_sims <- 10000
+
+results <- data.frame( #<1>
+  SF1_Winner = rep(NA, times = n_sims), #<1>
+  SF2_Winner = rep(NA, times = n_sims), #<1>
+  Finals_Hi = rep(NA, times = n_sims), #<1>
+  Finals_Lo = rep(NA, times = n_sims), #<1>
+  Champion = rep(NA, times = n_sims)) #<1>
+
+
+for(r in 1:n_sims){
+  set.seed(479+r) #<2>
+  sf_winners <- c(NA, NA)
+  sf_outcomes <- rbinom(n = nrow(semis), size = 1, prob = semis$prob)
+  for(i in 1:nrow(semis)){
+    if(sf_outcomes[i] == 1){
+      sf_winners[i] <- semis$Hi[i]
+    } else{
+      sf_winners[i] <- semis$Lo[i]
+    }
+    results[r, c("SF1_Winner", "SF2_Winner")] <- sf_winners #<3>
+  }
+  
+  finals <- 
+    data.frame(Team1 = sf_winners[1], Team2 = sf_winners[2]) |>
+    dplyr::left_join(
+      y = seeds |> dplyr::rename(Team1 = Team, Team1.Seed = Seed), 
+      by = "Team1") |>
+    dplyr::left_join(
+      y = seeds |> dplyr::rename(Team2 = Team, Team2.Seed = Seed), 
+      by = "Team2") |>
+    dplyr::mutate(
+      Hi = ifelse(Team1.Seed < Team2.Seed, Team1, Team2),
+      Lo = ifelse(Team1.Seed < Team2.Seed, Team2, Team1)) |>
+    dplyr::select(Hi, Lo) |> 
+    dplyr::left_join(
+      y = possible_matchups |> dplyr::select(Hi, Lo, prob), 
+      by = c("Hi", "Lo"))
+  
+  results[r, "Finals_Hi"] <- finals$Hi[1] #<4>
+  results[r, "Finals_Lo"] <- finals$Lo[1] #<4>
+  
+  final_outcome <- rbinom(n = 1, size = 1, prob = finals$prob)
+  
+  if(final_outcome == 1){
+    results[r, "Champion"] <- finals$Hi[1]
+  } else{
+    results[r, "Champion"] <- finals$Lo[1]
+  }
+}
+```
+
+## Simulation Snapshot
+
+- Results of the first 10 simulations 
+```{r}
+#| label: results-head
+#| eval: true
+#| echo: false
+results |> dplyr::slice_head(n = 10)
+```
+
+. . . 
+
+```{r}
+#| label: tabulate-champion
+#| eval: true
+#| echo: true
+table(results$Champion)
+```
+
+## Estimating Complex Probabilities
+
+- Across the 10,000 simulations:
+  - WIS made the finals `{r} sum(results$SF1_Winner == "Wisconsin")` times
+  * WIS made and won the finals `{r} sum(results$SF1_Winner == "Wisconsin" & results$Champion == "Wisconsin")` times
+
+- $\mathbb{P}(\textrm{WIS wins the finals} \vert \textrm{WIS makes it to the finals}) \approx 84.6\%.$
+
+```{r}
+#| label: wisco-conditional-finals
+#| eval: true
+#| echo: true
+sum(results$SF1_Winner == "Wisconsin" & 
+      results$Champion == "Wisconsin")/sum(results$SF1_Winner == "Wisconsin")
+```
+
+## Alternative Rules
+
+- What if higher seed always gets to play at home?
+- See [lecture notes](../../lectures/lecture13.qmd) for simulation
+- Very similar code but uses different matchup probabilities
+- Under alternative, WIS wins championship about 77% of the time (as opposed to 71% at neutral site)
+
+
+## Introducing Covariates
+
+<!--
+  Latent team strength could depend on sevefal factors:
+    e.g., number of returning players, number of new recruits, offensive or defensive ratings, etc.
+    Possible to elaborate the model so that $\lambda_{i} = \bx_{i}^{\top}\beta + \alpha_{i}$
+    To do this, you must get team-specific covariates! 
+  BTm allows you to fit such models (but syntax is a bit harder)
+
+-->
