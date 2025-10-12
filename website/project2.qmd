@@ -1,0 +1,117 @@
+---
+title: "Project 2 Information"
+format: html
+---
+
+
+## Overivew
+
+For your first project, I would like you to use simulation to estimate probabilities of game-, season-, tournament-, or draft-level outcomes.
+Ideally, you will go beyond computing probabilities of events like "Team A beats team B" and will focus on more complex events like "Team A makes it to the third-round of March Madness tournament" or "Team A and Team B make it to the finals and Team wins".
+Obviously, the types of events of interest will depend on the specific sport you choose and the level of outcome you are modeling.
+Whatever your choice, the simulation must be based on a probabilistic model fitted using publicly available box-score, play-by-play, or event-level data.
+See @sec-models for an overview of the types of models that may be useful for this project.
+
+The project report and recorded presentation are due on **Friday November 7 at 12:00pm (noon)**. 
+
+## Simulation Requirements
+
+Regardless of the sport you choose and the underlying probabilistic model, you need to run enough simulations to ensure that the estimates of the probabilities of interest are reliable.
+I recommend at least 10,000 simulation replications.
+But if you are simulating fairly complex events (e.g., the entire March Madness Tournament or every point in the entire NCAA Women's Volleyball season), you may only have time to run fewer simulation replications.
+In those cases, I would request that you run at least 500 simulation replications. 
+One way to mitigate the computational burden is to divide simulation replications across different team members' computers (making sure to set different random seeds for each replication).
+
+
+## Model Choice{#sec-models}
+
+Depending on the sport and type of event you choose, you may find it useful to fit a Bradley-Terry model, Markov chain model, or a Plackett-Luce model.
+
+
+### Bradley-Terry Models 
+
+Bradley-Terry models are a very natural model for paired competitions.
+A perfectly acceptable project would involve identifying a particular sport, fitting a Bradley-Terry model to a season's worth of match-level outcomes, and then simulating the entire season or a season-ending tournament using the fitted model probabilities.
+
+Bradley-Terry models can also be used to model more granular in-game events.
+For instance, in racket sports (e.g., tennis, badminton, table tennis, squash, and racquetball) and volleyball, in which one competitor serves the ball to another and competitors exchange a series of shots until a point is scored, one could use a Bradley-Terry model to estimate the probability that the serving team wins a point.
+Using such a model, one can simulate events at the individual game-level (e.g., whether the match lasts 3 or 4 sets, overall winner, whether team wins a set by more than 5 points), and season-level outcomes (e.g., whether a team wins at least 5 games or wins a championship) by simulating each point of each game.
+
+One could even build a Bradley-Terry model to model matchups between individual players in team sports.
+For instance, one could fit a Bradley-Terry model to estimate the probability that any given batter "wins" a matchup (i.e., gets a hit) against any given pitcher or that a particular wide receiver wins a matchup against a particular defensive back[^tracking]
+
+[^tracking]: If you choose to pursue this option, you may need to use tracking data from previous year's Big Data Bowl competitions to extract specific match-up information. 
+
+### Extending Bradley-Terry Models
+
+In [Lecture 12](lectures/lecture12.qmd) and [Lecture 13](lectures/lecture13.qmd), we fit Bradley-Terry models in which every team was assigned a latent strength parameter $\lambda.$
+In principle, these strengths could depend on certain covariates.
+For instance, in basketball, one might obtain more accurate predictions by allowing each team's $\lambda$ to vary with their offensive and defensive rating.
+Or, in tennis, the latent strength of each player might vary systematically with player characteristics like height.
+
+The **BradelyTerry2** package allows one to fit such models in which the the latent strength for team $j$ can be decomposed as
+$$
+\lambda_{j} = u_{j} + \boldsymbol{\mathbf{x}}_{j}^{\top}\beta,
+$$
+where $\boldsymbol{\mathbf{x}}_{j}$ is a vector of team-level covariates and $u_{j}$ is a team-specific intercept, capturing all parts of team strength not already explained by the covariates. 
+
+If you do a project that uses a Bradley-Terry model, I encourage you to investigate the possibility that the latent strengths might vary with respect to covariates.
+
+## Markov chain Models
+
+If you choose to analyze a sport in which games (or discrete components of a game) invovles a series of state transitions, a Markov chain model can be used to an simulate entire game (or portions of a game).
+As we saw in [Lecture 14](lectures/lecture14.qmd), Markov chains can be used to simulate the progression of at-bats within a half-inning.
+One could take this a step further and model the transition of game-states at a pitch-by-pitch level.
+Beyond baseball and softball, one can also study American football with a Markov chain in which the states are indexed by factors including, but certainly not limited to, down, distance, and field position.
+One could also build Markov chains for volleyball and other racquet sports to simulate the trajectories of individual scores (e.g., 0-0, 15-0, 15-15, 30-15, 40-15, game).
+It may even be possible to use a Markov chain model to simulate a cricket innings at the ball-by-ball or over-by-over level. 
+
+If you choose to base your simulation around a Markov chain model, you need to carefully define your state-space, identify any potential absorbing states, and estimate the transition probabilities.
+Depending on the amount of available data, these probabilities may be estimated with a simple binning-or-averaging procedure.
+But if there is not much data, you may need to fit a multinomial logistic regression model or use an empirical Bayes estimator of these probabilities. 
+
+
+### Plackett-Luce Models
+
+Plackett-Luce models derive a consensus ranking of several items based on several partial rankings of those same items.
+This makes them a natural way to aggregate multiple mock drafts.
+But they can also be used to derive power rankings in situations where games are not head-to-head.
+For instance, one could derive a power ranking of F1 drivers or teams, runners, cyclists, or swimmers by aggregating finishing time results across multiple races with a Plackett-Luce model.
+One could also derive a power ranking of golfers based on their finishing positions in multiple tour events.
+
+
+
+
+## Deliverables
+
+The deliverables for Project 2 are the same as for Project 1 and carry the similar requirements.
+The main difference is that you must clearly state and motivate the events of interest (i.e., those whose probabilities you are estimating via simulation) in both your written report and presentation.
+
+### Written Report
+
+The written report consists of a non-technical executive summary and a technical report.
+The executive summary, which should not exceed 500 words, should describe the overall goals, analytic approach, and main conclusions in non-technical language.
+The executive summary should be free from jargon, code listings, figures, tables, and charts.
+It should be written to be read and understood by a front office executive, coach, player, or fan with little data science experience.
+The rest of written report should
+
+  * Clearly state the problem being studied and provide sufficient background details and to motivate why the problem is important and interesting.
+  * Describe the data and major steps of the analysis
+  * Presents the main results within the context of the relevant sport(s) and supports the results with figures, tables, charts, and other statistical software output as appropriate.
+  * Discusses the limitations of the analysis and outlines concrete steps for further development.
+
+The technical section of the report should contain enough detail and code that another data scientist could replicate your analysis verify its soundness.
+Code listings and output (e.g., figures, tables, charts, and numerical summaries) should be tightly integrated with the written exposition.
+A good example of such integration is [here](https://github.com/danmorse314/hockeyR-models).
+Pay particular attention to the way the author complements the numerical results with detailed examples of individual performances. 
+
+### Presentation
+
+Each team will also record an 8--10 minute presentation (e.g., using Zoom) that provides an overview of their analysis.
+Each presentation should include the following elements
+
+  * Background (2--4 slides): clearly motivate and state the main problem being studied. Explain why it is interesting and important. Present just enough background to motivate the problem, while taking care not to overwhelm the audience with extraneous details. If appropriate, comment on the limitations of existing solutions to the problem or closely-related problems
+  * Analysis overview (2--4 slides): present only the main steps of your analysis. Be sure to explain why each step was necessary and how these steps contribute to the overall solution. Focus more on the high-level ideas and motivation for each step rather than the specific implementation or software syntax
+  * Main results (2--3 slides): distill your results into a few key points. Use figures, tables, charts, and other statistical software output to support your findings.
+  * Conclusion (1 slide): briefly summarize your analysis and findings and outline between 1 and 3 specific directions for future development, improvement or refinement.
+

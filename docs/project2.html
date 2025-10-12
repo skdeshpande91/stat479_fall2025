@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Lecture 2: Expected Goals – STAT479</title>
+<title>Project 2 Information – STAT479</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,23 +23,23 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="../site_libs/quarto-nav/headroom.min.js"></script>
-<script src="../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="../site_libs/quarto-search/fuse.min.js"></script>
-<script src="../site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="../">
-<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../site_libs/quarto-html/popper.min.js"></script>
-<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="../site_libs/quarto-html/anchor.min.js"></script>
-<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-4bfb630b09c0e164834af1bb3207dbff.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-4bfb630b09c0e164834af1bb3207dbff.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -68,18 +68,47 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
-<link rel="stylesheet" href="../styles.css">
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="nav-sidebar docked nav-fixed quarto-light">
+<body class="nav-fixed quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="../index.html">
+    <a class="navbar-brand" href="./index.html">
     <span class="navbar-title">STAT479</span>
     </a>
   </div>
@@ -90,11 +119,11 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../index.html"> 
+    <a class="nav-link" href="./index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../syllabus.html"> 
+    <a class="nav-link" href="./syllabus.html"> 
 <span class="menu-text">Syllabus</span></a>
   </li>  
   <li class="nav-item dropdown ">
@@ -103,63 +132,63 @@ ul.task-list li input[type="checkbox"] {
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-lecture-notes">    
         <li>
-    <a class="dropdown-item" href="../lectures/lecture00.html">
+    <a class="dropdown-item" href="./lectures/lecture00.html">
  <span class="dropdown-text">Lecture 0: Boxscore Metrics</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../lectures/lecture02.html">
+    <a class="dropdown-item" href="./lectures/lecture02.html">
  <span class="dropdown-text">Lecture 2: Expected Goals</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../lectures/lecture03.html">
+    <a class="dropdown-item" href="./lectures/lecture03.html">
  <span class="dropdown-text">Lecture 3: Estimating XG</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../lectures/lecture04.html">
+    <a class="dropdown-item" href="./lectures/lecture04.html">
  <span class="dropdown-text">Lecture 4: Adjusted Plus/Minus</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../lectures/lecture05.html">
+    <a class="dropdown-item" href="./lectures/lecture05.html">
  <span class="dropdown-text">Lecture 5: Regularized Adjusted Plus/Minus</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../lectures/lecture06.html">
+    <a class="dropdown-item" href="./lectures/lecture06.html">
  <span class="dropdown-text">Lecture 6: Run Expectancy</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../lectures/lecture07.html">
+    <a class="dropdown-item" href="./lectures/lecture07.html">
  <span class="dropdown-text">Lecture 7: Offensive Credit Allocation in Baseball</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../lectures/lecture08.html">
+    <a class="dropdown-item" href="./lectures/lecture08.html">
  <span class="dropdown-text">Lecture 8: Defensive Credit Allocation in Baseball</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../lectures/lecture09.html">
+    <a class="dropdown-item" href="./lectures/lecture09.html">
  <span class="dropdown-text">Lecture 9: Multilevel Modeling</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../lectures/lecture10.html">
+    <a class="dropdown-item" href="./lectures/lecture10.html">
  <span class="dropdown-text">Lecture 10: NFl WAR</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../lectures/lecture11.html">
+    <a class="dropdown-item" href="./lectures/lecture11.html">
  <span class="dropdown-text">Lecture 11: Pitch Framing</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../lectures/lecture12.html">
+    <a class="dropdown-item" href="./lectures/lecture12.html">
  <span class="dropdown-text">Lecture 12: Bradley-Terry Models</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../lectures/lecture13.html">
+    <a class="dropdown-item" href="./lectures/lecture13.html">
  <span class="dropdown-text">Lecture 13: Tournament Simulation</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../lectures/lecture14.html">
+    <a class="dropdown-item" href="./lectures/lecture14.html">
  <span class="dropdown-text">Lecture 14: Markov Chains I</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../lectures/lecture15.html">
+    <a class="dropdown-item" href="./lectures/lecture15.html">
  <span class="dropdown-text">Lecture 15: Markov Chains II</span></a>
   </li>  
     </ul>
@@ -170,61 +199,61 @@ ul.task-list li input[type="checkbox"] {
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-lecture-slides">    
         <li>
-    <a class="dropdown-item" href="../slides/lecture01.html">
+    <a class="dropdown-item" href="./slides/lecture01.html">
  <span class="dropdown-text">Lecture 1</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../slides/lecture02.html">
+    <a class="dropdown-item" href="./slides/lecture02.html">
  <span class="dropdown-text">Lecture 2: Expected Goals</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../slides/lecture03.html">
+    <a class="dropdown-item" href="./slides/lecture03.html">
  <span class="dropdown-text">Lecture 3: Estimating XG</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../slides/lecture04.html">
+    <a class="dropdown-item" href="./slides/lecture04.html">
  <span class="dropdown-text">Lecture 4: Adjusted Plus/Minus</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../slides/lecture05.html">
+    <a class="dropdown-item" href="./slides/lecture05.html">
  <span class="dropdown-text">Lecture 5: Regularized Adjusted Plus/Minus</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../slides/lecture06.html">
+    <a class="dropdown-item" href="./slides/lecture06.html">
  <span class="dropdown-text">Lecture 6: Expected Runs</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../slides/lecture07.html">
+    <a class="dropdown-item" href="./slides/lecture07.html">
  <span class="dropdown-text">Lecture 7: Offensive Credit</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../slides/lecture08.html">
+    <a class="dropdown-item" href="./slides/lecture08.html">
  <span class="dropdown-text">Lecture 8: Defensive Credit Allocation &amp; WAR</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../slides/lecture09.html">
+    <a class="dropdown-item" href="./slides/lecture09.html">
  <span class="dropdown-text">Lecture 9: Multilevel Models</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../slides/lecture10.html">
+    <a class="dropdown-item" href="./slides/lecture10.html">
  <span class="dropdown-text">Lecture 10: NFL WAR</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../slides/lecture11.html">
+    <a class="dropdown-item" href="./slides/lecture11.html">
  <span class="dropdown-text">Lecture 11: Pitch Framing</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../slides/lecture12.html">
+    <a class="dropdown-item" href="./slides/lecture12.html">
  <span class="dropdown-text">Lecture 12: Bradley-Terry Models I</span></a>
   </li>  
     </ul>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="../project1.html"> 
+    <a class="nav-link" href="./project1.html"> 
 <span class="menu-text">Project 1 Information</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../project2.html"> 
+    <a class="nav-link active" href="./project2.html" aria-current="page"> 
 <span class="menu-text">Project 2 Information</span></a>
   </li>  
 </ul>
@@ -233,109 +262,41 @@ ul.task-list li input[type="checkbox"] {
 </div>
       </div> <!-- /container-fluid -->
     </nav>
-  <nav class="quarto-secondary-nav">
-    <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-        <i class="bi bi-layout-text-sidebar-reverse"></i>
-      </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../slides/lecture02.html">Lecture 2: Expected Goals</a></li></ol></nav>
-        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-        </a>
-    </div>
-  </nav>
 </header>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
-    <div class="sidebar-menu-container"> 
-    <ul class="list-unstyled mt-1">
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../slides/lecture01.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lecture 1</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../slides/lecture02.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Lecture 2: Expected Goals</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../slides/lecture03.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lecture 3: Estimating XG</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../slides/lecture04.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lecture 4: Adjusted Plus/Minus</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../slides/lecture05.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lecture 5: Regularized Adjusted Plus/Minus</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../slides/lecture06.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lecture 6: Expected Runs</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../slides/lecture07.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lecture 7: Offensive Credit</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../slides/lecture08.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lecture 8: Defensive Credit Allocation &amp; WAR</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../slides/lecture09.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lecture 9: Multilevel Models</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../slides/lecture10.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lecture 10: NFL WAR</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../slides/lecture11.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lecture 11: Pitch Framing</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../slides/lecture12.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lecture 12: Bradley-Terry Models I</span></a>
-  </div>
-</li>
-    </ul>
-    </div>
-</nav>
-<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overivew" id="toc-overivew" class="nav-link active" data-scroll-target="#overivew">Overivew</a></li>
+  <li><a href="#simulation-requirements" id="toc-simulation-requirements" class="nav-link" data-scroll-target="#simulation-requirements">Simulation Requirements</a></li>
+  <li><a href="#sec-models" id="toc-sec-models" class="nav-link" data-scroll-target="#sec-models">Model Choice</a>
+  <ul class="collapse">
+  <li><a href="#bradley-terry-models" id="toc-bradley-terry-models" class="nav-link" data-scroll-target="#bradley-terry-models">Bradley-Terry Models</a></li>
+  <li><a href="#extending-bradley-terry-models" id="toc-extending-bradley-terry-models" class="nav-link" data-scroll-target="#extending-bradley-terry-models">Extending Bradley-Terry Models</a></li>
+  </ul></li>
+  <li><a href="#markov-chain-models" id="toc-markov-chain-models" class="nav-link" data-scroll-target="#markov-chain-models">Markov chain Models</a>
+  <ul class="collapse">
+  <li><a href="#plackett-luce-models" id="toc-plackett-luce-models" class="nav-link" data-scroll-target="#plackett-luce-models">Plackett-Luce Models</a></li>
+  </ul></li>
+  <li><a href="#deliverables" id="toc-deliverables" class="nav-link" data-scroll-target="#deliverables">Deliverables</a>
+  <ul class="collapse">
+  <li><a href="#written-report" id="toc-written-report" class="nav-link" data-scroll-target="#written-report">Written Report</a></li>
+  <li><a href="#presentation" id="toc-presentation" class="nav-link" data-scroll-target="#presentation">Presentation</a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Lecture 2: Expected Goals</h1>
+<h1 class="title">Project 2 Information</h1>
 </div>
 
 
@@ -352,14 +313,77 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>You can view the presentation in a full screen window <a href="raw_slides/slides_02.html" target="_blank">here</a>. Code for the lecture is available at <a href="../lectures/lecture02.html">this link</a></p>
-<div>
-<iframe class="slide-deck" src="raw_slides/slides_02.html" height="420" width="747" style="border: 1px solid #123233;"></iframe>
-</div>
+<section id="overivew" class="level2">
+<h2 class="anchored" data-anchor-id="overivew">Overivew</h2>
+<p>For your first project, I would like you to use simulation to estimate probabilities of game-, season-, tournament-, or draft-level outcomes. Ideally, you will go beyond computing probabilities of events like “Team A beats team B” and will focus on more complex events like “Team A makes it to the third-round of March Madness tournament” or “Team A and Team B make it to the finals and Team wins”. Obviously, the types of events of interest will depend on the specific sport you choose and the level of outcome you are modeling. Whatever your choice, the simulation must be based on a probabilistic model fitted using publicly available box-score, play-by-play, or event-level data. See <a href="#sec-models" class="quarto-xref">Section&nbsp;3</a> for an overview of the types of models that may be useful for this project.</p>
+<p>The project report and recorded presentation are due on <strong>Friday November 7 at 12:00pm (noon)</strong>.</p>
+</section>
+<section id="simulation-requirements" class="level2">
+<h2 class="anchored" data-anchor-id="simulation-requirements">Simulation Requirements</h2>
+<p>Regardless of the sport you choose and the underlying probabilistic model, you need to run enough simulations to ensure that the estimates of the probabilities of interest are reliable. I recommend at least 10,000 simulation replications. But if you are simulating fairly complex events (e.g., the entire March Madness Tournament or every point in the entire NCAA Women’s Volleyball season), you may only have time to run fewer simulation replications. In those cases, I would request that you run at least 500 simulation replications. One way to mitigate the computational burden is to divide simulation replications across different team members’ computers (making sure to set different random seeds for each replication).</p>
+</section>
+<section id="sec-models" class="level2">
+<h2 class="anchored" data-anchor-id="sec-models">Model Choice</h2>
+<p>Depending on the sport and type of event you choose, you may find it useful to fit a Bradley-Terry model, Markov chain model, or a Plackett-Luce model.</p>
+<section id="bradley-terry-models" class="level3">
+<h3 class="anchored" data-anchor-id="bradley-terry-models">Bradley-Terry Models</h3>
+<p>Bradley-Terry models are a very natural model for paired competitions. A perfectly acceptable project would involve identifying a particular sport, fitting a Bradley-Terry model to a season’s worth of match-level outcomes, and then simulating the entire season or a season-ending tournament using the fitted model probabilities.</p>
+<p>Bradley-Terry models can also be used to model more granular in-game events. For instance, in racket sports (e.g., tennis, badminton, table tennis, squash, and racquetball) and volleyball, in which one competitor serves the ball to another and competitors exchange a series of shots until a point is scored, one could use a Bradley-Terry model to estimate the probability that the serving team wins a point. Using such a model, one can simulate events at the individual game-level (e.g., whether the match lasts 3 or 4 sets, overall winner, whether team wins a set by more than 5 points), and season-level outcomes (e.g., whether a team wins at least 5 games or wins a championship) by simulating each point of each game.</p>
+<p>One could even build a Bradley-Terry model to model matchups between individual players in team sports. For instance, one could fit a Bradley-Terry model to estimate the probability that any given batter “wins” a matchup (i.e., gets a hit) against any given pitcher or that a particular wide receiver wins a matchup against a particular defensive back<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+</section>
+<section id="extending-bradley-terry-models" class="level3">
+<h3 class="anchored" data-anchor-id="extending-bradley-terry-models">Extending Bradley-Terry Models</h3>
+<p>In <a href="./lectures/lecture12.html">Lecture 12</a> and <a href="./lectures/lecture13.html">Lecture 13</a>, we fit Bradley-Terry models in which every team was assigned a latent strength parameter <span class="math inline">\(\lambda.\)</span> In principle, these strengths could depend on certain covariates. For instance, in basketball, one might obtain more accurate predictions by allowing each team’s <span class="math inline">\(\lambda\)</span> to vary with their offensive and defensive rating. Or, in tennis, the latent strength of each player might vary systematically with player characteristics like height.</p>
+<p>The <strong>BradelyTerry2</strong> package allows one to fit such models in which the the latent strength for team <span class="math inline">\(j\)</span> can be decomposed as <span class="math display">\[
+\lambda_{j} = u_{j} + \boldsymbol{\mathbf{x}}_{j}^{\top}\beta,
+\]</span> where <span class="math inline">\(\boldsymbol{\mathbf{x}}_{j}\)</span> is a vector of team-level covariates and <span class="math inline">\(u_{j}\)</span> is a team-specific intercept, capturing all parts of team strength not already explained by the covariates.</p>
+<p>If you do a project that uses a Bradley-Terry model, I encourage you to investigate the possibility that the latent strengths might vary with respect to covariates.</p>
+</section>
+</section>
+<section id="markov-chain-models" class="level2">
+<h2 class="anchored" data-anchor-id="markov-chain-models">Markov chain Models</h2>
+<p>If you choose to analyze a sport in which games (or discrete components of a game) invovles a series of state transitions, a Markov chain model can be used to an simulate entire game (or portions of a game). As we saw in <a href="./lectures/lecture14.html">Lecture 14</a>, Markov chains can be used to simulate the progression of at-bats within a half-inning. One could take this a step further and model the transition of game-states at a pitch-by-pitch level. Beyond baseball and softball, one can also study American football with a Markov chain in which the states are indexed by factors including, but certainly not limited to, down, distance, and field position. One could also build Markov chains for volleyball and other racquet sports to simulate the trajectories of individual scores (e.g., 0-0, 15-0, 15-15, 30-15, 40-15, game). It may even be possible to use a Markov chain model to simulate a cricket innings at the ball-by-ball or over-by-over level.</p>
+<p>If you choose to base your simulation around a Markov chain model, you need to carefully define your state-space, identify any potential absorbing states, and estimate the transition probabilities. Depending on the amount of available data, these probabilities may be estimated with a simple binning-or-averaging procedure. But if there is not much data, you may need to fit a multinomial logistic regression model or use an empirical Bayes estimator of these probabilities.</p>
+<section id="plackett-luce-models" class="level3">
+<h3 class="anchored" data-anchor-id="plackett-luce-models">Plackett-Luce Models</h3>
+<p>Plackett-Luce models derive a consensus ranking of several items based on several partial rankings of those same items. This makes them a natural way to aggregate multiple mock drafts. But they can also be used to derive power rankings in situations where games are not head-to-head. For instance, one could derive a power ranking of F1 drivers or teams, runners, cyclists, or swimmers by aggregating finishing time results across multiple races with a Plackett-Luce model. One could also derive a power ranking of golfers based on their finishing positions in multiple tour events.</p>
+</section>
+</section>
+<section id="deliverables" class="level2">
+<h2 class="anchored" data-anchor-id="deliverables">Deliverables</h2>
+<p>The deliverables for Project 2 are the same as for Project 1 and carry the similar requirements. The main difference is that you must clearly state and motivate the events of interest (i.e., those whose probabilities you are estimating via simulation) in both your written report and presentation.</p>
+<section id="written-report" class="level3">
+<h3 class="anchored" data-anchor-id="written-report">Written Report</h3>
+<p>The written report consists of a non-technical executive summary and a technical report. The executive summary, which should not exceed 500 words, should describe the overall goals, analytic approach, and main conclusions in non-technical language. The executive summary should be free from jargon, code listings, figures, tables, and charts. It should be written to be read and understood by a front office executive, coach, player, or fan with little data science experience. The rest of written report should</p>
+<ul>
+<li>Clearly state the problem being studied and provide sufficient background details and to motivate why the problem is important and interesting.</li>
+<li>Describe the data and major steps of the analysis</li>
+<li>Presents the main results within the context of the relevant sport(s) and supports the results with figures, tables, charts, and other statistical software output as appropriate.</li>
+<li>Discusses the limitations of the analysis and outlines concrete steps for further development.</li>
+</ul>
+<p>The technical section of the report should contain enough detail and code that another data scientist could replicate your analysis verify its soundness. Code listings and output (e.g., figures, tables, charts, and numerical summaries) should be tightly integrated with the written exposition. A good example of such integration is <a href="https://github.com/danmorse314/hockeyR-models">here</a>. Pay particular attention to the way the author complements the numerical results with detailed examples of individual performances.</p>
+</section>
+<section id="presentation" class="level3">
+<h3 class="anchored" data-anchor-id="presentation">Presentation</h3>
+<p>Each team will also record an 8–10 minute presentation (e.g., using Zoom) that provides an overview of their analysis. Each presentation should include the following elements</p>
+<ul>
+<li>Background (2–4 slides): clearly motivate and state the main problem being studied. Explain why it is interesting and important. Present just enough background to motivate the problem, while taking care not to overwhelm the audience with extraneous details. If appropriate, comment on the limitations of existing solutions to the problem or closely-related problems</li>
+<li>Analysis overview (2–4 slides): present only the main steps of your analysis. Be sure to explain why each step was necessary and how these steps contribute to the overall solution. Focus more on the high-level ideas and motivation for each step rather than the specific implementation or software syntax</li>
+<li>Main results (2–3 slides): distill your results into a few key points. Use figures, tables, charts, and other statistical software output to support your findings.</li>
+<li>Conclusion (1 slide): briefly summarize your analysis and findings and outline between 1 and 3 specific directions for future development, improvement or refinement.</li>
+</ul>
 
 
+</section>
+</section>
 
-</main> <!-- /main -->
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>If you choose to pursue this option, you may need to use tracking data from previous year’s Big Data Bowl competitions to extract specific match-up information.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";

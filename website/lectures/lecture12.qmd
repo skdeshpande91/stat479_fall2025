@@ -292,7 +292,17 @@ They also publish match results for each season in a tabular form[^composite-sch
 [^composite-schedule]: See [here](https://www.uscho.com/scoreboard/division-i-women/2024-2025/composite-schedule/) for the 2024-25 results
 
 This information is readily scraped using tools like [**rvest**](https://rvest.tidyverse.org/index.html).
-<!-- See TO DO for more details -->
+
+:::{.callout-important}
+
+## Error
+
+Unfortunately, USCHO changed their website backend and the following code no longer works (as of October 5, 2025).
+The data will be posted as a CSV file on the course website.
+
+:::
+
+
 The codeblock below defines a function that scrapes a single season's worth of D1 Women's Ice Hockey results.
 
 ```{r}
@@ -386,7 +396,7 @@ scrape_uscho <- function(season){
 We can use this function to obtain game-by-game results from the 2024-25 regular season
 ```{r}
 #| label: scrape-2024-25
-#| eval: true
+#| eval: false
 #| echo: true
 wd1hockey_2024_2025 <- scrape_uscho(season = 2024)
 save(wd1hockey_2024_2025, file = "wd1hockey_2024_2025.RData") #<1>
@@ -399,6 +409,7 @@ In addition to the recording the date and time of each game, our data table `wd1
 #| eval: true
 #| echo: false
 set.seed(479)
+load("wd1hockey_2024_2025.RData")
 wd1hockey_2024_2025 |>
   dplyr::slice_sample(n=10)
 ```
