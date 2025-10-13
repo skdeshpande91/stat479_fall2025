@@ -68,14 +68,17 @@ It is also available for download directly from [this shared Box folder](https:/
 A full description of the data fields is available [here](https://www.kaggle.com/competitions/nfl-big-data-bowl-2026-analytics/data).
 There are two CSV files for each week of the 2023 regular season.
 The files `input_2023_w[0-18].csv` contain tracking data from *before* the ball was thrown. 
-Each row records where a single player is located on the field in one 0.1-second time frame. 
-So, there are multiple rows for a single play.
+Each row records where a single player is located on the field in one 0.1-second time frame[^multiple].
 In addition to game, play, frame, and player ID's (`game_id`, `play_id`, `frame_id` and `nfl_id`), each row records
+
   * Information about the specific player: `player_height`, `player_weight`, `player_birth_date`, `player_position`, `player_side` (offense or defense), and `player_role` (defensive coverage, targeted receiver, passer or other route runner)
-  * Player location and movement: their `x` and `y` coordinates, the orientation (`o`) and direction of player movement (`dir`), speed (`s`), acceleration (`a`), 
+  * Player location and movement: their `x` and `y` coordinates, the orientation (`o`) and direction of player movement (`dir`), speed (`s`), acceleration (`a`)
+  * Play-specific information: the yardline at the start of the play (`absolute_yardline_number`), where the ball lands (`ball_land_x` and `ball_land_y`)
 
 The NFL removed tracking data for offensive and defensive linemen.
 They also removed data from very short passes.
+
+[^multiple]: So, a single play is comprised of multiple rows.
 
 ### Data Example
 
