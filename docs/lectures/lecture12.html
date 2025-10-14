@@ -434,7 +434,7 @@ window.Quarto = {
   </ul></li>
   <li><a href="#sec-scraping" id="toc-sec-scraping" class="nav-link" data-scroll-target="#sec-scraping">Scraping D1 Women’s Hockey Results</a>
   <ul class="collapse">
-  <li><a href="#determine-winner" id="toc-determine-winner" class="nav-link" data-scroll-target="#determine-winner">Determining the Winner</a></li>
+  <li><a href="#sec-determine-winner" id="toc-sec-determine-winner" class="nav-link" data-scroll-target="#sec-determine-winner">Determining the Winner</a></li>
   <li><a href="#sec-extract-reg-season" id="toc-sec-extract-reg-season" class="nav-link" data-scroll-target="#sec-extract-reg-season">Identifying Regular Season Games</a></li>
   </ul></li>
   <li><a href="#sec-bt-est" id="toc-sec-bt-est" class="nav-link" data-scroll-target="#sec-bt-est">Fitting Bradley-Terry Models</a>
@@ -753,93 +753,97 @@ Download pre-scraped data
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Unfortunately, USCHO changed their website back-end and the following code no longer works (as of October 5, 2025). The data for this lecture is available as a CSV file <a href="https://github.com/skdeshpande91/stat479_fall2025/blob/main/data/wd1hockey_2024_2025.csv">here</a>.</p>
+<p>Unfortunately, USCHO changed their website back-end and the following code no longer works (as of October 5, 2025). The data for this lecture is available as a CSV file <a href="https://github.com/skdeshpande91/stat479_fall2025/blob/main/data/wd1hockey_2024_2025.csv">here</a>. You should also download a list of team abbreviations from <a href="https://github.com/skdeshpande91/stat479_fall2025/blob/main/data/wd1hockey_teams.csv">here</a>.</p>
+<p>After downloading the data, you can load the match results into R using the code and then proceed directly to <a href="#sec-determine-winner" class="quarto-xref">Section&nbsp;3.1</a></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>wd1hockey_2024_2025 <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="at">file =</span> <span class="st">"wd1hockey_2024_2025.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </div>
 </div>
 <p>The codeblock below defines a function that scrapes a single season’s worth of D1 Women’s Ice Hockey results.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Function for scraping</summary>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>scrape_uscho <span class="ot">&lt;-</span> <span class="cf">function</span>(season){</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  col_names <span class="ot">&lt;-</span></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="st">"Day"</span>, <span class="st">""</span>, <span class="st">"Date"</span>, <span class="st">"Time"</span>, </span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Opponent"</span>, <span class="st">"Opp Score"</span>, <span class="st">""</span>, <span class="st">"Home"</span>, <span class="st">"Score"</span>, <span class="st">"OT"</span>,</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Notes"</span>, <span class="st">"Type"</span>, <span class="st">"Summary"</span>, <span class="st">"TV"</span>)</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  target_url <span class="ot">&lt;-</span> </span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste0</span>(<span class="st">"https://www.uscho.com/scoreboard/division-i-women/"</span>,</span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>           season, <span class="st">"-"</span>, season<span class="sc">+</span><span class="dv">1</span>, </span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>           <span class="st">"/composite-schedule/"</span>)</span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  raw_data <span class="ot">&lt;-</span></span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    rvest<span class="sc">::</span><span class="fu">read_html</span>(target_url)</span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>  raw_elements <span class="ot">&lt;-</span></span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>    raw_data <span class="sc">|&gt;</span></span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>    rvest<span class="sc">::</span><span class="fu">html_elements</span>(<span class="at">xpath =</span> <span class="st">'//*[(@id = "ez-outstream-ez-stuck-close")] | //td'</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>    rvest<span class="sc">::</span><span class="fu">html_text2</span>()</span>
-<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">assign</span>(<span class="fu">paste0</span>(<span class="st">"raw_wd1hockey_"</span>, season, <span class="st">"_"</span>, season<span class="sc">+</span><span class="dv">1</span>), raw_data)</span>
-<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">save</span>(<span class="at">list =</span> <span class="fu">paste0</span>(<span class="st">"raw_wd1hockey_"</span>, season, <span class="st">"_"</span>, season<span class="sc">+</span><span class="dv">1</span>),</span>
-<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>       <span class="at">file =</span> <span class="fu">paste0</span>(<span class="st">"raw_wd1hockey_"</span>, season, <span class="st">"_"</span>, season<span class="sc">+</span><span class="dv">1</span>, <span class="st">".RData"</span>))</span>
-<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">identical</span>(col_names, raw_elements[<span class="dv">1</span><span class="sc">:</span><span class="dv">14</span>])){</span>
-<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">message</span>(<span class="fu">paste0</span>(<span class="st">"Season "</span>, season,<span class="st">"-"</span>,season<span class="sc">+</span><span class="dv">1</span>, <span class="st">": did not find expected column names in html elements!"</span>))</span>
-<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>    results <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
-<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>  } </span>
-<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 2022-23 does not have TV abbreviations</span></span>
-<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>  altitude_ix <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="fu">grepl</span>(<span class="st">"Altitude"</span>, raw_elements))[<span class="dv">1</span>]</span>
-<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(altitude_ix <span class="sc">%%</span> <span class="dv">14</span> <span class="sc">!=</span> <span class="dv">1</span>){</span>
-<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">message</span>(<span class="fu">paste0</span>(<span class="st">"Season "</span>, season, <span class="st">"-"</span>, season<span class="sc">+</span><span class="dv">1</span>, <span class="st">": did not find expected number of elements in table!"</span>))</span>
-<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a>    results <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
-<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span>{</span>
-<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a>    <span class="co"># First 14 elements </span></span>
-<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a>    n_games <span class="ot">&lt;-</span> (altitude_ix <span class="sc">-</span> <span class="dv">1</span>)<span class="sc">/</span><span class="dv">14</span> <span class="sc">-</span> <span class="dv">1</span> </span>
-<span id="cb20-38"><a href="#cb20-38" aria-hidden="true" tabindex="-1"></a>    games <span class="ot">&lt;-</span> </span>
-<span id="cb20-39"><a href="#cb20-39" aria-hidden="true" tabindex="-1"></a>      <span class="fu">data.frame</span>(</span>
-<span id="cb20-40"><a href="#cb20-40" aria-hidden="true" tabindex="-1"></a>        <span class="at">Day =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_games),</span>
-<span id="cb20-41"><a href="#cb20-41" aria-hidden="true" tabindex="-1"></a>        <span class="at">Date =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_games),</span>
-<span id="cb20-42"><a href="#cb20-42" aria-hidden="true" tabindex="-1"></a>        <span class="at">Time =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_games),</span>
-<span id="cb20-43"><a href="#cb20-43" aria-hidden="true" tabindex="-1"></a>        <span class="at">Opponent =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_games),</span>
-<span id="cb20-44"><a href="#cb20-44" aria-hidden="true" tabindex="-1"></a>        <span class="at">OppScore =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_games),</span>
-<span id="cb20-45"><a href="#cb20-45" aria-hidden="true" tabindex="-1"></a>        <span class="at">Home =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_games),</span>
-<span id="cb20-46"><a href="#cb20-46" aria-hidden="true" tabindex="-1"></a>        <span class="at">HomeScore =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_games),</span>
-<span id="cb20-47"><a href="#cb20-47" aria-hidden="true" tabindex="-1"></a>        <span class="at">OT =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_games),</span>
-<span id="cb20-48"><a href="#cb20-48" aria-hidden="true" tabindex="-1"></a>        <span class="at">Notes =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_games),</span>
-<span id="cb20-49"><a href="#cb20-49" aria-hidden="true" tabindex="-1"></a>        <span class="at">Type =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_games))</span>
-<span id="cb20-50"><a href="#cb20-50" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb20-51"><a href="#cb20-51" aria-hidden="true" tabindex="-1"></a>    games[[<span class="st">"Day"</span>]] <span class="ot">&lt;-</span> </span>
-<span id="cb20-52"><a href="#cb20-52" aria-hidden="true" tabindex="-1"></a>      raw_elements[<span class="fu">seq</span>(<span class="dv">15</span>, (n_games<span class="sc">+</span><span class="dv">1</span>)<span class="sc">*</span><span class="dv">14</span>, <span class="at">by =</span> <span class="dv">14</span>)] </span>
-<span id="cb20-53"><a href="#cb20-53" aria-hidden="true" tabindex="-1"></a>    games[[<span class="st">"Date"</span>]] <span class="ot">&lt;-</span></span>
-<span id="cb20-54"><a href="#cb20-54" aria-hidden="true" tabindex="-1"></a>      raw_elements[<span class="fu">seq</span>(<span class="dv">17</span>, (n_games<span class="sc">+</span><span class="dv">1</span>)<span class="sc">*</span><span class="dv">14</span>, <span class="at">by =</span> <span class="dv">14</span>)]</span>
-<span id="cb20-55"><a href="#cb20-55" aria-hidden="true" tabindex="-1"></a>    games[[<span class="st">"Time"</span>]] <span class="ot">&lt;-</span></span>
-<span id="cb20-56"><a href="#cb20-56" aria-hidden="true" tabindex="-1"></a>      raw_elements[<span class="fu">seq</span>(<span class="dv">18</span>, (n_games<span class="sc">+</span><span class="dv">1</span>)<span class="sc">*</span><span class="dv">14</span>, <span class="at">by =</span> <span class="dv">14</span>)]</span>
-<span id="cb20-57"><a href="#cb20-57" aria-hidden="true" tabindex="-1"></a>    games[[<span class="st">"Opponent"</span>]] <span class="ot">&lt;-</span></span>
-<span id="cb20-58"><a href="#cb20-58" aria-hidden="true" tabindex="-1"></a>      raw_elements[<span class="fu">seq</span>(<span class="dv">19</span>, (n_games<span class="sc">+</span><span class="dv">1</span>)<span class="sc">*</span><span class="dv">14</span>, <span class="at">by =</span> <span class="dv">14</span>)]</span>
-<span id="cb20-59"><a href="#cb20-59" aria-hidden="true" tabindex="-1"></a>    games[[<span class="st">"OppScore"</span>]] <span class="ot">&lt;-</span></span>
-<span id="cb20-60"><a href="#cb20-60" aria-hidden="true" tabindex="-1"></a>      raw_elements[<span class="fu">seq</span>(<span class="dv">20</span>, (n_games<span class="sc">+</span><span class="dv">1</span>)<span class="sc">*</span><span class="dv">14</span>, <span class="at">by =</span> <span class="dv">14</span>)]</span>
-<span id="cb20-61"><a href="#cb20-61" aria-hidden="true" tabindex="-1"></a>    games[[<span class="st">"Home"</span>]] <span class="ot">&lt;-</span></span>
-<span id="cb20-62"><a href="#cb20-62" aria-hidden="true" tabindex="-1"></a>      raw_elements[<span class="fu">seq</span>(<span class="dv">22</span>, (n_games<span class="sc">+</span><span class="dv">1</span>)<span class="sc">*</span><span class="dv">14</span>, <span class="at">by =</span> <span class="dv">14</span>)]</span>
-<span id="cb20-63"><a href="#cb20-63" aria-hidden="true" tabindex="-1"></a>    games[[<span class="st">"HomeScore"</span>]] <span class="ot">&lt;-</span></span>
-<span id="cb20-64"><a href="#cb20-64" aria-hidden="true" tabindex="-1"></a>      raw_elements[<span class="fu">seq</span>(<span class="dv">23</span>, (n_games<span class="sc">+</span><span class="dv">1</span>)<span class="sc">*</span><span class="dv">14</span>, <span class="at">by =</span> <span class="dv">14</span>)]</span>
-<span id="cb20-65"><a href="#cb20-65" aria-hidden="true" tabindex="-1"></a>    games[[<span class="st">"OT"</span>]] <span class="ot">&lt;-</span></span>
-<span id="cb20-66"><a href="#cb20-66" aria-hidden="true" tabindex="-1"></a>      raw_elements[<span class="fu">seq</span>(<span class="dv">24</span>, (n_games<span class="sc">+</span><span class="dv">1</span>)<span class="sc">*</span><span class="dv">14</span>, <span class="at">by =</span> <span class="dv">14</span>)]</span>
-<span id="cb20-67"><a href="#cb20-67" aria-hidden="true" tabindex="-1"></a>    games[[<span class="st">"Notes"</span>]] <span class="ot">&lt;-</span></span>
-<span id="cb20-68"><a href="#cb20-68" aria-hidden="true" tabindex="-1"></a>      raw_elements[<span class="fu">seq</span>(<span class="dv">25</span>, (n_games<span class="sc">+</span><span class="dv">1</span>)<span class="sc">*</span><span class="dv">14</span>, <span class="at">by =</span> <span class="dv">14</span>)]</span>
-<span id="cb20-69"><a href="#cb20-69" aria-hidden="true" tabindex="-1"></a>    games[[<span class="st">"Type"</span>]] <span class="ot">&lt;-</span></span>
-<span id="cb20-70"><a href="#cb20-70" aria-hidden="true" tabindex="-1"></a>      raw_elements[<span class="fu">seq</span>(<span class="dv">26</span>, (n_games<span class="sc">+</span><span class="dv">1</span>)<span class="sc">*</span><span class="dv">14</span>, <span class="at">by =</span> <span class="dv">14</span>)]</span>
-<span id="cb20-71"><a href="#cb20-71" aria-hidden="true" tabindex="-1"></a>    results <span class="ot">&lt;-</span> </span>
-<span id="cb20-72"><a href="#cb20-72" aria-hidden="true" tabindex="-1"></a>      tidyr<span class="sc">::</span><span class="fu">as_tibble</span>(games) <span class="sc">|&gt;</span></span>
-<span id="cb20-73"><a href="#cb20-73" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb20-74"><a href="#cb20-74" aria-hidden="true" tabindex="-1"></a>        <span class="at">OT =</span> <span class="fu">ifelse</span>(OT <span class="sc">==</span> <span class="st">""</span>, <span class="cn">NA_character_</span>, OT),</span>
-<span id="cb20-75"><a href="#cb20-75" aria-hidden="true" tabindex="-1"></a>        <span class="at">Notes =</span> <span class="fu">ifelse</span>(Notes <span class="sc">==</span> <span class="st">""</span>, <span class="cn">NA_character_</span>, Notes),</span>
-<span id="cb20-76"><a href="#cb20-76" aria-hidden="true" tabindex="-1"></a>        <span class="at">HomeScore =</span> <span class="fu">as.integer</span>(HomeScore),</span>
-<span id="cb20-77"><a href="#cb20-77" aria-hidden="true" tabindex="-1"></a>        <span class="at">OppScore =</span> <span class="fu">as.integer</span>(OppScore))</span>
-<span id="cb20-78"><a href="#cb20-78" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb20-79"><a href="#cb20-79" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(results)</span>
-<span id="cb20-80"><a href="#cb20-80" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>scrape_uscho <span class="ot">&lt;-</span> <span class="cf">function</span>(season){</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  col_names <span class="ot">&lt;-</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="st">"Day"</span>, <span class="st">""</span>, <span class="st">"Date"</span>, <span class="st">"Time"</span>, </span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Opponent"</span>, <span class="st">"Opp Score"</span>, <span class="st">""</span>, <span class="st">"Home"</span>, <span class="st">"Score"</span>, <span class="st">"OT"</span>,</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Notes"</span>, <span class="st">"Type"</span>, <span class="st">"Summary"</span>, <span class="st">"TV"</span>)</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  target_url <span class="ot">&lt;-</span> </span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste0</span>(<span class="st">"https://www.uscho.com/scoreboard/division-i-women/"</span>,</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>           season, <span class="st">"-"</span>, season<span class="sc">+</span><span class="dv">1</span>, </span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>           <span class="st">"/composite-schedule/"</span>)</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>  raw_data <span class="ot">&lt;-</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    rvest<span class="sc">::</span><span class="fu">read_html</span>(target_url)</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>  raw_elements <span class="ot">&lt;-</span></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    raw_data <span class="sc">|&gt;</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    rvest<span class="sc">::</span><span class="fu">html_elements</span>(<span class="at">xpath =</span> <span class="st">'//*[(@id = "ez-outstream-ez-stuck-close")] | //td'</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>    rvest<span class="sc">::</span><span class="fu">html_text2</span>()</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">assign</span>(<span class="fu">paste0</span>(<span class="st">"raw_wd1hockey_"</span>, season, <span class="st">"_"</span>, season<span class="sc">+</span><span class="dv">1</span>), raw_data)</span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">save</span>(<span class="at">list =</span> <span class="fu">paste0</span>(<span class="st">"raw_wd1hockey_"</span>, season, <span class="st">"_"</span>, season<span class="sc">+</span><span class="dv">1</span>),</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>       <span class="at">file =</span> <span class="fu">paste0</span>(<span class="st">"raw_wd1hockey_"</span>, season, <span class="st">"_"</span>, season<span class="sc">+</span><span class="dv">1</span>, <span class="st">".RData"</span>))</span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">identical</span>(col_names, raw_elements[<span class="dv">1</span><span class="sc">:</span><span class="dv">14</span>])){</span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">message</span>(<span class="fu">paste0</span>(<span class="st">"Season "</span>, season,<span class="st">"-"</span>,season<span class="sc">+</span><span class="dv">1</span>, <span class="st">": did not find expected column names in html elements!"</span>))</span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>    results <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>  } </span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 2022-23 does not have TV abbreviations</span></span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>  altitude_ix <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="fu">grepl</span>(<span class="st">"Altitude"</span>, raw_elements))[<span class="dv">1</span>]</span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(altitude_ix <span class="sc">%%</span> <span class="dv">14</span> <span class="sc">!=</span> <span class="dv">1</span>){</span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">message</span>(<span class="fu">paste0</span>(<span class="st">"Season "</span>, season, <span class="st">"-"</span>, season<span class="sc">+</span><span class="dv">1</span>, <span class="st">": did not find expected number of elements in table!"</span>))</span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>    results <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span>{</span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a>    <span class="co"># First 14 elements </span></span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a>    n_games <span class="ot">&lt;-</span> (altitude_ix <span class="sc">-</span> <span class="dv">1</span>)<span class="sc">/</span><span class="dv">14</span> <span class="sc">-</span> <span class="dv">1</span> </span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a>    games <span class="ot">&lt;-</span> </span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a>      <span class="fu">data.frame</span>(</span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a>        <span class="at">Day =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_games),</span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a>        <span class="at">Date =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_games),</span>
+<span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a>        <span class="at">Time =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_games),</span>
+<span id="cb21-43"><a href="#cb21-43" aria-hidden="true" tabindex="-1"></a>        <span class="at">Opponent =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_games),</span>
+<span id="cb21-44"><a href="#cb21-44" aria-hidden="true" tabindex="-1"></a>        <span class="at">OppScore =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_games),</span>
+<span id="cb21-45"><a href="#cb21-45" aria-hidden="true" tabindex="-1"></a>        <span class="at">Home =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_games),</span>
+<span id="cb21-46"><a href="#cb21-46" aria-hidden="true" tabindex="-1"></a>        <span class="at">HomeScore =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_games),</span>
+<span id="cb21-47"><a href="#cb21-47" aria-hidden="true" tabindex="-1"></a>        <span class="at">OT =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_games),</span>
+<span id="cb21-48"><a href="#cb21-48" aria-hidden="true" tabindex="-1"></a>        <span class="at">Notes =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_games),</span>
+<span id="cb21-49"><a href="#cb21-49" aria-hidden="true" tabindex="-1"></a>        <span class="at">Type =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_games))</span>
+<span id="cb21-50"><a href="#cb21-50" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-51"><a href="#cb21-51" aria-hidden="true" tabindex="-1"></a>    games[[<span class="st">"Day"</span>]] <span class="ot">&lt;-</span> </span>
+<span id="cb21-52"><a href="#cb21-52" aria-hidden="true" tabindex="-1"></a>      raw_elements[<span class="fu">seq</span>(<span class="dv">15</span>, (n_games<span class="sc">+</span><span class="dv">1</span>)<span class="sc">*</span><span class="dv">14</span>, <span class="at">by =</span> <span class="dv">14</span>)] </span>
+<span id="cb21-53"><a href="#cb21-53" aria-hidden="true" tabindex="-1"></a>    games[[<span class="st">"Date"</span>]] <span class="ot">&lt;-</span></span>
+<span id="cb21-54"><a href="#cb21-54" aria-hidden="true" tabindex="-1"></a>      raw_elements[<span class="fu">seq</span>(<span class="dv">17</span>, (n_games<span class="sc">+</span><span class="dv">1</span>)<span class="sc">*</span><span class="dv">14</span>, <span class="at">by =</span> <span class="dv">14</span>)]</span>
+<span id="cb21-55"><a href="#cb21-55" aria-hidden="true" tabindex="-1"></a>    games[[<span class="st">"Time"</span>]] <span class="ot">&lt;-</span></span>
+<span id="cb21-56"><a href="#cb21-56" aria-hidden="true" tabindex="-1"></a>      raw_elements[<span class="fu">seq</span>(<span class="dv">18</span>, (n_games<span class="sc">+</span><span class="dv">1</span>)<span class="sc">*</span><span class="dv">14</span>, <span class="at">by =</span> <span class="dv">14</span>)]</span>
+<span id="cb21-57"><a href="#cb21-57" aria-hidden="true" tabindex="-1"></a>    games[[<span class="st">"Opponent"</span>]] <span class="ot">&lt;-</span></span>
+<span id="cb21-58"><a href="#cb21-58" aria-hidden="true" tabindex="-1"></a>      raw_elements[<span class="fu">seq</span>(<span class="dv">19</span>, (n_games<span class="sc">+</span><span class="dv">1</span>)<span class="sc">*</span><span class="dv">14</span>, <span class="at">by =</span> <span class="dv">14</span>)]</span>
+<span id="cb21-59"><a href="#cb21-59" aria-hidden="true" tabindex="-1"></a>    games[[<span class="st">"OppScore"</span>]] <span class="ot">&lt;-</span></span>
+<span id="cb21-60"><a href="#cb21-60" aria-hidden="true" tabindex="-1"></a>      raw_elements[<span class="fu">seq</span>(<span class="dv">20</span>, (n_games<span class="sc">+</span><span class="dv">1</span>)<span class="sc">*</span><span class="dv">14</span>, <span class="at">by =</span> <span class="dv">14</span>)]</span>
+<span id="cb21-61"><a href="#cb21-61" aria-hidden="true" tabindex="-1"></a>    games[[<span class="st">"Home"</span>]] <span class="ot">&lt;-</span></span>
+<span id="cb21-62"><a href="#cb21-62" aria-hidden="true" tabindex="-1"></a>      raw_elements[<span class="fu">seq</span>(<span class="dv">22</span>, (n_games<span class="sc">+</span><span class="dv">1</span>)<span class="sc">*</span><span class="dv">14</span>, <span class="at">by =</span> <span class="dv">14</span>)]</span>
+<span id="cb21-63"><a href="#cb21-63" aria-hidden="true" tabindex="-1"></a>    games[[<span class="st">"HomeScore"</span>]] <span class="ot">&lt;-</span></span>
+<span id="cb21-64"><a href="#cb21-64" aria-hidden="true" tabindex="-1"></a>      raw_elements[<span class="fu">seq</span>(<span class="dv">23</span>, (n_games<span class="sc">+</span><span class="dv">1</span>)<span class="sc">*</span><span class="dv">14</span>, <span class="at">by =</span> <span class="dv">14</span>)]</span>
+<span id="cb21-65"><a href="#cb21-65" aria-hidden="true" tabindex="-1"></a>    games[[<span class="st">"OT"</span>]] <span class="ot">&lt;-</span></span>
+<span id="cb21-66"><a href="#cb21-66" aria-hidden="true" tabindex="-1"></a>      raw_elements[<span class="fu">seq</span>(<span class="dv">24</span>, (n_games<span class="sc">+</span><span class="dv">1</span>)<span class="sc">*</span><span class="dv">14</span>, <span class="at">by =</span> <span class="dv">14</span>)]</span>
+<span id="cb21-67"><a href="#cb21-67" aria-hidden="true" tabindex="-1"></a>    games[[<span class="st">"Notes"</span>]] <span class="ot">&lt;-</span></span>
+<span id="cb21-68"><a href="#cb21-68" aria-hidden="true" tabindex="-1"></a>      raw_elements[<span class="fu">seq</span>(<span class="dv">25</span>, (n_games<span class="sc">+</span><span class="dv">1</span>)<span class="sc">*</span><span class="dv">14</span>, <span class="at">by =</span> <span class="dv">14</span>)]</span>
+<span id="cb21-69"><a href="#cb21-69" aria-hidden="true" tabindex="-1"></a>    games[[<span class="st">"Type"</span>]] <span class="ot">&lt;-</span></span>
+<span id="cb21-70"><a href="#cb21-70" aria-hidden="true" tabindex="-1"></a>      raw_elements[<span class="fu">seq</span>(<span class="dv">26</span>, (n_games<span class="sc">+</span><span class="dv">1</span>)<span class="sc">*</span><span class="dv">14</span>, <span class="at">by =</span> <span class="dv">14</span>)]</span>
+<span id="cb21-71"><a href="#cb21-71" aria-hidden="true" tabindex="-1"></a>    results <span class="ot">&lt;-</span> </span>
+<span id="cb21-72"><a href="#cb21-72" aria-hidden="true" tabindex="-1"></a>      tidyr<span class="sc">::</span><span class="fu">as_tibble</span>(games) <span class="sc">|&gt;</span></span>
+<span id="cb21-73"><a href="#cb21-73" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb21-74"><a href="#cb21-74" aria-hidden="true" tabindex="-1"></a>        <span class="at">OT =</span> <span class="fu">ifelse</span>(OT <span class="sc">==</span> <span class="st">""</span>, <span class="cn">NA_character_</span>, OT),</span>
+<span id="cb21-75"><a href="#cb21-75" aria-hidden="true" tabindex="-1"></a>        <span class="at">Notes =</span> <span class="fu">ifelse</span>(Notes <span class="sc">==</span> <span class="st">""</span>, <span class="cn">NA_character_</span>, Notes),</span>
+<span id="cb21-76"><a href="#cb21-76" aria-hidden="true" tabindex="-1"></a>        <span class="at">HomeScore =</span> <span class="fu">as.integer</span>(HomeScore),</span>
+<span id="cb21-77"><a href="#cb21-77" aria-hidden="true" tabindex="-1"></a>        <span class="at">OppScore =</span> <span class="fu">as.integer</span>(OppScore))</span>
+<span id="cb21-78"><a href="#cb21-78" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb21-79"><a href="#cb21-79" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(results)</span>
+<span id="cb21-80"><a href="#cb21-80" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>We can use this function to obtain game-by-game results from the 2024-25 regular season</p>
@@ -874,14 +878,14 @@ Download pre-scraped data
 </div>
 </div>
 <p>In the following subsections, we will investigate what the columns <code>Type</code> and <code>Notes</code> record.</p>
-<section id="determine-winner" class="level3">
-<h3 class="anchored" data-anchor-id="determine-winner">Determining the Winner</h3>
+<section id="sec-determine-winner" class="level3">
+<h3 class="anchored" data-anchor-id="sec-determine-winner">Determining the Winner</h3>
 <p>In order to fit a Bradley-Terry model using these data, we still need to determine whether the home team won the game or not. Intuitively, we can do this by adding a column to <code>wd1hockey_2024_2025</code> that compares <code>HomeScore</code> to <code>OppScore</code>. Unfortunately, this simple strategy is not quite adequate as there are a number of games in which <code>HomeScore = OppScore</code>. It turns out that many of these games ended in a shootout[^shootout] and the ultimate winner is recorded in the <code>Notes</code> column.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>wd1hockey_2024_2025 <span class="sc">|&gt;</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(HomeScore <span class="sc">==</span> OppScore) <span class="sc">|&gt;</span></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Opponent, OppScore, Home, HomeScore, Notes) <span class="sc">|&gt;</span></span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>wd1hockey_2024_2025 <span class="sc">|&gt;</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(HomeScore <span class="sc">==</span> OppScore) <span class="sc">|&gt;</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Opponent, OppScore, Home, HomeScore, Notes) <span class="sc">|&gt;</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 × 5
   Opponent     OppScore Home          HomeScore Notes          
@@ -895,7 +899,7 @@ Download pre-scraped data
 </div>
 <p><code>Notes</code> uses a three-character abbreviation instead of the team’s full name. We can look up the abbreviations by inspecting the box score for each game. For instance, by looking under the “Team” column <a href="https://www.uscho.com/gameday/division-i-women/2024-2025/2025-03-23/game-7949/">here</a>, we see that Wisconsin and Ohio States’ abbreviations are, respectively, <code>"WIS"</code> and <code>"OSU"</code>. A table listing every team and its USCHO’s abbreviation is available <a href="">here</a>. After downloading this table and saving it in our working directory, we can load it into our R session</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>team_abbr <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="at">file =</span> <span class="st">"wd1hockey_teams.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>team_abbr <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="at">file =</span> <span class="st">"wd1hockey_teams.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>To see whether the home team won a match, we first check whether <code>HomeScore</code> and <code>OppScore</code> are identical. If not, then we can check whether <code>HomeScore &gt; OppScore</code>. But if they are the same, we can determine the winner by parsing the text in <code>Notes</code>. The following code block implement a function that executes this procedure.</p>
 <div class="cell">
@@ -966,7 +970,7 @@ Download pre-scraped data
 <h3 class="anchored" data-anchor-id="sec-extract-reg-season">Identifying Regular Season Games</h3>
 <p>The column <code>Type</code> records whether the game was an exhibition game (<code>Type="EX"</code>), non-conference game (<code>Type="NC"</code>), or a conference game. In the case of a conference game, <code>Type</code> records an abbreviation of the conference.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(wd1hockey_2024_2025<span class="sc">$</span>Type)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(wd1hockey_2024_2025<span class="sc">$</span>Type)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
  AH  EC  EX  HE  NC NEW  WC 
@@ -975,14 +979,14 @@ Download pre-scraped data
 </div>
 <p>We will fit our Bradley-Terry model using data only from the regular season, which includes conference tournaments and mid-season tournaments<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a> but not the NCAA Tournament, which is used to determine the national championship. The column <code>Notes</code>, in addition to recording the result of shootouts, also records whether the game was part of a tournament.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>reg_season <span class="ot">&lt;-</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  wd1hockey_2024_2025 <span class="sc">|&gt;</span></span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(Type <span class="sc">!=</span> <span class="st">"EX"</span> <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"NCAA W Tournament"</span>, Notes)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>reg_season <span class="ot">&lt;-</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  wd1hockey_2024_2025 <span class="sc">|&gt;</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(Type <span class="sc">!=</span> <span class="st">"EX"</span> <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"NCAA W Tournament"</span>, Notes)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Of the 787 games in <code>reg_season</code>, there are 18 that ended in ties. We will remove these from our analysis<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>no_ties <span class="ot">&lt;-</span></span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  reg_season <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Home_Winner))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>no_ties <span class="ot">&lt;-</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  reg_season <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Home_Winner))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>
@@ -990,7 +994,7 @@ Download pre-scraped data
 <h2 class="anchored" data-anchor-id="sec-bt-est">Fitting Bradley-Terry Models</h2>
 <p>We will use the package <a href="https://github.com/hturner/BradleyTerry2"><strong>BradleyTerry2</strong></a> to fit Bradley-Terry models in R. You can install the package using</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"hturner/BradleyTerry2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"hturner/BradleyTerry2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="re-formatting-our-data" class="level3">
 <h3 class="anchored" data-anchor-id="re-formatting-our-data">Re-formatting Our Data</h3>
@@ -1028,8 +1032,8 @@ Download pre-scraped data
 </div>
 <p>To better understand the structure of <code>results</code>, we can take a look at a few rows corresponding to Wisconsin’s home games.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>results <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(home.team <span class="sc">==</span> <span class="st">"Wisconsin"</span>) <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>results <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(home.team <span class="sc">==</span> <span class="st">"Wisconsin"</span>) <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 × 4
   home.team away.team       home.win away.win
@@ -1076,8 +1080,8 @@ Download pre-scraped data
 </div>
 <p>The function <code>BTabilities()</code> returns a matrix with columns containing the estimated value of <span class="math inline">\(\lambda\)</span> for each team and the associated standard error. Taking a look at the first few rows, we can verify that <code>BTm</code> set Assumption College’s latent strength to be 0. We further see that the model estimates the next several teams as having very large <span class="math inline">\(\lambda\)</span>’s, suggesting that they are very likely to beat Assumption.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>lambda_hat <span class="ot">&lt;-</span> BradleyTerry2<span class="sc">::</span><span class="fu">BTabilities</span>(fit)</span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>lambda_hat[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>lambda_hat <span class="ot">&lt;-</span> BradleyTerry2<span class="sc">::</span><span class="fu">BTabilities</span>(fit)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>lambda_hat[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                   ability     s.e.
 Assumption        0.000000 0.000000
@@ -1089,7 +1093,7 @@ Brown             4.798288 1.217776</code></pre>
 </div>
 <p>Wisconsin, Ohio State, Cornell, and Minnesota all have even larger positive estimated strengths. This is not especially surprising, as these are four of the better teams in the country[^frozenfour].</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>lambda_hat[<span class="fu">c</span>(<span class="st">"Wisconsin"</span>, <span class="st">"Ohio State"</span>, <span class="st">"Cornell"</span>, <span class="st">"Minnesota"</span>),]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>lambda_hat[<span class="fu">c</span>(<span class="st">"Wisconsin"</span>, <span class="st">"Ohio State"</span>, <span class="st">"Cornell"</span>, <span class="st">"Minnesota"</span>),]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>            ability     s.e.
 Wisconsin  9.341843 1.430356
@@ -1163,9 +1167,9 @@ Figure&nbsp;1: Most teams are favored against the reference team (Assumption Col
 </div>
 <p>Instead of using Assumption College as the reference, we can re-center our estimated <span class="math inline">\(\hat{\lambda}_{j}\)</span>’s using the function <code>update()</code></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>fit_nh <span class="ot">&lt;-</span> <span class="fu">update</span>(fit, <span class="at">refcat =</span> <span class="st">"New Hampshire"</span>)</span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>lambda_hat_nh <span class="ot">&lt;-</span> BradleyTerry2<span class="sc">::</span><span class="fu">BTabilities</span>(fit_nh)</span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>lambda_hat_nh[<span class="fu">c</span>(<span class="st">"Assumption"</span>, <span class="st">"New Hampshire"</span>, <span class="st">"Wisconsin"</span>, <span class="st">"Ohio State"</span>),]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>fit_nh <span class="ot">&lt;-</span> <span class="fu">update</span>(fit, <span class="at">refcat =</span> <span class="st">"New Hampshire"</span>)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>lambda_hat_nh <span class="ot">&lt;-</span> BradleyTerry2<span class="sc">::</span><span class="fu">BTabilities</span>(fit_nh)</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>lambda_hat_nh[<span class="fu">c</span>(<span class="st">"Assumption"</span>, <span class="st">"New Hampshire"</span>, <span class="st">"Wisconsin"</span>, <span class="st">"Ohio State"</span>),]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                ability      s.e.
 Assumption    -4.662547 1.2191462
@@ -1194,7 +1198,7 @@ Figure&nbsp;2: Some teams are significantly stronger and some teams are signific
 <h3 class="anchored" data-anchor-id="sec-series-simulate">Simulating a Best-of-5 Series</h3>
 <p>According to our model estimates, the probability that Wisconsin beats Ohio State in a single game is about 81%</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> (lambda_hat[<span class="st">"Wisconsin"</span>, <span class="st">"ability"</span>] <span class="sc">-</span> lambda_hat[<span class="st">"Ohio State"</span>, <span class="st">"ability"</span>])))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">*</span> (lambda_hat[<span class="st">"Wisconsin"</span>, <span class="st">"ability"</span>] <span class="sc">-</span> lambda_hat[<span class="st">"Ohio State"</span>, <span class="st">"ability"</span>])))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.8167779</code></pre>
 </div>
@@ -1310,13 +1314,13 @@ Game results: 1 1 0 1 NA </code></pre>
 </div>
 <p>Across the 5000 simulated series, Wisconsin won about 95% (4768/5000). We further estimate that the series ends in 3 games with probability 55% (2767/5000), 4 games with probability 32% (1585/5000), and 5 games with probability 13% (648/5000).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(series_results<span class="sc">$</span>Winner)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(series_results<span class="sc">$</span>Winner)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Ohio State  Wisconsin 
        232       4768 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(series_results<span class="sc">$</span>Games)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(series_results<span class="sc">$</span>Games)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
    3    4    5 
@@ -1330,7 +1334,7 @@ Ohio State  Wisconsin
 <p>Some of the games in our dataset were played at team’s home venue (e.g., La Bahn arean here in Madison) while other games were played a neutral venue (e.g., the championship round of the Beanpot, which is typically played at T.D. Garden in Boston). Our initial Bradley-Terry model does not account for any potential home-ice advantage. In <a href="../lectures/lecture13.html">Lecture 13</a>, we will add an term to our model that is 1 if the a game was played at one of the teams’ home and is 0 if it was played a netural site.</p>
 <p>We will then simulate a more complex, single-elimination tournament and use the simulation to estimated probabilities of events like “Wisconsin reaches the semi-finals”. To facilitate this, we will save the data table <code>no_ties</code> for future use</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(no_ties, <span class="at">file =</span> <span class="st">"wd1hockey_regseason_2024_2025.RData"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(no_ties, <span class="at">file =</span> <span class="st">"wd1hockey_regseason_2024_2025.RData"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 

@@ -9,10 +9,10 @@ execute:
 
 # Motivation
 
-## NCAA D1 Women's Hockey (2024-25) {.smaller}
+## NCAA D1 Women's Hockey (2024-25)
 - WIS went 38-1-2 & won the National Championship
-- OSU went 29-8-0 & lost against WIS
-- Head-to-Head: 2-1-1
+- OSU went 29-8-0 & lost against WIS in the finals
+- Head-to-Head Record: 2-1-1
 
 . . . 
 
@@ -159,7 +159,9 @@ $$
 #| echo: true
 #| eval: true
 lambda <- c(1, 0.5, 0.3, 0)
-1/(1 + exp(-1 * (lambda[1] - lambda[2]))) #<1>
+1/(1 + exp(-1 * (lambda[1] - lambda[2]))) 
+1/(1 + exp(-1 * (lambda[2] - lambda[3]))) 
+1/(1 + exp(-1 * (lambda[4] - lambda[2])))
 ```
 
 ### `outer`
@@ -167,7 +169,7 @@ lambda <- c(1, 0.5, 0.3, 0)
 #| label: outer-demo
 #| eval: true
 #| echo: true
-outer(X = lambda, Y = lambda, FUN = "-") #<1>
+outer(X = lambda, Y = lambda, FUN = "-")
 ```
 
 ### Pairwise Probs.
@@ -192,14 +194,14 @@ round(probs, digits = 3)
 ```{r}
 #| label: design-example
 #| eval: true
-#| echo: false
+#| echo: true
 design <- 
   combn(x = 1:4, m = 2) |> 
-  t() |> #<1>
-  as.data.frame() |> #<2>
-  dplyr::rename(player1 = V1, player2 = V2) |> #<3>
+  t() |> 
+  as.data.frame() |> 
+  dplyr::rename(player1 = V1, player2 = V2) |> 
   dplyr::rowwise() |>
-  dplyr::mutate(prob = probs[player1, player2]) |> #<4>
+  dplyr::mutate(prob = probs[player1, player2]) |> 
   dplyr::ungroup()
 design
 ```
@@ -207,7 +209,7 @@ design
 ## Example: Tournament Simulation II{.smaller}
 
 - Flip 6 coins, one per match
-  - Heads: `player1` wins; Tails: `player2` wins
+- Heads: `player1` wins; Tails: `player2` wins
 - `rbinom(n, size, prob)`: simulate from a **Binomial** distribution
 - Coin flips are special case with `size = 1`
   - `n`: number of coins to flip
@@ -218,7 +220,7 @@ design
 #| echo: true
 set.seed(479)
 outcomes <- rbinom(n = 6, size = 1, prob = design$prob)
-cbind(design, outcomes)
+design |> dplyr::mutate(outcome = outcomes)
 ```
 
 ## Example: Tournament Simulation III{.smaller}
@@ -293,8 +295,27 @@ for(r in 1:n_sims){
 }
 ```
 
+### Snapshot
+
+- Results for first 10 simulations
+- Simulation 1: 
+  - 1 beats 2, 3, & 4
+  - 2 beats 3, loses to 1 & 4
+  - 3 beats 4 & loses to 1 & 2
+  - 4 beats 2 & loses to 1 & 3
+```{r}
+#| label: simulation-snapshot
+#| eval: true
+#| echo: false
+simulated_wins[1:10,]
+
+```
+
+
 ### Team 1's Performance
 
+- Columns record number of wins for each team
+- Team 1 won all 3 games in about 30% of simulations 
 ```{r}
 #| label: tabulate-rr4-team1
 #| eval: true
@@ -303,6 +324,8 @@ table(simulated_wins[,1])
 ```
 
 ### Ranking w/ Ties
+
+
 - We will rank teams by *negative* number of wins
 - In case of ties: assign **minimum** possible rank
 - E.g.: say Teams 1 & 2 won 2 games each and 3 & 4 won 1 game each
@@ -316,7 +339,7 @@ rank(-1*c(2,2,1,1), ties.method = "min")
 
 ### Team Rankings
 
-- $\mathbb{P}(\textrm{Team 3 is in top-2}) \approx 53.1%$ 
+- $\mathbb{P}(\textrm{Team 3 is in top-2}) \approx 53.1\%$ 
 
 ```{r}
 #| label: rank-rr4
@@ -333,11 +356,11 @@ simulated_ranks <-
 
 :::
 
-## Identifiability{.smaller}
+## Identifiability
 
-- Basic BT model: $\textrm{P}(i \textrm{beats} j)$ depends only on **difference** $\lambda_{i} - \lambda_{j}$
+- Basic BT model: $\textrm{P}(i \textrm{ beats } j)$ depends only on **difference** $\lambda_{i} - \lambda_{j}$
 - Probabilities unchanged after constant shift. E.g.: $\lambda_{j} \rightarrow \lambda_{j} + 5$ for all $j$
-- Practically: we can only estiamtes latent strengths **up to an additive constant**
+- Practically: we can only estiamte latent strengths **up to an additive constant**
 - Often we fix one $\lambda_{j} = 0$ (a "reference team")
 
 # Fitting BT Models
@@ -352,9 +375,8 @@ simulated_ranks <-
 - Scrape from USCHO website
   - Before 10/6: code on course website worked
   - After 10/6: USCHO changed their backend (so scraping code won't work...)
-- Will post a complete data table on Canvas
 
-## Preview of Data
+## Preview of Data{.smaller}
 
 ```{r}
 #| label: data-view
@@ -458,6 +480,10 @@ summary(fit)
 
 ### Extracting $\hat{\lambda}_{j}$'s
 
+- Use `BTabilities` to extract estimates & standard errors
+- Remember: we manually set Assumption College's $\lambda = 0$
+- These are **relative** strength estimates
+
 ```{r}
 #| label: extract-lambda
 #| eval: true
@@ -470,13 +496,15 @@ lambda_hat[c("Wisconsin", "Ohio State", "Cornell", "Minnesota"),]
 
 ## Estimated Team Strengths
 
+- Approximate confident intervals $\hat{\lambda} \pm 2 \times \textrm{s.e.}(\hat{\lambda}_{j})$
+- Would be more precise to bootstrap games
+
 ```{r}
 #| label: fig-lambda-hat-raw
 #| eval: true
 #| echo: false
-#| fig-width: 8
+#| fig-width: 7
 #| fig-asp: 0.5625
-#| fig-cap: Most teams are favored against the reference team (Assumption College)
 
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
 oi_colors <- palette.colors(palette = "Okabe-Ito")
@@ -534,7 +562,6 @@ lambda_hat_nh[c("Assumption", "New Hampshire", "Wisconsin", "Ohio State"),]
 #| echo: false
 #| fig-width: 8
 #| fig-asp: 0.5625
-#| fig-cap: "Some teams are significantly stronger and some teams are significantly weaker than New Hampshire"
 
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
 n_teams <- nrow(lambda_hat_nh) 

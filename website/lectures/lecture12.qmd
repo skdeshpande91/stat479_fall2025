@@ -299,11 +299,19 @@ This information is readily scraped using tools like [**rvest**](https://rvest.t
 
 Unfortunately, USCHO changed their website back-end and the following code no longer works (as of October 5, 2025).
 The data for this lecture is available as a CSV file [here](https://github.com/skdeshpande91/stat479_fall2025/blob/main/data/wd1hockey_2024_2025.csv). 
+You should also download a list of team abbreviations from [here](https://github.com/skdeshpande91/stat479_fall2025/blob/main/data/wd1hockey_teams.csv).
+
+After downloading the data, you can load the match results into R using the code and then proceed directly to @sec-determine-winner
+```{r}
+#| label: load-csv
+#| eval: false
+#| echo: true
+wd1hockey_2024_2025 <- readr::read_csv(file = "wd1hockey_2024_2025.csv")
+```
 :::
 
 
 The codeblock below defines a function that scrapes a single season's worth of D1 Women's Ice Hockey results.
-
 ```{r}
 #| label: uscho-scraper
 #| eval: true
@@ -403,6 +411,11 @@ save(wd1hockey_2024_2025, file = "wd1hockey_2024_2025.RData") #<1>
 1. Save a copy of the data table so that we can load it later without have to re-scrape it
 
 In addition to the recording the date and time of each game, our data table `wd1hockey_2024_2025` records the home and away team names (`Home` and `Opponent`); the home and away team scores (`HomeScore` and `OppScore`); whether the game went into overtime (`OT = "OT"`) or not (`OT = NA`).
+
+
+
+
+
 ```{r}
 #| label: data-view
 #| eval: true
@@ -416,7 +429,7 @@ wd1hockey_2024_2025 |>
 In the following subsections, we will investigate what the columns `Type` and `Notes` record.
 
 
-### Determining the Winner {#determine-winner}
+### Determining the Winner {#sec-determine-winner}
 
 In order to fit a Bradley-Terry model using these data, we still need to determine whether the home team won the game or not.
 Intuitively, we can do this by adding a column to `wd1hockey_2024_2025` that compares `HomeScore` to `OppScore`.
