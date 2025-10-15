@@ -7,24 +7,360 @@ execute:
 
 ## Overview
 
-## Beyond Run Scoring
 
-### Game State After 2 Batters
+In [Lecture 14](lecture14.qmd), we estimated the matrix of transition probabilities for 25 different game-states in baseball.
+24 of these states corresponded to the combinations of outs and base runner configurations.
+The final state was the three-out state, representing the end of the half-inning.
+We simulated Markov chains that randomly walked between these states according to the estimated transition matrix
+
+The fundamental feature of those simulations --- and all Markov chains --- is that the state the chain visits next depends only on its current state and not on any of the previously visited states.
+This is known as the *Markov property*.
+Put more somewhat more poetically, the Markov property means that the future depends only on the present and not on the past.
+In the baseball context of [Lecture 14](lecture14.qmd), this would mean that what happens after the game reaches any particular state does not depend on what ultimately lead the state.
+So, for instance, when predicting what might happen after the game reaches the state `2.110`, with runners on 1st and 2nd base and two outs, it doesn't matter whether the state was reached from `1.110` or `2.100`.  
+It is important to note that in [Lecture 14](lecture14.qmd), we are **assuming** that the Markov property holds.
+
+
+This lecture consists of two distinct parts.
+First, in @sec-mc-theory, we leverage certain mathematical properties of the Markov chain over game-states in a half-inning of baseball to compute things like the expected number of at-bats that will follow one beginning in state `1.000` or the number of times a half-inning will visit a particular state.
+Then in @sec-mc-ranking, we explore how Markov chains can be used to derive power rankings of teams from head-to-head matchups.
+Unlike our [rankings derived from Bradley-Terry models](lecture12.qmd), these Markov chain-based rankings cannot immediately be used to estimate the probability of one team beating another. 
+
+
+## Markov Chain Theory {#sec-mc-theory}
+
+Throughout this section, we will use $\boldsymbol{\mathbf{P}}$ to denote the transition matrix of a Markov chain defined over the state space $\{1, 2, \ldots, S\}.$
+We will also denote the $(s,s')$ entry of $\boldsymbol{\mathbf{P}}$ by $p_{s,s'}.$
+Throughout this section, we will work with the estimated transition probability from [Lecture 14](lecture14.qmd)
+```{r}
+#| label: load-transitions
+#| eval: true
+#| echo: true
+load("atbat2024_markov_chain.RData")
+```
+
+
+### Modeling Multiple Steps
+
+The $(s,s')$ entry of $\boldsymbol{\mathbf{P}}$ is the probability that the chain moves from state $s$ to state $s'.$
+Based on the 2024 MLB season, we estimated that approximately 23\% of at-bats that began in the state `1.000` ended in the state `1.100`, so $p_{\textrm{1.000, 1.100}} \approx 0.23$ 
+```{r}
+#| label: one-step-transition
+#| eval: true
+#| echo: true
+transition_matrix["1.000", "1.100"]
+```
+
+Now suppose we are at the start of an at-bat with one out and no runners on base (i.e., in state `1.000`).
+How likely is it that in exactly two at-bats, we will have two outs and a runner on 1st base (i.e., be in the state `2.100`)?
+
+Before answering this question, we consider a somewhat simpler question: What are all the different intermediate states that the game could visit between `1.000` and `2.100`? 
+For instance, the batter facing `1.000` could strike out, moving the game to `2.000`, and then the next batter could hit a single, moving the game to `2.100`.
+Alternatively, the batter facing `1.000` could hit a single, moving the game to `1.100`, before the next batter strikes out, moving the game to `2.100`.
+A somewhat less likely --- but still plausible --- way to reach `2.100` from `1.000` in two at-bats is for the first batter to hit a single and for the second batter to hit into a force out at second.
+
+More formally, to compute the probability that the game moves from `1.000` to `2.100` in exactly two steps, we must
+
+  1. Multiply the one-step transition probabilities $p_{\textrm{1.000},s} \times p_{s, \textrm{2.100}}$ to obtain the probability of transitioning from `1.000` to $s$ to `2.100` **for all states $s$**.
+  2. Sum these two-step probabilities over all possibly intermediate states $s.$
+
+That is, we compute
+$$
+\mathbb{P}(\textrm{game moves from 1.000 to 2.100 in two steps}) = \sum_{s}{p_{\textrm{1.000},s} \times p_{s, \textrm{2.100}}},
+$$
+where the sum is taken over *all* possible states.
+Because certain states like `0.000` or `3.000` are unreachable from `1.000`, the impossible transitions through those states do not contribute to the sum as the term $p_{1.000,s}$ will be zero.
+
+Looking carefully at this sum, we recognize the familiar form of matrix multiplication.
+Specifically, the entry corresponding to (`1.000,2.100`) in the matrix $\boldsymbol{\mathbf{P}} \times \boldsymbol{\mathbf{P}}$ is *precisely* the sum above.
+We find that there is roughly a 26% probability of reaching `2.100` from `1.000`:
+```{r}
+#| label: two-step
+#| eval: true
+#| echo: true
+
+P2 <- transition_matrix %*% transition_matrix #<1>
+P2["1.000", "2.100"]
+```
+1. Matrix multiplication uses the syntax `%*%`
+
+:::{.callout-note}
+
+## Definition: n-Step Transition
+For any integer $n$, let $\boldsymbol{\mathbf{P}}^{(n)}$ denote the **$n$-step transition matrix**, which we obtain by multiplying $\boldsymbol{\mathbf{P}}$ with itself $n$ times.
+The $(s,s')$ entry of $\boldsymbol{\mathbf{P}}^{(n)}$ is the probability that Markov chain beginning in state $s$ reaches states $s'$ in *exactly* $n$ steps.
+:::
+
+To illustrate, here are several entries of $\boldsymbol{\mathbf{P}}^{(2)}$
+
+```{r}
+selected_states <- c("0.000", "1.000", "2.000", "1.110", "3.000")
+round(P2[selected_states, selected_states], digits = 2)
+```
+Starting from `0.000`, there is about a 50% chance that the game reaches the state `2.000` after two at-bats[^intuition].
+Similarly, there is about a 50% chance that the inning ends within two batters of an at-bat beginning in state `1.000`.
+Looking at the three-step transition probabilities, we see that the most three most likely outcomes after the first three batters of a half-inning are (i) the inning ended (38\%); (ii) the state `2.100` (23.5%); and (iii) the state `2.010` (7.8%)
+
+```{r}
+#| label: three-step-start
+#| eval: true
+#| echo: true
+P3 <- P2 %*% transition_matrix
+round(sort(P3["0.000",], decreasing = TRUE), digits = 2)
+```
+[^intuition]: Reassuringly, we see that there is a a 0% chance of the inning ending after two at-bats!
+
+### Absorbing Chains & Fundamental Matrices
+
+In [Lecture 14](lecture14.qmd), we computed the distribution of the the length of a half-inning beginning with `0.000`.
+Now, we turn to a more nuanced questions: starting from state `1.100`, what is the probability that we visit the state `2.010` before the end of the half-inning? And about how many times can we visit the state `2.010` before the half-inning ends? 
+To answer these questions, we need to introduce a bit more theory about Markov chains.
+
+First, recall that in our Markov chain model of a half-inning, the state `3.000` is **absorbing**: once the chain reaches the state (i.e., the inning ends), it remains there and cannot visit any of the other states.
+
+:::{.callout-note}
+
+## Definition: Absorbing Markov Chain
+A Markov chain is called **absorbing** if it (i) there is at least one absorbing state and (ii) it is possible to go from any state to an absorbing state in a finite number of steps.
+
+:::
+
+It is not difficult to verify mathematically that our Markov chain for the state transitions between at-bats is absorbing.
+But it is even easier to verify this empirically: in all of baseball, we've never not had a half-inning continue indefinitely.
+Eventually half-innings ends, reaching the absorbing state `3.000`.
+
+Now, suppose we have an absorbing Markov chain defined over the states $\{1, 2, \ldots, S\}.$
+Without losing any generality, let us suppose that the first $T$ states are *transient* (i.e., non-absorbing) and the last $A = S - T$ states are absorbing.
+Then, the transition matrix has the form
+$$
+\boldsymbol{\mathbf{P}} = \begin{pmatrix} Q & R \\ 0 & I_{A} \end{pmatrix},
+$$
+where $Q$ is a $T \times T$ matrix capturing one-step transition probabilities between non-absobring states; $R$ is a $T \times A$ matrix capturing one-step transition probabilities between non-absorbing and absorbing states; and $I_{A}$ is the $A \times A$ identity matrix, with ones along the diagonal and zeros in all other entries.
+
+In our baseball example, there is only $A = 1$ absorbing state and $T = 24$ transient states.
+The code below extracts the matrix $Q$
+```{r}
+#| label: extract-q
+#| eval: true
+#| echo: true
+transient_states <- unik_states |> dplyr::filter(GameState != "3.000") |> dplyr::pull(GameState)
+Q <- transition_matrix[transient_states, transient_states]
+R <- matrix(transition_matrix[transient_states, "3.000"], ncol = 1)
+```
+
+
+:::{.callout-note}
+
+## Definition: Fundamental Matrix
+For an absorbing Markov chain, the **fundamental** matrix is given by 
+$$
+N = (I_{T} - Q)^{-1}.
+$$
+:::
+
+For any two transient states $s$ and $s',$ the $(s,s')$ entry of $N,$ which we denote as $n_{s,s'}$ counts the *expected* number of times visits state $s'$ after starting from $s$ before absorption.
+```{r}
+#| label: get-fundamental
+#| eval: true
+#| echo: true
+N <- solve(diag(24) - Q)
+round(N[1:5, 1:5], digits = 2)
+```
+Looking at several entries of the fundamental matrix of our baseball Markov chain, we notice a few things.
+First, starting from `0.000`, we expect the number of times the chain visits `0.100`  about 0.25 times and `0.010` 0.06 times, on average.
+We also observe that the diagonal entries all appaer to be larger than 1
+```{r}
+#| label: fundamental-diagonal
+#| eval: true
+#| echo: true
+round(diag(N), digits  = 2)
+```
+Recall that the diagonal entry $n_{s,s}$ is the expected number of times that an absorbing chain visits state $s$ after starting from state $s.$
+So, if the chain *starts* at $s,$ it necessarily visits $s$ at least once.
+These results suggest, for instance, that starting from the state `1.111` the chain will return to the state `1.111` about 0.19 more times, on average.
+Similarly, starting from `0.000`, the chain expects to return to the starting state `0.000` only 0.05 more times, on average.
+
+Summing the entries along the rows of $N$, we can compute the expected time until the chain is absorbed starting from each state.
+So, if we are in an at-bat starting with `1.000`, we would expect to face a total of `{r} round(sum(N["1.000",]) - 1, digits = 2)` *additional* batters before the end of the half-inning
+```{r}
+#| label: expected-absorption-time
+#| eval: true
+#| echo: true
+sum(N["1.000",])
+```
 
 
 
-## Incorporating Team Information
+## Markov Chains for Power Rankings {#sec-rankings}
 
-Our Markov chain simulations have, so far, assumed that the transition probabilities between states are identical for all teams.
-This simplified assumption overlooks important differences between batting and pitching abilities.
+We now turn our attention to ranking NCAA D1 Women's Hockey teams, for which we used Bradley-Terry models in [Lecture 12](lecture12.qmd).
+One drawback of that modeling approach is its inability to account for the margin of victory.
+It turns out that we can construct a special type of Markov chain over the set of teams using match results and then estimate the *stationary distribution* of that Markov chain to derive a ranking. 
 
-### Empirical Bayes Shrinkage Estimator
+### High-level Overview
+
+The basic idea is to construct a Markov chain that describes the behavior of a fair-weather fan[^fairweather] who randomly switches their support from one team to another based on some underlying measure of how much better one team is than another.
+We can model this fan's behavior using a random walk along a *directed graph* whose vertices corresponds to the different teams and with edges between pairs of team.
+@fig-graph shows an example of such a graph with 4 vertices, corresponding to 4 different teams. 
+On any given day, the fan might support a particular team and be at the corresponding vertex in the graph.
+They can then random select one of the outgoing edges to follow based on the relative *weights* of each edge.
+
+
+Suppose the fan is currently located vertex W (i.e., they currently support team W).
+They now select a new team to support by randomly following one of the outgoing edges from vertex W with probability given by the weight of each outgoing edge. 
+In the case of @fig-graph, the edge weights are 1/8 from W to M, 1/4 from W to O, 1/8 from 1 to W to C, and 1/2 from W back to itself.
+So, given that the fan currently supports team W, we have the following probability distribution over the team they next support:
+
+  * Team W with probability 1/2 (i.e., they stay at vertex W)
+  * Team M with probability 1/8 (i.e., they move from vertex W to vertex M)
+  * Team O with probability 1/4 (i.e., they move from vertex W to vertex O)
+  * Team C with probability 1/8 (i.e., they move from vertex W to vertex C)
+
+Once the fan selects their new team to support, the process begins again: based on their current favorite team, they pick a new team based on the weights if the outgoing edges from the corresponding vertex in the graph.
+
+
+
+This random walk behavior can be described with a Markov chain with a transition matrix $\boldsymbol{\mathbf{P}}$ whose $(s,s')$ entry corresponds to the probability that the fan moves from vertex $s$ to vertex $s'$.
+In our 4-team analogy the transition matrix is given by
+$$
+\boldsymbol{\mathbf{P}} = 
+\begin{pmatrix}
+1/2 & 1/8 & 1/4 & 1/8 \\
+1/3 & 1/6 & 1/3 & 1/6 \\
+3/5 & 1/10 & 1/5 & 1/10 \\
+3/8 & 1/8 & 1/4 & 1/4
+\end{pmatrix}
+$$
+
+Now imagine running this random walk indefinitely, allowing the fan to switch their support from team to team according to the $\boldsymbol{\mathbf{P}}.$
+In doing so, we will generate a sequence of teams and can track the relative proportion of time the fan spends supporting each team.
+The following simulates such a walk of length 10,000 several times, each time starting the fan at a random node 
+
+we repeatedly start the fan at a random vertex and simulate their walk for 10,000 steps.
+In eachWe then report the 
+```{r}
+#| label: four-team-transition
+#| eval: true
+#| echo: true
+
+teams <- c("W", "M", "O", "C")
+P <- 
+  matrix(c(1/2, 1/3, 3/5, 3/8, 
+           1/8, 1/6, 1/10, 1/8,
+           1/4, 1/3, 1/5, 1/4,
+           1/8, 1/6, 1/10, 1/4), 
+         nrow = 4, ncol = 4,
+         dimnames = list(teams, teams))
+
+```
+
+
+
+### Invariant & Limiting Distributions
+
+
+### Constructing $\boldsymbol{\mathbf{P}}$
+
+There are *many* ways to construct the transition matrix $\boldsymbol{\mathbf{P}}.$
+All of these involve first introducing edge weights $w_{s,s'}$ for all possibly pairs of teams $s$ and $s'.$
+In addition to specifying the weight of the edge from $s$ to $s'$ (i.e., $w_{s,s'}$) and the weight of the edge from $s'$ to $s$ (i.e., $w_{s',s}$), we also must specify the weight for the self-loop from $s$ back to itself (i.e., $w_{s,s}$).
+Once we do that, we can then form a *stochastic matrix* $\boldsymbol{\mathbf{P}}$ whose rows sum to 1 and use this matrix as the transition matrix in our Markov chain.
+To ensure that the the resulting Markov chain has a unique limiting distribution, we often need to add a slight *damping* factor.
+
+Formally, let $\boldsymbol{\mathbf{A}}$ be the diagonal matrix containing the *row* sums of $\boldsymbol{\mathbf{W}}$ with entries $a_{s,s'} = 0$ whenever $s \neq s'$ and 
+$$
+a_{s,s} = \sum_{s'}{w_{s,s'}}.
+$$
+Additionally let $\boldsymbol{\mathbf{J}}$ be the $T \times T$ matrix consisting of all $1$'s.
+Then for some damping factor $0 < \beta < 1$, we set
+$$
+\boldsymbol{\mathbf{P}} = \beta \times \boldsymbol{\mathbf{A}}^{-1}\boldsymbol{\mathbf{W}} + \frac{1 - \beta}{T}\boldsymbol{\mathbf{J}}
+$$
+Essentially the additional damping ensures that the fan walking along a graph always has the potential to (i) not change their support in one-step and (ii) can switch their support to every other team from the current team.
+This is especially helpful in situations where not every team plays every other team or if one team goes undefeated. 
+
+
+
+
+#### Loss-based Edge Weights
+Perhaps the simplest edge-weight specification sets $w_{s,s'}$ to be the number of times team $s$ beats team $s'.$
+Let $\boldsymbol{\mathbf{W}}$ be the matrix with entries $w_{s,s'}.$
+
 <!--
-  Raw estimates are not so good
-  Stein shrinakge estimator: for each starting state s, let n_t be the number of time team t is starting state t. Fix an ending state s'.
-  We observe yt which is the number of times team t goes to state 
-  Derive a stein-like shriknage estimator
-  Albert & Baumer & Marchi do a weighted average that pull to grand mean
+ Weights are loss. w(s,s') = -1 each time s loses to s'. Intuitively: if s loses to s' many times, we'd like for the the fan to move to s' more often  from s.
+ Set beta = 0.85
 -->
 
-## Team-specific Half-Inning Simulation
+
+#### Margin-Based Weights
+
+<!--
+  w_{s,s'} : when s loses to s', look up total point differential by which they lost.
+  is w_{s,s'} < w_{s,t}, we want to encourage fan to move to the team that beat s by more points!
+  if s never loses to s', set w_{s,s'} = 0.
+-->
+
+#### Score-based Weights
+
+<!--
+  w_{s,s'} number of points s' scored when it played s
+  w_{s',s} number of points s score when it played s'.
+  
+  
+--> 
+
+To illustrate, let us load in the NCAA D1 Hockey Data
+
+
+
+Given a Markov chain
+
+Under suitable conditions[^markovchain], one can show that a Markov chain 
+
+
+
+
+
+
+[^fairweather]: See [this letter](https://www.nytimes.com/2024/03/05/magazine/fair-weather-fan-recommendation.html) for a counter-point.
+
+
+
+
+
+Each edge from team $s$ to team $s'$ will be associated with a weight $w_{s,s'}.$
+
+Every time
+
+
+We can now imagine a fan picking a node uniformly at random and then taking a random walk on the graph, visiting a sequence of vertices corresponding to different teams.
+The probability that the fan walks from vertex $s$ to vertex $s'$ will be proportional to $w_{s,s'}.$
+
+
+Now imagine a fan takes a random
+
+imagine creating a directed graph that contains a node (or vertex) for every team and that contains directed edges between  
+ 
+
+
+
+a fair-weather fan taking a random walk between teams and trying to identify the best team.
+
+
+The fan can start at any team and
+
+The central idea
+
+
+
+We also clear out our workspace, deleting all the objects used for our baseball modeling.
+```{r}
+#| label: load-hockey
+#| eval: true
+#| echo: true
+rm(list = ls())
+load("wd1hockey_regseason_2024_2025.RData")
+```
+
+
+

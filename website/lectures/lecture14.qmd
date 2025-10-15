@@ -384,7 +384,13 @@ transitions <-
   dplyr::left_join(y = start_counts, by = "GameState") |> #<2>
   dplyr::left_join(y = end_counts, by = c("GameState", "end_GameState")) |> #<2>
   tidyr::replace_na(replace = list(n_start_end=0)) |> #<3>
-  dplyr::mutate(prob = n_start_end/n_start) #<4>
+  dplyr::mutate(prob = n_start_end/n_start) |> #<4> 
+  dplyr::mutate(
+    prob = dplyr::case_when(
+      GameState == "3.000" & end_GameState != "3.000" ~ 0,
+      GameState == "3.000" & end_GameState == "3.000" ~ 1,
+      .default = prob))
+
 ```
 1. Enumerate all 625 possible combinations of starting and ending states of an at-bat
 2. Append columns with the number of at-bats (i) starting in each state and (ii) starting & ending in each combination of states
