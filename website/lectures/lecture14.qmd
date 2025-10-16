@@ -31,17 +31,18 @@ During the 6th at-bat, when Mookie Betts drove in a run off a single, the game s
 
 If we were to replay this half-inning over and over again, how often would the half-inning end after 8 at-bats?
 How often would the the first at-bat result in a batter reaching first base?
-How unusual is it to reach the state `0.111` from the state `0.110`? 
+And how unusual is it to reach the state `0.111` from the state `0.110`? 
 
-We will introduce a simple probabilistic model of these state transitions --- a **Markov chain** --- that allows us to answer such questions.
+In this lecture, we will build a **Markov chain** model, which is a simple probabilistic model of state transitions, to answer such questions.
 We briefly introduce the relevant mathematical details about Markov chains in @sec-markov-chain and work through some simple examples of Markov chains with two (@sec-two-state) and three (@sec-three-state) states.
 Then in @sec-half-inning, we build a Markov chain model to simulate an entire half-inning of baseball.
 Using this simulation, we study the distributions of the number of at-bats in a half-inning (@sec-halfinning-length) and the number of runs scored in a half-inning (@sec-runs-scored).
+Finally, in @sec-fundamental, we will lean on some mathematical properties of *absorbing Markov chains* to estimate how many more at-bats a team can expect to face given the current game state.
 
 
 ### Data Preparation
 
-The first at-bat in any half-inning of baseball has a deterministic game state: it always in the state `0.000`, with no outs and no runners on base.
+The first at-bat in any half-inning of baseball has a deterministic starting state: `0.000`, with no outs and no runners on base.
 The starting state of the next at-bat is, in contrast, non-deterministic.
 Sometimes the first batter gets out out, in which the game transitions to the state `1.000`.
 But other times, the first batter gets base on with single (`0.1000`), double (`0.010`), or triple (`0.001`).
@@ -49,14 +50,14 @@ More rarely, the batter scores a home run and the game state remains at `0.000`.
 Put another way, although the first game state visited in a half-inning is deterministic, the second game state visited is random. 
 
 From each possible second state, the game could move into multiple possible third states.
-Continuing this logic until the end of the half-inning, when the game state has `Outs = 3` and `BaseRunner` is undefined, the whole sequence of states visited is stochastic.
-If a team were to play the half-inning over and over again, the exact number of states visited (i.e., at-bats) and the precise sequence might vary from repetition to repetition.
+Continuing this logic until the end of the half-inning, when the game state has `Outs = 3` and `BaseRunner` is undefined, the whole sequence of states visited is *stochastic*.
+So, if a team were to play the half-inning over and over again, the exact number of states visited (i.e., at-bats) and the precise sequence might vary from repetition to repetition.
+Markov chains offer a conceptually simple way to model the randomness of the sequence of game states visited in a half-inning. 
 
-
-
-In our data table `atbat2024,` the variable `GameState` records the value of $G_{t}$ and was formed by concatenating the variables `Outs` and `BaseRunner`.
+To build a Markov chain model for baseball, we need to record the starting and ending state of every at-bat in the 2024 regular season.
+Recall that in our data table `atbat2024,` the variable `GameState` records the value of $G_{t}$ and was formed by concatenating the variables `Outs` and `BaseRunner`.
 In the code below, we create the variable `end_GameState` recording the ending state of each at-bat.
-We also create a table of all 25 unique states.
+
 ```{r}
 #| label: add-end-gamestate
 #| eval: true
@@ -89,22 +90,19 @@ unik_states <-
 ```
 1. Remove impossible combinations like 3 outs and runners on 1st and 2nd base.
 
-
-
 ## Markov Chains {#sec-markov-chain}
 
 Formally, let us denote the game state at the start of at-bat $t$ of a half-inning as $G_{t}.$
 There are 25 possible values for each $G_{t}$: the 24 different combinations of `Outs` (0,1, and 2) and `BaseRunner` ("000", "100", "010", "001", "110", "101", "011", and "111") and the one state corresponding to the end of the half-inning.
 As discussed in @sec-overview, although $G_{1}$ is always equal to `0.000`, the remaining $G_{t}$'s are random and the length of the sequence of states visited in the half-inning is also random.
 
-
 Formally, this involves coming up with a **joint** probability distribution for the (possibly infinite) sequence $G_{1}, G_{2}, \ldots.$
 That is, for every possible sequence of states visited, we would need to assign a probability.
-Once we do this, we could compute things like the probability of a half-inning lasting at least 5 at-bats by finding all sequences of length 5 or more and adding up the corresponding probabilities[^equiv].
-Similarly, if we wanted to know the probability that the half-inning began by visiting the states `0.000`, `0.100`, `0.110`, and `0.111`, we would find all sequences with that starting sub-sequence and add up the probabilities.
+Once we do this, we could compute things like the probability of a half-inning lasting at least 5 at-bats by finding all sequences of length 5 or more and adding up the corresponding probabilities.
+Similarly, if we wanted to know the probability that the half-inning began by visiting the states `0.000`, `0.100`, `0.110`, and `0.111`, we would find all sequences with that starting sub-sequence and add up the corrsponding probabilities.
 
 Of course, calculating the probability for every possible sequence of every possible length is practically impossible.
-Luckily, it turns out that the probability distribution of a sequence of random variables $\{X_{t}\}$ is fully determined by the sequence of *conditional* distributions of the form $X_{t} \vert X_{t-1}, \ldots, X_{1}.$
+Luckily, it turns out that the probability distribution of a sequence of random variables $\{X_{t}\}$ is fully determined by the sequence of *conditional* distributions of the form $G_{t} \vert G_{t-1}, \ldots, G_{1}.$
 In other words, it suffices to specify a probability distribution over the next state visited based on its past history.
 
 A **Markov chain** is a probabilistic model in which the probability of the next state visited depends only on the current state and not all the previous states.
@@ -126,6 +124,7 @@ If there are $S$ different states, labelled without loss of generality as $s = 1
 
 Suppose a system exists in one of two states `1` and `2.
 Further suppose that 
+
   * When the system is in state `1`, it can remain there with probability 0.9 and it can move to state `2` with probability 0.1.
   * When the system is in state `2`, it remains there with probability 0.2 and it moves to state `1` with probability 0.8.
 
@@ -136,6 +135,8 @@ $$
 0.8 & 0.2
 \end{pmatrix}
 $$
+
+
 The following code *simulate* 10 time steps from this Markov chain starting from the state `2`
 
 ```{r}
@@ -170,13 +171,25 @@ states_visited
 
 In this example, we see that the chain immediately transitions from state 2 to state 1; remains in state 2 for 8 steps; and then return to state 2.
 
+
+## A Graphical Perspective
+
+We can visualize transition probability matrix $\boldsymbol{\mathbf{P}}$ with a *directed graph* whose vertices correspond to the distinct states and whose edges are weighted by the corresponding transition probabilities.
+In the graph, the edge from vertex $s$ to $s'$ is the assigned a weight of $p_{s,s'},$ which is the $(s,s')$ entry of $\boldsymbol{\mathbf{P}}$ and equals the probability of moving to state $s'$ from state $s.$
+@fig-two-state-graph illustrates the graph corresponding to the simple two-state Markov chain from before.
+
+<!--
+  Draw something in TiKZ instead of fighting with igraph
+  Only use igraph to represent the transition matrix for the actual game out stages
+-->
+
+We can interpret a Markov chain with transition matrix $\boldsymbol{\mathbf{P}}$ as a *random walk* along this graph.
+Whenever the walk is at vertex $s$, it picks one of the outgoing edges from $s$ to follow at a random.
+The probability that the walk follows the edge from $s$ to $s'$ 
+
 ### Absorbing States
 
-In our two-state example, the chain is able to transition from state 1 to state 2 and from state 2 to state 1.
-We consequently say that states 1 and 2 **communicate** with one another.
-
 Suppose that $\{X_{t}\}$ is a Markov chain defined over the states $\{1, 2, \ldots, S\}$ and let $\boldsymbol{\mathbf{P}}$ be its transition matrix.
-
 :::{.callout-note}
 ## Definition: Absorbing State
 A state $s$ is called an **absorbing state** if for all $s' \neq s,$ $\mathbb{P}(X_{t} = s' \vert X_{t-1} = s) = 0$ and $\mathbb{P}(X_{t} = s \vert X_{t-1} = s) = 1.$
@@ -195,6 +208,9 @@ $$
 $$
 If the chain is currently in state `1`, it (i) remains in state `1` 50% of the time and (ii) moves to states `2` 25% of the time; and (iii) moves to state `3` 25% of the time.
 If the chain is currently in state `2`, it (i) moves to state `1` 25% of the time; (ii) remains in state `2` 25\% of the time; and moves to state `3` 50% of the time.
+
+@fig-three-state-graph is a graphical illustration of this transition matrix.
+Notice that the absorbing state `3` only has one outgoing edge that (i) leads back to itself and (ii) has an edge weight of one
 
 The following code simulates 10 steps of the Markov chain beginning in state `1`.
 ```{r}
@@ -222,6 +238,7 @@ for(t in 2:n_steps){
 states_visited
 
 ```
+
 In this particular simulation, the chain begins in state `1`, moves to state `2,` and then moves to the absorbing state `3`.
 The following code block repeats the simulation 10 times, each time starting at state `1` and simulating 10 steps of the Markov chain.
 Sometimes, the chain immediately moves from `1` to the absorbing state `3`.
@@ -307,6 +324,7 @@ for(r in 1:n_sims){
 
 Because there are only 3 states and the probabilities of transitioning to state `3` from states `1` and `2` are relatively high, simulating the Markov chain until it hits state `3` takes very little time.
 Tabulating the different values in `absorption_time`, we see that the chain
+
   1. Immediately transitioned from state `1` to state `3` in one step (so that $T^{A}_{1} = 2$) in 2440 of the 10,000 simulations
   2. Reached state `3` in exactly two steps (so $T^{A}_{1} = 2$) in 3214 of the 10,000 simulations
   3. Reached state `3` after 20 or more steps in just 2 of the 10,000 simulation
@@ -658,8 +676,171 @@ for(r in 1:n_sim){
 6. Add the number of runs scored in the current at-bat to the running tally
 
 
+## Theory of Absorbing Markov Chains {#sec-mc-theory} 
+Throughout this section, we will use $\boldsymbol{\mathbf{P}}$ to denote the transition matrix of a Markov chain defined over the state space $\{1, 2, \ldots, S\}.$
+We will also denote the $(s,s')$ entry of $\boldsymbol{\mathbf{P}}$ by $p_{s,s'}.$
+Throughout this section, we will work with the estimated transition probability from [Lecture 14](lecture14.qmd)
+```{r}
+#| label: load-transitions
+#| eval: true
+#| echo: true
+load("atbat2024_markov_chain.RData")
+```
+
+
+### Modeling Multiple Steps
+
+The $(s,s')$ entry of $\boldsymbol{\mathbf{P}}$ is the probability that the chain moves from state $s$ to state $s'.$
+Based on the 2024 MLB season, we estimated that approximately 23\% of at-bats that began in the state `1.000` ended in the state `1.100`, so $p_{\textrm{1.000, 1.100}} \approx 0.23$ 
+```{r}
+#| label: one-step-transition
+#| eval: true
+#| echo: true
+transition_matrix["1.000", "1.100"]
+```
+
+Now suppose we are at the start of an at-bat with one out and no runners on base (i.e., in state `1.000`).
+How likely is it that in exactly two at-bats, we will have two outs and a runner on 1st base (i.e., be in the state `2.100`)?
+
+Before answering this question, we consider a somewhat simpler question: What are all the different intermediate states that the game could visit between `1.000` and `2.100`? 
+For instance, the batter facing `1.000` could strike out, moving the game to `2.000`, and then the next batter could hit a single, moving the game to `2.100`.
+Alternatively, the batter facing `1.000` could hit a single, moving the game to `1.100`, before the next batter strikes out, moving the game to `2.100`.
+A somewhat less likely --- but still plausible --- way to reach `2.100` from `1.000` in two at-bats is for the first batter to hit a single and for the second batter to hit into a force out at second.
+
+More formally, to compute the probability that the game moves from `1.000` to `2.100` in exactly two steps, we must
+
+  1. Multiply the one-step transition probabilities $p_{\textrm{1.000},s} \times p_{s, \textrm{2.100}}$ to obtain the probability of transitioning from `1.000` to $s$ to `2.100` **for all states $s$**.
+  2. Sum these two-step probabilities over all possibly intermediate states $s.$
+
+That is, we compute
+$$
+\mathbb{P}(\textrm{game moves from 1.000 to 2.100 in two steps}) = \sum_{s}{p_{\textrm{1.000},s} \times p_{s, \textrm{2.100}}},
+$$
+where the sum is taken over *all* possible states.
+Because certain states like `0.000` or `3.000` are unreachable from `1.000`, the impossible transitions through those states do not contribute to the sum as the term $p_{1.000,s}$ will be zero.
+
+Looking carefully at this sum, we recognize the familiar form of matrix multiplication.
+Specifically, the entry corresponding to (`1.000,2.100`) in the matrix $\boldsymbol{\mathbf{P}} \times \boldsymbol{\mathbf{P}}$ is *precisely* the sum above.
+We find that there is roughly a 26% probability of reaching `2.100` from `1.000`:
+```{r}
+#| label: two-step
+#| eval: true
+#| echo: true
+
+P2 <- transition_matrix %*% transition_matrix #<1>
+P2["1.000", "2.100"]
+```
+1. Matrix multiplication uses the syntax `%*%`
+
+:::{.callout-note}
+
+## Definition: n-Step Transition
+For any integer $n$, let $\boldsymbol{\mathbf{P}}^{(n)}$ denote the **$n$-step transition matrix**, which we obtain by multiplying $\boldsymbol{\mathbf{P}}$ with itself $n$ times.
+The $(s,s')$ entry of $\boldsymbol{\mathbf{P}}^{(n)}$ is the probability that Markov chain beginning in state $s$ reaches states $s'$ in *exactly* $n$ steps.
+:::
+
+To illustrate, here are several entries of $\boldsymbol{\mathbf{P}}^{(2)}$
+
+```{r}
+selected_states <- c("0.000", "1.000", "2.000", "1.110", "3.000")
+round(P2[selected_states, selected_states], digits = 2)
+```
+Starting from `0.000`, there is about a 50% chance that the game reaches the state `2.000` after two at-bats[^intuition].
+Similarly, there is about a 50% chance that the inning ends within two batters of an at-bat beginning in state `1.000`.
+Looking at the three-step transition probabilities, we see that the most three most likely outcomes after the first three batters of a half-inning are (i) the inning ended (38\%); (ii) the state `2.100` (23.5%); and (iii) the state `2.010` (7.8%)
+
+```{r}
+#| label: three-step-start
+#| eval: true
+#| echo: true
+P3 <- P2 %*% transition_matrix
+round(sort(P3["0.000",], decreasing = TRUE), digits = 2)
+```
+[^intuition]: Reassuringly, we see that there is a a 0% chance of the inning ending after two at-bats!
+
+### Absorbing Chains & Fundamental Matrices
+
+In [Lecture 14](lecture14.qmd), we computed the distribution of the the length of a half-inning beginning with `0.000`.
+Now, we turn to a more nuanced questions: starting from state `1.100`, what is the probability that we visit the state `2.010` before the end of the half-inning? And about how many times can we visit the state `2.010` before the half-inning ends? 
+To answer these questions, we need to introduce a bit more theory about Markov chains.
+
+First, recall that in our Markov chain model of a half-inning, the state `3.000` is **absorbing**: once the chain reaches the state (i.e., the inning ends), it remains there and cannot visit any of the other states.
+
+:::{.callout-note}
+
+## Definition: Absorbing Markov Chain
+A Markov chain is called **absorbing** if it (i) there is at least one absorbing state and (ii) it is possible to go from any state to an absorbing state in a finite number of steps.
+
+:::
+
+It is not difficult to verify mathematically that our Markov chain for the state transitions between at-bats is absorbing.
+But it is even easier to verify this empirically: in all of baseball, we've never not had a half-inning continue indefinitely.
+Eventually half-innings ends, reaching the absorbing state `3.000`.
+
+Now, suppose we have an absorbing Markov chain defined over the states $\{1, 2, \ldots, S\}.$
+Without losing any generality, let us suppose that the first $T$ states are *transient* (i.e., non-absorbing) and the last $A = S - T$ states are absorbing.
+Then, the transition matrix has the form
+$$
+\boldsymbol{\mathbf{P}} = \begin{pmatrix} Q & R \\ 0 & I_{A} \end{pmatrix},
+$$
+where $Q$ is a $T \times T$ matrix capturing one-step transition probabilities between non-absobring states; $R$ is a $T \times A$ matrix capturing one-step transition probabilities between non-absorbing and absorbing states; and $I_{A}$ is the $A \times A$ identity matrix, with ones along the diagonal and zeros in all other entries.
+
+In our baseball example, there is only $A = 1$ absorbing state and $T = 24$ transient states.
+The code below extracts the matrix $Q$
+```{r}
+#| label: extract-q
+#| eval: true
+#| echo: true
+transient_states <- unik_states |> dplyr::filter(GameState != "3.000") |> dplyr::pull(GameState)
+Q <- transition_matrix[transient_states, transient_states]
+R <- matrix(transition_matrix[transient_states, "3.000"], ncol = 1)
+```
+
+
+:::{.callout-note}
+
+## Definition: Fundamental Matrix
+For an absorbing Markov chain, the **fundamental** matrix is given by 
+$$
+N = (I_{T} - Q)^{-1}.
+$$
+:::
+
+For any two transient states $s$ and $s',$ the $(s,s')$ entry of $N,$ which we denote as $n_{s,s'}$ counts the *expected* number of times visits state $s'$ after starting from $s$ before absorption.
+```{r}
+#| label: get-fundamental
+#| eval: true
+#| echo: true
+N <- solve(diag(24) - Q)
+round(N[1:5, 1:5], digits = 2)
+```
+Looking at several entries of the fundamental matrix of our baseball Markov chain, we notice a few things.
+First, starting from `0.000`, we expect the number of times the chain visits `0.100`  about 0.25 times and `0.010` 0.06 times, on average.
+We also observe that the diagonal entries all appaer to be larger than 1
+```{r}
+#| label: fundamental-diagonal
+#| eval: true
+#| echo: true
+round(diag(N), digits  = 2)
+```
+Recall that the diagonal entry $n_{s,s}$ is the expected number of times that an absorbing chain visits state $s$ after starting from state $s.$
+So, if the chain *starts* at $s,$ it necessarily visits $s$ at least once.
+These results suggest, for instance, that starting from the state `1.111` the chain will return to the state `1.111` about 0.19 more times, on average.
+Similarly, starting from `0.000`, the chain expects to return to the starting state `0.000` only 0.05 more times, on average.
+
+Summing the entries along the rows of $N$, we can compute the expected time until the chain is absorbed starting from each state.
+So, if we are in an at-bat starting with `1.000`, we would expect to face a total of `{r} round(sum(N["1.000",]) - 1, digits = 2)` *additional* batters before the end of the half-inning
+```{r}
+#| label: expected-absorption-time
+#| eval: true
+#| echo: true
+sum(N["1.000",])
+```
+
+
 ## Looking Ahead {#sec-looking-ahead}
 
+<!--
 In [Lecture 15](lecture15.qmd), we will lean on some mathematical properties of Markov chains to  understand how many more at-bats a team can expect to have in a half-inning given the current game state.
 We will then estimate team-specific transition probability matrices, which will enable somewhat more granular Markov chain simulations.
 So that we don't have to re-compute it, we will save the transition matrix and the set of unique states
@@ -669,7 +850,7 @@ So that we don't have to re-compute it, we will save the transition matrix and t
 #| echo: true
 save(transition_matrix, unik_states, file = "atbat2024_markov_chain.RData")
 ```
-
+-->
 
 
 ## Exercises

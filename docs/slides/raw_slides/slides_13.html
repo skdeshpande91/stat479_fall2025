@@ -6,8 +6,8 @@
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="../../site_libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.7.32">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.7.31">
 
   <title>STAT479 – STAT 479 Lecture 13</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -203,8 +203,8 @@
 <h2>Recap of Lecture 12</h2>
 <ul>
 <li>Bradley-Terry model: team <span class="math inline">\(j\)</span> has latent strength <span class="math inline">\(\lambda_{j}\)</span></li>
-<li><span class="math inline">\(\textrm{Log-odds}(i \textrm{beats} j) = \lambda_{i} - \lambda_{j}\)</span> <span class="math display">\[
-\mathbb{P}(i \textrm{beats} j ) = \frac{1}{1 + e^{-(\lambda_{i} - \lambda_{j})}} = \frac{e^{\lambda_{i}}}{e^{\lambda_{i}} + e^{\lambda_{j}}}.
+<li><span class="math inline">\(\textrm{Log-odds}(i \textrm{ beats } j) = \lambda_{i} - \lambda_{j}\)</span> <span class="math display">\[
+\mathbb{P}(i \textrm{ beats } j ) = \frac{1}{1 + e^{-(\lambda_{i} - \lambda_{j})}} = \frac{e^{\lambda_{i}}}{e^{\lambda_{i}} + e^{\lambda_{j}}}.
 \]</span></li>
 </ul>
 <div class="fragment">
@@ -222,7 +222,7 @@
 <section id="bt-with-home-advantage-i" class="slide level2">
 <h2>BT with Home Advantage I</h2>
 <ul>
-<li>Basic BT model: <span class="math inline">\(\mathbb{P}(i \textrm{beats} j)\)</span> does not depend on location</li>
+<li>Basic BT model: <span class="math inline">\(\mathbb{P}(i \textrm{ beats } j)\)</span> does not depend on location</li>
 <li>Elaborated model: introduce a latent intercept <span class="math inline">\(\lambda_{0}\)</span> so that <span class="math display">\[
 \begin{align*}
 \mathbb{P}(\textrm{team i beats team j at i's home}) &amp;= \frac{e^{\lambda_{i} + \lambda_{0}}}{e^{\lambda_{i} + \lambda_{0}} + e^{\lambda_{j}}} \\
@@ -331,14 +331,14 @@
 </div>
 <div id="tabset-1-2">
 <div class="cell">
-<div class="sourceCode cell-code" id="annotated-cell-12"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy"><code class="sourceCode r"><span id="annotated-cell-12-1"><a href="#annotated-cell-12-1"></a>fit <span class="ot">&lt;-</span></span>
-<span id="annotated-cell-12-2"><a href="#annotated-cell-12-2"></a>  BradleyTerry2<span class="sc">::</span><span class="fu">BTm</span>(</span>
-<span id="annotated-cell-12-3"><a href="#annotated-cell-12-3"></a>    <span class="at">outcome =</span> <span class="fu">cbind</span>(home.win, away.win),</span>
-<span id="annotated-cell-12-4"><a href="#annotated-cell-12-4"></a>    <span class="at">player1 =</span> home.team, <span class="at">player2 =</span> away.team,</span>
-<span id="annotated-cell-12-5"><a href="#annotated-cell-12-5"></a>    <span class="at">formula =</span> <span class="sc">~</span> team <span class="sc">+</span> at.home,</span>
-<span id="annotated-cell-12-6"><a href="#annotated-cell-12-6"></a>    <span class="at">refcat =</span> <span class="st">"New Hampshire"</span>,</span>
-<span id="annotated-cell-12-7"><a href="#annotated-cell-12-7"></a>    <span class="at">id =</span> <span class="st">"team"</span>,</span>
-<span id="annotated-cell-12-8"><a href="#annotated-cell-12-8"></a>    <span class="at">data =</span> tmp_df) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-13"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy"><code class="sourceCode r"><span id="annotated-cell-13-1"><a href="#annotated-cell-13-1"></a>fit <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-13-2"><a href="#annotated-cell-13-2"></a>  BradleyTerry2<span class="sc">::</span><span class="fu">BTm</span>(</span>
+<span id="annotated-cell-13-3"><a href="#annotated-cell-13-3"></a>    <span class="at">outcome =</span> <span class="fu">cbind</span>(home.win, away.win),</span>
+<span id="annotated-cell-13-4"><a href="#annotated-cell-13-4"></a>    <span class="at">player1 =</span> home.team, <span class="at">player2 =</span> away.team,</span>
+<span id="annotated-cell-13-5"><a href="#annotated-cell-13-5"></a>    <span class="at">formula =</span> <span class="sc">~</span> team <span class="sc">+</span> at.home,</span>
+<span id="annotated-cell-13-6"><a href="#annotated-cell-13-6"></a>    <span class="at">refcat =</span> <span class="st">"New Hampshire"</span>,</span>
+<span id="annotated-cell-13-7"><a href="#annotated-cell-13-7"></a>    <span class="at">id =</span> <span class="st">"team"</span>,</span>
+<span id="annotated-cell-13-8"><a href="#annotated-cell-13-8"></a>    <span class="at">data =</span> tmp_df) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div id="tabset-1-3">
@@ -413,7 +413,7 @@ Number of Fisher Scoring iterations: 6</code></pre>
 </div>
 </div>
 </section>
-<section id="fitted-probabilities" class="slide level2">
+<section id="fitted-probabilities" class="slide level2 smaller">
 <h2>Fitted Probabilities</h2>
 <div class="panel-tabset">
 <ul id="tabset-2" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-2-1">Estimates</a></li><li><a href="#tabset-2-2">Log-Odds</a></li><li><a href="#tabset-2-3">Probabilities</a></li></ul>
@@ -513,6 +513,10 @@ Number of Fisher Scoring iterations: 6</code></pre>
 </section>
 <section id="matchup-probabilities" class="slide level2">
 <h2>Matchup Probabilities</h2>
+<div class="panel-tabset">
+<ul id="tabset-3" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-3-1">All Possibilities</a></li><li><a href="#tabset-3-2">Semi-Finals</a></li></ul>
+<div class="tab-content">
+<div id="tabset-3-1">
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code>          Hi         Lo Hi.Seed Lo.Seed neutral       diff      prob
@@ -524,62 +528,80 @@ Number of Fisher Scoring iterations: 6</code></pre>
 6    Cornell  Minnesota       3       4       0 -0.1298191 0.3915970</code></pre>
 </div>
 </div>
+</div>
+<div id="tabset-3-2">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a></a>semis <span class="ot">&lt;-</span> </span>
+<span id="cb22-2"><a></a>  <span class="fu">data.frame</span>(<span class="at">Hi =</span> <span class="fu">c</span>(<span class="st">"Wisconsin"</span>, <span class="st">"Ohio State"</span>), <span class="at">Lo =</span> <span class="fu">c</span>(<span class="st">"Minnesota"</span>, <span class="st">"Cornell"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb22-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(possible_matchups <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(Hi, Lo, prob), <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Hi"</span>, <span class="st">"Lo"</span>))</span>
+<span id="cb22-4"><a></a>semis</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          Hi        Lo      prob
+1  Wisconsin Minnesota 0.8451936
+2 Ohio State   Cornell 0.6541993</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
 </section>
-<section id="semi-final-simulation" class="slide level2">
+<section id="semi-final-simulation" class="slide level2 smaller">
 <h2>Semi-Final Simulation</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="annotated-cell-5"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy"><code class="sourceCode r"><span id="annotated-cell-5-1"><a href="#annotated-cell-5-1"></a>semis <span class="ot">&lt;-</span> </span>
-<span id="annotated-cell-5-2"><a href="#annotated-cell-5-2"></a>  <span class="fu">data.frame</span>(<span class="at">Hi =</span> <span class="fu">c</span>(<span class="st">"Wisconsin"</span>, <span class="st">"Ohio State"</span>), <span class="at">Lo =</span> <span class="fu">c</span>(<span class="st">"Minnesota"</span>, <span class="st">"Cornell"</span>)) <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-5-3"><a href="#annotated-cell-5-3"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(possible_matchups <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(Hi, Lo, prob), <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Hi"</span>, <span class="st">"Lo"</span>))</span>
-<span id="annotated-cell-5-4"><a href="#annotated-cell-5-4"></a></span>
-<span id="annotated-cell-5-5"><a href="#annotated-cell-5-5"></a><span class="fu">set.seed</span>(<span class="dv">479</span>)</span>
-<span id="annotated-cell-5-6"><a href="#annotated-cell-5-6"></a>sf_winners <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="cn">NA</span>)</span>
-<span id="annotated-cell-5-7"><a href="#annotated-cell-5-7"></a></span>
-<span id="annotated-cell-5-8"><a href="#annotated-cell-5-8"></a>sf_outcomes <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="at">n =</span> <span class="fu">nrow</span>(semis), <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> semis<span class="sc">$</span>prob)</span>
-<span id="annotated-cell-5-9"><a href="#annotated-cell-5-9"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(semis)){</span>
-<span id="annotated-cell-5-10"><a href="#annotated-cell-5-10"></a>  <span class="cf">if</span>(sf_outcomes[i] <span class="sc">==</span> <span class="dv">1</span>) sf_winners[i] <span class="ot">&lt;-</span> semis<span class="sc">$</span>Hi[i]</span>
-<span id="annotated-cell-5-11"><a href="#annotated-cell-5-11"></a>  <span class="cf">else</span> sf_winners[i] <span class="ot">&lt;-</span> semis<span class="sc">$</span>Lo[i]</span>
-<span id="annotated-cell-5-12"><a href="#annotated-cell-5-12"></a>}</span>
-<span id="annotated-cell-5-13"><a href="#annotated-cell-5-13"></a><span class="fu">cat</span>(<span class="st">"Semi-final outcomes:"</span>, sf_outcomes, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
-<span id="annotated-cell-5-14"><a href="#annotated-cell-5-14"></a><span class="fu">cat</span>(<span class="st">"Semi-final winners:"</span>, sf_winners, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a></a>semis <span class="ot">&lt;-</span> </span>
+<span id="cb24-2"><a></a>  <span class="fu">data.frame</span>(<span class="at">Hi =</span> <span class="fu">c</span>(<span class="st">"Wisconsin"</span>, <span class="st">"Ohio State"</span>), <span class="at">Lo =</span> <span class="fu">c</span>(<span class="st">"Minnesota"</span>, <span class="st">"Cornell"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb24-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(possible_matchups <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(Hi, Lo, prob), <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Hi"</span>, <span class="st">"Lo"</span>))</span>
+<span id="cb24-4"><a></a></span>
+<span id="cb24-5"><a></a><span class="fu">set.seed</span>(<span class="dv">479</span>)</span>
+<span id="cb24-6"><a></a>sf_winners <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="cn">NA</span>)</span>
+<span id="cb24-7"><a></a></span>
+<span id="cb24-8"><a></a>sf_outcomes <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="at">n =</span> <span class="fu">nrow</span>(semis), <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> semis<span class="sc">$</span>prob) </span>
+<span id="cb24-9"><a></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(semis)){</span>
+<span id="cb24-10"><a></a>  <span class="cf">if</span>(sf_outcomes[i] <span class="sc">==</span> <span class="dv">1</span>) sf_winners[i] <span class="ot">&lt;-</span> semis<span class="sc">$</span>Hi[i] </span>
+<span id="cb24-11"><a></a>  <span class="cf">else</span> sf_winners[i] <span class="ot">&lt;-</span> semis<span class="sc">$</span>Lo[i] </span>
+<span id="cb24-12"><a></a>}</span>
+<span id="cb24-13"><a></a><span class="fu">cat</span>(<span class="st">"Semi-final outcomes:"</span>, sf_outcomes, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Semi-final outcomes: 0 1 
-Semi-final winners: Minnesota Ohio State </code></pre>
+<pre><code>Semi-final outcomes: 0 1 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a></a><span class="fu">cat</span>(<span class="st">"Semi-final winners:"</span>, sf_winners, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Semi-final winners: Minnesota Ohio State </code></pre>
 </div>
 </div>
 </section>
-<section id="finals-simulation" class="slide level2">
+<section id="finals-simulation" class="slide level2 smaller">
 <h2>Finals Simulation</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a></a>finals <span class="ot">&lt;-</span> </span>
-<span id="cb23-2"><a></a>  <span class="fu">data.frame</span>(<span class="at">Team1 =</span> sf_winners[<span class="dv">1</span>], <span class="at">Team2 =</span> sf_winners[<span class="dv">2</span>]) <span class="sc">|&gt;</span></span>
-<span id="cb23-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> seeds <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">Team1 =</span> Team, <span class="at">Team1.Seed =</span> Seed), <span class="at">by =</span> <span class="st">"Team1"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb23-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> seeds <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">Team2 =</span> Team, <span class="at">Team2.Seed =</span> Seed), <span class="at">by =</span> <span class="st">"Team2"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb23-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb23-6"><a></a>    <span class="at">Hi =</span> <span class="fu">ifelse</span>(Team1.Seed <span class="sc">&lt;</span> Team2.Seed, Team1, Team2),</span>
-<span id="cb23-7"><a></a>    <span class="at">Lo =</span> <span class="fu">ifelse</span>(Team1.Seed <span class="sc">&lt;</span> Team2.Seed, Team2, Team1)) <span class="sc">|&gt;</span></span>
-<span id="cb23-8"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Hi, Lo) <span class="sc">|&gt;</span> </span>
-<span id="cb23-9"><a></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
-<span id="cb23-10"><a></a>    <span class="at">y =</span> possible_matchups <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(Hi, Lo, prob), <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Hi"</span>, <span class="st">"Lo"</span>))</span>
-<span id="cb23-11"><a></a></span>
-<span id="cb23-12"><a></a>final_outcome <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> finals<span class="sc">$</span>prob)</span>
-<span id="cb23-13"><a></a><span class="cf">if</span>(final_outcome <span class="sc">==</span> <span class="dv">1</span>){</span>
-<span id="cb23-14"><a></a>  final_winner <span class="ot">&lt;-</span> finals<span class="sc">$</span>Hi[<span class="dv">1</span>]</span>
-<span id="cb23-15"><a></a>} <span class="cf">else</span>{</span>
-<span id="cb23-16"><a></a>  final_winner <span class="ot">&lt;-</span> finals<span class="sc">$</span>Lo[<span class="dv">1</span>]</span>
-<span id="cb23-17"><a></a>}</span>
-<span id="cb23-18"><a></a></span>
-<span id="cb23-19"><a></a><span class="fu">cat</span>(<span class="st">"Finals outcome:"</span>, final_outcome, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a></a>finals <span class="ot">&lt;-</span> </span>
+<span id="cb28-2"><a></a>  <span class="fu">data.frame</span>(<span class="at">Team1 =</span> sf_winners[<span class="dv">1</span>], <span class="at">Team2 =</span> sf_winners[<span class="dv">2</span>]) <span class="sc">|&gt;</span></span>
+<span id="cb28-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> seeds <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">Team1 =</span> Team, <span class="at">Team1.Seed =</span> Seed), <span class="at">by =</span> <span class="st">"Team1"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb28-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(<span class="at">y =</span> seeds <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">Team2 =</span> Team, <span class="at">Team2.Seed =</span> Seed), <span class="at">by =</span> <span class="st">"Team2"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb28-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb28-6"><a></a>    <span class="at">Hi =</span> <span class="fu">ifelse</span>(Team1.Seed <span class="sc">&lt;</span> Team2.Seed, Team1, Team2),</span>
+<span id="cb28-7"><a></a>    <span class="at">Lo =</span> <span class="fu">ifelse</span>(Team1.Seed <span class="sc">&lt;</span> Team2.Seed, Team2, Team1)) <span class="sc">|&gt;</span></span>
+<span id="cb28-8"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Hi, Lo) <span class="sc">|&gt;</span> </span>
+<span id="cb28-9"><a></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="cb28-10"><a></a>    <span class="at">y =</span> possible_matchups <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(Hi, Lo, prob), <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Hi"</span>, <span class="st">"Lo"</span>))</span>
+<span id="cb28-11"><a></a></span>
+<span id="cb28-12"><a></a>final_outcome <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> finals<span class="sc">$</span>prob)</span>
+<span id="cb28-13"><a></a><span class="cf">if</span>(final_outcome <span class="sc">==</span> <span class="dv">1</span>){</span>
+<span id="cb28-14"><a></a>  final_winner <span class="ot">&lt;-</span> finals<span class="sc">$</span>Hi[<span class="dv">1</span>]</span>
+<span id="cb28-15"><a></a>} <span class="cf">else</span>{</span>
+<span id="cb28-16"><a></a>  final_winner <span class="ot">&lt;-</span> finals<span class="sc">$</span>Lo[<span class="dv">1</span>]</span>
+<span id="cb28-17"><a></a>}</span>
+<span id="cb28-18"><a></a></span>
+<span id="cb28-19"><a></a><span class="fu">cat</span>(<span class="st">"Finals outcome:"</span>, final_outcome, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Finals outcome: 1 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a></a><span class="fu">cat</span>(<span class="st">"Finals winner:"</span>, final_winner, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a></a><span class="fu">cat</span>(<span class="st">"Finals winner:"</span>, final_winner, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Finals winner: Ohio State </code></pre>
 </div>
 </div>
 </section>
-<section id="repeated-simulations" class="slide level2">
+<section id="repeated-simulations" class="slide level2 smaller">
 <h2>Repeated Simulations</h2>
 <ul>
 <li>Embed earlier code into large <code>for</code> loop</li>
@@ -618,7 +640,7 @@ Semi-final winners: Minnesota Ohio State </code></pre>
 </div>
 <div class="fragment">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a></a><span class="fu">table</span>(results<span class="sc">$</span>Champion)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a></a><span class="fu">table</span>(results<span class="sc">$</span>Champion)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
    Cornell  Minnesota Ohio State  Wisconsin 
@@ -638,8 +660,8 @@ Semi-final winners: Minnesota Ohio State </code></pre>
 <li><span class="math inline">\(\mathbb{P}(\textrm{WIS wins the finals} \vert \textrm{WIS makes it to the finals}) \approx 84.6\%.\)</span></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a></a><span class="fu">sum</span>(results<span class="sc">$</span>SF1_Winner <span class="sc">==</span> <span class="st">"Wisconsin"</span> <span class="sc">&amp;</span> </span>
-<span id="cb30-2"><a></a>      results<span class="sc">$</span>Champion <span class="sc">==</span> <span class="st">"Wisconsin"</span>)<span class="sc">/</span><span class="fu">sum</span>(results<span class="sc">$</span>SF1_Winner <span class="sc">==</span> <span class="st">"Wisconsin"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a></a><span class="fu">sum</span>(results<span class="sc">$</span>SF1_Winner <span class="sc">==</span> <span class="st">"Wisconsin"</span> <span class="sc">&amp;</span> </span>
+<span id="cb35-2"><a></a>      results<span class="sc">$</span>Champion <span class="sc">==</span> <span class="st">"Wisconsin"</span>)<span class="sc">/</span><span class="fu">sum</span>(results<span class="sc">$</span>SF1_Winner <span class="sc">==</span> <span class="st">"Wisconsin"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.8461629</code></pre>
 </div>

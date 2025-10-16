@@ -9,9 +9,9 @@ execute:
 ## Recap of Lecture 12
 
 - Bradley-Terry model: team $j$ has latent strength $\lambda_{j}$
-- $\textrm{Log-odds}(i \textrm{beats} j) = \lambda_{i} - \lambda_{j}$
+- $\textrm{Log-odds}(i \textrm{ beats } j) = \lambda_{i} - \lambda_{j}$
 $$
-\mathbb{P}(i \textrm{beats} j ) = \frac{1}{1 + e^{-(\lambda_{i} - \lambda_{j})}} = \frac{e^{\lambda_{i}}}{e^{\lambda_{i}} + e^{\lambda_{j}}}.
+\mathbb{P}(i \textrm{ beats } j ) = \frac{1}{1 + e^{-(\lambda_{i} - \lambda_{j})}} = \frac{e^{\lambda_{i}}}{e^{\lambda_{i}} + e^{\lambda_{j}}}.
 $$
  
 . . . 
@@ -28,7 +28,7 @@ $$
 
 ## BT with Home Advantage I
 
-- Basic BT model: $\mathbb{P}(i \textrm{beats} j)$ does not depend on location
+- Basic BT model: $\mathbb{P}(i \textrm{ beats } j)$ does not depend on location
 - Elaborated model: introduce a latent intercept $\lambda_{0}$ so that
 $$
 \begin{align*}
@@ -159,7 +159,7 @@ summary(fit)
 
 :::
 
-## Fitted Probabilities
+## Fitted Probabilities{.smaller}
 
 :::{.panel-tabset}
 
@@ -240,6 +240,10 @@ possible_matchups <-
 
 ## Matchup Probabilities
 
+
+:::{.panel-tabset}
+
+### All Possibilities
 ```{r}
 #| label: matchup-prob
 #| eval: true
@@ -247,8 +251,25 @@ possible_matchups <-
 possible_matchups
 ```
 
+### Semi-Finals
 
-## Semi-Final Simulation
+```{r}
+#| label: define-semis
+#| eval: true
+#| echo: true
+semis <- 
+  data.frame(Hi = c("Wisconsin", "Ohio State"), Lo = c("Minnesota", "Cornell")) |>
+  dplyr::left_join(possible_matchups |> dplyr::select(Hi, Lo, prob), by = c("Hi", "Lo"))
+semis
+```
+
+::::
+
+
+
+
+
+## Semi-Final Simulation {.smaller}
 ```{r}
 #| label: simulate-semifinals
 #| eval: true
@@ -260,17 +281,17 @@ semis <-
 set.seed(479)
 sf_winners <- c(NA, NA)
 
-sf_outcomes <- rbinom(n = nrow(semis), size = 1, prob = semis$prob) #<1>
+sf_outcomes <- rbinom(n = nrow(semis), size = 1, prob = semis$prob) 
 for(i in 1:nrow(semis)){
-  if(sf_outcomes[i] == 1) sf_winners[i] <- semis$Hi[i] #<1>
-  else sf_winners[i] <- semis$Lo[i] #<1>
+  if(sf_outcomes[i] == 1) sf_winners[i] <- semis$Hi[i] 
+  else sf_winners[i] <- semis$Lo[i] 
 }
 cat("Semi-final outcomes:", sf_outcomes, "\n")
 cat("Semi-final winners:", sf_winners, "\n")
 ```
 
 
-## Finals Simulation
+## Finals Simulation{.smaller}
 ```{r}
 #| label: simulate-finals
 #| eval: true
@@ -299,7 +320,7 @@ cat("Finals winner:", final_winner, "\n")
 
 ```
 
-## Repeated Simulations
+## Repeated Simulations {.smaller}
 
 - Embed earlier code into large `for` loop 
 - In each iteration, we will save
@@ -370,6 +391,7 @@ for(r in 1:n_sims){
 ## Simulation Snapshot
 
 - Results of the first 10 simulations 
+
 ```{r}
 #| label: results-head
 #| eval: true
@@ -390,7 +412,7 @@ table(results$Champion)
 
 - Across the 10,000 simulations:
   - WIS made the finals `{r} sum(results$SF1_Winner == "Wisconsin")` times
-  * WIS made and won the finals `{r} sum(results$SF1_Winner == "Wisconsin" & results$Champion == "Wisconsin")` times
+  - WIS made and won the finals `{r} sum(results$SF1_Winner == "Wisconsin" & results$Champion == "Wisconsin")` times
 
 - $\mathbb{P}(\textrm{WIS wins the finals} \vert \textrm{WIS makes it to the finals}) \approx 84.6\%.$
 
