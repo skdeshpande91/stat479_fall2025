@@ -4,6 +4,40 @@ format: html
 execute: 
   cache: true
 ---
+<!--
+  Create a "Votes" matrix. v_{s,s'} is how many votes team s "gives" to team s'
+  Imagine the fan currently supporting the team S. They choose to move .
+  Because they're looking for the best possible team, the fan will move from S to S' if 
+  they believe S' is better. 
+  Many ways to measure better so let's imagine that there's some out-going votes.
+  For now, we'll say 
+  
+  Under this construction, we'll say 
+  
+  
+  Of course, we might also want to allow teams to vote for itself! To make this a bit more formal,
+
+
+-->
+
+
+
+
+## Overview
+
+In [Lecture 14](lecture14.qmd), we estimated the matrix of transition probabilities for 25 different game-states in baseball.
+24 of these states corresponded to the combinations of outs and base runner configurations.
+The final state was the three-out state, representing the end of the half-inning.
+We simulated Markov chains that randomly walked between these states according to the estimated transition matrix
+
+
+
+## Example
+
+We will discuss how to construct the transition matrices a little bit later
+
+
+
 
 ## Overview
 
@@ -13,250 +47,260 @@ In [Lecture 14](lecture14.qmd), we estimated the matrix of transition probabilit
 The final state was the three-out state, representing the end of the half-inning.
 We simulated Markov chains that randomly walked between these states according to the estimated transition matrix
 
-The fundamental feature of those simulations --- and all Markov chains --- is that the state the chain visits next depends only on its current state and not on any of the previously visited states.
-This is known as the *Markov property*.
-Put more somewhat more poetically, the Markov property means that the future depends only on the present and not on the past.
-In the baseball context of [Lecture 14](lecture14.qmd), this would mean that what happens after the game reaches any particular state does not depend on what ultimately lead the state.
-So, for instance, when predicting what might happen after the game reaches the state `2.110`, with runners on 1st and 2nd base and two outs, it doesn't matter whether the state was reached from `1.110` or `2.100`.  
-It is important to note that in [Lecture 14](lecture14.qmd), we are **assuming** that the Markov property holds.
-
-
-This lecture consists of two distinct parts.
-First, in @sec-mc-theory, we leverage certain mathematical properties of the Markov chain over game-states in a half-inning of baseball to compute things like the expected number of at-bats that will follow one beginning in state `1.000` or the number of times a half-inning will visit a particular state.
-Then in @sec-mc-ranking, we explore how Markov chains can be used to derive power rankings of teams from head-to-head matchups.
+In this lecture, we will explore how Markov chains can be used to derive power rankings for teams from head-to-head competitions.
 Unlike our [rankings derived from Bradley-Terry models](lecture12.qmd), these Markov chain-based rankings cannot immediately be used to estimate the probability of one team beating another. 
+Instead, they are based on mathematical properties of specifically constructed Markov chain models over the state space of teams.
+These Markov chains model the behavior of a hypothetical"bandwagon" fan who tries to identify the "best" team by randomly switching their support from team $s$ to team $s'$ based on how often and/or by how many points team $s'$ beats team $s.$
+If we simulate a Markov chain modeling the fan's behavior, we can estimate the relative frequencies with which the fan supports each team.
+These relatively frequencies immediately give us a rank-ordering of the teams based on how often the bandwagon fan think that they are best.
+
+We begin in @sec-fourteam-example by illustrating such a Markov chain inWe first 
 
 
-## Markov Chain Theory {#sec-mc-theory}
+## The Random Behavior of a Fair-weather Fan {#sec-fourteam-example}
 
-Throughout this section, we will use $\boldsymbol{\mathbf{P}}$ to denote the transition matrix of a Markov chain defined over the state space $\{1, 2, \ldots, S\}.$
-We will also denote the $(s,s')$ entry of $\boldsymbol{\mathbf{P}}$ by $p_{s,s'}.$
-Throughout this section, we will work with the estimated transition probability from [Lecture 14](lecture14.qmd)
-```{r}
-#| label: load-transitions
-#| eval: true
-#| echo: true
-load("atbat2024_markov_chain.RData")
-```
+Imagine a bandwagon fan who randomly switches their support each day between four teams (`W`, `O`, `M`, and `C`) according to the transition probabilities in @fig-fourstate-graph. 
+For instance, if they currently support `W` today, tomorrow they will support
 
-
-### Modeling Multiple Steps
-
-The $(s,s')$ entry of $\boldsymbol{\mathbf{P}}$ is the probability that the chain moves from state $s$ to state $s'.$
-Based on the 2024 MLB season, we estimated that approximately 23\% of at-bats that began in the state `1.000` ended in the state `1.100`, so $p_{\textrm{1.000, 1.100}} \approx 0.23$ 
-```{r}
-#| label: one-step-transition
-#| eval: true
-#| echo: true
-transition_matrix["1.000", "1.100"]
-```
-
-Now suppose we are at the start of an at-bat with one out and no runners on base (i.e., in state `1.000`).
-How likely is it that in exactly two at-bats, we will have two outs and a runner on 1st base (i.e., be in the state `2.100`)?
-
-Before answering this question, we consider a somewhat simpler question: What are all the different intermediate states that the game could visit between `1.000` and `2.100`? 
-For instance, the batter facing `1.000` could strike out, moving the game to `2.000`, and then the next batter could hit a single, moving the game to `2.100`.
-Alternatively, the batter facing `1.000` could hit a single, moving the game to `1.100`, before the next batter strikes out, moving the game to `2.100`.
-A somewhat less likely --- but still plausible --- way to reach `2.100` from `1.000` in two at-bats is for the first batter to hit a single and for the second batter to hit into a force out at second.
-
-More formally, to compute the probability that the game moves from `1.000` to `2.100` in exactly two steps, we must
-
-  1. Multiply the one-step transition probabilities $p_{\textrm{1.000},s} \times p_{s, \textrm{2.100}}$ to obtain the probability of transitioning from `1.000` to $s$ to `2.100` **for all states $s$**.
-  2. Sum these two-step probabilities over all possibly intermediate states $s.$
-
-That is, we compute
-$$
-\mathbb{P}(\textrm{game moves from 1.000 to 2.100 in two steps}) = \sum_{s}{p_{\textrm{1.000},s} \times p_{s, \textrm{2.100}}},
-$$
-where the sum is taken over *all* possible states.
-Because certain states like `0.000` or `3.000` are unreachable from `1.000`, the impossible transitions through those states do not contribute to the sum as the term $p_{1.000,s}$ will be zero.
-
-Looking carefully at this sum, we recognize the familiar form of matrix multiplication.
-Specifically, the entry corresponding to (`1.000,2.100`) in the matrix $\boldsymbol{\mathbf{P}} \times \boldsymbol{\mathbf{P}}$ is *precisely* the sum above.
-We find that there is roughly a 26% probability of reaching `2.100` from `1.000`:
-```{r}
-#| label: two-step
-#| eval: true
-#| echo: true
-
-P2 <- transition_matrix %*% transition_matrix #<1>
-P2["1.000", "2.100"]
-```
-1. Matrix multiplication uses the syntax `%*%`
-
-:::{.callout-note}
-
-## Definition: n-Step Transition
-For any integer $n$, let $\boldsymbol{\mathbf{P}}^{(n)}$ denote the **$n$-step transition matrix**, which we obtain by multiplying $\boldsymbol{\mathbf{P}}$ with itself $n$ times.
-The $(s,s')$ entry of $\boldsymbol{\mathbf{P}}^{(n)}$ is the probability that Markov chain beginning in state $s$ reaches states $s'$ in *exactly* $n$ steps.
-:::
-
-To illustrate, here are several entries of $\boldsymbol{\mathbf{P}}^{(2)}$
-
-```{r}
-selected_states <- c("0.000", "1.000", "2.000", "1.110", "3.000")
-round(P2[selected_states, selected_states], digits = 2)
-```
-Starting from `0.000`, there is about a 50% chance that the game reaches the state `2.000` after two at-bats[^intuition].
-Similarly, there is about a 50% chance that the inning ends within two batters of an at-bat beginning in state `1.000`.
-Looking at the three-step transition probabilities, we see that the most three most likely outcomes after the first three batters of a half-inning are (i) the inning ended (38\%); (ii) the state `2.100` (23.5%); and (iii) the state `2.010` (7.8%)
-
-```{r}
-#| label: three-step-start
-#| eval: true
-#| echo: true
-P3 <- P2 %*% transition_matrix
-round(sort(P3["0.000",], decreasing = TRUE), digits = 2)
-```
-[^intuition]: Reassuringly, we see that there is a a 0% chance of the inning ending after two at-bats!
-
-### Absorbing Chains & Fundamental Matrices
-
-In [Lecture 14](lecture14.qmd), we computed the distribution of the the length of a half-inning beginning with `0.000`.
-Now, we turn to a more nuanced questions: starting from state `1.100`, what is the probability that we visit the state `2.010` before the end of the half-inning? And about how many times can we visit the state `2.010` before the half-inning ends? 
-To answer these questions, we need to introduce a bit more theory about Markov chains.
-
-First, recall that in our Markov chain model of a half-inning, the state `3.000` is **absorbing**: once the chain reaches the state (i.e., the inning ends), it remains there and cannot visit any of the other states.
-
-:::{.callout-note}
-
-## Definition: Absorbing Markov Chain
-A Markov chain is called **absorbing** if it (i) there is at least one absorbing state and (ii) it is possible to go from any state to an absorbing state in a finite number of steps.
-
-:::
-
-It is not difficult to verify mathematically that our Markov chain for the state transitions between at-bats is absorbing.
-But it is even easier to verify this empirically: in all of baseball, we've never not had a half-inning continue indefinitely.
-Eventually half-innings ends, reaching the absorbing state `3.000`.
-
-Now, suppose we have an absorbing Markov chain defined over the states $\{1, 2, \ldots, S\}.$
-Without losing any generality, let us suppose that the first $T$ states are *transient* (i.e., non-absorbing) and the last $A = S - T$ states are absorbing.
-Then, the transition matrix has the form
-$$
-\boldsymbol{\mathbf{P}} = \begin{pmatrix} Q & R \\ 0 & I_{A} \end{pmatrix},
-$$
-where $Q$ is a $T \times T$ matrix capturing one-step transition probabilities between non-absobring states; $R$ is a $T \times A$ matrix capturing one-step transition probabilities between non-absorbing and absorbing states; and $I_{A}$ is the $A \times A$ identity matrix, with ones along the diagonal and zeros in all other entries.
-
-In our baseball example, there is only $A = 1$ absorbing state and $T = 24$ transient states.
-The code below extracts the matrix $Q$
-```{r}
-#| label: extract-q
-#| eval: true
-#| echo: true
-transient_states <- unik_states |> dplyr::filter(GameState != "3.000") |> dplyr::pull(GameState)
-Q <- transition_matrix[transient_states, transient_states]
-R <- matrix(transition_matrix[transient_states, "3.000"], ncol = 1)
-```
-
-
-:::{.callout-note}
-
-## Definition: Fundamental Matrix
-For an absorbing Markov chain, the **fundamental** matrix is given by 
-$$
-N = (I_{T} - Q)^{-1}.
-$$
-:::
-
-For any two transient states $s$ and $s',$ the $(s,s')$ entry of $N,$ which we denote as $n_{s,s'}$ counts the *expected* number of times visits state $s'$ after starting from $s$ before absorption.
-```{r}
-#| label: get-fundamental
-#| eval: true
-#| echo: true
-N <- solve(diag(24) - Q)
-round(N[1:5, 1:5], digits = 2)
-```
-Looking at several entries of the fundamental matrix of our baseball Markov chain, we notice a few things.
-First, starting from `0.000`, we expect the number of times the chain visits `0.100`  about 0.25 times and `0.010` 0.06 times, on average.
-We also observe that the diagonal entries all appaer to be larger than 1
-```{r}
-#| label: fundamental-diagonal
-#| eval: true
-#| echo: true
-round(diag(N), digits  = 2)
-```
-Recall that the diagonal entry $n_{s,s}$ is the expected number of times that an absorbing chain visits state $s$ after starting from state $s.$
-So, if the chain *starts* at $s,$ it necessarily visits $s$ at least once.
-These results suggest, for instance, that starting from the state `1.111` the chain will return to the state `1.111` about 0.19 more times, on average.
-Similarly, starting from `0.000`, the chain expects to return to the starting state `0.000` only 0.05 more times, on average.
-
-Summing the entries along the rows of $N$, we can compute the expected time until the chain is absorbed starting from each state.
-So, if we are in an at-bat starting with `1.000`, we would expect to face a total of `{r} round(sum(N["1.000",]) - 1, digits = 2)` *additional* batters before the end of the half-inning
-```{r}
-#| label: expected-absorption-time
-#| eval: true
-#| echo: true
-sum(N["1.000",])
-```
-
-
-
-## Markov Chains for Power Rankings {#sec-rankings}
-
-We now turn our attention to ranking NCAA D1 Women's Hockey teams, for which we used Bradley-Terry models in [Lecture 12](lecture12.qmd).
-One drawback of that modeling approach is its inability to account for the margin of victory.
-It turns out that we can construct a special type of Markov chain over the set of teams using match results and then estimate the *stationary distribution* of that Markov chain to derive a ranking. 
-
-### High-level Overview
-
-The basic idea is to construct a Markov chain that describes the behavior of a fair-weather fan[^fairweather] who randomly switches their support from one team to another based on some underlying measure of how much better one team is than another.
-We can model this fan's behavior using a random walk along a *directed graph* whose vertices corresponds to the different teams and with edges between pairs of team.
-@fig-graph shows an example of such a graph with 4 vertices, corresponding to 4 different teams. 
-On any given day, the fan might support a particular team and be at the corresponding vertex in the graph.
-They can then random select one of the outgoing edges to follow based on the relative *weights* of each edge.
-
-
-Suppose the fan is currently located vertex W (i.e., they currently support team W).
-They now select a new team to support by randomly following one of the outgoing edges from vertex W with probability given by the weight of each outgoing edge. 
-In the case of @fig-graph, the edge weights are 1/8 from W to M, 1/4 from W to O, 1/8 from 1 to W to C, and 1/2 from W back to itself.
-So, given that the fan currently supports team W, we have the following probability distribution over the team they next support:
-
-  * Team W with probability 1/2 (i.e., they stay at vertex W)
-  * Team M with probability 1/8 (i.e., they move from vertex W to vertex M)
-  * Team O with probability 1/4 (i.e., they move from vertex W to vertex O)
-  * Team C with probability 1/8 (i.e., they move from vertex W to vertex C)
-
+  * Team `W` with probability 0.05 (i.e., they stay at vertex `W`)
+  * Team `M` with probability 0.05 (i.e., they move from vertex `W` to vertex `M`)
+  * Team `O` with probability 0.85 (i.e., they move from vertex `W` to vertex `O`)
+  * Team `C` with probability 0.05 (i.e., they move from vertex `W` to vertex `C`)
+  
 Once the fan selects their new team to support, the process begins again: based on their current favorite team, they pick a new team based on the weights if the outgoing edges from the corresponding vertex in the graph.
 
+![Graphical representation of the transition matrix of a fan who randomly choose which team to support](figures/four-state-graph.png){#fig-fourstate-graph width=50% fig-align="center"}
 
+The following code defines a *function* that simulates the Markov chain describing the fans behavior.
+The function takes three arguments: the starting state (i.e., the team the fan initially supports); the number of iterations to simulate; and the transition matrix $\boldsymbol{\mathbf{P}}.$
+It then returns the relative proportion of times that the chain spends in each state (i.e., how often the fan supports each team).
 
-This random walk behavior can be described with a Markov chain with a transition matrix $\boldsymbol{\mathbf{P}}$ whose $(s,s')$ entry corresponds to the probability that the fan moves from vertex $s$ to vertex $s'$.
-In our 4-team analogy the transition matrix is given by
-$$
-\boldsymbol{\mathbf{P}} = 
-\begin{pmatrix}
-1/2 & 1/8 & 1/4 & 1/8 \\
-1/3 & 1/6 & 1/3 & 1/6 \\
-3/5 & 1/10 & 1/5 & 1/10 \\
-3/8 & 1/8 & 1/4 & 1/4
-\end{pmatrix}
-$$
-
-Now imagine running this random walk indefinitely, allowing the fan to switch their support from team to team according to the $\boldsymbol{\mathbf{P}}.$
-In doing so, we will generate a sequence of teams and can track the relative proportion of time the fan spends supporting each team.
-The following simulates such a walk of length 10,000 several times, each time starting the fan at a random node 
-
-we repeatedly start the fan at a random vertex and simulate their walk for 10,000 steps.
-In eachWe then report the 
 ```{r}
-#| label: four-team-transition
-#| eval: true
-#| echo: true
+#| label: four-state-example-fn
 
-teams <- c("W", "M", "O", "C")
-P <- 
-  matrix(c(1/2, 1/3, 3/5, 3/8, 
-           1/8, 1/6, 1/10, 1/8,
-           1/4, 1/3, 1/5, 1/4,
-           1/8, 1/6, 1/10, 1/4), 
-         nrow = 4, ncol = 4,
-         dimnames = list(teams, teams))
-
+fan_walk <- function(init_state, n_iter, P){
+  states <- colnames(P)
+  states_visited <- rep(NA, times = n_iter)
+  states_visited[1] <- init_state
+  for(r in 2:n_iter){
+    states_visited[r] <- 
+      sample(states, size = 1, 
+             prob = P[states_visited[r-1],])
+  }
+  props <- table(states_visited)[states]/n_iter
+  return(props)
+}
 ```
 
+Now we define the matrix $\boldsymbol{\mathbf{P}}$ correspond to the graph in @fig-fourstate-graph
+```{r}
+teams <- c("W", "O", "C", "M")
+P <- matrix(c(0.05, 0.85, 0.05, 0.05,
+              0.425, 0.075, 0.075, 0.425,
+              0.05, 0.85, 0.05, 0.05,
+              0.53, 0.32, 0.075, 0.075), 
+            byrow = TRUE, nrow = 4, ncol = 4,
+            dimnames = list(teams, teams))
+
+set.seed(479)
+round(fan_walk(init_state = "W", n_iter = 1e6, P = P), digits = 3)
+round(fan_walk(init_state = "O", n_iter = 1e6, P = P), digits = 3)
+round(fan_walk(init_state = "C", n_iter = 1e6, P = P), digits = 3)
+round(fan_walk(init_state = "M", n_iter = 1e6, P = P), digits = 3)
+
+```
+The long-run frequency that the chain spends in each state is remarkably stable: regardless of their initial preference, the fan spends about 30\% of their time supporting `W`; 42\% of the time supporting `O`; 7\% of the time supporting `C`; and 21\% of the time supporting `M`. 
 
 
-### Invariant & Limiting Distributions
+
+## Limiting Distributions of Markov Chains
+
+The stability in the long-run proportion of time spent in each state in the four-team example is not coincidental!
+
+### Distribution of $X_{n}$ {#sec-nstep-dist}
+
+Suppose that $\{X_{t}\}$ is a Markov chain defined on the states $\{1, 2, \ldots, S\}$ with transition matrix $\boldsymbol{\mathbf{P}}.$
+Let $\boldsymbol{\pi}_{0} = (\pi_{0,1}, \ldots, \pi_{0,S})^{\top}$ be a vector of probabilities.
+Now suppose that we initialize the Markov chain randomly according to $\boldsymbol{\pi}_{0}.$
+That is, for each state $s \in \{1, 2, \ldots, S\},$ $\mathbb{P}(X_{0} = s) = \pi_{0,s}.$
+If we initialize the Markov chain according to $\boldsymbol{\pi}_{0}$ and then simulate the Markov chain for $n$ steps, what is the probability that the chain is in state $s$ after $n$ steps? 
+
+Before jumping into the general case for the $n$-th visited step, we'll start by carefully computing the distribution of the first visited state (i.e., $X_{1}$).
+To this end, observe that
+$$
+\mathbb{P}(X_{1} = s') = \sum_{s}{\mathbb{P}(X_{1} = s' \textrm{ and } X_{0} = s)},
+$$
+where the sum is taken over the entire state space $\{1, 2, \ldots, S\}.$
+We can further compute each summand in as the product of atransition probability and an initial probability:
+$$
+\mathbb{P}(X_{1} = s' \textrm{ and } X_{0} = s) = \mathbb{P}(X_{1} = s' \vert X_{0} = s)\mathbb{P}(X_{0} = s).
+$$
+Since we know $\mathbb{P}(X_{0} = s) \pi_{0,s}$ and $\mathbb{P}(X_{1} = s' \vert X_{0} = s) = p_{s,s'},$ we conclude that
+$$
+\mathbb{P}(X_{1} = s') = \sum_{s}{\pi_{0,s}p_{s,s'}}
+$$
+If we let if $\boldsymbol{\pi}_{1} = (\pi_{1,1}, \ldots, \pi_{1,S})^{\top}$ where $\pi_{1,s} = \mathbb{P}(X_{1} = s)$ be the probability distribution of $X_{1},$ we can re-write the above equation in matrix form as
+$$
+\boldsymbol{\pi}_{1}^{\top} = \boldsymbol{\pi}_{0}^{\top}\boldsymbol{\mathbf{P}}
+$$
+Using essentially the same calculation, we conclude that for each $n$,
+$$
+\boldsymbol{\pi}_{n}^{\top} = \boldsymbol{\pi}_{n-1}^{\top}\boldsymbol{\mathbf{P}},
+$$
+where $\boldsymbol{\pi}_{n} = (\pi_{n,1}, \ldots, \pi_{n,S})^{\top}$ and $\pi_{n,s} = \mathbb{P}(X_{n} = s).$
+Recalling the definition of the $n$-step transition probability matrix $\boldsymbol{\mathbf{P}}^{(n)}$ from [Lecture 14](lecture14.qmd#sec-nstep), we have
+$$
+\boldsymbol{\pi}_{n}^{\top} = \boldsymbol{\pi}_{0}^{\top}\boldsymbol{\mathbf{P}}^{n},
+$$
+
+### Invariant Distributions {#sec-invariant-dist}
+Returning to the 4 team example from @fig-fourstate-graph, suppose that the bandwagon fan choose the initial team to support uniformly at random.
+The following code computes $\boldsymbol{\pi}_{1}, \ldots, \boldsymbol{\pi}_{10}$
+```{r}
+#| label: n-step-probs-1
+#| eval: true
+#| echo: true
+pi0 <- rep(0.25, times = 4)
+state_probs <- matrix(nrow = 10, ncol = 4, dimnames = list(c(), teams))
+state_probs[1,] <- pi0
+for(i in 2:10){
+  state_probs[i,] <- state_probs[i-1,] %*% P #<1>
+}
+round(state_probs, digits = 2)
+```
+1. The $i$-th row of `state_probs` holds the entries in the vector $\boldsymbol{\pi}_{i-1}$ (i.e., the distribution of $X_{i-1}$).
+
+We notice that after about four or five iterations, it appears that the vectors $\boldsymbol{\pi}_{n-1}$ and $\boldsymbol{\pi}_{n}$ are essentially identical.
+We observe the same phenomenon using a very different initial distribution
+```{r}
+#| label: n-step-probs-2
+#| eval: true
+#| echo: true
+pi0 <- c(0.9, 0.05, 0.025, 0.025)
+state_probs <- matrix(nrow = 10, ncol = 4, dimnames = list(c(), teams))
+state_probs[1,] <- pi0
+for(i in 2:10){
+  state_probs[i,] <- state_probs[i-1,] %*% P #<1>
+}
+round(state_probs, digits = 2)
+```
+It would appear that if every $\boldsymbol{\pi}_{n} \approx (0.31, 0.42, 0.07, 0.21)^{\top},$ then $\boldsymbol{\pi}_{n+1} \approx \boldsymbol{\pi}_{n}.$
+In other words, after a while, the uncertainty about what state the Markov chain is in appears to be *invariant*. 
+
+:::{.callout-note}
+
+## Definition: Invariant Distribution
+
+Suppose $\{X_{t}\}$ is a Markov chain over state space $\{1, 2, \ldots, S\}$ with transition probability matrix $\boldsymbol{\mathbf{P}}.$
+The probability distribution $\boldsymbol{\pi} = (\pi_{1}, \ldots, \pi_{S})^{\top}$ is **invariant** to $\boldsymbol{\mathbf{P}}$ if 
+$$
+\boldsymbol{\pi}^{\top}\boldsymbol{\mathbf{P}} = \boldsymbol{\pi}.
+$$
+Notice that if $\boldsymbol{\pi}$ is invariant, if the chain is initialized according to $\boldsymbol{\pi}$ then $\mathbb{P}(X_{t} = s) = \pi_{s}$ for all time steps $t.$
+
+:::
+
+
+It turns out that for a broad class of Markov chains --- specifically, those that are positive recurrent[^positiverecurrent], aperiodic[^aperiodic], and irreducible[^irreducible] --- then
+
+  1. There is a unique invariant distribution $\boldsymbol{\pi}$ satisfying $\boldsymbol{\pi}^{\top}\boldsymbol{\mathbf{P}} = \boldsymbol{\pi}.$
+  2. As $n \rightarrow \infty,$ $\boldsymbol{\pi}_{n} \rightarrow \boldsymbol{\pi}.
+
+[^aperiodic]: The *period* of state $s$ is the greatest common divisor of all $n$ such that $(\boldsymbol{P}^{n})_{s,s} > 0.$ If state $s$ has period $d,$ this means that the chain has non-zero probability of returning to $s$ every $d$ steps. An **aperiodic** chain is one in which the period of every state is 1. That is, in an aperiodic chain, there is always a chance of returning to the same state in one step.
+
+[^irreducible]: Informally, irreducible Markov chains are those in which there is a any state $s'$ can be reached from any other state in a **finite** number of steps. A sufficient (but not necessary) condition is that $p_{s,s'} > 0$ for all pairs of state $s$ and $s'$
+
+[^positiverecurrent]: A chain is said to be positive recurrent if for all states $s,$ a chain begun in $s$ is guaranteed to return to $s$ in a **finite** number of steps with probability 1. A sufficient (but not necessary) condition is for $p_{s,s} > 0$ for all states $s.$
+
+
+
+### Computing Invariant Distributions
+
+
+That is, under suitable conditions, the limiting distribution of the states visited by the Markov chain converges to the invariant distribution.
+This means that in order to determine the long-run frequency of the chain being in state $s,$ we do not actualy have to simulate the Markov chain.
+Instead, we need find a probability vector $\boldsymbol{\pi}$ such that $\boldsymbol{\pi}^{\top}\boldsymbol{\mathbf{P}} = \boldsymbol{\pi}^{\top}.$
+This relation implies that in fact, the invariant probability vector is a **left** eigenvector of the matrix $\boldsymbol{\mathbf{P}}$ with eigenvalue 1.
+The following code defines a function that return the invariant distribution given a transition matrix $\boldsymbol{\mathbf{P}}.$
+
+```{r}
+#| label: get-invariant-fn
+#| eval: true
+#| code-fold: true
+#| code-summary: Function to compute leading left eigenvector of transition matrix
+
+get_invariant <- function(P, tol = 1e-16){ #<1>
+  states <- colnames(P)
+  if(!all( abs(rowSums(P) - 1) < tol) ){ #<2>
+    stop("Rows sums of P are not all 1. P may not be a valid transition matrix") #<2
+  } #<2>
+  
+  decomp <- eigen(t(P)) #<3>
+  pi_raw <- decomp$vectors[,1] #<4>
+  
+  if(!all(Re(pi_raw) < tol)){
+    stop("Leading eigenvalue of P appears to be complex and not real-valued")
+  } #<5>
+  pi <- Re(pi_raw)
+  pi <- pi/sum(pi)
+  names(pi) <- states
+  
+  return(pi)
+}
+```
+1. When doing linear algebra in R, it's helpful to work up to some degree of numerical precision. For most of our calculations, it'll be enough to use `1e-16`
+2. Transition matrices have row sums of 1. This checks that the row sums of the provided matrix `P` are sufficiently close to 1. If they are not, the function throws an error
+3. By default `eigen()` returns right eigenvectors. The left eigenvectors of a matrix $M$ are the right eigenvector of its transpose $M^{\top}$
+4. `eigen()` scales eigenvectors to have squared norm 1 and not a sum of 1. We need to re-scale this vector.
+5. Generally speaking, the eigenvalues and eigenvectors of a transition matrix are complex-valued and not real-valued. For a Markov chain with a limiting, invariant distribution the leading eigenvector should only have real values. This code checks that the imaginary parts are 0 (or at least smaller than than our small tolerance `tol`)
+
+
+As an illustration, in the code below we first compute the invariant distribution for our 4-team Markov chain.
+Then, we look at the different $\boldsymbol{\pi}^{\top} - \boldsymbol{\pi}^{\top}\boldsymbol{\mathbf{P}}.$
+We find that that differences are all of the other $10^{-16},$ which for our purposes are small enough to be considered zero.
+
+```{r}
+#| label: verify-invariant
+#| eval: true
+#| echo: true
+pi <- get_invariant(P)
+cat("pi:", round(pi, digits = 6), "\n")
+cat("pi %*% P:", round(pi %*% P, digits = 6), "\n")
+cat("Difference: ", pi - pi %*% P, "\n")
+```
+
+If we interpret the bandwagon fans' transitions from team $s$ to $s'$ to signify that team is $s'$ is, in some sense, better than $s,$ then we can rank teams by the amount of time the fan spends support thing.
+In our 4-team example, the bandwagon fan supports:
+
+  * `W` about 30% of the time
+  * `O` about 42% of the time
+  * `C` about 7% of the time
+  * `M` about 21% of the time.
+
+So, we would obtain the ranking `O`, `W`, `M,` and `C` based on this specific Markov chain. 
+
+
+## Markov chain-based Rankings 
+
+We're now in a position to apply this general procedure to our D1 hockey data.
+The main steps involve:
+
+  1. Construct a Markov chain model describing how a bandwagon fan could randomly switch their support from team to team
+  2. Compute the invariant distribution of the Markov chain
+
+There are **many** ways to carry out the first step and there is no objectively or normatively *best* way to do so.
+By convention, we usually set up the Markov chain model so that $p_{s,s'}$, the probability that the fan switches their support from $s$ to $s'$, quantifies how much better $s'$ is than $s.$
+Most often, $p_{s,s'}$ is selected to depend on the number of times $s'$ beats $s$ and/or the number of points $s'$ scores against $s.$
+
+
+
+
+
+
+
+
+
+
 
 
 ### Constructing $\boldsymbol{\mathbf{P}}$
