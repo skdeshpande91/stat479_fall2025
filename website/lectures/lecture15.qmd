@@ -4,39 +4,6 @@ format: html
 execute: 
   cache: true
 ---
-<!--
-  Create a "Votes" matrix. v_{s,s'} is how many votes team s "gives" to team s'
-  Imagine the fan currently supporting the team S. They choose to move .
-  Because they're looking for the best possible team, the fan will move from S to S' if 
-  they believe S' is better. 
-  Many ways to measure better so let's imagine that there's some out-going votes.
-  For now, we'll say 
-  
-  Under this construction, we'll say 
-  
-  
-  Of course, we might also want to allow teams to vote for itself! To make this a bit more formal,
-
-
--->
-
-
-
-
-## Overview
-
-In [Lecture 14](lecture14.qmd), we estimated the matrix of transition probabilities for 25 different game-states in baseball.
-24 of these states corresponded to the combinations of outs and base runner configurations.
-The final state was the three-out state, representing the end of the half-inning.
-We simulated Markov chains that randomly walked between these states according to the estimated transition matrix
-
-
-
-## Example
-
-We will discuss how to construct the transition matrices a little bit later
-
-
 
 
 ## Overview
@@ -57,7 +24,7 @@ These relatively frequencies immediately give us a rank-ordering of the teams ba
 We begin in @sec-fourteam-example by illustrating such a Markov chain inWe first 
 
 
-## The Random Behavior of a Fair-weather Fan {#sec-fourteam-example}
+## The Random Behavior of a Bandwagon Fan {#sec-fourteam-example}
 
 Imagine a bandwagon fan who randomly switches their support each day between four teams (`W`, `O`, `M`, and `C`) according to the transition probabilities in @fig-fourstate-graph. 
 For instance, if they currently support `W` today, tomorrow they will support
@@ -214,7 +181,7 @@ It turns out that for a broad class of Markov chains --- specifically, those tha
 
 
 
-### Computing Invariant Distributions
+### Computing Invariant Distributions {#sec-eigenvalue}
 
 
 That is, under suitable conditions, the limiting distribution of the states visited by the Markov chain converges to the invariant distribution.
@@ -229,7 +196,7 @@ The following code defines a function that return the invariant distribution giv
 #| code-fold: true
 #| code-summary: Function to compute leading left eigenvector of transition matrix
 
-get_invariant <- function(P, tol = 1e-16){ #<1>
+get_invariant <- function(P, tol = 1e-12){ #<1>
   states <- colnames(P)
   if(!all( abs(rowSums(P) - 1) < tol) ){ #<2>
     stop("Rows sums of P are not all 1. P may not be a valid transition matrix") #<2
@@ -248,7 +215,7 @@ get_invariant <- function(P, tol = 1e-16){ #<1>
   return(pi)
 }
 ```
-1. When doing linear algebra in R, it's helpful to work up to some degree of numerical precision. For most of our calculations, it'll be enough to use `1e-16`
+1. When doing linear algebra in R, it's helpful to work up to some degree of numerical precision. For most of our calculations, it'll be enough to use `1e-12` or `1e-9`
 2. Transition matrices have row sums of 1. This checks that the row sums of the provided matrix `P` are sufficiently close to 1. If they are not, the function throws an error
 3. By default `eigen()` returns right eigenvectors. The left eigenvectors of a matrix $M$ are the right eigenvector of its transpose $M^{\top}$
 4. `eigen()` scales eigenvectors to have squared norm 1 and not a sum of 1. We need to re-scale this vector.
@@ -280,7 +247,7 @@ In our 4-team example, the bandwagon fan supports:
 So, we would obtain the ranking `O`, `W`, `M,` and `C` based on this specific Markov chain. 
 
 
-## Markov chain-based Rankings 
+## Markov chain-based Rankings {#sec-mc-ranking}
 
 We're now in a position to apply this general procedure to our D1 hockey data.
 The main steps involve:
@@ -288,123 +255,196 @@ The main steps involve:
   1. Construct a Markov chain model describing how a bandwagon fan could randomly switch their support from team to team
   2. Compute the invariant distribution of the Markov chain
 
-There are **many** ways to carry out the first step and there is no objectively or normatively *best* way to do so.
+There are **many** ways to carry out the first step and there is no objective or normative *best* way to do so.
 By convention, we usually set up the Markov chain model so that $p_{s,s'}$, the probability that the fan switches their support from $s$ to $s'$, quantifies how much better $s'$ is than $s.$
 Most often, $p_{s,s'}$ is selected to depend on the number of times $s'$ beats $s$ and/or the number of points $s'$ scores against $s.$
 
-
-
-
-
-
-
-
-
-
-
-
-### Constructing $\boldsymbol{\mathbf{P}}$
-
-There are *many* ways to construct the transition matrix $\boldsymbol{\mathbf{P}}.$
-All of these involve first introducing edge weights $w_{s,s'}$ for all possibly pairs of teams $s$ and $s'.$
-In addition to specifying the weight of the edge from $s$ to $s'$ (i.e., $w_{s,s'}$) and the weight of the edge from $s'$ to $s$ (i.e., $w_{s',s}$), we also must specify the weight for the self-loop from $s$ back to itself (i.e., $w_{s,s}$).
-Once we do that, we can then form a *stochastic matrix* $\boldsymbol{\mathbf{P}}$ whose rows sum to 1 and use this matrix as the transition matrix in our Markov chain.
-To ensure that the the resulting Markov chain has a unique limiting distribution, we often need to add a slight *damping* factor.
-
-Formally, let $\boldsymbol{\mathbf{A}}$ be the diagonal matrix containing the *row* sums of $\boldsymbol{\mathbf{W}}$ with entries $a_{s,s'} = 0$ whenever $s \neq s'$ and 
-$$
-a_{s,s} = \sum_{s'}{w_{s,s'}}.
-$$
-Additionally let $\boldsymbol{\mathbf{J}}$ be the $T \times T$ matrix consisting of all $1$'s.
-Then for some damping factor $0 < \beta < 1$, we set
-$$
-\boldsymbol{\mathbf{P}} = \beta \times \boldsymbol{\mathbf{A}}^{-1}\boldsymbol{\mathbf{W}} + \frac{1 - \beta}{T}\boldsymbol{\mathbf{J}}
-$$
-Essentially the additional damping ensures that the fan walking along a graph always has the potential to (i) not change their support in one-step and (ii) can switch their support to every other team from the current team.
-This is especially helpful in situations where not every team plays every other team or if one team goes undefeated. 
-
-
-
-
-#### Loss-based Edge Weights
-Perhaps the simplest edge-weight specification sets $w_{s,s'}$ to be the number of times team $s$ beats team $s'.$
-Let $\boldsymbol{\mathbf{W}}$ be the matrix with entries $w_{s,s'}.$
-
-<!--
- Weights are loss. w(s,s') = -1 each time s loses to s'. Intuitively: if s loses to s' many times, we'd like for the the fan to move to s' more often  from s.
- Set beta = 0.85
--->
-
-
-#### Margin-Based Weights
-
-<!--
-  w_{s,s'} : when s loses to s', look up total point differential by which they lost.
-  is w_{s,s'} < w_{s,t}, we want to encourage fan to move to the team that beat s by more points!
-  if s never loses to s', set w_{s,s'} = 0.
--->
-
-#### Score-based Weights
-
-<!--
-  w_{s,s'} number of points s' scored when it played s
-  w_{s',s} number of points s score when it played s'.
-  
-  
---> 
-
-To illustrate, let us load in the NCAA D1 Hockey Data
-
-
-
-Given a Markov chain
-
-Under suitable conditions[^markovchain], one can show that a Markov chain 
-
-
-
-
-
-
-[^fairweather]: See [this letter](https://www.nytimes.com/2024/03/05/magazine/fair-weather-fan-recommendation.html) for a counter-point.
-
-
-
-
-
-Each edge from team $s$ to team $s'$ will be associated with a weight $w_{s,s'}.$
-
-Every time
-
-
-We can now imagine a fan picking a node uniformly at random and then taking a random walk on the graph, visiting a sequence of vertices corresponding to different teams.
-The probability that the fan walks from vertex $s$ to vertex $s'$ will be proportional to $w_{s,s'}.$
-
-
-Now imagine a fan takes a random
-
-imagine creating a directed graph that contains a node (or vertex) for every team and that contains directed edges between  
- 
-
-
-
-a fair-weather fan taking a random walk between teams and trying to identify the best team.
-
-
-The fan can start at any team and
-
-The central idea
-
-
-
-We also clear out our workspace, deleting all the objects used for our baseball modeling.
+Before proceeding, we will load in the data table constructed in [Lecture 12](lecture12.qmd) containing match-by-match results from the 2024-25 D1 Women's Ice Hockey Season
 ```{r}
 #| label: load-hockey
 #| eval: true
 #| echo: true
-rm(list = ls())
 load("wd1hockey_regseason_2024_2025.RData")
+teams <- sort(unique(c(no_ties$Home, no_ties$Opponent))) #<1>
+S <- length(teams) #<2>
+
+
+results <- #<3>
+  no_ties |> #<3>
+  dplyr::rename( #<3>
+    home.team = Home, home.score = HomeScore,home.winner = Home_Winner, #<3>
+    away.team = Opponent, away.score = OppScore, away.winner = Opp_Winner) |> #<3>
+  dplyr::select(home.team, away.team, home.winner, away.winner, home.score, away.score) #<3>
+```
+1. Vector containing the list of all teams
+2. Number of teams
+3. Rename columns in original table and extract home and away team identities, scores, and indicators for winning
+
+### Damping
+
+
+Suppose that our bandwagon fan currently supports team $s$ and must now (randomly) select another team $s'$ to support.
+Since we'd like for our fan to more often move to "better" teams, it makes sense to send the fan from $s$ to $s'$ than to another team $t$ if more frequently if $s'$ has beaten $s$ more often than $t$ has beaten $s.$
+To formalize this intuition, we begin by creating a matrix $\boldsymbol{\mathbf{V}}$ whose $(s,s')$ element $v_{s,s'}$ counts the number of times $s'$ beats $s.$
+
+```{r}
+#| label: create-win-V
+#| eval: true
+#| echo: true
+V <- matrix(0, nrow = S, ncol = S, dimnames = list(teams, teams)) #<1>
+for(i in 1:nrow(results)){
+  home <- results$home.team[i]
+  away <- results$away.team[i]
+  
+  if(results$home.winner[i] == 1){ #<2>
+    V[away,home] <- V[away,home] + 1 #<2>
+  } else if(results$away.winner[i] == 1){ #<3>
+    V[home,away] <- V[home,away] + 1 #<3>
+  } else{
+    cat("Problem with game", i, ": neither team won") #<4>
+  }
+}
+
+```
+1. Initialize $\boldsymbol{\mathbf{V}}$ to have all zero entries
+2. The `V[away,home]` counts how many times `home` beat `away`. So, every time the home team wins a game, we must increment `V[away,home]`.
+3. The `V[home,away]` counts how many times `away` beat `home`. So, every time the away team wins a game, we must increment `V[home,away]`.
+4. This condition should never be reached, since we removed ties from the data back in [Lecture 12](lecture12.qmd)
+
+
+Each row of a transition probability matrices must sum to 1[^prob].
+In its present form, $\boldsymbol{\mathbf{V}}$ does not satisfy this property: in fact, the row and columns sums of $\boldsymbol{\mathbf{V}}$ respectively count the number of losses and wins for each team.
+To turn $\boldsymbol{\mathbf{V}}$ into a valid transition probability matrix, we need to normalize the **rows**.
+
+Mathematically, let $\mathbf{\boldsymbol{A}}$ be the $S \times S$ diagonal matrix whose $(s,s')$ entry is zero for all $s \neq s$ and whose $(s,s)$ entry, $a_{s,s}$, is sum of the elements along the $s$-th row of $\boldsymbol{\mathbf{V}}$:
+$$a_{s,s} = \sum_{s'}{v_{s,s'}}$$
+Then, the matrix $\boldsymbol{\mathbf{W}} = \boldsymbol{\mathbf{A}}^{-1}\boldsymbol{\mathbf{V}}$ is the row-normalized version of $\boldsymbol{\mathbf{V}}.$
+
+```{r}
+#| label: create-win-W
+#| eval: true
+#| echo: true
+
+r <- rowSums(V)
+if(any(r == 0)) r[r==0] <- 1 #<1>
+A <- diag(x = r) #<2>
+W <- solve(A) %*% V #<3>
+dimnames(W) <- dimnames(V)
+```
+1. If any rows of `V` have a sum of zero (e.g., for an undefeated team), we will set the corresponding element of `A` to be 1 so that the corresponding row of `W` contains only zeros.
+2. `diag()` creates a diagonal matrix with diagonal entries given by 
+3. `solve()` returns the inverse of a matrix.
+
+[^prob]: Remember, the $s$-th row of $\boldsymbol{\mathbf{P}}$ specifies a distribution of the state the Markov chain visits immediately being in state $s.$ Since the chain must move (or remain in $S$), the sum of the probabilities along the rows has to be 1.
+
+Since the rows of $\boldsymbol{\mathbf{W}}$ sum to one, it is tempting to use it as the transition matrix for our Markov chain.
+There are a few issues with that, however.
+To illustrate them, we first look at the rows and columns of $\boldsymbol{\mathbf{W}}$ corresponding to the teams who qualified for the 2024-25 Frozen 4
+```{r}
+#| label: view-W-wins
+#| eval: true
+#| echo: true
+W[c("Wisconsin", "Ohio State", "Cornell", "Minnesota"), c("Wisconsin", "Ohio State", "Cornell", "Minnesota")]
+```
+If we simulated a Markov chain using transitions in $\boldsymbol{\mathbf{W}},$ then the chain would **always** move from Wisconsin to Ohio State (since Ohio State was the only team to beat Wisconsin last season).
+While this is subjectively bad, the more serious issue is that it turns out the Markov chain so defined is not necessarily aperiodic, positive recurrent, and irreducible.
+So, it may not always have 
+A somewhat less abstract issue is that all diagonal elements of $\boldsymbol{\mathbf{W}}$ are zero.
+This means that the bandwagon fan who switches their support sequentially according to $\boldsybmol{\mathbf{W}}$ never has the option to stick with the same team across multiple rounds.
+
+To overcome this issue, it is common to introduce a *damping* factor as follows.
+First, one fixes a number $0 < \beta < 1$ (e.g., $\beta = 0.5$ or $\beta = 0.85$) and then creates a transition matrix
+$$
+\boldsymbol{\mathbf{P}} = \beta \times \boldsymbol{\mathbf{W}} + \frac{(1 - \beta)}{S} \times \mathbf{\boldsymbol{1}}_{S}^{\top}\mathbf{\boldsymbol{1}}_{S}
+$$
+by
+
+  1. Scaling all the elements of $\boldsymbol{\mathbf{W}}$ by $\beta$
+  2. Adding $(1-\beta)/S$ to every element of the re-scaled matrix (both off-diagonal and diagonal elements)
+  
+Doing so ensures that the matrix is irreducible, aperiodic, and positive recurrent, which means that $\boldsymbol{\mathbf{P}}$ has a unique limiting, invariant distribution.
+So, if we simulate a bandwagon fan switching their support between teams according to $\boldsymbol{\mathbf{P}},$ we can derive a rank ordering of teams from the long-run proportion of time they spend supporting each team.
+
+In the following code, we define a function that takes a matrix $\boldsymbol{\mathbf{V}}$ and damping factor $\beta$ and outputs the resulting transition matrix $\boldsymbol{\mathbf{P}}.$
+
+```{r}
+#| label: damp-fn
+#| eval: true
+#| echo: true
+get_dampened_transition <- function(V, beta){
+  states <- rownames(V)
+  n_states <- nrow(V)
+  
+  r <- rowSums(V)
+  if(any(r == 0)) r[r==0] <- 1
+  A <- diag(r)
+  W <- solve(A) %*% V
+  P <- beta * W + (1-beta)/n_states
+  dimnames(P) <- dimnames(V)
+  return(P)
+}
+```
+
+
+Simulating the random walk behavior of our bandwagon fan beginning at Wisconsin, we find that the fan spends about 11% of the time supporting Ohio State, 8% of the time supporting Wisconsin, and 6% of the time supporting Minnesota.
+
+```{r}
+#| label: fanwalk-wins
+#| eval: true
+#| echo: true
+P <- get_dampened_transition(V, beta = 0.85)
+sim1 <- fan_walk(init_state = "Wisconsin", n_iter = 1e6, P = P)
+round(sort(sim1, decreasing = TRUE), digits = 3)[1:10]
+```
+
+Reassuringly, these long-run frequency estimates are very close to the invariant distribution of $\boldsymbol{\mathbf{P}}$
+```{r}
+#| label: wins-invariant
+#| eval: true
+#| echo: true
+pi <- get_invariant(P)
+round(sort(pi, decreasing = TRUE), digits = 3)[1:10]
 ```
 
 
 
+### Score-based Markov Chain Rankings
+
+Based on the particular model of bandwagon fan behavior from the previous section, we obtain a power ranking in which Ohio State is first and Wisconsin is second.
+This is despite the fact that (i) Wisconsin beat most of its opponents in the 2024-25 regular season and (ii) Wisconsin won more games than Ohio State.
+Remember, we constructed the Markov chain so that the fan would move from team $s$ to team $s'$ more often the more times $s'$ beat $s.$
+Since Wisconsin only lost to Ohio State and to nobody else, our Markov chain model specifies a rather large transition probability from Wisconsin to Ohio State.
+
+Another, somewhat less subjective objection to the model, lies in the fact that transitions only depend on match results and not on the scoring margin or the number of goals scored.
+As a refinement, let's try to build a different $\boldsymbol{\mathbf{V}}$ that takes scoring into account.
+Specifically, we will set $v_{s,s'}$ equal to the total number of points scored by $s'$ when it plays $s.$
+In our hockey context, the row and column sums of this new $\boldsymbol{\mathbf{V}}$ are, respectively, the number of goals conceded and number of goals scored by each team.
+
+```{r}
+#| label: construct-v-score
+#| eval: true
+#| echo: true
+V_score <- matrix(0, nrow = S, ncol = S, dimnames = list(teams, teams)) #<1>
+for(i in 1:nrow(results)){ #<1>
+  home <- results$home.team[i]
+  away <- results$away.team[i]
+  
+  V_score[away, home] <- V_score[away,home] + results$home.score[i] #<2>
+  V_score[home,away] <- V_score[home,away] + results$away.score[i] #<3>
+}
+```
+1. Re-initialize `V` to have all entries equal to 0
+2. Add the number of goals scored by the home team when playing the away team to `V[away,home]`
+3. Add the number of goals scored by the away team when playing the home team to `V[home,away]`.
+
+We now convert our score-based $\boldsymbol{\mathbf{V}}$ into a dampened transition matrix with $\beta = 0.8$ and then compute the resulting invariant distribution.
+Now, it appears that Wisconsin is at the top of the power rankings, closely followed by Minnesota and Ohio State.
+
+```{r}
+#| label: score-invariant
+#| eval: true
+#| echo: true
+P_score <- get_dampened_transition(V_score, beta = 0.8)
+pi_score <- get_invariant(P_score)
+round(sort(pi_score, decreasing = TRUE), digits = 3)[1:10]
+```

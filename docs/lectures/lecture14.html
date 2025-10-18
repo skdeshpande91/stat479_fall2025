@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.31">
+<meta name="generator" content="quarto-1.7.32">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -71,7 +71,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-4bfb630b09c0e164834af1bb3207dbff.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -445,7 +445,7 @@ window.Quarto = {
   <li><a href="#sec-halfinning-length" id="toc-sec-halfinning-length" class="nav-link" data-scroll-target="#sec-halfinning-length">Length of a Half-Inning</a></li>
   <li><a href="#sec-runs-scored" id="toc-sec-runs-scored" class="nav-link" data-scroll-target="#sec-runs-scored">Runs Scored in a Half-Inning</a></li>
   </ul></li>
-  <li><a href="#modeling-multiple-steps" id="toc-modeling-multiple-steps" class="nav-link" data-scroll-target="#modeling-multiple-steps">Modeling Multiple Steps</a></li>
+  <li><a href="#sec-nstep" id="toc-sec-nstep" class="nav-link" data-scroll-target="#sec-nstep">Modeling Multiple Steps</a></li>
   <li><a href="#sec-absorbing" id="toc-sec-absorbing" class="nav-link" data-scroll-target="#sec-absorbing">Theory of Absorbing Markov Chains</a></li>
   <li><a href="#sec-looking-ahead" id="toc-sec-looking-ahead" class="nav-link" data-scroll-target="#sec-looking-ahead">Looking Ahead</a></li>
   <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises">Exercises</a></li>
@@ -805,16 +805,16 @@ T^{A}_{1} = \min\left\{t \geq 1 : X_{t} = 3\right\}.
 </dl>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "Simulation 1000 at 2025-10-06 13:50:09.088247"
-[1] "Simulation 2000 at 2025-10-06 13:50:09.100474"
-[1] "Simulation 3000 at 2025-10-06 13:50:09.108593"
-[1] "Simulation 4000 at 2025-10-06 13:50:09.116484"
-[1] "Simulation 5000 at 2025-10-06 13:50:09.126352"
-[1] "Simulation 6000 at 2025-10-06 13:50:09.133823"
-[1] "Simulation 7000 at 2025-10-06 13:50:09.142898"
-[1] "Simulation 8000 at 2025-10-06 13:50:09.150779"
-[1] "Simulation 9000 at 2025-10-06 13:50:09.158436"
-[1] "Simulation 10000 at 2025-10-06 13:50:09.167351"</code></pre>
+<pre><code>[1] "Simulation 1000 at 2025-10-12 10:32:59.9493"
+[1] "Simulation 2000 at 2025-10-12 10:32:59.966283"
+[1] "Simulation 3000 at 2025-10-12 10:32:59.973903"
+[1] "Simulation 4000 at 2025-10-12 10:32:59.987753"
+[1] "Simulation 5000 at 2025-10-12 10:32:59.995445"
+[1] "Simulation 6000 at 2025-10-12 10:33:00.008812"
+[1] "Simulation 7000 at 2025-10-12 10:33:00.016478"
+[1] "Simulation 8000 at 2025-10-12 10:33:00.030004"
+[1] "Simulation 9000 at 2025-10-12 10:33:00.03737"
+[1] "Simulation 10000 at 2025-10-12 10:33:00.044903"</code></pre>
 </div>
 </div>
 <p>Because there are only 3 states and the probabilities of transitioning to state <code>3</code> from states <code>1</code> and <code>2</code> are relatively high, simulating the Markov chain until it hits state <code>3</code> takes very little time. Tabulating the different values in <code>absorption_time</code>, we see that the chain</p>
@@ -838,7 +838,9 @@ T^{A}_{1} = \min\left\{t \geq 1 : X_{t} = 3\right\}.
 </section>
 <section id="sec-half-inning" class="level2">
 <h2 class="anchored" data-anchor-id="sec-half-inning">A Markov Chain Model for Half-Innings</h2>
-<p>Our goal is to build a Markov chain model for a half-inning of baseball. To do this, we need to estimate the transition probabilities between every pair of the 24 non-absorbing states and the absorbing state corresponding to the end of the half-inning. Because the 9th inning (and any extra innings) can end before a team has amassed three outs<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>, we exclude all data from the 9th inning and beyond.</p>
+<p>Our goal is to build a Markov chain model for a half-inning of baseball. The fundamental feature of Markov chains is that the state the chain visits next depends only on its current state and not on any of the previously visited states. This is known as the <em>Markov property</em>. Put more somewhat more poetically, the Markov property means that the future depends only on the present and not on the past. In a baseball context, this would mean that what happens after the game reaches any particular state does not depend on what ultimately lead to the current state. So, for instance, when predicting what might happen after the game reaches the state <code>2.110</code>, with runners on 1st and 2nd base and two outs, it doesn’t matter whether the state was reached from <code>1.110</code> or <code>2.100</code>.<br>
+It is important to note, we are <strong>assuming</strong> that the Markov property holds.</p>
+<p>Ultimately, we must estimate the transition probabilities between every pair of the 24 non-absorbing states and the absorbing state corresponding to the end of the half-inning. Because the 9th inning (and any extra innings) can end before a team has amassed three outs<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>, we exclude all data from the 9th inning and beyond.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>atbat2024 <span class="ot">&lt;-</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  atbat2024 <span class="sc">|&gt;</span></span>
@@ -1214,22 +1216,22 @@ Warning
 </dl>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "Simulation 5000 at 2025-10-06 13:51:05.678391"
-[1] "Simulation 10000 at 2025-10-06 13:51:35.711222"
-[1] "Simulation 15000 at 2025-10-06 13:52:05.833381"
-[1] "Simulation 20000 at 2025-10-06 13:52:36.133501"
-[1] "Simulation 25000 at 2025-10-06 13:53:06.109522"
-[1] "Simulation 30000 at 2025-10-06 13:53:36.611018"
-[1] "Simulation 35000 at 2025-10-06 13:54:08.371337"
-[1] "Simulation 40000 at 2025-10-06 13:54:38.437346"
-[1] "Simulation 45000 at 2025-10-06 13:55:08.679951"
-[1] "Simulation 50000 at 2025-10-06 13:55:39.183223"</code></pre>
+<pre><code>[1] "Simulation 5000 at 2025-10-12 10:33:33.501278"
+[1] "Simulation 10000 at 2025-10-12 10:34:04.4989"
+[1] "Simulation 15000 at 2025-10-12 10:34:35.688561"
+[1] "Simulation 20000 at 2025-10-12 10:35:07.392822"
+[1] "Simulation 25000 at 2025-10-12 10:35:38.505577"
+[1] "Simulation 30000 at 2025-10-12 10:36:09.795408"
+[1] "Simulation 35000 at 2025-10-12 10:36:41.31038"
+[1] "Simulation 40000 at 2025-10-12 10:37:12.930233"
+[1] "Simulation 45000 at 2025-10-12 10:37:45.754027"
+[1] "Simulation 50000 at 2025-10-12 10:38:17.400918"</code></pre>
 </div>
 </div>
 </section>
 </section>
-<section id="modeling-multiple-steps" class="level2">
-<h2 class="anchored" data-anchor-id="modeling-multiple-steps">Modeling Multiple Steps</h2>
+<section id="sec-nstep" class="level2">
+<h2 class="anchored" data-anchor-id="sec-nstep">Modeling Multiple Steps</h2>
 <p>The <span class="math inline">\((s,s')\)</span> entry of <span class="math inline">\(\boldsymbol{\mathbf{P}}\)</span> is the probability that the chain moves from state <span class="math inline">\(s\)</span> to state <span class="math inline">\(s'.\)</span> Based on the 2024 MLB season, we estimated that approximately 23% of at-bats that began in the state <code>1.000</code> ended in the state <code>1.100</code>, so <span class="math inline">\(p_{\textrm{1.000, 1.100}} \approx 0.23\)</span></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>transition_matrix[<span class="st">"1.000"</span>, <span class="st">"1.100"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1260,7 +1262,7 @@ Warning
 </dl>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.2628367</code></pre>
+<pre><code>[1] NA</code></pre>
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
@@ -1273,20 +1275,20 @@ Definition: n-Step Transition
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>For any integer <span class="math inline">\(n\)</span>, let <span class="math inline">\(\boldsymbol{\mathbf{P}}^{(n)}\)</span> denote the <strong><span class="math inline">\(n\)</span>-step transition matrix</strong>, which we obtain by multiplying <span class="math inline">\(\boldsymbol{\mathbf{P}}\)</span> with itself <span class="math inline">\(n\)</span> times. The <span class="math inline">\((s,s')\)</span> entry of <span class="math inline">\(\boldsymbol{\mathbf{P}}^{(n)}\)</span> is the probability that Markov chain beginning in state <span class="math inline">\(s\)</span> reaches states <span class="math inline">\(s'\)</span> in <em>exactly</em> <span class="math inline">\(n\)</span> steps.</p>
+<p>For any integer <span class="math inline">\(n\)</span>, let <span class="math inline">\(\boldsymbol{\mathbf{P}}^{n}\)</span> denote the <strong><span class="math inline">\(n\)</span>-step transition matrix</strong>, which we obtain by multiplying <span class="math inline">\(\boldsymbol{\mathbf{P}}\)</span> with itself <span class="math inline">\(n\)</span> times. The <span class="math inline">\((s,s')\)</span> entry of <span class="math inline">\(\boldsymbol{\mathbf{P}}^{n}\)</span> is the probability that Markov chain beginning in state <span class="math inline">\(s\)</span> reaches states <span class="math inline">\(s'\)</span> in <em>exactly</em> <span class="math inline">\(n\)</span> steps.</p>
 </div>
 </div>
-<p>To illustrate, here are several entries of <span class="math inline">\(\boldsymbol{\mathbf{P}}^{(2)}\)</span></p>
+<p>To illustrate, here are several entries of <span class="math inline">\(\boldsymbol{\mathbf{P}}^{2}\)</span></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>selected_states <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"0.000"</span>, <span class="st">"1.000"</span>, <span class="st">"2.000"</span>, <span class="st">"1.110"</span>, <span class="st">"3.000"</span>)</span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(P2[selected_states, selected_states], <span class="at">digits =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      0.000 1.000 2.000 1.110 3.000
-0.000  0.01  0.04  0.50  0.00  0.00
-1.000  0.00  0.01  0.04  0.05  0.51
-2.000  0.00  0.00  0.01  0.00  0.90
-1.110  0.00  0.01  0.04  0.01  0.54
-3.000  0.00  0.00  0.00  0.00  1.00</code></pre>
+0.000    NA    NA    NA    NA    NA
+1.000    NA    NA    NA    NA    NA
+2.000    NA    NA    NA    NA    NA
+1.110    NA    NA    NA    NA    NA
+3.000    NA    NA    NA    NA    NA</code></pre>
 </div>
 </div>
 <p>Starting from <code>0.000</code>, there is about a 50% chance that the game reaches the state <code>2.000</code> after two at-bats<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>. Similarly, there is about a 50% chance that the inning ends within two batters of an at-bat beginning in state <code>1.000</code>. Looking at the three-step transition probabilities, we see that the most three most likely outcomes after the first three batters of a half-inning are (i) the inning ended (38%); (ii) the state <code>2.100</code> (23.5%); and (iii) the state <code>2.010</code> (7.8%)</p>
@@ -1294,10 +1296,7 @@ Definition: n-Step Transition
 <div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>P3 <span class="ot">&lt;-</span> P2 <span class="sc">%*%</span> transition_matrix</span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">sort</span>(P3[<span class="st">"0.000"</span>,], <span class="at">decreasing =</span> <span class="cn">TRUE</span>), <span class="at">digits =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>3.000 2.100 2.010 1.110 2.000 2.001 1.101 1.100 1.000 1.011 1.010 0.111 0.110 
- 0.38  0.24  0.08  0.08  0.05  0.03  0.03  0.03  0.02  0.02  0.02  0.01  0.01 
-1.001 0.101 0.100 0.000 0.011 0.010 2.110 1.111 0.001 2.101 2.011 2.111 
- 0.01  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00 </code></pre>
+<pre><code>named numeric(0)</code></pre>
 </div>
 </div>
 </section>
