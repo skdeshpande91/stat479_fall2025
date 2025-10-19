@@ -1,0 +1,527 @@
+---
+title: "STAT 479 Lecture 14"
+subtitle: "Markov Chains"
+format: revealjs
+execute:
+  cache: true
+---
+
+## State Transitions in Baseball
+
+- 8th inning of Dodgers-Padres game on March 20, 2024
+
+```{r}
+#| label: dodgers-gamestates
+#| eval: true
+#| echo: false
+load("atbat2024.RData")
+dodgers_inning <- 
+  atbat2024 |>
+  dplyr::filter(game_pk == 745444 & inning == 8 & inning_topbot == "Top")
+dodgers_inning |> dplyr::select(at_bat_number, Outs, BaseRunner, end_events, end_Outs, end_BaseRunner)
+```
+
+- Game state transitions: 
+  - `0.000` to `0.100` to `0.110` to `0.111` to `1.110` 
+  - Eventually transitions from `1.110` to `3.000` (end of inning)
+  
+## Motivation & Objectives
+
+- How unusual was this sequence of state transitions?
+- If we replayed inning over and over again, how many at-bats?
+- Dist. of runs scored? 
+- Given the game is in `1.000`, how likely is it to reach `2.111`? 
+
+. . .
+
+- Today: a **probabilistic** model for state transitions
+
+## Data Preparation
+
+- For every at bat, record starting state and ending state
+
+```{r}
+#| label: add-end-gamestate
+#| eval: true
+#| echo: true
+atbat2024 <-
+  atbat2024 |>
+  dplyr::mutate(
+    end_BaseRunner = ifelse(end_Outs == 3, "000", end_BaseRunner), 
+    end_GameState = paste(end_Outs, end_BaseRunner, sep = "."))
+```
+
+- Also useful to create table of 25 unique game states (see [lecture notes](../../lectures/lecture14.qmd#sec-data-prep))
+
+# Markov Chains Fundamentals
+
+## Setting
+
+- State space: $\mathcal{S} = \{1, 2, \ldots, S\}$
+- $\{X_{t}\}$: infinite sequence of $\mathcal{S}$-valued random variables
+- Interested in several probabilities & random quantities
+  - $\mathbb{P}(X_{1} = s_{1}, X_{2} = s_{2}, X_{3} = s_{3}, X_{4} = s_{4}$): e.g., likelihood of seeing `0.000` to `1.000` to `2.000` to `3.000`
+  - First $n$ such that $X_{t} \in A$: e.g., # at-bats needed to get at least one out
+  - Amount of time to reach state $s$ starting from state $s'$
+
+## Specifying Joint Distributions 
+
+- To answer these questions, must define a **joint** probability distribution:
+- For every infinite sequence of states $s_{1}, s_{2}, \ldots$ must specify
+$$
+\mathbb{P}(X_{1} = s_{1}, X_{2} = s_{2}, X_{3} = s_{3}, \ldots)
+$$
+- Can compute prob. of events of interest by 
+  - Enumerating all infinite sequences for which event occurs
+  - Sum the probabilities of those sequences
+  
+## Joints from Conditionals{.smaller}
+
+- Specify joint dist. $\{X_{t}\}$ by specifying sequence of **conditional probabilities**
+$$
+\mathbb{P}(X_{t+1} = s \vert X_{t} = s_{t}, X_{t-1} = s_{t-1}, X_{t-2} = s_{t-2}, \ldots, X_{1} = s_{1})
+$$
+
+- Specifying how to generate next value based on all previous values
+
+. . . 
+
+- To characterize $X_{t+1}$, must specify a total of $S \times S^{t}$ different probabilities
+  - $S$ possible states for $X_{t+1}$
+  - $S^{t}$ possible sequences $s_{1}, \ldots, s_{t}$
+  
+## Markov Property
+
+- $\{X_{t}\}$ satisfies the **Markov property** if:
+  - For all $A \subset \mathcal{A}$
+  - For all $t$ and sequences $s_{1}, \ldots s_{t}$
+$$
+\mathbb{P}(X_{t+1} \in A \vert X_{t} = s_{t}, \ldots, X_{1} = s_{1}) = \mathbb{P}(X_{t+1} \in A \vert X_{t} = s_{t})
+$$
+
+- What comes next depends only on current state & not past states
+
+
+
+
+## Markov Chains
+
+
+
+- If $\{X_{t}\}$ satisfies Markov property, we say it is a **Markov chain**
+
+- Markov chains on state space $\mathcal{S} = \{1, 2, \ldots, S\}$ are determined by transition probability matrix
+$$
+\boldsymbol{\mathbf{P}} = \begin{pmatrix} p_{1,1} &  \cdots & p_{1,S} \\ \vdots &  ~ & \vdots \\ p_{S,1} & \cdots & p_{S,S} \end{pmatrix}
+$$
+- $p_{s, s'} = \mathbb{P}(X_{t+1} = s' \vert X_{t} = s)$: prob. of moving from $s$ to $s'$
+
+
+## 2-State Example
+
+- If chain is
+  - At `1`: move to `2` w.p. 60% and remain at `1` w.p. 40%
+  - At `2`: move to `1` w.p. 50% and remain at `2` w.p. 50%
+
+![](two-state-graph.png){width=75% fig-align="center"}
+
+## 2-State Example: Simulation
+
+```{r}
+#| label: two-state-single-sim
+#| eval: true
+#| echo: true
+
+set.seed(479) 
+states <- c(1,2) 
+P<- matrix(c(0.6, 0.4, 0.5, 0.5), nrow = 2, ncol = 2, byrow = TRUE)
+
+n_steps <- 10
+init_state <- 2
+states_visited <- rep(NA, times = n_steps)
+
+states_visited[1] <- init_state 
+
+for(t in 2:n_steps){
+  prev_state <- states_visited[t-1] 
+  probs <- P[prev_state,]
+  next_state <- sample(states, size = 1, prob = probs) 
+  states_visited[t] <- next_state
+}
+
+states_visited
+
+```
+
+## 3-State Example
+
+- When the chain reaches `3`, it remains there.
+
+![](three-state-graph.png){width=50% fig-align="center"}
+
+## 3-State Example: Simulation
+
+- Simulate the Markov chain 10 times for 10 iterations each
+- Each simulation begins in state `1`
+- All quickly reach state `3` (absorbing)
+
+```{r}
+#| label: absorb-simulation-10
+#| eval: true
+#| echo: false
+
+
+states <- c(1,2, 3) #<1>
+P <- 
+  matrix(c(0.25, 0.5, 0.25,
+           0.25, 0.25, 0.5,
+           0, 0, 1), nrow = 3, ncol = 3, byrow = TRUE) #<2>
+
+n_sims <- 10
+n_steps <- 10
+init_state <- 1
+states_visited <- rep(NA, times = n_steps)
+
+for(r in 1:n_sims){
+  set.seed(479+r)
+  states_visited <- rep(NA, times = n_steps)
+  states_visited[1] <- init_state
+  for(t in 2:n_steps){
+    states_visited[t] <-
+      sample(states, size = 1, 
+              prob = P[states_visited[t-1],]) 
+  }
+  cat("Simulation ", r, ":", states_visited, "\n") 
+}
+```
+
+
+## 3-State Example: Absorbtion Time{.smaller}
+
+- Starting from `1`, how long until chain reaches state `3`?
+- $T_{1}^{A} = \min\left\{t \geq 1: X_{t} = 3\right\}$
+- See [notes](../../lectures/lecture14.qmd#sec-three-state) for code 
+- Simulated 10,000 Markov chains
+
+```{r}
+#| label: three-state-absorption
+#| eval: true
+#| echo: false
+
+n_sims <- 1e4 
+max_iterations <- 1e3 
+states <- c(1,2,3)
+P <- 
+  matrix(c(0.25, 0.5, 0.25,
+           0.25, 0.25, 0.5,
+           0, 0, 1), nrow = 3, ncol = 3, byrow = TRUE)
+absorption_time <- rep(NA, times = n_sims)
+for(r in 1:n_sims){
+  iteration_counter <- 1 
+  current_state <- 1 
+  while(current_state != 3 & iteration_counter < max_iterations){ 
+    
+    current_state <-
+      sample(states, size = 1,
+             prob = P[current_state,]) 
+    
+    iteration_counter <- iteration_counter + 1 
+  }
+  if(iteration_counter < max_iterations & current_state == 3){ 
+    absorption_time[r] <- iteration_counter 
+  } 
+}
+
+table(absorption_time, useNA = 'always')[1:15]
+
+```
+
+# A Markov Chain Model for Baseball
+
+## Estimating Transition Probabilities
+
+- Focus only on at-bats in the first 8 innings
+- $n_{s,s'}$: number of at-bats starting in state $s$ and ending in $s'$
+- $n_{s}$: number of at-bats starting in state $s$
+- Estimate $p_{s,s'}$ with $n_{s,s'}/n_{s}$
+
+```{r}
+#| label: load-baseball-transition
+#| eval: true
+#| echo: true
+load("atbat2024_markov_chain.RData")
+round(transition_matrix[1:5, 1:5], digits = 3)
+```
+
+
+## Half-Inning Simulation
+
+- Start at `0.000` and terminate once chain reaches `3.000`
+
+```{r}
+#| label: half-inning1
+#| eval: true
+#| echo: true
+
+max_iterations <- 30
+states_visited <- rep(NA, times = max_iterations)
+
+iteration_counter <- 1
+states_visited[1] <- "0.000"
+current_state <- "0.000"
+set.seed(479)
+while(current_state != "3.000" & iteration_counter < max_iterations){
+  
+  current_state <-
+    sample(unik_states$GameState, size = 1,
+           prob = transition_matrix[current_state,])
+  iteration_counter <- iteration_counter + 1
+  states_visited[iteration_counter] <- current_state 
+}
+states_visited[1:(iteration_counter)]
+```
+
+## Inning-Length Simulation
+
+- See [lecture notes](../../lectures/lecture14.qmd#sec-halfinning-length) for full code
+- Simulated 50,000 half-innings, keeping track of all states visited
+
+
+```{r}
+#| label: half-inning2
+#| eval: true
+#| echo: false
+
+n_sim <- 5e4
+max_iterations <- 30
+states_visited <- matrix(NA, nrow = n_sim, ncol = max_iterations)
+
+for(r in 1:n_sim){
+  set.seed(479+r)
+  states_visited[r,1] <- "0.000"
+  current_state <- "0.000"
+  iteration_counter <- 1
+  while(current_state != "3.000" & iteration_counter < max_iterations){
+    
+    current_state <-
+      sample(x = unik_states$GameState,
+             size = 1, replace = 1,
+             prob = transition_matrix[current_state,])
+    iteration_counter <- iteration_counter+1
+    states_visited[r,iteration_counter] <- current_state
+  }
+}
+
+states_visited[1:10, 1:8]
+```
+
+## Inning-Length Simulation II
+
+- For each row of `states_visited` find first instance `3.000`
+
+```{r}
+#| label: inning-length
+#| eval: true
+#| echo: true
+
+inning_length <-
+  apply(states_visited, 
+        MARGIN = 1, #<1>
+        FUN = function(x){ return(which(x == "3.000") - 1)} )
+table(inning_length)
+```
+
+. . . 
+
+- 2 of the 50,000 simulated half-innings had 15 at-bats
+```{r}
+#| label: states-15-inning
+#| eval: true
+#| echo: false
+states_visited[which(inning_length == 15)[1], 1:15]
+```
+
+## Runs Scored{.smaller}
+
+- $O_{t}$ and $B_{t}$: number of outs and runners at the **start** of at-bat $t$
+- $O^{\star}_{t}$ and $B^{\star}_{t}$: numbers of outs and runners at the **end** of at-bat $t$
+- Runs Scored during at-bat $t$:
+$$
+(O_{t} + B_{t} + 1) - (O_{t}^{\star} + B_{t}^{\star}).
+$$
+
+- Re-run simulation & keep running total of runs scored in each at-bat
+```{r}
+#| label: add-n-runner
+#| eval: true
+#| echo: false
+unik_states <-
+  unik_states |>
+  dplyr::mutate(
+    n_runners = 
+      dplyr::case_when(
+        BaseRunner == "000" ~ 0,
+        BaseRunner %in% c("100", "010", "001") ~ 1,
+        BaseRunner %in% c("110", "101", "011") ~ 2,
+        BaseRunner == "111" ~ 3))
+n_sim <- 5e4
+max_iterations <- 30
+states_visited <- matrix(NA, nrow = n_sim, ncol = max_iterations)
+
+runs_scored <- rep(NA, times = n_sim) 
+
+for(r in 1:n_sim){
+  set.seed(479+r)
+  states_visited[r,1] <- "0.000"
+  current_state <- "0.000"
+  iteration_counter <- 1
+  runs <- 0 
+  
+  n_outs_start <- 0 
+  n_runners_start <- 0 
+  n_outs_end <- 0 
+  n_runners_end <- 0 
+  
+  while(current_state != "3.000" & iteration_counter < max_iterations){
+    
+    n_outs_start <-
+      unik_states |> dplyr::filter(GameState == current_state) |> dplyr::pull(Outs) #<4>
+    n_runners_start <- 
+      unik_states |> dplyr::filter(GameState == current_state) |> dplyr::pull(n_runners) #<4>
+    
+    current_state <-
+      sample(x = unik_states$GameState,
+             size = 1, replace = 1,
+             prob = transition_matrix[current_state,])
+    iteration_counter <- iteration_counter+1
+    states_visited[r,iteration_counter] <- current_state
+    
+    n_outs_end <- 
+      unik_states |> dplyr::filter(GameState == current_state) |> dplyr::pull(Outs) #<4>
+    n_runners_end <- 
+      unik_states |> dplyr::filter(GameState == current_state) |> dplyr::pull(n_runners) #<4>
+
+    runs <- 
+      runs + 
+      (n_outs_start + n_runners_start + 1) - 
+      (n_outs_end + n_runners_end) 
+  }
+  runs_scored[r] <- runs 
+}
+
+table(runs_scored)
+```
+
+
+
+# Further Markov Chain Theory
+
+## $n$-step Transitions I 
+
+- Suppose $X_{t} = s$. What is $\mathbb{P}(X_{t+2} = s' \vert X_{t} = s)$? 
+  - If we start at-bat in `1.000`, chances of being at `2.100` in exactly 2 at-bats?
+- Must sum over all all *intermediate* states between $s$ and $s'$:
+$$
+\begin{align}
+\mathbb{P}(X_{t+2} = s' \vert X_{t} = s) &= \sum_{k = 1}^{S}{\mathbb{P}(X_{t+2} = s', X_{t+1} = k \vert X_{t} = s)} \\
+&= \sum_{k = 1}^{S}{\mathbb{P}(X_{t+2} = s' \vert X_{t+1} = k, X_{t} = s)\mathbb{P}(X_{t+1} = k \vert X_{t} = s)}
+\end{align}
+$$
+
+
+## $n$-step Transitions II
+
+- By Markov Property
+$$
+\mathbb{P}(X_{t+2} = s' \vert X_{t+1} = k, X_{t} = s) = \mathbb{P}(X_{t+2} = s' \vert X_{t+1} = k) = p_{k,s'}
+$$
+
+. . .
+
+- Conclude that
+$$
+\mathbb{P}(X_{t+2} = s' \vert X_{t} = s) = \sum_{k = 1}^{S}{p_{s,k} p_{k,s'}}
+$$
+
+## $n$-step Transitions III
+
+- This is just matrix multiplication!
+
+:::{.callout-note}
+
+## Definition: n-Step Transition
+For any integer $n$, let $\boldsymbol{\mathbf{P}}^{n}$ denote the **$n$-step transition matrix**, which we obtain by multiplying $\boldsymbol{\mathbf{P}}$ with itself $n$ times.
+The $(s,s')$ entry of $\boldsymbol{\mathbf{P}}^{n}$ is the probability that Markov chain beginning in state $s$ reaches states $s'$ in *exactly* $n$ steps.
+:::
+
+$$
+\boldsymbol{\mathbf{P}}^{n} = \boldsymbol{\mathbf{P}} ~ \overbrace{\times \cdots \times}^{n \textrm{ times}} ~  \boldsymbol{\mathbf{P}}
+$$
+
+
+## Example{.smaller}
+
+- Starting from `1.000`: 
+  - 51% chance inning ends after 2 at-bats
+  - 27% chance inning is at `2.100` after 2 at-bats
+```{r}
+#| label: two-step-start
+#| eval: true
+#| echo: true
+P2 <- transition_matrix %*% transition_matrix
+round(sort(P2["1.000",], decreasing = TRUE), digits = 2)[1:10]
+```
+
+. . .
+
+- After first three at-bats 
+  - 38% chance inning is over
+  - 24% chance inning reaches `2.100` 
+
+```{r}
+#| label: three-step-start
+#| eval: true
+#| echo: true
+P3 <- transition_matrix %*% P2
+round(sort(P3["0.000",], decreasing = TRUE), digits = 2)[1:10]
+```
+
+## Fundamental Matrix{.smaller}
+
+- Suppose chain has $A$ absorbing states & $T$ non-absorbing states
+- Partition transition matrix as
+$$
+\boldsymbol{\mathbf{P}} = \begin{pmatrix} Q & R \\ 0 & I_{A} \end{pmatrix},
+$$
+  - $Q$: transitions between non-absorbing states
+  - $R$: transitions from non-absorbing to absorbing
+
+- Fundamental Matrix: $N = (I_{T} - Q)^{-1}$
+
+## Example
+- $n_{s,s'}$: expected number of visits to $s'$ starting from $s$ before absorption
+  - Starting from `0.000`, chain visits `0.100` 0.25 times and `0.010` 0.06 times
+  - Starting from `1.000` chain returns about 
+```{r}
+#| label: get-fundamental-matrix
+#| eval: true
+#| echo: true
+
+transient_states <- unik_states |> dplyr::filter(GameState != "3.000") |> dplyr::pull(GameState)
+Q <- transition_matrix[transient_states, transient_states]
+R <- matrix(transition_matrix[transient_states, "3.000"], ncol = 1)
+N <- solve(diag(24) - Q)
+round(N[1:5, 1:5], digits = 2)
+```
+
+## Row Sums of $N$
+
+- $n_{s,s'}$ number of expected visits to $s'$ by a chain started at $s$
+- $\sum_{s'}{n_{s,s'}}$: expected number of states visited before absorption
+- Starting from `1.000`, expect about 2.8 more at-bats before end of half-inning
+```{r}
+#| label: expected-absorption-time
+#| eval: true
+#| echo: true
+sum(N["1.000",])
+```

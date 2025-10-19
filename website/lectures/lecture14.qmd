@@ -40,7 +40,7 @@ Using this simulation, we study the distributions of the number of at-bats in a 
 Finally, in @sec-fundamental, we will lean on some mathematical properties of *absorbing Markov chains* to estimate how many more at-bats a team can expect to face given the current game state.
 
 
-### Data Preparation
+### Data Preparation {#sec-data-prep}
 
 The first at-bat in any half-inning of baseball has a deterministic starting state: `0.000`, with no outs and no runners on base.
 The starting state of the next at-bat is, in contrast, non-deterministic.
@@ -296,6 +296,7 @@ transition_matrix <-
            0, 0, 1), nrow = 3, ncol = 3, byrow = TRUE)
 absorption_time <- rep(NA, times = n_sims)
 for(r in 1:n_sims){
+  set.seed(479+r)
   if(r %% 1000 == 0) print(paste("Simulation", r, "at", Sys.time())) #<3>
   
   iteration_counter <- 1 #<4>
@@ -326,7 +327,7 @@ Because there are only 3 states and the probabilities of transitioning to state 
 Tabulating the different values in `absorption_time`, we see that the chain
 
   1. Immediately transitioned from state `1` to state `3` in one step (so that $T^{A}_{1} = 2$) in 2440 of the 10,000 simulations
-  2. Reached state `3` in exactly two steps (so $T^{A}_{1} = 2$) in 3214 of the 10,000 simulations
+  2. Reached state `3` in exactly two steps (so $T^{A}_{1} = 2$) in about 3200 of the 10,000 simulations
   3. Reached state `3` after 20 or more steps in just 2 of the 10,000 simulation
   4. Always reached state `3` within the maximum number of iterations (as indicated by the fact that there are no `NA` values in `absorption_time`)
   
@@ -747,6 +748,17 @@ for(r in 1:n_sim){
 4. At the start of a simulated at-bat, get the numbers of outs and runners
 5. At the end of a simulated at-bat, get the numbers of outs and runners
 6. Add the number of runs scored in the current at-bat to the running tally
+
+
+We can now tabulate the number of runs scored in each simulated half-inning
+
+```{r}
+#| label: runs-scored-tabulation
+#| eval: true
+#| echo: true
+table(runs_scored)
+
+```
 
 
 ## Modeling Multiple Steps {#sec-nstep}
