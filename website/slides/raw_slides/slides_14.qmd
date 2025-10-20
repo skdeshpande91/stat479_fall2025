@@ -6,7 +6,7 @@ execute:
   cache: true
 ---
 
-## State Transitions in Baseball
+## State Transitions in Baseball{.smaller}
 
 - 8th inning of Dodgers-Padres game on March 20, 2024
 
@@ -61,7 +61,7 @@ atbat2024 <-
 - $\{X_{t}\}$: infinite sequence of $\mathcal{S}$-valued random variables
 - Interested in several probabilities & random quantities
   - $\mathbb{P}(X_{1} = s_{1}, X_{2} = s_{2}, X_{3} = s_{3}, X_{4} = s_{4}$): e.g., likelihood of seeing `0.000` to `1.000` to `2.000` to `3.000`
-  - First $n$ such that $X_{t} \in A$: e.g., # at-bats needed to get at least one out
+  - First $n$ such that $X_{n} \in A$: e.g., # at-bats needed to get at least one out
   - Amount of time to reach state $s$ starting from state $s'$
 
 ## Specifying Joint Distributions 
@@ -254,6 +254,10 @@ round(transition_matrix[1:5, 1:5], digits = 3)
 ```
 
 
+## Baseball Transitions: Visualization
+
+![](baseball-transition-graph.png){width=50% fig-align="center"}
+
 ## Half-Inning Simulation
 
 - Start at `0.000` and terminate once chain reaches `3.000`
@@ -281,7 +285,7 @@ while(current_state != "3.000" & iteration_counter < max_iterations){
 states_visited[1:(iteration_counter)]
 ```
 
-## Inning-Length Simulation
+## Inning-Length Simulation I
 
 - See [lecture notes](../../lectures/lecture14.qmd#sec-halfinning-length) for full code
 - Simulated 50,000 half-innings, keeping track of all states visited
@@ -416,10 +420,10 @@ table(runs_scored)
 
 # Further Markov Chain Theory
 
-## $n$-step Transitions I 
+## $n$-step Transitions I {.smaller}
 
 - Suppose $X_{t} = s$. What is $\mathbb{P}(X_{t+2} = s' \vert X_{t} = s)$? 
-  - If we start at-bat in `1.000`, chances of being at `2.100` in exactly 2 at-bats?
+  - Starting from `1.000`, chances of being at `2.100` in exactly 2 at-bats?
 - Must sum over all all *intermediate* states between $s$ and $s'$:
 $$
 \begin{align}
@@ -429,7 +433,7 @@ $$
 $$
 
 
-## $n$-step Transitions II
+## $n$-step Transitions II{.smaller}
 
 - By Markov Property
 $$
@@ -443,21 +447,13 @@ $$
 \mathbb{P}(X_{t+2} = s' \vert X_{t} = s) = \sum_{k = 1}^{S}{p_{s,k} p_{k,s'}}
 $$
 
-## $n$-step Transitions III
+. . . 
 
-- This is just matrix multiplication!
-
-:::{.callout-note}
-
-## Definition: n-Step Transition
-For any integer $n$, let $\boldsymbol{\mathbf{P}}^{n}$ denote the **$n$-step transition matrix**, which we obtain by multiplying $\boldsymbol{\mathbf{P}}$ with itself $n$ times.
-The $(s,s')$ entry of $\boldsymbol{\mathbf{P}}^{n}$ is the probability that Markov chain beginning in state $s$ reaches states $s'$ in *exactly* $n$ steps.
-:::
+- This is just matrix multiplication! $n$-step transition probability matrix
 
 $$
 \boldsymbol{\mathbf{P}}^{n} = \boldsymbol{\mathbf{P}} ~ \overbrace{\times \cdots \times}^{n \textrm{ times}} ~  \boldsymbol{\mathbf{P}}
 $$
-
 
 ## Example{.smaller}
 
@@ -498,7 +494,7 @@ $$
 
 - Fundamental Matrix: $N = (I_{T} - Q)^{-1}$
 
-## Example
+## Example{.smaller}
 - $n_{s,s'}$: expected number of visits to $s'$ starting from $s$ before absorption
   - Starting from `0.000`, chain visits `0.100` 0.25 times and `0.010` 0.06 times
   - Starting from `1.000` chain returns about 
@@ -525,3 +521,29 @@ round(N[1:5, 1:5], digits = 2)
 #| echo: true
 sum(N["1.000",])
 ```
+
+
+## Reminders{.smaller}
+
+- Project 2: simulation of a game, season, tournament, draft, etc.
+  - Simulation powered by a probabilistic model
+  - Could build a Bradley-Terry, Markov chain, or Plackett-Luce model
+  - By October 22 (Wednesday): email me w/ your team's plans!
+  - Due November 7
+
+- Project 3: Big Data Bowl or curling data
+  - Big Data Bowl: how players move when ball in air
+  - Curling: strategies for power play and/or shot selection
+  - Can work w/ other students (form groups on Canvas)
+  - By October 22 (Wednesday): email me w/ group & choice of topic
+  
+## Guest Speaker
+
+- Thursday October 30: David Radke (Chicago Blackhawks)
+- 2:30pm - 3:30pm: Research Talk
+  - "Multiagent Challenges in Team Sports Analytics"
+  - Aimed at graduate students & faculty but all welcome!
+- 3:30pm - 4:30pm: Career Talk
+  - "Professional Hockey Analytics at the Chicago Blackhawks"
+  - How does Hockey Strateegy & Analytics groups operate? 
+- Both talks in Morgridge Hall 7560

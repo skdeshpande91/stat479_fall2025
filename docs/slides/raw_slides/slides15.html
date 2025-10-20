@@ -12,7 +12,7 @@
 <link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.7.31">
 
-  <title>STAT479 – STAT 479 Lecture 14</title>
+  <title>STAT479 – STAT 479 Lecture 15</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -195,532 +195,435 @@
     <div class="slides">
 
 <section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">STAT 479 Lecture 14</h1>
-  <p class="subtitle">Markov Chains</p>
+  <h1 class="title">STAT 479 Lecture 15</h1>
+  <p class="subtitle">Markov Chains II</p>
 
 <div class="quarto-title-authors">
 </div>
 
 </section>
-<section id="state-transitions-in-baseball" class="slide level2 smaller">
-<h2>State Transitions in Baseball</h2>
+<section id="overview" class="slide level2 smaller">
+<h2>Overview</h2>
 <ul>
-<li>8th inning of Dodgers-Padres game on March 20, 2024</li>
-</ul>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 8 × 6
-  at_bat_number  Outs BaseRunner end_events      end_Outs end_BaseRunner
-          &lt;int&gt; &lt;int&gt; &lt;chr&gt;      &lt;chr&gt;              &lt;dbl&gt; &lt;chr&gt;         
-1            59     0 000        walk                   0 100           
-2            60     0 100        single                 0 110           
-3            61     0 110        walk                   0 111           
-4            62     0 111        sac_fly                1 110           
-5            63     1 110        fielders_choice        1 110           
-6            64     1 110        single                 1 110           
-7            65     1 110        single                 1 110           
-8            66     1 110        double_play            3 &lt;NA&gt;          </code></pre>
-</div>
-</div>
+<li><a href="../../lectures/lecture14.html">Lecture 14</a>: Markov chain model of baseball
 <ul>
-<li>Game state transitions:
-<ul>
-<li><code>0.000</code> to <code>0.100</code> to <code>0.110</code> to <code>0.111</code> to <code>1.110</code></li>
-<li>Eventually transitions from <code>1.110</code> to <code>3.000</code> (end of inning)</li>
+<li>Estimated transition probabilities b/w out-baserunner states</li>
+<li>Single absorbing state <code>3.000</code>: once reached, chain never leaves</li>
+<li>Simulation: inning length &amp; expected runs</li>
+<li>Theory: # at-bats until end of inning</li>
 </ul></li>
-</ul>
-</section>
-<section id="motivation-objectives" class="slide level2">
-<h2>Motivation &amp; Objectives</h2>
-<ul>
-<li>How unusual was this sequence of state transitions?</li>
-<li>If we replayed inning over and over again, how many at-bats?</li>
-<li>Dist. of runs scored?</li>
-<li>Given the game is in <code>1.000</code>, how likely is it to reach <code>2.111</code>?</li>
 </ul>
 <div class="fragment">
 <ul>
-<li>Today: a <strong>probabilistic</strong> model for state transitions</li>
+<li>Today: using Markov chains to <em>rank</em> teams
+<ul>
+<li>Simulate a random walk (Markov chain) b/w teams</li>
+<li><span class="math inline">\(p_{s,s'}\)</span> tracks how much better <span class="math inline">\(s'\)</span> is than <span class="math inline">\(s\)</span></li>
+</ul></li>
+<li>Essentially, a variant of <a href="https://web.stanford.edu/class/cs54n/handouts/24-GooglePageRankAlgorithm.pdf">PageRank</a>, which used to power Google Search</li>
 </ul>
 </div>
 </section>
-<section id="data-preparation" class="slide level2">
-<h2>Data Preparation</h2>
+<section id="modeling-a-bandwagon-fan" class="slide level2">
+<h2>Modeling a Bandwagon Fan</h2>
 <ul>
-<li>For every at bat, record starting state and ending state</li>
-</ul>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a></a>atbat2024 <span class="ot">&lt;-</span></span>
-<span id="cb2-2"><a></a>  atbat2024 <span class="sc">|&gt;</span></span>
-<span id="cb2-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb2-4"><a></a>    <span class="at">end_BaseRunner =</span> <span class="fu">ifelse</span>(end_Outs <span class="sc">==</span> <span class="dv">3</span>, <span class="st">"000"</span>, end_BaseRunner), </span>
-<span id="cb2-5"><a></a>    <span class="at">end_GameState =</span> <span class="fu">paste</span>(end_Outs, end_BaseRunner, <span class="at">sep =</span> <span class="st">"."</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<ul>
-<li>Also useful to create table of 25 unique game states (see <a href="../../lectures/lecture14.html#sec-data-prep">lecture notes</a>)</li>
+<li>Bandwagon fan: supports an actively successful/trendy team, no past loyalty,</li>
+<li>Imagine a bandwagon fan randomly switching support b/w <span class="math inline">\(S\)</span> teams</li>
+<li>Each day, fan switches their support to a different team</li>
+<li><span class="math inline">\(p_{s,s'}\)</span>: prob. of switching from <span class="math inline">\(s\)</span> to <span class="math inline">\(s'\)</span></li>
+<li>Long-term behavior: how often does fan support any one team?</li>
 </ul>
 </section>
-<section>
-<section id="markov-chains-fundamentals" class="title-slide slide level1 center">
-<h1>Markov Chains Fundamentals</h1>
-
-</section>
-<section id="setting" class="slide level2">
-<h2>Setting</h2>
-<ul>
-<li>State space: <span class="math inline">\(\mathcal{S} = \{1, 2, \ldots, S\}\)</span></li>
-<li><span class="math inline">\(\{X_{t}\}\)</span>: infinite sequence of <span class="math inline">\(\mathcal{S}\)</span>-valued random variables</li>
-<li>Interested in several probabilities &amp; random quantities
-<ul>
-<li><span class="math inline">\(\mathbb{P}(X_{1} = s_{1}, X_{2} = s_{2}, X_{3} = s_{3}, X_{4} = s_{4}\)</span>): e.g., likelihood of seeing <code>0.000</code> to <code>1.000</code> to <code>2.000</code> to <code>3.000</code></li>
-<li>First <span class="math inline">\(n\)</span> such that <span class="math inline">\(X_{n} \in A\)</span>: e.g., # at-bats needed to get at least one out</li>
-<li>Amount of time to reach state <span class="math inline">\(s\)</span> starting from state <span class="math inline">\(s'\)</span></li>
-</ul></li>
-</ul>
-</section>
-<section id="specifying-joint-distributions" class="slide level2">
-<h2>Specifying Joint Distributions</h2>
-<ul>
-<li>To answer these questions, must define a <strong>joint</strong> probability distribution:</li>
-<li>For every infinite sequence of states <span class="math inline">\(s_{1}, s_{2}, \ldots\)</span> must specify <span class="math display">\[
-\mathbb{P}(X_{1} = s_{1}, X_{2} = s_{2}, X_{3} = s_{3}, \ldots)
-\]</span></li>
-<li>Can compute prob. of events of interest by
-<ul>
-<li>Enumerating all infinite sequences for which event occurs</li>
-<li>Sum the probabilities of those sequences</li>
-</ul></li>
-</ul>
-</section>
-<section id="joints-from-conditionals" class="slide level2 smaller">
-<h2>Joints from Conditionals</h2>
-<ul>
-<li><p>Specify joint dist. <span class="math inline">\(\{X_{t}\}\)</span> by specifying sequence of <strong>conditional probabilities</strong> <span class="math display">\[
-\mathbb{P}(X_{t+1} = s \vert X_{t} = s_{t}, X_{t-1} = s_{t-1}, X_{t-2} = s_{t-2}, \ldots, X_{1} = s_{1})
-\]</span></p></li>
-<li><p>Specifying how to generate next value based on all previous values</p></li>
-</ul>
-<div class="fragment">
-<ul>
-<li>To characterize <span class="math inline">\(X_{t+1}\)</span>, must specify a total of <span class="math inline">\(S \times S^{t}\)</span> different probabilities
-<ul>
-<li><span class="math inline">\(S\)</span> possible states for <span class="math inline">\(X_{t+1}\)</span></li>
-<li><span class="math inline">\(S^{t}\)</span> possible sequences <span class="math inline">\(s_{1}, \ldots, s_{t}\)</span></li>
-</ul></li>
-</ul>
-</div>
-</section>
-<section id="markov-property" class="slide level2">
-<h2>Markov Property</h2>
-<ul>
-<li><span class="math inline">\(\{X_{t}\}\)</span> satisfies the <strong>Markov property</strong> if:
-<ul>
-<li>For all <span class="math inline">\(A \subset \mathcal{A}\)</span></li>
-<li>For all <span class="math inline">\(t\)</span> and sequences <span class="math inline">\(s_{1}, \ldots s_{t}\)</span> <span class="math display">\[
-\mathbb{P}(X_{t+1} \in A \vert X_{t} = s_{t}, \ldots, X_{1} = s_{1}) = \mathbb{P}(X_{t+1} \in A \vert X_{t} = s_{t})
-\]</span></li>
-</ul></li>
-<li>What comes next depends only on current state &amp; not past states</li>
-</ul>
-</section>
-<section id="markov-chains" class="slide level2">
-<h2>Markov Chains</h2>
-<ul>
-<li><p>If <span class="math inline">\(\{X_{t}\}\)</span> satisfies Markov property, we say it is a <strong>Markov chain</strong></p></li>
-<li><p>Markov chains on state space <span class="math inline">\(\mathcal{S} = \{1, 2, \ldots, S\}\)</span> are determined by transition probability matrix <span class="math display">\[
-\boldsymbol{\mathbf{P}} = \begin{pmatrix} p_{1,1} &amp;  \cdots &amp; p_{1,S} \\ \vdots &amp;  ~ &amp; \vdots \\ p_{S,1} &amp; \cdots &amp; p_{S,S} \end{pmatrix}
-\]</span></p></li>
-<li><p><span class="math inline">\(p_{s, s'} = \mathbb{P}(X_{t+1} = s' \vert X_{t} = s)\)</span>: prob. of moving from <span class="math inline">\(s\)</span> to <span class="math inline">\(s'\)</span></p></li>
-</ul>
-</section>
-<section id="state-example" class="slide level2">
-<h2>2-State Example</h2>
-<ul>
-<li>If chain is
-<ul>
-<li>At <code>1</code>: move to <code>2</code> w.p. 60% and remain at <code>1</code> w.p. 40%</li>
-<li>At <code>2</code>: move to <code>1</code> w.p. 50% and remain at <code>2</code> w.p. 50%</li>
-</ul></li>
-</ul>
+<section id="team-example-setup" class="slide level2">
+<h2>4 Team Example: Setup</h2>
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><a href="two-state-graph.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img data-src="two-state-graph.png" class="quarto-figure quarto-figure-center" style="width:75.0%"></a></p>
+<p><a href="four-state-graph.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img data-src="four-state-graph.png" class="quarto-figure quarto-figure-center"></a></p>
 </figure>
 </div>
-</section>
-<section id="state-example-simulation" class="slide level2">
-<h2>2-State Example: Simulation</h2>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a><span class="fu">set.seed</span>(<span class="dv">479</span>) </span>
-<span id="cb3-2"><a></a>states <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>) </span>
-<span id="cb3-3"><a></a>P<span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.6</span>, <span class="fl">0.4</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span>), <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">2</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb3-4"><a></a></span>
-<span id="cb3-5"><a></a>n_steps <span class="ot">&lt;-</span> <span class="dv">10</span></span>
-<span id="cb3-6"><a></a>init_state <span class="ot">&lt;-</span> <span class="dv">2</span></span>
-<span id="cb3-7"><a></a>states_visited <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_steps)</span>
-<span id="cb3-8"><a></a></span>
-<span id="cb3-9"><a></a>states_visited[<span class="dv">1</span>] <span class="ot">&lt;-</span> init_state </span>
-<span id="cb3-10"><a></a></span>
-<span id="cb3-11"><a></a><span class="cf">for</span>(t <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n_steps){</span>
-<span id="cb3-12"><a></a>  prev_state <span class="ot">&lt;-</span> states_visited[t<span class="dv">-1</span>] </span>
-<span id="cb3-13"><a></a>  probs <span class="ot">&lt;-</span> P[prev_state,]</span>
-<span id="cb3-14"><a></a>  next_state <span class="ot">&lt;-</span> <span class="fu">sample</span>(states, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> probs) </span>
-<span id="cb3-15"><a></a>  states_visited[t] <span class="ot">&lt;-</span> next_state</span>
-<span id="cb3-16"><a></a>}</span>
-<span id="cb3-17"><a></a></span>
-<span id="cb3-18"><a></a>states_visited</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code> [1] 2 1 1 1 2 2 2 1 1 2</code></pre>
-</div>
-</div>
-</section>
-<section id="state-example-1" class="slide level2">
-<h2>3-State Example</h2>
 <ul>
-<li>When the chain reaches <code>3</code>, it remains there.</li>
-</ul>
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><a href="three-state-graph.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img data-src="three-state-graph.png" class="quarto-figure quarto-figure-center" style="width:50.0%"></a></p>
-</figure>
-</div>
-</section>
-<section id="state-example-simulation-1" class="slide level2">
-<h2>3-State Example: Simulation</h2>
+<li>Markov chain model of fan’s support:
 <ul>
-<li>Simulate the Markov chain 10 times for 10 iterations each</li>
-<li>Each simulation begins in state <code>1</code></li>
-<li>All quickly reach state <code>3</code> (absorbing)</li>
-</ul>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>Simulation  1 : 1 3 3 3 3 3 3 3 3 3 
-Simulation  2 : 1 2 3 3 3 3 3 3 3 3 
-Simulation  3 : 1 2 2 3 3 3 3 3 3 3 
-Simulation  4 : 1 2 3 3 3 3 3 3 3 3 
-Simulation  5 : 1 2 2 1 1 2 3 3 3 3 
-Simulation  6 : 1 2 3 3 3 3 3 3 3 3 
-Simulation  7 : 1 2 3 3 3 3 3 3 3 3 
-Simulation  8 : 1 3 3 3 3 3 3 3 3 3 
-Simulation  9 : 1 2 1 1 1 1 2 3 3 3 
-Simulation  10 : 1 1 3 3 3 3 3 3 3 3 </code></pre>
-</div>
-</div>
-</section>
-<section id="state-example-absorbtion-time" class="slide level2 smaller">
-<h2>3-State Example: Absorbtion Time</h2>
-<ul>
-<li>Starting from <code>1</code>, how long until chain reaches state <code>3</code>?</li>
-<li><span class="math inline">\(T_{1}^{A} = \min\left\{t \geq 1: X_{t} = 3\right\}\)</span></li>
-<li>See <a href="../../lectures/lecture14.html#sec-three-state">notes</a> for code</li>
-<li>Simulated 10,000 Markov chains</li>
-</ul>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>absorption_time
-   2    3    4    5    6    7    8    9   10   11   12   13   14   15   16 
-2511 3209 1701  995  586  395  226  159   83   52   32   20   12    8    6 </code></pre>
-</div>
-</div>
-</section></section>
-<section>
-<section id="a-markov-chain-model-for-baseball" class="title-slide slide level1 center">
-<h1>A Markov Chain Model for Baseball</h1>
-
-</section>
-<section id="estimating-transition-probabilities" class="slide level2">
-<h2>Estimating Transition Probabilities</h2>
-<ul>
-<li>Focus only on at-bats in the first 8 innings</li>
-<li><span class="math inline">\(n_{s,s'}\)</span>: number of at-bats starting in state <span class="math inline">\(s\)</span> and ending in <span class="math inline">\(s'\)</span></li>
-<li><span class="math inline">\(n_{s}\)</span>: number of at-bats starting in state <span class="math inline">\(s\)</span></li>
-<li>Estimate <span class="math inline">\(p_{s,s'}\)</span> with <span class="math inline">\(n_{s,s'}/n_{s}\)</span></li>
-</ul>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a><span class="fu">load</span>(<span class="st">"atbat2024_markov_chain.RData"</span>)</span>
-<span id="cb7-2"><a></a><span class="fu">round</span>(transition_matrix[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>], <span class="at">digits =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>      0.000 0.100 0.010 0.001 0.110
-0.000 0.032 0.231 0.045 0.005 0.000
-0.100 0.031 0.003 0.014 0.004 0.198
-0.010 0.021 0.057 0.048 0.003 0.093
-0.001 0.038 0.179 0.046 0.008 0.000
-0.110 0.030 0.000 0.011 0.005 0.039</code></pre>
-</div>
-</div>
-</section>
-<section id="baseball-transitions-visualization" class="slide level2">
-<h2>Baseball Transitions: Visualization</h2>
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><a href="baseball-transition-graph.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img data-src="baseball-transition-graph.png" class="quarto-figure quarto-figure-center" style="width:50.0%"></a></p>
-</figure>
-</div>
-</section>
-<section id="half-inning-simulation" class="slide level2">
-<h2>Half-Inning Simulation</h2>
-<ul>
-<li>Start at <code>0.000</code> and terminate once chain reaches <code>3.000</code></li>
-</ul>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a>max_iterations <span class="ot">&lt;-</span> <span class="dv">30</span></span>
-<span id="cb9-2"><a></a>states_visited <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> max_iterations)</span>
-<span id="cb9-3"><a></a></span>
-<span id="cb9-4"><a></a>iteration_counter <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb9-5"><a></a>states_visited[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="st">"0.000"</span></span>
-<span id="cb9-6"><a></a>current_state <span class="ot">&lt;-</span> <span class="st">"0.000"</span></span>
-<span id="cb9-7"><a></a><span class="fu">set.seed</span>(<span class="dv">479</span>)</span>
-<span id="cb9-8"><a></a><span class="cf">while</span>(current_state <span class="sc">!=</span> <span class="st">"3.000"</span> <span class="sc">&amp;</span> iteration_counter <span class="sc">&lt;</span> max_iterations){</span>
-<span id="cb9-9"><a></a>  </span>
-<span id="cb9-10"><a></a>  current_state <span class="ot">&lt;-</span></span>
-<span id="cb9-11"><a></a>    <span class="fu">sample</span>(unik_states<span class="sc">$</span>GameState, <span class="at">size =</span> <span class="dv">1</span>,</span>
-<span id="cb9-12"><a></a>           <span class="at">prob =</span> transition_matrix[current_state,])</span>
-<span id="cb9-13"><a></a>  iteration_counter <span class="ot">&lt;-</span> iteration_counter <span class="sc">+</span> <span class="dv">1</span></span>
-<span id="cb9-14"><a></a>  states_visited[iteration_counter] <span class="ot">&lt;-</span> current_state </span>
-<span id="cb9-15"><a></a>}</span>
-<span id="cb9-16"><a></a>states_visited[<span class="dv">1</span><span class="sc">:</span>(iteration_counter)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "0.000" "0.010" "1.010" "2.010" "2.000" "3.000"</code></pre>
-</div>
-</div>
-</section>
-<section id="inning-length-simulation-i" class="slide level2">
-<h2>Inning-Length Simulation I</h2>
-<ul>
-<li>See <a href="../../lectures/lecture14.html#sec-halfinning-length">lecture notes</a> for full code</li>
-<li>Simulated 50,000 half-innings, keeping track of all states visited</li>
-</ul>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>      [,1]    [,2]    [,3]    [,4]    [,5]    [,6]    [,7]    [,8]
- [1,] "0.000" "1.000" "2.000" "3.000" NA      NA      NA      NA  
- [2,] "0.000" "1.000" "2.000" "2.100" "3.000" NA      NA      NA  
- [3,] "0.000" "1.000" "1.100" "2.100" "2.011" "3.000" NA      NA  
- [4,] "0.000" "1.000" "2.000" "3.000" NA      NA      NA      NA  
- [5,] "0.000" "1.000" "1.100" "3.000" NA      NA      NA      NA  
- [6,] "0.000" "1.000" "2.000" "3.000" NA      NA      NA      NA  
- [7,] "0.000" "1.000" "2.000" "3.000" NA      NA      NA      NA  
- [8,] "0.000" "1.000" "2.000" "2.100" "3.000" NA      NA      NA  
- [9,] "0.000" "1.000" "1.100" "2.010" "2.100" "2.110" "3.000" NA  
-[10,] "0.000" "0.010" "1.001" "1.100" "2.100" "3.000" NA      NA  </code></pre>
-</div>
-</div>
-</section>
-<section id="inning-length-simulation-ii" class="slide level2">
-<h2>Inning-Length Simulation II</h2>
-<ul>
-<li>For each row of <code>states_visited</code> find first instance <code>3.000</code></li>
-</ul>
-<div class="cell">
-<div class="sourceCode cell-code" id="annotated-cell-5"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy"><code class="sourceCode r"><span id="annotated-cell-5-1"><a href="#annotated-cell-5-1"></a>inning_length <span class="ot">&lt;-</span></span>
-<span id="annotated-cell-5-2"><a href="#annotated-cell-5-2"></a>  <span class="fu">apply</span>(states_visited, </span>
-<span id="annotated-cell-5-3"><a href="#annotated-cell-5-3"></a>        <span class="at">MARGIN =</span> <span class="dv">1</span>,</span>
-<span id="annotated-cell-5-4"><a href="#annotated-cell-5-4"></a>        <span class="at">FUN =</span> <span class="cf">function</span>(x){ <span class="fu">return</span>(<span class="fu">which</span>(x <span class="sc">==</span> <span class="st">"3.000"</span>) <span class="sc">-</span> <span class="dv">1</span>)} )</span>
-<span id="annotated-cell-5-5"><a href="#annotated-cell-5-5"></a><span class="fu">table</span>(inning_length)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>inning_length
-    3     4     5     6     7     8     9    10    11    12    13    14    15 
-19138 14368  8685  4222  2014   921   401   131    72    31    11     4     2 </code></pre>
-</div>
-</div>
-<div class="fragment">
-<ul>
-<li>2 of the 50,000 simulated half-innings had 15 at-bats</li>
-</ul>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code> [1] "0.000" "0.100" "0.110" "1.110" "1.000" "1.100" "1.000" "1.100" "1.000"
-[10] "1.000" "1.100" "1.110" "1.101" "2.100" "2.000"</code></pre>
-</div>
-</div>
-</div>
-</section>
-<section id="runs-scored" class="slide level2 smaller">
-<h2>Runs Scored</h2>
-<ul>
-<li><p><span class="math inline">\(O_{t}\)</span> and <span class="math inline">\(B_{t}\)</span>: number of outs and runners at the <strong>start</strong> of at-bat <span class="math inline">\(t\)</span></p></li>
-<li><p><span class="math inline">\(O^{\star}_{t}\)</span> and <span class="math inline">\(B^{\star}_{t}\)</span>: numbers of outs and runners at the <strong>end</strong> of at-bat <span class="math inline">\(t\)</span></p></li>
-<li><p>Runs Scored during at-bat <span class="math inline">\(t\)</span>: <span class="math display">\[
-(O_{t} + B_{t} + 1) - (O_{t}^{\star} + B_{t}^{\star}).
-\]</span></p></li>
-<li><p>Re-run simulation &amp; keep running total of runs scored in each at-bat</p></li>
-</ul>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>runs_scored
-    0     1     2     3     4     5     6     7     8     9    10    11    12 
-19138 14368  8685  4222  2014   921   401   131    72    31    11     4     2 </code></pre>
-</div>
-</div>
-</section></section>
-<section>
-<section id="further-markov-chain-theory" class="title-slide slide level1 center">
-<h1>Further Markov Chain Theory</h1>
-
-</section>
-<section id="n-step-transitions-i" class="slide level2 smaller">
-<h2><span class="math inline">\(n\)</span>-step Transitions I</h2>
-<ul>
-<li>Suppose <span class="math inline">\(X_{t} = s\)</span>. What is <span class="math inline">\(\mathbb{P}(X_{t+2} = s' \vert X_{t} = s)\)</span>?
-<ul>
-<li>Starting from <code>1.000</code>, chances of being at <code>2.100</code> in exactly 2 at-bats?</li>
+<li>Each day, stay with same team or pick different one</li>
+<li>Transitions depend only on current team (not past)</li>
 </ul></li>
-<li>Must sum over all all <em>intermediate</em> states between <span class="math inline">\(s\)</span> and <span class="math inline">\(s'\)</span>: <span class="math display">\[
-\begin{align}
-\mathbb{P}(X_{t+2} = s' \vert X_{t} = s) &amp;= \sum_{k = 1}^{S}{\mathbb{P}(X_{t+2} = s', X_{t+1} = k \vert X_{t} = s)} \\
-&amp;= \sum_{k = 1}^{S}{\mathbb{P}(X_{t+2} = s' \vert X_{t+1} = k, X_{t} = s)\mathbb{P}(X_{t+1} = k \vert X_{t} = s)}
-\end{align}
-\]</span></li>
 </ul>
 </section>
-<section id="n-step-transitions-ii" class="slide level2 smaller">
-<h2><span class="math inline">\(n\)</span>-step Transitions II</h2>
+<section id="team-example-simulation-function" class="slide level2">
+<h2>4 Team Example: Simulation Function</h2>
 <ul>
-<li>By Markov Property <span class="math display">\[
-\mathbb{P}(X_{t+2} = s' \vert X_{t+1} = k, X_{t} = s) = \mathbb{P}(X_{t+2} = s' \vert X_{t+1} = k) = p_{k,s'}
-\]</span></li>
+<li>Function to compute long-run frequencies for each team</li>
+<li>Arguments: initial state, number of iterations, transition matrix</li>
 </ul>
-<div class="fragment">
-<ul>
-<li>Conclude that <span class="math display">\[
-\mathbb{P}(X_{t+2} = s' \vert X_{t} = s) = \sum_{k = 1}^{S}{p_{s,k} p_{k,s'}}
-\]</span></li>
-</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a>fan_walk <span class="ot">&lt;-</span> <span class="cf">function</span>(init_state, n_iter, P){</span>
+<span id="cb1-2"><a></a>  states <span class="ot">&lt;-</span> <span class="fu">colnames</span>(P)</span>
+<span id="cb1-3"><a></a>  states_visited <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> n_iter)</span>
+<span id="cb1-4"><a></a>  states_visited[<span class="dv">1</span>] <span class="ot">&lt;-</span> init_state</span>
+<span id="cb1-5"><a></a>  <span class="cf">for</span>(r <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n_iter){</span>
+<span id="cb1-6"><a></a>    states_visited[r] <span class="ot">&lt;-</span> </span>
+<span id="cb1-7"><a></a>      <span class="fu">sample</span>(states, <span class="at">size =</span> <span class="dv">1</span>, </span>
+<span id="cb1-8"><a></a>             <span class="at">prob =</span> P[states_visited[r<span class="dv">-1</span>],])</span>
+<span id="cb1-9"><a></a>  }</span>
+<span id="cb1-10"><a></a>  props <span class="ot">&lt;-</span> <span class="fu">table</span>(states_visited)[states]<span class="sc">/</span>n_iter</span>
+<span id="cb1-11"><a></a>  <span class="fu">return</span>(props)</span>
+<span id="cb1-12"><a></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="fragment">
+</section>
+<section id="team-example-simulation" class="slide level2 smaller">
+<h2>4 Team Example: Simulation</h2>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><a href="four-state-graph.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img data-src="four-state-graph.png" class="quarto-figure quarto-figure-center" style="width:40.0%"></a></p>
+</figure>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a></a>teams <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"W"</span>, <span class="st">"O"</span>, <span class="st">"C"</span>, <span class="st">"M"</span>)</span>
+<span id="cb2-2"><a></a>P <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.85</span>, <span class="fl">0.05</span>, <span class="fl">0.05</span>,</span>
+<span id="cb2-3"><a></a>              <span class="fl">0.425</span>, <span class="fl">0.075</span>, <span class="fl">0.075</span>, <span class="fl">0.425</span>,</span>
+<span id="cb2-4"><a></a>              <span class="fl">0.05</span>, <span class="fl">0.85</span>, <span class="fl">0.05</span>, <span class="fl">0.05</span>,</span>
+<span id="cb2-5"><a></a>              <span class="fl">0.53</span>, <span class="fl">0.32</span>, <span class="fl">0.075</span>, <span class="fl">0.075</span>), </span>
+<span id="cb2-6"><a></a>            <span class="at">byrow =</span> <span class="cn">TRUE</span>, <span class="at">nrow =</span> <span class="dv">4</span>, <span class="at">ncol =</span> <span class="dv">4</span>,</span>
+<span id="cb2-7"><a></a>            <span class="at">dimnames =</span> <span class="fu">list</span>(teams, teams))</span>
+<span id="cb2-8"><a></a></span>
+<span id="cb2-9"><a></a><span class="fu">set.seed</span>(<span class="dv">479</span>)</span>
+<span id="cb2-10"><a></a><span class="fu">round</span>(<span class="fu">fan_walk</span>(<span class="at">init_state =</span> <span class="st">"W"</span>, <span class="at">n_iter =</span> <span class="fl">1e6</span>, <span class="at">P =</span> P), <span class="at">digits =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>states_visited
+    W     O     C     M 
+0.307 0.416 0.066 0.211 </code></pre>
+</div>
+</div>
+</section>
+<section>
+<section id="additional-markov-chain-theory" class="title-slide slide level1 center">
+<h1>Additional Markov Chain Theory</h1>
+
+</section>
+<section id="setup" class="slide level2">
+<h2>Setup</h2>
 <ul>
-<li>This is just matrix multiplication! <span class="math inline">\(n\)</span>-step transition probability matrix</li>
+<li><span class="math inline">\(\{X_{t}\}\)</span> Markov chain over <span class="math inline">\(\mathcal{S} = \{1, 2, \ldots, S\}\)</span></li>
+<li>Transition matrix <span class="math inline">\(\boldsymbol{\mathbf{P}}\)</span>
+<ul>
+<li><span class="math inline">\(p_{s,s'} = \mathbb{P}(X_{t+1} = s' \vert X_{t} = s)\)</span></li>
+</ul></li>
+<li><span class="math inline">\(n\)</span>-step transition matrix: <span class="math inline">\(\boldsymbol{\mathbf{P}}^{n}\)</span>
+<ul>
+<li><span class="math inline">\((\boldsymbol{\mathbf{P}}^{n})_{s,s'} = \mathbb{P}(X_{t+n} = s' \vert X_{t} = s)\)</span></li>
+<li>Sums over all possible <span class="math inline">\(n\)</span>-step paths from <span class="math inline">\(s\)</span> to <span class="math inline">\(s'\)</span></li>
+</ul></li>
 </ul>
+</section>
+<section id="n-step-distribution-i" class="slide level2">
+<h2><span class="math inline">\(n\)</span>-step Distribution I</h2>
+<ul>
+<li>Suppose we randomly initialize according to <span class="math inline">\(\boldsymbol{\pi}_{0} = (\pi_{0,1}, \ldots, \pi_{0,S})^{\top}\)</span></li>
+<li>I.e. for all <span class="math inline">\(s\)</span>, <span class="math inline">\(\pi_{0,s} = \mathbb{P}(X_{0} = s)\)</span></li>
+<li>What is <span class="math inline">\(\mathbb{P}(X_{1} = s')\)</span> for all <span class="math inline">\(s'\)</span>?</li>
+</ul>
+<div class="fragment">
 <p><span class="math display">\[
-\boldsymbol{\mathbf{P}}^{n} = \boldsymbol{\mathbf{P}} ~ \overbrace{\times \cdots \times}^{n \textrm{ times}} ~  \boldsymbol{\mathbf{P}}
+\begin{align}
+\mathbb{P}(X_{1} = s') &amp;= \sum_{s}{\mathbb{P}(X_{1} = s', X_{0} = s)} \\
+&amp;= \sum_{s}{\mathbb{P}(X_{0} = s) \times \mathbb{P}(X_{1} = s' \vert X_{0} = s)} \\
+&amp;= \sum_{s}{\pi_{0,s} \times p_{s,s'}}
+\end{align}
 \]</span></p>
 </div>
 </section>
-<section id="example" class="slide level2 smaller">
-<h2>Example</h2>
+<section id="n-step-distribution-ii" class="slide level2 smaller">
+<h2><span class="math inline">\(n\)</span>-step Distribution II</h2>
 <ul>
-<li>Starting from <code>1.000</code>:
+<li><span class="math inline">\(\boldsymbol{\pi}_{1} = (\pi_{1,1}, \ldots, \pi_{1,S})^{\top}\)</span> where <span class="math inline">\(\pi_{1,s} = \mathbb{P}(X_{1} = s)\)</span></li>
+<li><span class="math inline">\(\boldsymbol{\pi}_{1}^{\top} = \boldsymbol{\pi}_{0}^{\top}\boldsymbol{\mathbf{P}}\)</span></li>
+</ul>
+<div class="fragment">
 <ul>
-<li>51% chance inning ends after 2 at-bats</li>
-<li>27% chance inning is at <code>2.100</code> after 2 at-bats</li>
+<li><p>Using almost identical calculations: <span class="math inline">\(\boldsymbol{\pi}_{n}^{\top} = \boldsymbol{\pi}_{n-1}^{\top}\boldsymbol{\mathbf{P}} = \boldsymbol{\pi}_{0}^{\top}\boldsymbol{\mathbf{P}}^{n}.\)</span></p></li>
+<li><p>Limiting distribution <span class="math inline">\(\lim_{n \rightarrow \infty} \boldsymbol{\pi}_{n}\)</span></p>
+<ul>
+<li>Long-term prop. of time spend in each state</li>
+<li>Does not necessarily exist</li>
 </ul></li>
 </ul>
+</div>
+</section>
+<section id="invariant-distribution" class="slide level2">
+<h2>Invariant Distribution</h2>
+<ul>
+<li>If <span class="math inline">\(\boldsymbol{\pi}^{\top} = \boldsymbol{\pi}^{\top}\boldsymbol{\mathbf{P}}\)</span>, we say <span class="math inline">\(\boldsymbol{\pi}\)</span> is invariant</li>
+<li>Say <span class="math inline">\(\boldsymbol{\pi}\)</span> is invariant: if <span class="math inline">\(X_{t} \sim \boldsymbol{\pi}\)</span> then for all <span class="math inline">\(n\)</span> <span class="math inline">\(X_{t+n} \sim \boldsymbol{\pi}\)</span></li>
+<li>If limiting distribution exists, it is invariant!</li>
+</ul>
+</section>
+<section id="existence-of-limiting-distribution" class="slide level2 smaller">
+<h2>Existence of Limiting Distribution</h2>
+<ul>
+<li><span class="math inline">\(\{X_{t}\}\)</span> has a unique, limiting distribution if it is
+<ul>
+<li>Irreducible: possible to move b/w any <span class="math inline">\(s\)</span> &amp; <span class="math inline">\(s'\)</span> in <strong>finitely</strong> many steps</li>
+<li>Aperiodic: can return to <span class="math inline">\(s\)</span> at any time and not on fixed schedule</li>
+<li>Positive recurrent: chain returns to <span class="math inline">\(s\)</span> in <strong>finitely</strong> many steps w.p. 1</li>
+</ul></li>
+<li>Compute invariant distribution by finding leading left eigenvector</li>
+</ul>
+</section>
+<section id="team-example-invariant-distribution" class="slide level2 smaller">
+<h2>4-Team Example: Invariant Distribution</h2>
+<div class="panel-tabset">
+<ul id="tabset-1" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-1-1">Code</a></li><li><a href="#tabset-1-2">Results</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a>P2 <span class="ot">&lt;-</span> transition_matrix <span class="sc">%*%</span> transition_matrix</span>
-<span id="cb15-2"><a></a><span class="fu">round</span>(<span class="fu">sort</span>(P2[<span class="st">"1.000"</span>,], <span class="at">decreasing =</span> <span class="cn">TRUE</span>), <span class="at">digits =</span> <span class="dv">2</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-9"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy"><code class="sourceCode r"><span id="annotated-cell-9-1"><a href="#annotated-cell-9-1"></a>get_invariant <span class="ot">&lt;-</span> <span class="cf">function</span>(P, <span class="at">tol =</span> <span class="fl">1e-12</span>){</span>
+<span id="annotated-cell-9-2"><a href="#annotated-cell-9-2"></a>  states <span class="ot">&lt;-</span> <span class="fu">colnames</span>(P)</span>
+<span id="annotated-cell-9-3"><a href="#annotated-cell-9-3"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">all</span>( <span class="fu">abs</span>(<span class="fu">rowSums</span>(P) <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">&lt;</span> tol) ){</span>
+<span id="annotated-cell-9-4"><a href="#annotated-cell-9-4"></a>    <span class="fu">stop</span>(<span class="st">"Rows sums of P are not all 1. P may not be a valid transition matrix"</span>) <span class="co">#&lt;2</span></span>
+<span id="annotated-cell-9-5"><a href="#annotated-cell-9-5"></a>  }</span>
+<span id="annotated-cell-9-6"><a href="#annotated-cell-9-6"></a>  </span>
+<span id="annotated-cell-9-7"><a href="#annotated-cell-9-7"></a>  decomp <span class="ot">&lt;-</span> <span class="fu">eigen</span>(<span class="fu">t</span>(P))</span>
+<span id="annotated-cell-9-8"><a href="#annotated-cell-9-8"></a>  pi_raw <span class="ot">&lt;-</span> decomp<span class="sc">$</span>vectors[,<span class="dv">1</span>]</span>
+<span id="annotated-cell-9-9"><a href="#annotated-cell-9-9"></a>  </span>
+<span id="annotated-cell-9-10"><a href="#annotated-cell-9-10"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">all</span>(<span class="fu">Re</span>(pi_raw) <span class="sc">&lt;</span> tol)){</span>
+<span id="annotated-cell-9-11"><a href="#annotated-cell-9-11"></a>    <span class="fu">stop</span>(<span class="st">"Leading eigenvalue of P appears to be complex and not real-valued"</span>)</span>
+<span id="annotated-cell-9-12"><a href="#annotated-cell-9-12"></a>  }</span>
+<span id="annotated-cell-9-13"><a href="#annotated-cell-9-13"></a>  pi <span class="ot">&lt;-</span> <span class="fu">Re</span>(pi_raw)</span>
+<span id="annotated-cell-9-14"><a href="#annotated-cell-9-14"></a>  pi <span class="ot">&lt;-</span> pi<span class="sc">/</span><span class="fu">sum</span>(pi)</span>
+<span id="annotated-cell-9-15"><a href="#annotated-cell-9-15"></a>  <span class="fu">names</span>(pi) <span class="ot">&lt;-</span> states</span>
+<span id="annotated-cell-9-16"><a href="#annotated-cell-9-16"></a>  </span>
+<span id="annotated-cell-9-17"><a href="#annotated-cell-9-17"></a>  <span class="fu">return</span>(pi)</span>
+<span id="annotated-cell-9-18"><a href="#annotated-cell-9-18"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-1-2">
+<div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code>3.000 2.100 2.010 1.110 2.000 2.001 1.101 1.100 1.000 1.010 
- 0.51  0.26  0.07  0.05  0.04  0.02  0.01  0.01  0.01  0.01 </code></pre>
+<pre><code>pi: 0.307308 0.415808 0.065675 0.211208 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>pi %*% P: 0.307308 0.415808 0.065675 0.211208 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Difference:  -5.551115e-17 -2.220446e-16 1.387779e-17 2.220446e-16 </code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="recipe-markov-chain-based-rankings" class="slide level2">
+<h2>Recipe: Markov chain-based rankings:</h2>
+<ol type="1">
+<li>Construct aperiodic, irreducible, positive recurrent Markov chain over teams</li>
+<li>Compute invariant distribution</li>
+</ol>
+<div class="fragment">
+<ul>
+<li>No one way to construct the chain</li>
+<li>Intuition: <span class="math inline">\(p_{s,s'}\)</span> should capture how much better <span class="math inline">\(s'\)</span> is than <span class="math inline">\(s\)</span></li>
+</ul>
+</div>
+</section>
+<section id="win-matrix" class="slide level2">
+<h2>Win Matrix</h2>
+<ul>
+<li>Let <span class="math inline">\(v_{s,s'}\)</span> be # times team <span class="math inline">\(s\)</span>’ beats team <span class="math inline">\(s\)</span></li>
+<li>Arrange <span class="math inline">\(v_{s,s'}\)</span> values into <span class="math inline">\(S \times S\)</span> matrix <span class="math inline">\(\boldsymbol{\mathbf{V}}\)</span></li>
+</ul>
+<div class="fragment">
+<ul>
+<li><span class="math inline">\(\boldsymbol{\mathbf{W}}\)</span>: normalize rows of <span class="math inline">\(\boldsymbol{\mathbf{V}}\)</span> to have sum 1</li>
+<li>Tempting to use <span class="math inline">\(\boldsymbol{\mathbf{W}}\)</span> as transition matrix</li>
+<li>Problem: resulting Markov chain may not have invariant distribution</li>
+</ul>
+</div>
+</section>
+<section id="dampening" class="slide level2">
+<h2>Dampening</h2>
+<ul>
+<li>Fix some <span class="math inline">\(0 &lt; \beta &lt; 1\)</span> <span class="math display">\[
+\boldsymbol{\mathbf{P}} = \beta \times \boldsymbol{\mathbf{W}} + \frac{(1 - \beta)}{S} \times \mathbf{\boldsymbol{1}}_{S}^{\top}\mathbf{\boldsymbol{1}}_{S}
+\]</span></li>
+<li>Multiply all elements of <span class="math inline">\(\boldsymbol{\mathbf{W}}\)</span> by <span class="math inline">\(\beta\)</span></li>
+<li>Add <span class="math inline">\((1-\beta)/S\)</span> to all entries of re-scaled <span class="math inline">\(\boldsymbol{\mathbf{W}}\)</span></li>
+<li>Usually ensures positive recurrence, aperiodicity, and irreducibility</li>
+</ul>
+</section>
+<section id="ncaa-hockey-ranking-setup" class="slide level2">
+<h2>NCAA Hockey Ranking: Setup</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a><span class="fu">load</span>(<span class="st">"wd1hockey_regseason_2024_2025.RData"</span>)</span>
+<span id="cb7-2"><a></a>teams <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">unique</span>(<span class="fu">c</span>(no_ties<span class="sc">$</span>Home, no_ties<span class="sc">$</span>Opponent))) </span>
+<span id="cb7-3"><a></a>S <span class="ot">&lt;-</span> <span class="fu">length</span>(teams) </span>
+<span id="cb7-4"><a></a></span>
+<span id="cb7-5"><a></a>results <span class="ot">&lt;-</span> </span>
+<span id="cb7-6"><a></a>  no_ties <span class="sc">|&gt;</span> </span>
+<span id="cb7-7"><a></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(</span>
+<span id="cb7-8"><a></a>    <span class="at">home.team =</span> Home, <span class="at">home.score =</span> HomeScore,<span class="at">home.winner =</span> Home_Winner, </span>
+<span id="cb7-9"><a></a>    <span class="at">away.team =</span> Opponent, <span class="at">away.score =</span> OppScore, <span class="at">away.winner =</span> Opp_Winner) <span class="sc">|&gt;</span> </span>
+<span id="cb7-10"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(home.team, away.team, home.winner, away.winner, home.score, away.score)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="ncaa-hockey-rankings-boldsymbolmathbfv" class="slide level2">
+<h2>NCAA Hockey Rankings: <span class="math inline">\(\boldsymbol{\mathbf{V}}\)</span></h2>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>           Wisconsin Ohio State Minnesota Cornell
+Wisconsin          0          2         0       0
+Ohio State         2          0         2       0
+Minnesota          5          3         0       0
+Cornell            0          1         0       0</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-4"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy"><code class="sourceCode r"><span id="annotated-cell-4-1"><a href="#annotated-cell-4-1"></a>V <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> S, <span class="at">ncol =</span> S, <span class="at">dimnames =</span> <span class="fu">list</span>(teams, teams))</span>
+<span id="annotated-cell-4-2"><a href="#annotated-cell-4-2"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(results)){</span>
+<span id="annotated-cell-4-3"><a href="#annotated-cell-4-3"></a>  home <span class="ot">&lt;-</span> results<span class="sc">$</span>home.team[i]</span>
+<span id="annotated-cell-4-4"><a href="#annotated-cell-4-4"></a>  away <span class="ot">&lt;-</span> results<span class="sc">$</span>away.team[i]</span>
+<span id="annotated-cell-4-5"><a href="#annotated-cell-4-5"></a>  </span>
+<span id="annotated-cell-4-6"><a href="#annotated-cell-4-6"></a>  <span class="cf">if</span>(results<span class="sc">$</span>home.winner[i] <span class="sc">==</span> <span class="dv">1</span>){ </span>
+<span id="annotated-cell-4-7"><a href="#annotated-cell-4-7"></a>    V[away,home] <span class="ot">&lt;-</span> V[away,home] <span class="sc">+</span> <span class="dv">1</span> </span>
+<span id="annotated-cell-4-8"><a href="#annotated-cell-4-8"></a>  } <span class="cf">else</span> <span class="cf">if</span>(results<span class="sc">$</span>away.winner[i] <span class="sc">==</span> <span class="dv">1</span>){ </span>
+<span id="annotated-cell-4-9"><a href="#annotated-cell-4-9"></a>    V[home,away] <span class="ot">&lt;-</span> V[home,away] <span class="sc">+</span> <span class="dv">1</span> </span>
+<span id="annotated-cell-4-10"><a href="#annotated-cell-4-10"></a>  } <span class="cf">else</span>{</span>
+<span id="annotated-cell-4-11"><a href="#annotated-cell-4-11"></a>    <span class="fu">cat</span>(<span class="st">"Problem with game"</span>, i, <span class="st">": neither team won"</span>) </span>
+<span id="annotated-cell-4-12"><a href="#annotated-cell-4-12"></a>  }</span>
+<span id="annotated-cell-4-13"><a href="#annotated-cell-4-13"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="dampening-function" class="slide level2">
+<h2>Dampening Function</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a>get_dampened_transition <span class="ot">&lt;-</span> <span class="cf">function</span>(V, beta){</span>
+<span id="cb9-2"><a></a>  states <span class="ot">&lt;-</span> <span class="fu">rownames</span>(V)</span>
+<span id="cb9-3"><a></a>  n_states <span class="ot">&lt;-</span> <span class="fu">nrow</span>(V)</span>
+<span id="cb9-4"><a></a>  </span>
+<span id="cb9-5"><a></a>  r <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(V)</span>
+<span id="cb9-6"><a></a>  <span class="cf">if</span>(<span class="fu">any</span>(r <span class="sc">==</span> <span class="dv">0</span>)) r[r<span class="sc">==</span><span class="dv">0</span>] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb9-7"><a></a>  A <span class="ot">&lt;-</span> <span class="fu">diag</span>(r)</span>
+<span id="cb9-8"><a></a>  W <span class="ot">&lt;-</span> <span class="fu">solve</span>(A) <span class="sc">%*%</span> V</span>
+<span id="cb9-9"><a></a>  P <span class="ot">&lt;-</span> beta <span class="sc">*</span> W <span class="sc">+</span> (<span class="dv">1</span><span class="sc">-</span>beta)<span class="sc">/</span>n_states</span>
+<span id="cb9-10"><a></a>  <span class="fu">dimnames</span>(P) <span class="ot">&lt;-</span> <span class="fu">dimnames</span>(V)</span>
+<span id="cb9-11"><a></a>  <span class="fu">return</span>(P)</span>
+<span id="cb9-12"><a></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="ncaa-hockey-rankings" class="slide level2">
+<h2>NCAA Hockey Rankings</h2>
+<ul>
+<li>WIS only lost to OSU: massive transition prob. from <code>WIS</code> to <code>OSU</code></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a>P <span class="ot">&lt;-</span> <span class="fu">get_dampened_transition</span>(V, <span class="at">beta =</span> <span class="fl">0.85</span>)</span>
+<span id="cb10-2"><a></a>P[<span class="fu">c</span>(<span class="st">"Wisconsin"</span>, <span class="st">"Ohio State"</span>, <span class="st">"Cornell"</span>, <span class="st">"Minnesota"</span>), <span class="fu">c</span>(<span class="st">"Wisconsin"</span>, <span class="st">"Ohio State"</span>, <span class="st">"Cornell"</span>, <span class="st">"Minnesota"</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>             Wisconsin  Ohio State     Cornell   Minnesota
+Wisconsin  0.003409091 0.853409091 0.003409091 0.003409091
+Ohio State 0.215909091 0.003409091 0.003409091 0.215909091
+Cornell    0.003409091 0.173409091 0.003409091 0.003409091
+Minnesota  0.357575758 0.215909091 0.003409091 0.003409091</code></pre>
 </div>
 </div>
 <div class="fragment">
 <ul>
-<li>After first three at-bats
-<ul>
-<li>38% chance inning is over</li>
-<li>24% chance inning reaches <code>2.100</code></li>
-</ul></li>
+<li>Top-10 Teams sorted by invariant prob.</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a>P3 <span class="ot">&lt;-</span> transition_matrix <span class="sc">%*%</span> P2</span>
-<span id="cb17-2"><a></a><span class="fu">round</span>(<span class="fu">sort</span>(P3[<span class="st">"0.000"</span>,], <span class="at">decreasing =</span> <span class="cn">TRUE</span>), <span class="at">digits =</span> <span class="dv">2</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a></a>pi <span class="ot">&lt;-</span> <span class="fu">get_invariant</span>(P)</span>
+<span id="cb12-2"><a></a><span class="fu">round</span>(<span class="fu">sort</span>(pi, <span class="at">decreasing =</span> <span class="cn">TRUE</span>), <span class="at">digits =</span> <span class="dv">3</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>3.000 2.100 2.010 1.110 2.000 2.001 1.101 1.100 1.000 1.011 
- 0.38  0.24  0.08  0.08  0.05  0.03  0.03  0.03  0.02  0.02 </code></pre>
+<pre><code>      Ohio State        Wisconsin        Minnesota Minnesota Duluth 
+           0.115            0.080            0.059            0.046 
+         Cornell          Colgate     Northeastern  St. Cloud State 
+           0.040            0.039            0.032            0.032 
+    St. Lawrence      Connecticut 
+           0.028            0.026 </code></pre>
 </div>
 </div>
 </div>
 </section>
-<section id="fundamental-matrix" class="slide level2 smaller">
-<h2>Fundamental Matrix</h2>
+<section id="alternative-score-based-transitions" class="slide level2">
+<h2>Alternative: Score-based transitions</h2>
 <ul>
-<li>Suppose chain has <span class="math inline">\(A\)</span> absorbing states &amp; <span class="math inline">\(T\)</span> non-absorbing states</li>
-<li>Partition transition matrix as <span class="math display">\[
-\boldsymbol{\mathbf{P}} = \begin{pmatrix} Q &amp; R \\ 0 &amp; I_{A} \end{pmatrix},
-\]</span>
-<ul>
-<li><span class="math inline">\(Q\)</span>: transitions between non-absorbing states</li>
-<li><span class="math inline">\(R\)</span>: transitions from non-absorbing to absorbing</li>
-</ul></li>
-<li>Fundamental Matrix: <span class="math inline">\(N = (I_{T} - Q)^{-1}\)</span></li>
+<li><span class="math inline">\(v_{s,s'}\)</span>: number of goals scored by <span class="math inline">\(s\)</span>’ when playing <span class="math inline">\(s\)</span></li>
+<li>Sum of <span class="math inline">\(s\)</span>-th row of <span class="math inline">\(\boldsymbol{\mathbf{V}}\)</span>: goals conceded by team <span class="math inline">\(s\)</span></li>
+<li>Sum of <span class="math inline">\(s\)</span>-th column of <span class="math inline">\(\boldsymbol{\mathbf{V}}\)</span>: goals scored by team <span class="math inline">\(s\)</span></li>
+<li>Intuition: encourage transition if <span class="math inline">\(s'\)</span> scores a lot against <span class="math inline">\(s\)</span></li>
 </ul>
 </section>
-<section id="example-1" class="slide level2 smaller">
-<h2>Example</h2>
+<section id="scored-based-rankings" class="slide level2">
+<h2>Scored-Based Rankings</h2>
+<div class="panel-tabset">
+<ul id="tabset-2" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-2-1"><span class="math inline">\(\boldsymbol{\mathbf{V}}\)</span></a></li><li><a href="#tabset-2-2">Rankings</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1">
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-16"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy"><code class="sourceCode r"><span id="annotated-cell-16-1"><a href="#annotated-cell-16-1"></a>V_score <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> S, <span class="at">ncol =</span> S, <span class="at">dimnames =</span> <span class="fu">list</span>(teams, teams)) </span>
+<span id="annotated-cell-16-2"><a href="#annotated-cell-16-2"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(results)){</span>
+<span id="annotated-cell-16-3"><a href="#annotated-cell-16-3"></a>  home <span class="ot">&lt;-</span> results<span class="sc">$</span>home.team[i]</span>
+<span id="annotated-cell-16-4"><a href="#annotated-cell-16-4"></a>  away <span class="ot">&lt;-</span> results<span class="sc">$</span>away.team[i]</span>
+<span id="annotated-cell-16-5"><a href="#annotated-cell-16-5"></a>  </span>
+<span id="annotated-cell-16-6"><a href="#annotated-cell-16-6"></a>  V_score[away, home] <span class="ot">&lt;-</span> V_score[away,home] <span class="sc">+</span> results<span class="sc">$</span>home.score[i] </span>
+<span id="annotated-cell-16-7"><a href="#annotated-cell-16-7"></a>  V_score[home,away] <span class="ot">&lt;-</span> V_score[home,away] <span class="sc">+</span> results<span class="sc">$</span>away.score[i] </span>
+<span id="annotated-cell-16-8"><a href="#annotated-cell-16-8"></a>}</span>
+<span id="annotated-cell-16-9"><a href="#annotated-cell-16-9"></a>V[<span class="fu">c</span>(<span class="st">"Wisconsin"</span>, <span class="st">"Ohio State"</span>, <span class="st">"Cornell"</span>, <span class="st">"Minnesota"</span>), <span class="fu">c</span>(<span class="st">"Wisconsin"</span>, <span class="st">"Ohio State"</span>, <span class="st">"Cornell"</span>, <span class="st">"Minnesota"</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           Wisconsin Ohio State Cornell Minnesota
+Wisconsin          0          2       0         0
+Ohio State         2          0       0         2
+Cornell            0          1       0         0
+Minnesota          5          3       0         0</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-2-2">
 <ul>
-<li><span class="math inline">\(n_{s,s'}\)</span>: expected number of visits to <span class="math inline">\(s'\)</span> starting from <span class="math inline">\(s\)</span> before absorption
-<ul>
-<li>Starting from <code>0.000</code>, chain visits <code>0.100</code> 0.25 times and <code>0.010</code> 0.06 times</li>
-<li>Starting from <code>1.000</code> chain returns about</li>
-</ul></li>
+<li>Manually adjusted <span class="math inline">\(\beta = 0.5\)</span> to ensure numerical stability</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a></a>transient_states <span class="ot">&lt;-</span> unik_states <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(GameState <span class="sc">!=</span> <span class="st">"3.000"</span>) <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">pull</span>(GameState)</span>
-<span id="cb19-2"><a></a>Q <span class="ot">&lt;-</span> transition_matrix[transient_states, transient_states]</span>
-<span id="cb19-3"><a></a>R <span class="ot">&lt;-</span> <span class="fu">matrix</span>(transition_matrix[transient_states, <span class="st">"3.000"</span>], <span class="at">ncol =</span> <span class="dv">1</span>)</span>
-<span id="cb19-4"><a></a>N <span class="ot">&lt;-</span> <span class="fu">solve</span>(<span class="fu">diag</span>(<span class="dv">24</span>) <span class="sc">-</span> Q)</span>
-<span id="cb19-5"><a></a><span class="fu">round</span>(N[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>], <span class="at">digits =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a>P_score <span class="ot">&lt;-</span> <span class="fu">get_dampened_transition</span>(V_score, <span class="at">beta =</span> <span class="fl">0.8</span>)</span>
+<span id="cb15-2"><a></a>pi_score <span class="ot">&lt;-</span> <span class="fu">get_invariant</span>(P_score)</span>
+<span id="cb15-3"><a></a><span class="fu">round</span>(<span class="fu">sort</span>(pi_score, <span class="at">decreasing =</span> <span class="cn">TRUE</span>), <span class="at">digits =</span> <span class="dv">3</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>      0.000 0.100 0.010 0.001 0.110
-0.000  1.05  0.25  0.06  0.01  0.06
-0.100  0.05  1.02  0.03  0.01  0.22
-0.010  0.04  0.07  1.06  0.01  0.13
-0.001  0.06  0.20  0.06  1.01  0.06
-0.110  0.05  0.02  0.02  0.01  1.06</code></pre>
+<pre><code>       Wisconsin        Minnesota       Ohio State          Colgate 
+           0.053            0.048            0.045            0.039 
+         Cornell Minnesota Duluth  Minnesota State         Clarkson 
+           0.034            0.033            0.030            0.029 
+    St. Lawrence        Princeton 
+           0.029            0.028 </code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 </section>
-<section id="row-sums-of-n" class="slide level2">
-<h2>Row Sums of <span class="math inline">\(N\)</span></h2>
+<section id="remarks" class="slide level2 smaller">
+<h2>Remarks</h2>
 <ul>
-<li><span class="math inline">\(n_{s,s'}\)</span> number of expected visits to <span class="math inline">\(s'\)</span> by a chain started at <span class="math inline">\(s\)</span></li>
-<li><span class="math inline">\(\sum_{s'}{n_{s,s'}}\)</span>: expected number of states visited before absorption</li>
-<li>Starting from <code>1.000</code>, expect about 2.8 more at-bats before end of half-inning</li>
-</ul>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a><span class="fu">sum</span>(N[<span class="st">"1.000"</span>,])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 2.843932</code></pre>
-</div>
-</div>
-</section>
-<section id="reminders" class="slide level2 smaller">
-<h2>Reminders</h2>
+<li>Markov chain-based rankings very popular among operations researchers</li>
+<li>Early papers on ranking college basketball &amp; football
 <ul>
-<li>Project 2: simulation of a game, season, tournament, draft, etc.
-<ul>
-<li>Simulation powered by a probabilistic model</li>
-<li>Could build a Bradley-Terry, Markov chain, or Plackett-Luce model</li>
-<li>By October 22 (Wednesday): email me w/ your team’s plans!</li>
-<li>Due November 7</li>
+<li>Differ in construction of <span class="math inline">\(\boldsymbol{\mathbf{V}}\)</span></li>
 </ul></li>
-<li>Project 3: Big Data Bowl or curling data
+<li><a href="https://bracketology.engr.wisc.edu/methodology/">Badger Bracketology</a> : run by Prof.&nbsp;Laura Albert (ISy&amp;E)
 <ul>
-<li>Big Data Bowl: how players move when ball in air</li>
-<li>Curling: strategies for power play and/or shot selection</li>
-<li>Can work w/ other students (form groups on Canvas)</li>
-<li>By October 22 (Wednesday): email me w/ group &amp; choice of topic</li>
+<li>Markov chain model to obtain team rankings (i.e., invariant <span class="math inline">\(\pi_{s}\)</span>’s)</li>
+<li>Simulate games according to <span class="math inline">\(\mathbb{P}(s' \textrm{ beats } s) = \frac{\pi_{s}}{\pi_{s} + \pi_{s'}}.\)</span></li>
 </ul></li>
 </ul>
-</section>
-<section id="guest-speaker" class="slide level2">
-<h2>Guest Speaker</h2>
+<div class="fragment">
 <ul>
-<li>Thursday October 30: David Radke (Chicago Blackhawks)</li>
-<li>2:30pm - 3:30pm: Research Talk
+<li>Markov chain based rankings are very sensitive to choices (<span class="math inline">\(\boldsymbol{\mathbf{V}}\)</span>, <span class="math inline">\(\beta\)</span>, etc.)</li>
+<li>Personally, I prefer model-based rankings (e.g., Bradley-Terry)
 <ul>
-<li>“Multiagent Challenges in Team Sports Analytics”</li>
-<li>Aimed at graduate students &amp; faculty but all welcome!</li>
+<li>Directly quantify uncertainty about observables</li>
+<li>Simulation in probabilistically coherent fashion</li>
 </ul></li>
-<li>3:30pm - 4:30pm: Career Talk
-<ul>
-<li>“Professional Hockey Analytics at the Chicago Blackhawks”</li>
-<li>How does Hockey Strateegy &amp; Analytics groups operate?</li>
-</ul></li>
-<li>Both talks in Morgridge Hall 7560</li>
 </ul>
 
 
+</div>
 </section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">

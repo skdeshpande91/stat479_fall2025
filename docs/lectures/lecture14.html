@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.7.31">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -71,7 +71,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-4bfb630b09c0e164834af1bb3207dbff.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -292,6 +292,10 @@ window.Quarto = {
     <a class="dropdown-item" href="../slides/lecture14.html">
  <span class="dropdown-text">Lecture 14: Markov Chains I</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture15.html">
+ <span class="dropdown-text">Lecture 15: Markov Chains II</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item">
@@ -504,7 +508,7 @@ window.Quarto = {
 </div>
 <p>We see that the inning consisted of 8 at-bats. During the first at-bat, in which Max Muncy was walked, the game transitioned from the state <code>0.000</code> (i.e., no outs and no runners on base) to the state <code>0.100</code> (i.e., no outs and a runner on 1st). During the 6th at-bat, when Mookie Betts drove in a run off a single, the game state did not change: at the beginning and end of the at-bat there was 1 out and runners on 1st and 2nd base.</p>
 <p>If we were to replay this half-inning over and over again, how often would the half-inning end after 8 at-bats? How often would the the first at-bat result in a batter reaching first base? And how unusual is it to reach the state <code>0.111</code> from the state <code>0.110</code>?</p>
-<p>In this lecture, we will build a <strong>Markov chain</strong> model, which is a simple probabilistic model of state transitions, to answer such questions. We briefly introduce the relevant mathematical details about Markov chains in <a href="#sec-markov-chain" class="quarto-xref">Section&nbsp;2</a> and work through some simple examples of Markov chains with two (<a href="#sec-two-state" class="quarto-xref">Section&nbsp;2.1</a>) and three (<a href="#sec-three-state" class="quarto-xref">Section&nbsp;3.2</a>) states. Then in <a href="#sec-half-inning" class="quarto-xref">Section&nbsp;4</a>, we build a Markov chain model to simulate an entire half-inning of baseball. Using this simulation, we study the distributions of the number of at-bats in a half-inning (<a href="#sec-halfinning-length" class="quarto-xref">Section&nbsp;4.3</a>) and the number of runs scored in a half-inning (<a href="#sec-runs-scored" class="quarto-xref">Section&nbsp;4.4</a>). Finally, in <strong>?@sec-fundamental</strong>, we will lean on some mathematical properties of <em>absorbing Markov chains</em> to estimate how many more at-bats a team can expect to face given the current game state.</p>
+<p>In this lecture, we will build a <strong>Markov chain</strong> model, which is a simple probabilistic model of state transitions, to answer such questions. We briefly introduce the relevant mathematical details about Markov chains in <a href="#sec-markov-chain" class="quarto-xref">Section&nbsp;2</a> and work through some simple examples of Markov chains with two (<a href="#sec-two-state" class="quarto-xref">Section&nbsp;2.1</a>) and three (<a href="#sec-three-state" class="quarto-xref">Section&nbsp;3.2</a>) states. Then in <a href="#sec-half-inning" class="quarto-xref">Section&nbsp;4</a>, we build a Markov chain model to simulate an entire half-inning of baseball. Using this simulation, we study the distributions of the number of at-bats in a half-inning (<a href="#sec-halfinning-length" class="quarto-xref">Section&nbsp;4.3</a>) and the number of runs scored in a half-inning (<a href="#sec-runs-scored" class="quarto-xref">Section&nbsp;4.4</a>). Finally, in <a href="#sec-absorbing" class="quarto-xref">Section&nbsp;6</a>, we will lean on some mathematical properties of <em>absorbing Markov chains</em> to estimate how many more at-bats a team can expect to face given the current game state.</p>
 <section id="sec-data-prep" class="level3">
 <h3 class="anchored" data-anchor-id="sec-data-prep">Data Preparation</h3>
 <p>The first at-bat in any half-inning of baseball has a deterministic starting state: <code>0.000</code>, with no outs and no runners on base. The starting state of the next at-bat is, in contrast, non-deterministic. Sometimes the first batter gets out out, in which the game transitions to the state <code>1.000</code>. But other times, the first batter gets base on with single (<code>0.1000</code>), double (<code>0.010</code>), or triple (<code>0.001</code>). More rarely, the batter scores a home run and the game state remains at <code>0.000</code>. Put another way, although the first game state visited in a half-inning is deterministic, the second game state visited is random.</p>
@@ -645,7 +649,20 @@ Figure&nbsp;1: Graphical representation of the transition probabilities in a two
 <p>We can interpret a Markov chain with transition matrix <span class="math inline">\(\boldsymbol{\mathbf{P}}\)</span> as a <em>random walk</em> along this graph. Whenever the walk is at vertex <span class="math inline">\(s\)</span>, it picks one of the outgoing edges from <span class="math inline">\(s\)</span> to follow at a random. The probability that the walk follows the edge from <span class="math inline">\(s\)</span> to <span class="math inline">\(s'\)</span></p>
 <section id="absorbing-states" class="level3">
 <h3 class="anchored" data-anchor-id="absorbing-states">Absorbing States</h3>
-<p>Suppose that <span class="math inline">\(\{X_{t}\}\)</span> is a Markov chain defined over the states <span class="math inline">\(\{1, 2, \ldots, S\}\)</span> and let <span class="math inline">\(\boldsymbol{\mathbf{P}}\)</span> be its transition matrix. :::{.callout-note} ## Definition: Absorbing State A state <span class="math inline">\(s\)</span> is called an <strong>absorbing state</strong> if for all <span class="math inline">\(s' \neq s,\)</span> <span class="math inline">\(\mathbb{P}(X_{t} = s' \vert X_{t-1} = s) = 0\)</span> and <span class="math inline">\(\mathbb{P}(X_{t} = s \vert X_{t-1} = s) = 1.\)</span> :::</p>
+<p>Suppose that <span class="math inline">\(\{X_{t}\}\)</span> is a Markov chain defined over the states <span class="math inline">\(\{1, 2, \ldots, S\}\)</span> and let <span class="math inline">\(\boldsymbol{\mathbf{P}}\)</span> be its transition matrix.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Definition: Absorbing State
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A state <span class="math inline">\(s\)</span> is called an <strong>absorbing state</strong> if for all <span class="math inline">\(s' \neq s,\)</span> <span class="math inline">\(\mathbb{P}(X_{t} = s' \vert X_{t-1} = s) = 0\)</span> and <span class="math inline">\(\mathbb{P}(X_{t} = s \vert X_{t-1} = s) = 1.\)</span></p>
+</div>
+</div>
 <p>That is, an absorbing state is one from which there are no out-going transitions: once the chain reaches an absorbing state, it cannot leave. In our baseball analysis, the state <code>3.000</code> corresponding to the end of the half-inning is an absorbing.</p>
 <p>As an illustration, here is the transition matrix for 3-state Markov chain model with one absorbing state (<code>3</code>) <span class="math display">\[
 \begin{pmatrix}
@@ -810,16 +827,16 @@ T^{A}_{1} = \min\left\{t \geq 1 : X_{t} = 3\right\}.
 </dl>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "Simulation 1000 at 2025-10-19 10:10:37.954593"
-[1] "Simulation 2000 at 2025-10-19 10:10:37.966918"
-[1] "Simulation 3000 at 2025-10-19 10:10:37.978179"
-[1] "Simulation 4000 at 2025-10-19 10:10:37.987583"
-[1] "Simulation 5000 at 2025-10-19 10:10:37.997012"
-[1] "Simulation 6000 at 2025-10-19 10:10:38.007813"
-[1] "Simulation 7000 at 2025-10-19 10:10:38.017058"
-[1] "Simulation 8000 at 2025-10-19 10:10:38.028058"
-[1] "Simulation 9000 at 2025-10-19 10:10:38.037713"
-[1] "Simulation 10000 at 2025-10-19 10:10:38.048375"</code></pre>
+<pre><code>[1] "Simulation 1000 at 2025-10-20 09:20:02.134454"
+[1] "Simulation 2000 at 2025-10-20 09:20:02.146503"
+[1] "Simulation 3000 at 2025-10-20 09:20:02.157791"
+[1] "Simulation 4000 at 2025-10-20 09:20:02.167222"
+[1] "Simulation 5000 at 2025-10-20 09:20:02.176672"
+[1] "Simulation 6000 at 2025-10-20 09:20:02.187637"
+[1] "Simulation 7000 at 2025-10-20 09:20:02.196892"
+[1] "Simulation 8000 at 2025-10-20 09:20:02.207834"
+[1] "Simulation 9000 at 2025-10-20 09:20:02.217877"
+[1] "Simulation 10000 at 2025-10-20 09:20:02.228788"</code></pre>
 </div>
 </div>
 <p>Because there are only 3 states and the probabilities of transitioning to state <code>3</code> from states <code>1</code> and <code>2</code> are relatively high, simulating the Markov chain until it hits state <code>3</code> takes very little time. Tabulating the different values in <code>absorption_time</code>, we see that the chain</p>
@@ -1221,16 +1238,16 @@ Warning
 </dl>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "Simulation 5000 at 2025-10-12 10:33:33.501278"
-[1] "Simulation 10000 at 2025-10-12 10:34:04.4989"
-[1] "Simulation 15000 at 2025-10-12 10:34:35.688561"
-[1] "Simulation 20000 at 2025-10-12 10:35:07.392822"
-[1] "Simulation 25000 at 2025-10-12 10:35:38.505577"
-[1] "Simulation 30000 at 2025-10-12 10:36:09.795408"
-[1] "Simulation 35000 at 2025-10-12 10:36:41.31038"
-[1] "Simulation 40000 at 2025-10-12 10:37:12.930233"
-[1] "Simulation 45000 at 2025-10-12 10:37:45.754027"
-[1] "Simulation 50000 at 2025-10-12 10:38:17.400918"</code></pre>
+<pre><code>[1] "Simulation 5000 at 2025-10-06 13:51:05.678391"
+[1] "Simulation 10000 at 2025-10-06 13:51:35.711222"
+[1] "Simulation 15000 at 2025-10-06 13:52:05.833381"
+[1] "Simulation 20000 at 2025-10-06 13:52:36.133501"
+[1] "Simulation 25000 at 2025-10-06 13:53:06.109522"
+[1] "Simulation 30000 at 2025-10-06 13:53:36.611018"
+[1] "Simulation 35000 at 2025-10-06 13:54:08.371337"
+[1] "Simulation 40000 at 2025-10-06 13:54:38.437346"
+[1] "Simulation 45000 at 2025-10-06 13:55:08.679951"
+[1] "Simulation 50000 at 2025-10-06 13:55:39.183223"</code></pre>
 </div>
 </div>
 <p>We can now tabulate the number of runs scored in each simulated half-inning</p>
@@ -1276,7 +1293,7 @@ Warning
 </dl>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] NA</code></pre>
+<pre><code>[1] 0.2628367</code></pre>
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
@@ -1298,11 +1315,11 @@ Definition: n-Step Transition
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(P2[selected_states, selected_states], <span class="at">digits =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      0.000 1.000 2.000 1.110 3.000
-0.000    NA    NA    NA    NA    NA
-1.000    NA    NA    NA    NA    NA
-2.000    NA    NA    NA    NA    NA
-1.110    NA    NA    NA    NA    NA
-3.000    NA    NA    NA    NA    NA</code></pre>
+0.000  0.01  0.04  0.50  0.00  0.00
+1.000  0.00  0.01  0.04  0.05  0.51
+2.000  0.00  0.00  0.01  0.00  0.90
+1.110  0.00  0.01  0.04  0.01  0.54
+3.000  0.00  0.00  0.00  0.00  1.00</code></pre>
 </div>
 </div>
 <p>Starting from <code>0.000</code>, there is about a 50% chance that the game reaches the state <code>2.000</code> after two at-bats<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>. Similarly, there is about a 50% chance that the inning ends within two batters of an at-bat beginning in state <code>1.000</code>. Looking at the three-step transition probabilities, we see that the most three most likely outcomes after the first three batters of a half-inning are (i) the inning ended (38%); (ii) the state <code>2.100</code> (23.5%); and (iii) the state <code>2.010</code> (7.8%)</p>
@@ -1310,7 +1327,10 @@ Definition: n-Step Transition
 <div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>P3 <span class="ot">&lt;-</span> P2 <span class="sc">%*%</span> transition_matrix</span>
 <span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">sort</span>(P3[<span class="st">"0.000"</span>,], <span class="at">decreasing =</span> <span class="cn">TRUE</span>), <span class="at">digits =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>named numeric(0)</code></pre>
+<pre><code>3.000 2.100 2.010 1.110 2.000 2.001 1.101 1.100 1.000 1.011 1.010 0.111 0.110 
+ 0.38  0.24  0.08  0.08  0.05  0.03  0.03  0.03  0.02  0.02  0.02  0.01  0.01 
+1.001 0.101 0.100 0.000 0.011 0.010 2.110 1.111 0.001 2.101 2.011 2.111 
+ 0.01  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00 </code></pre>
 </div>
 </div>
 </section>

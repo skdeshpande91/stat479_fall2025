@@ -37,7 +37,7 @@ In this lecture, we will build a **Markov chain** model, which is a simple proba
 We briefly introduce the relevant mathematical details about Markov chains in @sec-markov-chain and work through some simple examples of Markov chains with two (@sec-two-state) and three (@sec-three-state) states.
 Then in @sec-half-inning, we build a Markov chain model to simulate an entire half-inning of baseball.
 Using this simulation, we study the distributions of the number of at-bats in a half-inning (@sec-halfinning-length) and the number of runs scored in a half-inning (@sec-runs-scored).
-Finally, in @sec-fundamental, we will lean on some mathematical properties of *absorbing Markov chains* to estimate how many more at-bats a team can expect to face given the current game state.
+Finally, in @sec-absorbing, we will lean on some mathematical properties of *absorbing Markov chains* to estimate how many more at-bats a team can expect to face given the current game state.
 
 
 ### Data Preparation {#sec-data-prep}
@@ -115,6 +115,7 @@ A sequence of random variables $\left\{X_{t}\right\}_{n = 1}^{\infty}$ is called
 $$
 \mathbb{P}(X_{t} \in A \vert X_{t-1} = x_{t-1}, \ldots, X_{1} = x_{1}) = \mathbb{P}(X_{t} \in A \vert X_{t-1} = x_{t-1}).
 $$
+
 :::
 
 When the set of states is discrete (e.g., game states in baseball), Markov chains are fully characterized by a **transition probability** matrix.
@@ -188,9 +189,12 @@ The probability that the walk follows the edge from $s$ to $s'$
 ### Absorbing States
 
 Suppose that $\{X_{t}\}$ is a Markov chain defined over the states $\{1, 2, \ldots, S\}$ and let $\boldsymbol{\mathbf{P}}$ be its transition matrix.
+
 :::{.callout-note}
+
 ## Definition: Absorbing State
 A state $s$ is called an **absorbing state** if for all $s' \neq s,$ $\mathbb{P}(X_{t} = s' \vert X_{t-1} = s) = 0$ and $\mathbb{P}(X_{t} = s \vert X_{t-1} = s) = 1.$
+
 :::
 
 That is, an absorbing state is one from which there are no out-going transitions: once the chain reaches an absorbing state, it cannot leave. 
@@ -810,6 +814,7 @@ P2["1.000", "2.100"]
 ## Definition: n-Step Transition
 For any integer $n$, let $\boldsymbol{\mathbf{P}}^{n}$ denote the **$n$-step transition matrix**, which we obtain by multiplying $\boldsymbol{\mathbf{P}}$ with itself $n$ times.
 The $(s,s')$ entry of $\boldsymbol{\mathbf{P}}^{n}$ is the probability that Markov chain beginning in state $s$ reaches states $s'$ in *exactly* $n$ steps.
+
 :::
 
 To illustrate, here are several entries of $\boldsymbol{\mathbf{P}}^{2}$
