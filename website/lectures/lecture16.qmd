@@ -254,6 +254,225 @@ Based on the `{r} nrow(ranking_matrix)` three-round mock drafts, the model estim
 #| label: top-lambdas
 round(sort(lambda_hat, decreasing = TRUE), digits = 3)[1:10]
 ```
-
-
 ## Draft Simulation {#sec-nfl-simulation}
+
+
+We're now in a position to simulate a draft.
+In our simulation, we will **assume** that teams select players in a manner consistent with the underlying Plackett-Luce model.
+That is, the first team will select a player out of the set of all players according to the model's implied probabilities.
+Then, the second team will select a player out of the set of all available players.
+
+:::{.callout-important}
+
+## Assumption Warning
+
+This is a heroic assumption: in actuality, teams make selections based on a range of factors that are not (yet) captured in our Plackett-Luce model.
+As but one example, each team typically creates their own internal rankings of players and different teams have different rankings not only of players but also of positions.
+For simplicity, our simulation assumes that teams are working based on the same rankings estimated with our model.
+To build a more accurate or life-like draft simulator, we would need to model team and player specific rankings, which is a bit beyond the scope of the course.
+
+:::
+
+To illustrate these steps, let's first simulate the first pick of the draft.
+According to the Plackett-Luce model, the probability that player $j$ is selected first is 
+$$
+\frac{e^{\lambda_{j}}}{\sum_{k = 1}^{p}{e^{\lambda_{k}}}}.
+$$
+The following code computes the probability that each available player is selected first overall.
+```{r}
+#| label: first-pick-prob
+#| eval: true
+#| echo: true
+players <- names(lambda_hat) #<1>
+probs <- exp(lambda_hat)/sum(exp(lambda_hat)) #<2>
+round(sort(probs, decreasing = TRUE), digits = 2)[1:10]
+```
+
+We can use the `sample()` function to select a single player according to their corresponding probabilities.
+At least for this simulation, Saquon Barkley is the first player selected
+```{r}
+set.seed(123)
+sample(x = players, size = 1, prob = probs)
+```
+According to the Plackett-Luce model, the probability selecting player $j$ is with the second pick *after Saquon Barkley has already been selected* is
+$$
+\frac{e^{\lambda_{j}}}{\sum_{k = 1}^{p}{e^{\lambda_{k}} \times \mathbf{1}(\textrm{player } k \textrm{ is not Saquon Barkley})}}.
+$$
+Mathematically, this probability is rather cumbersome to write down.
+Luckily, it's easier to compute in R using some clever indexing.
+In the code below, we create separate vectors containing the set of previously selected players and players still available to select; exponentiate the $\hat{\lambda}_{j}$'s for the available players; and then normalize these values to sum to 1 across the available players
+
+```{r}
+#| label: sim-second-pick
+#| eval: true
+#| echo: true
+selected_players <- c("Saquon Barkley") #<1>
+available_players <- players[!players %in% selected_players] #<1>
+probs <- exp(lambda_hat[available_players])/sum(exp(lambda_hat[available_players])) #<2>
+sample(x = available_players, size = 1, prob = probs)
+```
+1. Define vectors of players already selected and players available to be selected
+2. Compute the probabilities of selection among the available players only
+
+At least in this particular simulation, the second player selected is Parris Campbell (who was actually selected in the second round of the NFL draft).
+According to the model, based on all the other players available, the chances that Campbell is selected were quite slim:
+```{r}
+#| label: second-pick-prob
+#| eval: true
+#| echo: true
+probs["Parris Campbell"]
+```
+
+We can now simulate the third pick using virtually identical code as the second pick.
+```{r}
+#| label: third-pick-sim
+#| eval: true
+#| echo: true
+selected_players <- c("Saquon Barkley", "Parris Campbell") 
+available_players <- players[!players %in% selected_players] 
+probs <- exp(lambda_hat[available_players])/sum(exp(lambda_hat[available_players])) 
+sample(x = available_players, size = 1, prob = probs)
+```
+
+### Digression: The Softmax Function
+
+Continuing this simulation for several more picks is conceptually straightforward: as the picks progress, we need to 
+
+  1. Update the running set of players who have already been selected (i.e., update `selected_players`).
+  2. Compute $e^{\lambda_{j}}$ for all the players who remain available.
+  3. Normalize these exponentiated values across available players to obtain selection probabilities.
+  4. Draw a player from the set of available players based on the selection probabilities.
+  
+Steps 2 and 3 describe how to compute the selection probabilities from the Plackett-Luce parameters of the remaining players.
+The mapping from the vector of these parameters into the selection probabilities is known as the [**softmax function**](https://en.wikipedia.org/wiki/Softmax_function)
+
+:::{.callout-note}
+
+## Definition: Softmax
+
+The **softmax** function $\sigma$ maps a vector of $n$ numbers $(x_{1}, \ldots, x_{n})$ into a vector of probabilities
+$$
+\sigma(x_{1}, \ldots, x_{n}) = \left( \frac{e^{x_{1}}}{\sum{e^{x_{i}}}}, \ldots, \frac{e^{x_{n}}}{\sum{e^{x_{i}}}}\right)
+$$
+
+:::
+
+In R, a very fast and numerically stable implemention of the softmax function is available from the [**mclust** package](https://cran.r-project.org/web/packages/mclust/index.html), which can be installed using
+
+```{r}
+#| label: mclust
+#| eval: false
+#| echo: true
+install.packages("mclust")
+```
+  
+The function `mclust::softmax()` is relatively simple to use. 
+The following code compares the third pick probabilities computed using `mclust::softmax()` to our hand-computed calculations.
+Although the differences in this case are essentially negligble, moving forward we will use the somewhat more stable softmax implementation. 
+```{r}
+#| label: softmax-example
+#| eval: true
+#| echo: true
+tmp_probs <- mclust::softmax(x = lambda_hat[available_players]) 
+names(tmp_probs) <- available_players #<1>
+range(tmp_probs - probs) #<2>
+```
+1. The one downside of `mclust::softmax()` is that it doesn't preserve element names. So, we have to re-set the names manually
+2. Compare the probabilities computed by hand (`probs`) and using `mclust::softmax()`.
+
+### First Round Simulation
+
+We're now in a position to simulate the entire first round of the NFL draft many times.
+We can then estimate probabilities of various events (e.g., Saquon being selected in the top-3) by looking at the proportion of simulated drafts in which the events occur.
+
+Like our Markov chain simulations from [Lecture 14](lecture14.qmd), we will use double loop for implement our simulation.
+The outer loop iterates over the various simulation replications while the inner loop iterates over the individual picks in each simulated draft.
+Before starting each simulation replication, we create a container `selected_players` to record the picked players in the order in which they were picked.
+In the inner loop, we update the set of available players, compute the selection probabilities, and then simulate the actual pick.
+After the inner loop concludes, we write `selected_players` into the appropriate row of a large array holding our simulated picks.
+In this array, rows correspond to simulation iterations and columns correspond to picks. 
+
+:::{.callout-warning}
+
+## Warning
+
+The following code takes a few minutes to run
+
+:::
+
+```{r}
+#| label: sim-first-round
+#| eval: true
+#| echo: true
+
+n_sims <- 1e5
+results <- array(dim = c(n_sims, 32)) #<1>
+
+for(r in 1:n_sims){
+  set.seed(479 + 3*r) #<2>
+  
+  selected_players <- rep(NA, times = 32) #<3>
+  available_players <- players #<3>
+  
+  for(i in 1:32){
+    available_players <- players[!players %in% selected_players]
+    probs <- mclust::softmax(x = lambda_hat[available_players])
+    names(probs) <- available_players
+    pick <- sample(x = available_players, size = 1, prob = probs)
+    selected_players[i] <- pick #<4>
+  }
+  results[r,] <- selected_players
+}
+```
+
+Taking a look at the top-5 picks, we see a fair bit of variability simulation-to-simulation
+
+```{r}
+#| label: top-5-variability
+#| eval: true
+#| echo: true
+results[1:5, 1:5]
+```
+To compute the probability that Saquon Barkley is selected in the first three picks, we first define a function that checks whether a given players name appears among the first several entries of a given vector:
+```{r}
+#| label: find-player-fn
+#| eval: true
+#| echo: true
+
+player_picked <- function(x, player, pick){
+  return(player %in% x[1:pick]) #<1>
+}
+player_picked(x = results[1,], player = "Saquon Barkley", pick = 3)
+```
+1. Checks if `player` appears in the first `pick` elements of `x`
+
+We can then *apply* this function to every row of `results` to get a single Boolean (i.e., `TRUE` or `FALSE`) recording whether Saquon was selected in the first three picks.
+To quickly compute the proportion of simulated drafts in which Saquon was picked within the top 3 picks, we can take the mean of these Booleans.
+We find that in 41% of our simulated drafts, Saquon is a top-3 pick
+Note that when we apply a function to an array, additional arguments for the function can be passed to `apply()`.
+
+```{r}
+#| label: saquon-three
+#| eval: true
+#| echo: true
+saquon_pick3 <- apply(X = results, MARGIN = 1, FUN = player_picked, player = "Saquon Barkley", pick = 3)
+mean(saquon_pick3)
+```
+
+Going a bit further, we can even compute quantities like the probability Saquon Barkley is available at pick 11 given that he was not picked in the top-3.
+We can estimate this probability with $N/D$ where
+
+  * $N$ is the number of simulated drafts in which Saquon is **not** picked within the first 10 picks
+  * $D$ is the number of simulated drafts in which Saquon is **not** picked within the first 3 picks
+  
+```{r}
+#| label: conditional
+#| eval: true
+#| echo: true
+saquon_pick10 <- apply(X = results, MARGIN = 1, FUN = player_picked, player = "Saquon Barkley", pick = 10)
+N <- sum(!saquon_pick10)
+D <- sum(!saquon_pick3)
+
+cat("N = ", N, " D = ", D, "\n")
+cat("P(Saquon available at pick 11 | Saquon not taken in top-3) = ", round(100*N/D, digits = 3), "%\n")
+```
