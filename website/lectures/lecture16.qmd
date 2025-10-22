@@ -16,8 +16,8 @@ They also are increasingly used by teams, who attempt to lean on the "wisdom of 
 All this to say: mock drafts contain a considerable amount of information, especially when it comes to comparing players.
 Unlike game results data, in which we observe a winner and loser, mock draft data typically consist of a list of players ranked in some order. 
 In this lecture, we will introduce the Plackett-Luce model , an extension of the Bradley-Terry models we introduced in [Lecture 12](lecture12.qmd), that allows us to derive a single, global ranking of players, based on multiple observed partial rankings. 
-After formally introducing the model (@sec-pl-model) and discussing how to fit the model in R (@sec-fit-pl), we will walk through a simple example with only 3 items (@sec-three-items).
-Then, we fit a Plackett-Luce model to mock drafts of the first three rounds of the NFL draft (@sec-fit-nfl) before building a simulation of the first round(@sec-simulate-first).
+After formally introducing the model (@sec-pl-model) and discussing how to fit the model in R (@sec-fit-pl), we will walk through a simple example with only 3 items (@sec-three-item).
+Then, we fit a Plackett-Luce model to mock drafts of the first three rounds of the NFL draft (@sec-draft) before building a simulation of the first round (@sec-nfl-simulation).
 Using this simulation, we compute the probability that certain prospects being available at certain picks. 
 
 
@@ -25,7 +25,7 @@ Using this simulation, we compute the probability that certain prospects being a
 
 ### Setup
 
-Suppose that $n$ raters[^rater] (numbered $i = 1, \ldots, n$) rank $p$ total items[^items] (numbered $j = 1, 2, \ldots, p$).
+Suppose that $n$ raters[^raters] (numbered $i = 1, \ldots, n$) rank $p$ total items[^items] (numbered $j = 1, 2, \ldots, p$).
 Each rater $i$ reports a rank ordering of their $n_{i}$ items.
 For each rater $i,$ let $i(1), i(2), \ldots, i(n_{i})$ be the *indices* of the items that rater $i.$[^picks]
 Our observations take the form
@@ -44,7 +44,7 @@ In other words, although we will **not** assume that each rater fully ranks all 
 
 The **Plackett-Luce** model assumes that each rater *sequentially* generates their rankings.
 First, they select their top-rated item $i(1) out of the set of all items $\{1, 2, \ldots, p\}.$
-Then, conditionally on having selected the first item $i(1),$ they select their second-ranked item $i(2)$ from the set of remaining items $\{1, 2, \ldots, p\} \setminus \{i(1)\}$^[setminus].
+Then, conditionally on having selected the first item $i(1),$ they select their second-ranked item $i(2)$ from the set of remaining items $\{1, 2, \ldots, p\} \setminus \{i(1)\}$[^setminus].
 More generally, after selecting the top $k$ items $i(1), \ldots, i(k)$, rater $i$ selects their $(k+1)$-st ranked item from the set of currently available items $\{1, 2, \ldots, p\} \setminus \{i(1), \ldots, i(k)\}.$
 
 The Plackett-Luce model further assumes that each item $j$ has a latent "desirability" $\lambda_{j}$ and that the probability of selecting item $j$ from a subset $\mathcal{S} \subset \{1, 2, \ldots, p\}$
@@ -92,7 +92,7 @@ $$
 
 
 
-### Fitting Plackett-Luce Models {#sec-fitting}
+### Fitting Plackett-Luce Models {#sec-fit-pl}
 
 Of course, in reality, we never observe the latent item parameters $\lambda_{1}, \ldots, \lambda_{p}.$
 To estimate these parameters from collections of partial rankings, we will use the [**Plackett-Luce**](https://hturner.github.io/PlackettLuce/) package, which can be installed using the code
@@ -209,7 +209,7 @@ The mock drafts are uniquely identified by the variables `site`, `url`[^url], an
 
 [^date]: The date the mock draft was published 
 
-### Fitting the model {#sec-nfl-fit}
+### Fitting the model
 
 Currently, rows in `raw_data` correspond to the combination of row and pick.
 We need to convert this into a ranking matrix, in which rows correspond to raters, columns correspond to the items, and values record the ranking.
@@ -476,3 +476,14 @@ D <- sum(!saquon_pick3)
 cat("N = ", N, " D = ", D, "\n")
 cat("P(Saquon available at pick 11 | Saquon not taken in top-3) = ", round(100*N/D, digits = 3), "%\n")
 ```
+## Cautionary Note{#sec-caution}
+
+The results of the simulated drafts are quite a different than the actual 2018 NFL Draft.
+The discrepancy largely stems from the fact that the probabilistic model underpinning our simulations is rather unrealistic: it assumes, for instance, that each team rates each player identically.
+It also does not account for differential preferences regarding position.
+To make the simulation more realistic, you could consider incorporating player-specific covariates where each $\lambda_{j}$ is a linear function of covariates:
+$$
+\lambda_{j} = \beta_{0} + \beta_{1}x_{j,1} + \cdots + \beta_{p}x_{j,p}.
+$$
+It is possible to use the **PlackettLuce** package to fit such a model with *item*-level covariates. See [this package vignette](https://hturner.github.io/PlackettLuce/articles/PLADMM.html) for details and an example. 
+For the football data, it may be useful to treat position (e.g., quarterback, offensive tackle, etc) as a covariate.

@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.31">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Lecture 16: Plackett-Luce Models – STAT479</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-4bfb630b09c0e164834af1bb3207dbff.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">STAT479</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../syllabus.html"> 
+<span class="menu-text">Syllabus</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-lecture-notes" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Lecture Notes</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-lecture-notes">    
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture00.html">
+ <span class="dropdown-text">Lecture 0: Boxscore Metrics</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture02.html">
+ <span class="dropdown-text">Lecture 2: Expected Goals</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture03.html">
+ <span class="dropdown-text">Lecture 3: Estimating XG</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture04.html">
+ <span class="dropdown-text">Lecture 4: Adjusted Plus/Minus</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture05.html">
+ <span class="dropdown-text">Lecture 5: Regularized Adjusted Plus/Minus</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture06.html">
+ <span class="dropdown-text">Lecture 6: Run Expectancy</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture07.html">
+ <span class="dropdown-text">Lecture 7: Offensive Credit Allocation in Baseball</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture08.html">
+ <span class="dropdown-text">Lecture 8: Defensive Credit Allocation in Baseball</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture09.html">
+ <span class="dropdown-text">Lecture 9: Multilevel Modeling</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture10.html">
+ <span class="dropdown-text">Lecture 10: NFl WAR</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture11.html">
+ <span class="dropdown-text">Lecture 11: Pitch Framing</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture12.html">
+ <span class="dropdown-text">Lecture 12: Bradley-Terry Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture13.html">
+ <span class="dropdown-text">Lecture 13: Tournament Simulation</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture14.html">
+ <span class="dropdown-text">Lecture 14: Markov Chains I</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture15.html">
+ <span class="dropdown-text">Lecture 15: Markov Chains II</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture16.html">
+ <span class="dropdown-text">Lecture 16: Plackett-Luce Models</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-lecture-slides" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Lecture Slides</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-lecture-slides">    
+        <li>
+    <a class="dropdown-item" href="../slides/lecture01.html">
+ <span class="dropdown-text">Lecture 1</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture02.html">
+ <span class="dropdown-text">Lecture 2: Expected Goals</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture03.html">
+ <span class="dropdown-text">Lecture 3: Estimating XG</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture04.html">
+ <span class="dropdown-text">Lecture 4: Adjusted Plus/Minus</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture05.html">
+ <span class="dropdown-text">Lecture 5: Regularized Adjusted Plus/Minus</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture06.html">
+ <span class="dropdown-text">Lecture 6: Expected Runs</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture07.html">
+ <span class="dropdown-text">Lecture 7: Offensive Credit</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture08.html">
+ <span class="dropdown-text">Lecture 8: Defensive Credit Allocation &amp; WAR</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture09.html">
+ <span class="dropdown-text">Lecture 9: Multilevel Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture10.html">
+ <span class="dropdown-text">Lecture 10: NFL WAR</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture11.html">
+ <span class="dropdown-text">Lecture 11: Pitch Framing</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture12.html">
+ <span class="dropdown-text">Lecture 12: Bradley-Terry Models I</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture13.html">
+ <span class="dropdown-text">Lecture 13: Bradley-Terry Models II</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture14.html">
+ <span class="dropdown-text">Lecture 14: Markov Chains I</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture15.html">
+ <span class="dropdown-text">Lecture 15: Markov Chains II</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="../project1.html"> 
+<span class="menu-text">Project 1 Information</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../project2.html"> 
+<span class="menu-text">Project 2 Information</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../project3.html"> 
+<span class="menu-text">Project 3 Information</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../lectures/lecture16.html">Lecture 16: Plackett-Luce Models</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture00.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 0: Boxscore Metrics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture02.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 2: Expected Goals</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture03.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 3: Estimating XG</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture04.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 4: Adjusted Plus/Minus</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture05.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 5: Regularized Adjusted Plus/Minus</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture06.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 6: Run Expectancy</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture07.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 7: Offensive Credit Allocation in Baseball</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture08.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 8: Defensive Credit Allocation in Baseball</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture09.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 9: Multilevel Modeling</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture10.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 10: NFl WAR</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture11.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 11: Pitch Framing</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture12.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 12: Bradley-Terry Models</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture13.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 13: Tournament Simulation</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture14.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 14: Markov Chains I</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture15.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lecture 15: Markov Chains II</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../lectures/lecture16.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Lecture 16: Plackett-Luce Models</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#sec-overview" id="toc-sec-overview" class="nav-link active" data-scroll-target="#sec-overview">Overview</a></li>
+  <li><a href="#sec-pl-model" id="toc-sec-pl-model" class="nav-link" data-scroll-target="#sec-pl-model">The Plackett-Luce Model</a>
+  <ul class="collapse">
+  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setup</a></li>
+  <li><a href="#sec-three-item" id="toc-sec-three-item" class="nav-link" data-scroll-target="#sec-three-item">Example: Plackett-Luce with 3 items</a></li>
+  <li><a href="#sec-fit-pl" id="toc-sec-fit-pl" class="nav-link" data-scroll-target="#sec-fit-pl">Fitting Plackett-Luce Models</a></li>
+  </ul></li>
+  <li><a href="#sec-draft" id="toc-sec-draft" class="nav-link" data-scroll-target="#sec-draft">Consensus Draft Rankings</a>
+  <ul class="collapse">
+  <li><a href="#sec-data-prep" id="toc-sec-data-prep" class="nav-link" data-scroll-target="#sec-data-prep">Data Preparation</a></li>
+  <li><a href="#fitting-the-model" id="toc-fitting-the-model" class="nav-link" data-scroll-target="#fitting-the-model">Fitting the model</a></li>
+  </ul></li>
+  <li><a href="#sec-nfl-simulation" id="toc-sec-nfl-simulation" class="nav-link" data-scroll-target="#sec-nfl-simulation">Draft Simulation</a>
+  <ul class="collapse">
+  <li><a href="#digression-the-softmax-function" id="toc-digression-the-softmax-function" class="nav-link" data-scroll-target="#digression-the-softmax-function">Digression: The Softmax Function</a></li>
+  <li><a href="#first-round-simulation" id="toc-first-round-simulation" class="nav-link" data-scroll-target="#first-round-simulation">First Round Simulation</a></li>
+  </ul></li>
+  <li><a href="#sec-caution" id="toc-sec-caution" class="nav-link" data-scroll-target="#sec-caution">Cautionary Note</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Lecture 16: Plackett-Luce Models</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="sec-overview" class="level2">
+<h2 class="anchored" data-anchor-id="sec-overview">Overview</h2>
+<p>The NFL Draft is an annual meeting in which American football teams select newly eligible players. Prior to the NFL Draft, which is typically held in April, many fans and media analysts create <em>mock drafts</em>, in which they attempt to predict the order of players selected in the actual draft<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Whiel they initially served primarily as entertainment in the off-season, there is now a whole cottage industry of draft experts and analysts who regularly publish mock drafts in the lead up to the NFL Draft. These mock drafts can be used by fans to help calibrate expectations. They also are increasingly used by teams, who attempt to lean on the “wisdom of the crowd” to glean insight about the relative rankings of players and other teams’ preferences.</p>
+<p>All this to say: mock drafts contain a considerable amount of information, especially when it comes to comparing players. Unlike game results data, in which we observe a winner and loser, mock draft data typically consist of a list of players ranked in some order. In this lecture, we will introduce the Plackett-Luce model , an extension of the Bradley-Terry models we introduced in <a href="../lectures/lecture12.html">Lecture 12</a>, that allows us to derive a single, global ranking of players, based on multiple observed partial rankings. After formally introducing the model (<a href="#sec-pl-model" class="quarto-xref">Section&nbsp;2</a>) and discussing how to fit the model in R (<a href="#sec-fit-pl" class="quarto-xref">Section&nbsp;2.3</a>), we will walk through a simple example with only 3 items (<a href="#sec-three-item" class="quarto-xref">Section&nbsp;2.2</a>). Then, we fit a Plackett-Luce model to mock drafts of the first three rounds of the NFL draft (<a href="#sec-draft" class="quarto-xref">Section&nbsp;3</a>) before building a simulation of the first round (<a href="#sec-nfl-simulation" class="quarto-xref">Section&nbsp;4</a>). Using this simulation, we compute the probability that certain prospects being available at certain picks.</p>
+</section>
+<section id="sec-pl-model" class="level2">
+<h2 class="anchored" data-anchor-id="sec-pl-model">The Plackett-Luce Model</h2>
+<section id="setup" class="level3">
+<h3 class="anchored" data-anchor-id="setup">Setup</h3>
+<p>Suppose that <span class="math inline">\(n\)</span> raters<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> (numbered <span class="math inline">\(i = 1, \ldots, n\)</span>) rank <span class="math inline">\(p\)</span> total items<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> (numbered <span class="math inline">\(j = 1, 2, \ldots, p\)</span>). Each rater <span class="math inline">\(i\)</span> reports a rank ordering of their <span class="math inline">\(n_{i}\)</span> items. For each rater <span class="math inline">\(i,\)</span> let <span class="math inline">\(i(1), i(2), \ldots, i(n_{i})\)</span> be the <em>indices</em> of the items that rater <span class="math inline">\(i.\)</span><a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> Our observations take the form <span class="math display">\[
+i(1) \succ i(2) \succ \cdots \succ i(n_{i}),
+\]</span> which we read to mean that rater <span class="math inline">\(i\)</span>’s top-rated item was <span class="math inline">\(i(1),\)</span> followed by <span class="math inline">\(i(2),\)</span> then <span class="math inline">\(i(3),\)</span> etc. In other words, although we will <strong>not</strong> assume that each rater fully ranks all <span class="math inline">\(p\)</span> items, we will assume that they provide their top <span class="math inline">\(n_{i}\)</span> rankings</p>
+<p>The <strong>Plackett-Luce</strong> model assumes that each rater <em>sequentially</em> generates their rankings. First, they select their top-rated item $i(1) out of the set of all items <span class="math inline">\(\{1, 2, \ldots, p\}.\)</span> Then, conditionally on having selected the first item <span class="math inline">\(i(1),\)</span> they select their second-ranked item <span class="math inline">\(i(2)\)</span> from the set of remaining items <span class="math inline">\(\{1, 2, \ldots, p\} \setminus \{i(1)\}\)</span><a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>. More generally, after selecting the top <span class="math inline">\(k\)</span> items <span class="math inline">\(i(1), \ldots, i(k)\)</span>, rater <span class="math inline">\(i\)</span> selects their <span class="math inline">\((k+1)\)</span>-st ranked item from the set of currently available items <span class="math inline">\(\{1, 2, \ldots, p\} \setminus \{i(1), \ldots, i(k)\}.\)</span></p>
+<p>The Plackett-Luce model further assumes that each item <span class="math inline">\(j\)</span> has a latent “desirability” <span class="math inline">\(\lambda_{j}\)</span> and that the probability of selecting item <span class="math inline">\(j\)</span> from a subset <span class="math inline">\(\mathcal{S} \subset \{1, 2, \ldots, p\}\)</span> <span class="math display">\[
+\mathbb{P}(\textrm{select } j \textrm{ from } \mathcal{S}) =
+\begin{cases}
+\frac{e^{\lambda_{j}}}{\sum_{s \in \mathcal{S}}{e^{\lambda_{s}}}} &amp; \textrm{if } j \in \mathcal{S} \\
+0 &amp; \textrm{otherwise}.
+\end{cases}
+\]</span> That is, the log of the probability that the rater selects an item out of <span class="math inline">\(\mathcal{S}\)</span> is just the item’s latent desirability.</p>
+<p>The Bradley-Terry model is just the specialization of the Plackett-Luce model to the setting with <span class="math inline">\(p = 2\)</span> items.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note: Identifiability
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Like the Bradley-Terry model the latent item parameters <span class="math inline">\(\lambda_{j}\)</span> are not identifiable: translating all of them by an additive constant (e.g., <span class="math inline">\(\lambda_{j} \rightarrow \lambda_{j} + 5\)</span>) does not change the underlying probabilities of each observed ranking. By convention, one <span class="math inline">\(\lambda_{j}\)</span> is set equal to 0 before the modeling fitting. So, all remaining parameter estimates should be interpretted as the <em>relative</em> desirability of the remaining items.</p>
+</div>
+</div>
+</section>
+<section id="sec-three-item" class="level3">
+<h3 class="anchored" data-anchor-id="sec-three-item">Example: Plackett-Luce with 3 items</h3>
+<p>As a concrete example, suppose we have three items <span class="math inline">\(A\)</span>, <span class="math inline">\(B\)</span>, and $C4 and two raters. Further suppose that Rater 1 ranks <span class="math inline">\(A \succ B \succ C\)</span> and Rater 2 only returns their top-ranked item, which is <span class="math inline">\(C\)</span>. According to the Plackett-Luce model, the probability of observing Rater 1’s ranking <span class="math inline">\(A \succ B \succ C\)</span> can be decomposed as <span class="math display">\[
+\begin{align}
+\mathbb{P}(A \succ B \succ C) &amp;= \mathbb{P}(\textrm{select } A \textrm{ from } \{A, B, C\}) \\
+~ &amp;~\times \mathbb{P}(\textrm{select } B \textrm{ from } \{B, C\}) \\
+~ &amp; ~ \times \mathbb{P}(\textrm{select } C \textrm{ from } \{C\}) \\
+~ &amp; = \frac{e^{\lambda_{A}}}{e^{\lambda_{A}} + e^{\lambda_{B}} + e^{\lambda_{C}}} \times \frac{e^{\lambda_{B}}}{e^{\lambda_{B}} + e^{\lambda_{C}}} \times \frac{e^{\lambda_{C}}}{e^{\lambda_{C}}}
+\end{align}
+\]</span> Similarly, the probability of observing Rater 2’s ranking is <span class="math display">\[
+\mathbb{P}(C) = \frac{e^{\lambda_{C}}}{e^{\lambda_{A}} + e^{\lambda_{B}} + e^{\lambda_{C}}}
+\]</span></p>
+</section>
+<section id="sec-fit-pl" class="level3">
+<h3 class="anchored" data-anchor-id="sec-fit-pl">Fitting Plackett-Luce Models</h3>
+<p>Of course, in reality, we never observe the latent item parameters <span class="math inline">\(\lambda_{1}, \ldots, \lambda_{p}.\)</span> To estimate these parameters from collections of partial rankings, we will use the <a href="https://hturner.github.io/PlackettLuce/"><strong>Plackett-Luce</strong></a> package, which can be installed using the code</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"PlackettLuce"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The package includes a function <a href="https://hturner.github.io/PlackettLuce/reference/PlackettLuce.html"><code>PlackettLuce()</code></a> for fitting the model. This function requires the data to be formatted in a very specific way that is, unfortunately, not very easy to visualize with lots of raters and items. The package authors have provided a helper function <a href="https://hturner.github.io/PlackettLuce/reference/rankings.html"><code>as.rankings()</code></a> that takes in a matrix of ratings and re-formats it in a way that can be passed to <code>PlackettLuce()</code>.</p>
+<p>To illustrate, suppose we have four items <span class="math inline">\(A\)</span>, <span class="math inline">\(B,\)</span>, <span class="math inline">\(C\)</span>, and <span class="math inline">\(D\)</span> and six raters who provide the rankings</p>
+<ul>
+<li>Rater 1: <span class="math inline">\(A \succ B \succ D \succ C\)</span></li>
+<li>Rater 2: <span class="math inline">\(B \succ A\)</span></li>
+<li>Rater 3: <span class="math inline">\(A \succ D \succ C\)</span></li>
+<li>Rater 4: <span class="math inline">\(B \succ D \succ C\)</span></li>
+<li>Rater 5: <span class="math inline">\(A \succ B \succ D \succ C\)</span></li>
+<li>Rater 6: <span class="math inline">\(A \succ D \succ C\)</span></li>
+</ul>
+<p>We can encode these ratings in a matrix <span class="math inline">\(\boldsymbol{\mathbf{R}} = (r_{i,j})\)</span> whose rows correspond to the raters and whose columns correspond to the items. If rater <span class="math inline">\(i\)</span> selects item <span class="math inline">\(j\)</span> as their <span class="math inline">\(k\)</span>-th ranked item, then we set <span class="math inline">\(r_{i,j} = k\)</span>. If rater <span class="math inline">\(i\)</span> does not rank item <span class="math inline">\(j\)</span> at all, we leave <span class="math inline">\(r_{i,j}\)</span> empty (i.e., assign it <code>NA</code> in R)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>R <span class="ot">&lt;-</span> <span class="fu">matrix</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">3</span>,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>, <span class="dv">1</span>, <span class="cn">NA</span>, <span class="cn">NA</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="cn">NA</span>, <span class="dv">3</span>, <span class="dv">2</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="cn">NA</span>, <span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">2</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">3</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="cn">NA</span>, <span class="dv">3</span>, <span class="dv">2</span>),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">nrow =</span> <span class="dv">6</span>, <span class="at">ncol =</span> <span class="dv">4</span>, <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="fu">c</span>(), <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>, <span class="st">"D"</span>)),</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>R</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      A  B  C  D
+[1,]  1  2  4  3
+[2,]  2  1 NA NA
+[3,]  1 NA  3  2
+[4,] NA  1  3  2
+[5,]  1  2  4  3
+[6,]  1 NA  3  2</code></pre>
+</div>
+</div>
+<p>The function <code>as.rankings()</code> converts the matrix of rankings into a vector of partial rankings whose elements encode each rater’s rankings.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>R_rank <span class="ot">&lt;-</span> PlackettLuce<span class="sc">::</span><span class="fu">as.rankings</span>(R)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>R_rank</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "A &gt; B &gt; D &gt; C" "B &gt; A"         "A &gt; D &gt; C"     "B &gt; D &gt; C"    
+[5] "A &gt; B &gt; D &gt; C" "A &gt; D &gt; C"    </code></pre>
+</div>
+</div>
+<p>Once we have our rankings data in a format compatible with <code>PlackettLuce()</code>, we can estimate the underlying <span class="math inline">\(\lambda_{j}\)</span>’s We see that item <span class="math inline">\(A\)</span>, which was the top ranked item by the first rater, is selected as the reference item (so <span class="math inline">\(\lambda_{A} = 0\)</span>).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> PlackettLuce<span class="sc">::</span><span class="fu">PlackettLuce</span>(<span class="at">rankings =</span> R_rank)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>lambda_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(fit)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>lambda_hat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         A          B          C          D 
+ 0.0000000 -0.5006691 -4.9505260 -2.5287292 </code></pre>
+</div>
+</div>
+<p>Based on these</p>
+</section>
+</section>
+<section id="sec-draft" class="level2">
+<h2 class="anchored" data-anchor-id="sec-draft">Consensus Draft Rankings</h2>
+<p>Since 2018, <a href="https://grindingthemocks.substack.com">Benjamin Robinson</a> has built predictive model of the actual NFL draft by combining mock drafts from multiple sources. Using these models, he can forecast each propspect’s potential draft position and also estimate the inherent value each draft pick<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a> As part of the <a href="https://stat.cmu.edu/cmsac/conference/2020/">2020 Carnegie Mellon Sports Analytics Conference’s Reproducible Research competition</a>, Benjamin released some of the mock draft data he collected in the lead-up to the 2018 NFL Draft. In this section, we will work with a subset of the mock draft data he collected in the lead up to the 2018 NFL Draft. You can download a CSV file containing the data we will analyze <a href="">here</a>; it contains the results of the first three rounds of several mock drafts<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>. The data contains data from 372 distinct mock drafts, each of which ranked up to 96 players (corresponding to the first three rounds).</p>
+<section id="sec-data-prep" class="level3">
+<h3 class="anchored" data-anchor-id="sec-data-prep">Data Preparation</h3>
+<p>We begin by reading in our data and extracting a list of the unique players and the positions they play.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>raw_data <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(<span class="at">file =</span> <span class="st">"three_round_mocks.csv"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>unik_players <span class="ot">&lt;-</span> </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  raw_data <span class="sc">|&gt;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(name, position) <span class="sc">|&gt;</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Here are five random rows in <code>raw_data</code></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">129</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>raw_data <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">slice_sample</span>(<span class="at">n =</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 7
+  site                         date       name         pick position type  url  
+  &lt;chr&gt;                        &lt;date&gt;     &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt; &lt;chr&gt;
+1 Pacific Takes - Follman      2018-03-19 R.J. McInt…    55 DT       Fan   http…
+2 Walter Football - Alex9299   2018-02-14 Sam Darnold     1 QB       Fan   http…
+3 Walter Football - Lucasmd3   2018-03-30 Mike Hughes    41 CB       Fan   http…
+4 Baltimore Beatdown - Lericos 2018-02-13 Maurice Hu…    18 DT       Fan   http…
+5 Fox 59 - Joe Hopkins         2018-02-26 Josh Jacks…    14 CB       Media http…</code></pre>
+</div>
+</div>
+<p>Each row of <code>raw_data</code> corresponds a specific pick within a given mock draft. The mock drafts are uniquely identified by the variables <code>site</code>, <code>url</code><a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a>, and <code>date</code><a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a></p>
+</section>
+<section id="fitting-the-model" class="level3">
+<h3 class="anchored" data-anchor-id="fitting-the-model">Fitting the model</h3>
+<p>Currently, rows in <code>raw_data</code> correspond to the combination of row and pick. We need to convert this into a ranking matrix, in which rows correspond to raters, columns correspond to the items, and values record the ranking. In other words, we need to convert <code>raw_data</code> from long format into wide format<a href="#fn10" class="footnote-ref" id="fnref10" role="doc-noteref"><sup>10</sup></a>. We can do this pretty easily with the function <code>tidyr::pivot_wider()</code></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-7"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-7-1"><a href="#annotated-cell-7-1" aria-hidden="true" tabindex="-1"></a>ranking_matrix <span class="ot">&lt;-</span></span>
+<span id="annotated-cell-7-2"><a href="#annotated-cell-7-2" aria-hidden="true" tabindex="-1"></a>  raw_data <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="1">1</button><span id="annotated-cell-7-3" class="code-annotation-target"><a href="#annotated-cell-7-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(site, date, name, pick, url) <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="2">2</button><span id="annotated-cell-7-4" class="code-annotation-target"><a href="#annotated-cell-7-4" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(<span class="at">names_from =</span> name,<span class="at">values_from =</span> pick) <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="3">3</button><span id="annotated-cell-7-5" class="code-annotation-target"><a href="#annotated-cell-7-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>tidyr<span class="sc">::</span><span class="fu">all_of</span>(<span class="fu">c</span>(<span class="st">"date"</span>, <span class="st">"url"</span>, <span class="st">"site"</span>))) <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="4">4</button><span id="annotated-cell-7-6" class="code-annotation-target"><a href="#annotated-cell-7-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate_all</span>( <span class="sc">~</span><span class="fu">replace</span>(., <span class="fu">lengths</span>(.)<span class="sc">==</span><span class="dv">0</span>, <span class="cn">NA</span>)) <span class="sc">|&gt;</span></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="5">5</button><span id="annotated-cell-7-7" class="code-annotation-target"><a href="#annotated-cell-7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.matrix</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-7" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="3" data-code-annotation="1">Extract only variables needed to uniquely identify the mock draft (<code>site</code>, <code>date</code>, and <code>url</code>), the player/prospec (<code>name</code>), and the pick with which they were selected (<code>pick</code>)</span>
+</dd>
+<dt data-target-cell="annotated-cell-7" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="4" data-code-annotation="2">Convert from long to wide format</span>
+</dd>
+<dt data-target-cell="annotated-cell-7" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="5" data-code-annotation="3">Drop the columns identifying the raters (i.e., mock drafts) as they are now redundant</span>
+</dd>
+<dt data-target-cell="annotated-cell-7" data-target-annotation="4">4</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="6" data-code-annotation="4">Fill in missing values with <code>NA</code>’s</span>
+</dd>
+<dt data-target-cell="annotated-cell-7" data-target-annotation="5">5</dt>
+<dd>
+<span data-code-cell="annotated-cell-7" data-code-lines="7" data-code-annotation="5">Convert the data table into a matrix</span>
+</dd>
+</dl>
+</div>
+</div>
+<p>We now fit the model and extract the estimates <span class="math inline">\(\hat{\lambda}_{j}\)</span>’s</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>mock_rankings <span class="ot">&lt;-</span> PlackettLuce<span class="sc">::</span><span class="fu">as.rankings</span>(<span class="at">x =</span> ranking_matrix)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> PlackettLuce<span class="sc">::</span><span class="fu">PlackettLuce</span>(<span class="at">rankings =</span> mock_rankings)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>lambda_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Based on the 372 three-round mock drafts, the model estimates Sam Darnold as having the largest latent desirability, closely followed by Saquon Barkley, Josh Rosen, Bradley Chubb, and Quenton Nelson.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">sort</span>(lambda_hat, <span class="at">decreasing =</span> <span class="cn">TRUE</span>), <span class="at">digits =</span> <span class="dv">3</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       Sam Darnold     Saquon Barkley         Josh Rosen      Bradley Chubb 
+             0.000             -0.561             -0.997             -1.455 
+    Quenton Nelson Minkah Fitzpatrick     Baker Mayfield   Josh Allen (WYO) 
+            -1.963             -1.963             -2.277             -2.440 
+      Roquan Smith       Derwin James 
+            -2.627             -2.986 </code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="sec-nfl-simulation" class="level2">
+<h2 class="anchored" data-anchor-id="sec-nfl-simulation">Draft Simulation</h2>
+<p>We’re now in a position to simulate a draft. In our simulation, we will <strong>assume</strong> that teams select players in a manner consistent with the underlying Plackett-Luce model. That is, the first team will select a player out of the set of all players according to the model’s implied probabilities. Then, the second team will select a player out of the set of all available players.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Assumption Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This is a heroic assumption: in actuality, teams make selections based on a range of factors that are not (yet) captured in our Plackett-Luce model. As but one example, each team typically creates their own internal rankings of players and different teams have different rankings not only of players but also of positions. For simplicity, our simulation assumes that teams are working based on the same rankings estimated with our model. To build a more accurate or life-like draft simulator, we would need to model team and player specific rankings, which is a bit beyond the scope of the course.</p>
+</div>
+</div>
+<p>To illustrate these steps, let’s first simulate the first pick of the draft. According to the Plackett-Luce model, the probability that player <span class="math inline">\(j\)</span> is selected first is <span class="math display">\[
+\frac{e^{\lambda_{j}}}{\sum_{k = 1}^{p}{e^{\lambda_{k}}}}.
+\]</span> The following code computes the probability that each available player is selected first overall.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-10"><pre class="sourceCode r code-annotation-code code-with-copy"><code class="sourceCode r"><span id="annotated-cell-10-1"><a href="#annotated-cell-10-1" aria-hidden="true" tabindex="-1"></a>players <span class="ot">&lt;-</span> <span class="fu">names</span>(lambda_hat)</span>
+<span id="annotated-cell-10-2"><a href="#annotated-cell-10-2" aria-hidden="true" tabindex="-1"></a>probs <span class="ot">&lt;-</span> <span class="fu">exp</span>(lambda_hat)<span class="sc">/</span><span class="fu">sum</span>(<span class="fu">exp</span>(lambda_hat))</span>
+<span id="annotated-cell-10-3"><a href="#annotated-cell-10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">sort</span>(probs, <span class="at">decreasing =</span> <span class="cn">TRUE</span>), <span class="at">digits =</span> <span class="dv">2</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       Sam Darnold     Saquon Barkley         Josh Rosen      Bradley Chubb 
+              0.26               0.15               0.09               0.06 
+    Quenton Nelson Minkah Fitzpatrick     Baker Mayfield   Josh Allen (WYO) 
+              0.04               0.04               0.03               0.02 
+      Roquan Smith       Derwin James 
+              0.02               0.01 </code></pre>
+</div>
+</div>
+<p>We can use the <code>sample()</code> function to select a single player according to their corresponding probabilities. At least for this simulation, Saquon Barkley is the first player selected</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> players, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> probs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Saquon Barkley"</code></pre>
+</div>
+</div>
+<p>According to the Plackett-Luce model, the probability selecting player <span class="math inline">\(j\)</span> is with the second pick <em>after Saquon Barkley has already been selected</em> is <span class="math display">\[
+\frac{e^{\lambda_{j}}}{\sum_{k = 1}^{p}{e^{\lambda_{k}} \times \mathbf{1}(\textrm{player } k \textrm{ is not Saquon Barkley})}}.
+\]</span> Mathematically, this probability is rather cumbersome to write down. Luckily, it’s easier to compute in R using some clever indexing. In the code below, we create separate vectors containing the set of previously selected players and players still available to select; exponentiate the <span class="math inline">\(\hat{\lambda}_{j}\)</span>’s for the available players; and then normalize these values to sum to 1 across the available players</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-12"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-12" data-target-annotation="1">1</button><span id="annotated-cell-12-1" class="code-annotation-target"><a href="#annotated-cell-12-1" aria-hidden="true" tabindex="-1"></a>selected_players <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Saquon Barkley"</span>)</span>
+<span id="annotated-cell-12-2"><a href="#annotated-cell-12-2" aria-hidden="true" tabindex="-1"></a>available_players <span class="ot">&lt;-</span> players[<span class="sc">!</span>players <span class="sc">%in%</span> selected_players]</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-12" data-target-annotation="2">2</button><span id="annotated-cell-12-3" class="code-annotation-target"><a href="#annotated-cell-12-3" aria-hidden="true" tabindex="-1"></a>probs <span class="ot">&lt;-</span> <span class="fu">exp</span>(lambda_hat[available_players])<span class="sc">/</span><span class="fu">sum</span>(<span class="fu">exp</span>(lambda_hat[available_players]))</span>
+<span id="annotated-cell-12-4"><a href="#annotated-cell-12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> available_players, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> probs)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-12" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-12" data-code-lines="1,2" data-code-annotation="1">Define vectors of players already selected and players available to be selected</span>
+</dd>
+<dt data-target-cell="annotated-cell-12" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-12" data-code-lines="3" data-code-annotation="2">Compute the probabilities of selection among the available players only</span>
+</dd>
+</dl>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Parris Campbell"</code></pre>
+</div>
+</div>
+<p>At least in this particular simulation, the second player selected is Parris Campbell (who was actually selected in the second round of the NFL draft). According to the model, based on all the other players available, the chances that Campbell is selected were quite slim:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>probs[<span class="st">"Parris Campbell"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Parris Campbell 
+    0.004122244 </code></pre>
+</div>
+</div>
+<p>We can now simulate the third pick using virtually identical code as the second pick.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>selected_players <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Saquon Barkley"</span>, <span class="st">"Parris Campbell"</span>) </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>available_players <span class="ot">&lt;-</span> players[<span class="sc">!</span>players <span class="sc">%in%</span> selected_players] </span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>probs <span class="ot">&lt;-</span> <span class="fu">exp</span>(lambda_hat[available_players])<span class="sc">/</span><span class="fu">sum</span>(<span class="fu">exp</span>(lambda_hat[available_players])) </span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(<span class="at">x =</span> available_players, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> probs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Josh Rosen"</code></pre>
+</div>
+</div>
+<section id="digression-the-softmax-function" class="level3">
+<h3 class="anchored" data-anchor-id="digression-the-softmax-function">Digression: The Softmax Function</h3>
+<p>Continuing this simulation for several more picks is conceptually straightforward: as the picks progress, we need to</p>
+<ol type="1">
+<li>Update the running set of players who have already been selected (i.e., update <code>selected_players</code>).</li>
+<li>Compute <span class="math inline">\(e^{\lambda_{j}}\)</span> for all the players who remain available.</li>
+<li>Normalize these exponentiated values across available players to obtain selection probabilities.</li>
+<li>Draw a player from the set of available players based on the selection probabilities.</li>
+</ol>
+<p>Steps 2 and 3 describe how to compute the selection probabilities from the Plackett-Luce parameters of the remaining players. The mapping from the vector of these parameters into the selection probabilities is known as the <a href="https://en.wikipedia.org/wiki/Softmax_function"><strong>softmax function</strong></a></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Definition: Softmax
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The <strong>softmax</strong> function <span class="math inline">\(\sigma\)</span> maps a vector of <span class="math inline">\(n\)</span> numbers <span class="math inline">\((x_{1}, \ldots, x_{n})\)</span> into a vector of probabilities <span class="math display">\[
+\sigma(x_{1}, \ldots, x_{n}) = \left( \frac{e^{x_{1}}}{\sum{e^{x_{i}}}}, \ldots, \frac{e^{x_{n}}}{\sum{e^{x_{i}}}}\right)
+\]</span></p>
+</div>
+</div>
+<p>In R, a very fast and numerically stable implemention of the softmax function is available from the <a href="https://cran.r-project.org/web/packages/mclust/index.html"><strong>mclust</strong> package</a>, which can be installed using</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"mclust"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The function <code>mclust::softmax()</code> is relatively simple to use. The following code compares the third pick probabilities computed using <code>mclust::softmax()</code> to our hand-computed calculations. Although the differences in this case are essentially negligble, moving forward we will use the somewhat more stable softmax implementation.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-16"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-16-1"><a href="#annotated-cell-16-1" aria-hidden="true" tabindex="-1"></a>tmp_probs <span class="ot">&lt;-</span> mclust<span class="sc">::</span><span class="fu">softmax</span>(<span class="at">x =</span> lambda_hat[available_players]) </span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-16" data-target-annotation="1">1</button><span id="annotated-cell-16-2" class="code-annotation-target"><a href="#annotated-cell-16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(tmp_probs) <span class="ot">&lt;-</span> available_players</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-16" data-target-annotation="2">2</button><span id="annotated-cell-16-3" class="code-annotation-target"><a href="#annotated-cell-16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">range</span>(tmp_probs <span class="sc">-</span> probs)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-16" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-16" data-code-lines="2" data-code-annotation="1">The one downside of <code>mclust::softmax()</code> is that it doesn’t preserve element names. So, we have to re-set the names manually</span>
+</dd>
+<dt data-target-cell="annotated-cell-16" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-16" data-code-lines="3" data-code-annotation="2">Compare the probabilities computed by hand (<code>probs</code>) and using <code>mclust::softmax()</code>.</span>
+</dd>
+</dl>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -1.387779e-17  6.938894e-18</code></pre>
+</div>
+</div>
+</section>
+<section id="first-round-simulation" class="level3">
+<h3 class="anchored" data-anchor-id="first-round-simulation">First Round Simulation</h3>
+<p>We’re now in a position to simulate the entire first round of the NFL draft many times. We can then estimate probabilities of various events (e.g., Saquon being selected in the top-3) by looking at the proportion of simulated drafts in which the events occur.</p>
+<p>Like our Markov chain simulations from <a href="../lectures/lecture14.html">Lecture 14</a>, we will use double loop for implement our simulation. The outer loop iterates over the various simulation replications while the inner loop iterates over the individual picks in each simulated draft. Before starting each simulation replication, we create a container <code>selected_players</code> to record the picked players in the order in which they were picked. In the inner loop, we update the set of available players, compute the selection probabilities, and then simulate the actual pick. After the inner loop concludes, we write <code>selected_players</code> into the appropriate row of a large array holding our simulated picks. In this array, rows correspond to simulation iterations and columns correspond to picks.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The following code takes a few minutes to run</p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-17"><pre class="sourceCode r code-annotation-code code-with-copy"><code class="sourceCode r"><span id="annotated-cell-17-1"><a href="#annotated-cell-17-1" aria-hidden="true" tabindex="-1"></a>n_sims <span class="ot">&lt;-</span> <span class="fl">1e5</span></span>
+<span id="annotated-cell-17-2"><a href="#annotated-cell-17-2" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="at">dim =</span> <span class="fu">c</span>(n_sims, <span class="dv">32</span>))</span>
+<span id="annotated-cell-17-3"><a href="#annotated-cell-17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-17-4"><a href="#annotated-cell-17-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(r <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_sims){</span>
+<span id="annotated-cell-17-5"><a href="#annotated-cell-17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">479</span> <span class="sc">+</span> <span class="dv">3</span><span class="sc">*</span>r)</span>
+<span id="annotated-cell-17-6"><a href="#annotated-cell-17-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="annotated-cell-17-7"><a href="#annotated-cell-17-7" aria-hidden="true" tabindex="-1"></a>  selected_players <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="at">times =</span> <span class="dv">32</span>)</span>
+<span id="annotated-cell-17-8"><a href="#annotated-cell-17-8" aria-hidden="true" tabindex="-1"></a>  available_players <span class="ot">&lt;-</span> players</span>
+<span id="annotated-cell-17-9"><a href="#annotated-cell-17-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="annotated-cell-17-10"><a href="#annotated-cell-17-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">32</span>){</span>
+<span id="annotated-cell-17-11"><a href="#annotated-cell-17-11" aria-hidden="true" tabindex="-1"></a>    available_players <span class="ot">&lt;-</span> players[<span class="sc">!</span>players <span class="sc">%in%</span> selected_players]</span>
+<span id="annotated-cell-17-12"><a href="#annotated-cell-17-12" aria-hidden="true" tabindex="-1"></a>    probs <span class="ot">&lt;-</span> mclust<span class="sc">::</span><span class="fu">softmax</span>(<span class="at">x =</span> lambda_hat[available_players])</span>
+<span id="annotated-cell-17-13"><a href="#annotated-cell-17-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">names</span>(probs) <span class="ot">&lt;-</span> available_players</span>
+<span id="annotated-cell-17-14"><a href="#annotated-cell-17-14" aria-hidden="true" tabindex="-1"></a>    pick <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="at">x =</span> available_players, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> probs)</span>
+<span id="annotated-cell-17-15"><a href="#annotated-cell-17-15" aria-hidden="true" tabindex="-1"></a>    selected_players[i] <span class="ot">&lt;-</span> pick</span>
+<span id="annotated-cell-17-16"><a href="#annotated-cell-17-16" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="annotated-cell-17-17"><a href="#annotated-cell-17-17" aria-hidden="true" tabindex="-1"></a>  results[r,] <span class="ot">&lt;-</span> selected_players</span>
+<span id="annotated-cell-17-18"><a href="#annotated-cell-17-18" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Taking a look at the top-5 picks, we see a fair bit of variability simulation-to-simulation</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>results[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1]               [,2]                 [,3]                
+[1,] "Saquon Barkley"   "Vita Vea"           "Sam Darnold"       
+[2,] "Sam Darnold"      "Minkah Fitzpatrick" "Saquon Barkley"    
+[3,] "Josh Rosen"       "Dallas Goedert"     "Josh Allen (UK)"   
+[4,] "Tremaine Edmunds" "Harold Landry"      "Quenton Nelson"    
+[5,] "Sam Darnold"      "Saquon Barkley"     "Minkah Fitzpatrick"
+     [,4]              [,5]            
+[1,] "Joseph Noteboom" "Trey Adams"    
+[2,] "Derwin James"    "Quenton Nelson"
+[3,] "Andre Dillard"   "Da'Ron Payne"  
+[4,] "Saquon Barkley"  "Da'Ron Payne"  
+[5,] "Josh Rosen"      "Baker Mayfield"</code></pre>
+</div>
+</div>
+<p>To compute the probability that Saquon Barkley is selected in the first three picks, we first define a function that checks whether a given players name appears among the first several entries of a given vector:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-19"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-19-1"><a href="#annotated-cell-19-1" aria-hidden="true" tabindex="-1"></a>player_picked <span class="ot">&lt;-</span> <span class="cf">function</span>(x, player, pick){</span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-19" data-target-annotation="1">1</button><span id="annotated-cell-19-2" class="code-annotation-target"><a href="#annotated-cell-19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(player <span class="sc">%in%</span> x[<span class="dv">1</span><span class="sc">:</span>pick])</span>
+<span id="annotated-cell-19-3"><a href="#annotated-cell-19-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="annotated-cell-19-4"><a href="#annotated-cell-19-4" aria-hidden="true" tabindex="-1"></a><span class="fu">player_picked</span>(<span class="at">x =</span> results[<span class="dv">1</span>,], <span class="at">player =</span> <span class="st">"Saquon Barkley"</span>, <span class="at">pick =</span> <span class="dv">3</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-19" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-19" data-code-lines="2" data-code-annotation="1">Checks if <code>player</code> appears in the first <code>pick</code> elements of <code>x</code></span>
+</dd>
+</dl>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+</div>
+<p>We can then <em>apply</em> this function to every row of <code>results</code> to get a single Boolean (i.e., <code>TRUE</code> or <code>FALSE</code>) recording whether Saquon was selected in the first three picks. To quickly compute the proportion of simulated drafts in which Saquon was picked within the top 3 picks, we can take the mean of these Booleans. We find that in 41% of our simulated drafts, Saquon is a top-3 pick Note that when we apply a function to an array, additional arguments for the function can be passed to <code>apply()</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>saquon_pick3 <span class="ot">&lt;-</span> <span class="fu">apply</span>(<span class="at">X =</span> results, <span class="at">MARGIN =</span> <span class="dv">1</span>, <span class="at">FUN =</span> player_picked, <span class="at">player =</span> <span class="st">"Saquon Barkley"</span>, <span class="at">pick =</span> <span class="dv">3</span>)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(saquon_pick3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.41382</code></pre>
+</div>
+</div>
+<p>Going a bit further, we can even compute quantities like the probability Saquon Barkley is available at pick 11 given that he was not picked in the top-3. We can estimate this probability with <span class="math inline">\(N/D\)</span> where</p>
+<ul>
+<li><span class="math inline">\(N\)</span> is the number of simulated drafts in which Saquon is <strong>not</strong> picked within the first 10 picks</li>
+<li><span class="math inline">\(D\)</span> is the number of simulated drafts in which Saquon is <strong>not</strong> picked within the first 3 picks</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>saquon_pick10 <span class="ot">&lt;-</span> <span class="fu">apply</span>(<span class="at">X =</span> results, <span class="at">MARGIN =</span> <span class="dv">1</span>, <span class="at">FUN =</span> player_picked, <span class="at">player =</span> <span class="st">"Saquon Barkley"</span>, <span class="at">pick =</span> <span class="dv">10</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="sc">!</span>saquon_pick10)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>D <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="sc">!</span>saquon_pick3)</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"N = "</span>, N, <span class="st">" D = "</span>, D, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>N =  9666  D =  58618 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"P(Saquon available at pick 11 | Saquon not taken in top-3) = "</span>, <span class="fu">round</span>(<span class="dv">100</span><span class="sc">*</span>N<span class="sc">/</span>D, <span class="at">digits =</span> <span class="dv">3</span>), <span class="st">"%</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>P(Saquon available at pick 11 | Saquon not taken in top-3) =  16.49 %</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="sec-caution" class="level2">
+<h2 class="anchored" data-anchor-id="sec-caution">Cautionary Note</h2>
+<p>The results of the simulated drafts are quite a different than the actual 2018 NFL Draft. The discrepancy largely stems from the fact that the probabilistic model underpinning our simulations is rather unrealistic: it assumes, for instance, that each team rates each player identically. It also does not account for differential preferences regarding position. To make the simulation more realistic, you could consider incorporating player-specific covariates where each <span class="math inline">\(\lambda_{j}\)</span> is a linear function of covariates: <span class="math display">\[
+\lambda_{j} = \beta_{0} + \beta_{1}x_{j,1} + \cdots + \beta_{p}x_{j,p}.
+\]</span> It is possible to use the <strong>PlackettLuce</strong> package to fit such a model with <em>item</em>-level covariates. See <a href="https://hturner.github.io/PlackettLuce/articles/PLADMM.html">this package vignette</a> for details and an example. For the football data, it may be useful to treat position (e.g., quarterback, offensive tackle, etc) as a covariate.</p>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>You can read more about the history of mock drafts <a href="https://www.nbcsportsboston.com/nfl/nfl-mock-draft-history-most-accurate-predictors/602506/">here</a>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>In the context of NFL mock drafts, the raters are the individual mock drafts.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>In the context of NFL mock drafts, the items are players/prospects.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>In the context of NFL mock drafts, <span class="math inline">\(i(k)\)</span> is the player/prospect selected by rater <span class="math inline">\(i\)</span> with pick <span class="math inline">\(k.\)</span><a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>For two discrete sets <span class="math inline">\(A\)</span> and <span class="math inline">\(B,\)</span> <span class="math inline">\(A \setminus B\)</span> consists of all elements of <span class="math inline">\(A\)</span> that are not in <span class="math inline">\(B.\)</span> For instance, if <span class="math inline">\(A = \{1, 2, 3, 4\}\)</span> and <span class="math inline">\(B = \{2,4\},\)</span> then <span class="math inline">\(A \setminus B = \{1,3\}.\)</span><a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>You can read more about Benjamin’s work on his <a href="https://grindingthemocks.substack.com">Substack</a>.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>You can download the full data set, from which ours was derived, <a href="https://bitbucket.org/benjamin_robinson/grindingthebayes/src/master/">here</a>.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p>The website from which Benjamin Robinson obtained the mock draft results.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p>The date the mock draft was published<a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn10"><p>See <a href="https://cengel.github.io/R-data-wrangling/tidyr.html">these notes</a> for nice overview of long vs wide formats<a href="#fnref10" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        const annoteTargets = window.document.querySelectorAll('.code-annotation-anchor');
+        for (let i=0; i<annoteTargets.length; i++) {
+          const annoteTarget = annoteTargets[i];
+          const targetCell = annoteTarget.getAttribute("data-target-cell");
+          const targetAnnotation = annoteTarget.getAttribute("data-target-annotation");
+          const contentFn = () => {
+            const content = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+            if (content) {
+              const tipContent = content.cloneNode(true);
+              tipContent.classList.add("code-annotation-tip-content");
+              return tipContent.outerHTML;
+            }
+          }
+          const config = {
+            allowHTML: true,
+            content: contentFn,
+            onShow: (instance) => {
+              selectCodeLines(instance.reference);
+              instance.reference.classList.add('code-annotation-active');
+              window.tippy.hideAll();
+            },
+            onHide: (instance) => {
+              unselectCodeLines();
+              instance.reference.classList.remove('code-annotation-active');
+            },
+            maxWidth: 300,
+            delay: [50, 0],
+            duration: [200, 0],
+            offset: [5, 10],
+            arrow: true,
+            appendTo: function(el) {
+              return el.parentElement.parentElement.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'quarto',
+            placement: 'right',
+            popperOptions: {
+              modifiers: [
+              {
+                name: 'flip',
+                options: {
+                  flipVariations: false, // true by default
+                  allowedAutoPlacements: ['right'],
+                  fallbackPlacements: ['right', 'top', 'top-start', 'top-end', 'bottom', 'bottom-start', 'bottom-end', 'left'],
+                },
+              },
+              {
+                name: 'preventOverflow',
+                options: {
+                  mainAxis: false,
+                  altAxis: false
+                }
+              }
+              ]        
+            }      
+          };
+          window.tippy(annoteTarget, config); 
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
