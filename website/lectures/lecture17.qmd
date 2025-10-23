@@ -1,0 +1,128 @@
+---
+title: "Lecture 17: NFL Drive Simulation"
+format: html
+execute: 
+  cache: true
+---
+
+## Motivation: NFL Overtime Rules
+
+:::{.callout-important}
+
+## Acknowledgement
+
+This analysis reproduces a [fantastic case study](https://statsbylopez.netlify.app/post/resampling-nfl-drives/) first published by Mike Lopez.
+
+:::
+
+
+When the score is tied at the end of the fourth quarter of an NFL game, the two teams play an addition period of overtime.
+
+<!--
+  History of NFL overtime: https://www.underarmour.com/en-us/t/playbooks/football/guide-to-football-overtime-rules/
+  1974-2010: sudden death. first team to score wins. so, if you won the coin toss, you generally opted to take possession. all it took was a field goal
+  In 2010, the league adopted a modified sudden death rule in which (i) the game ends if the first team scores a touchdown. But if they only kick a fieldgoal (or turn the ball over), the second team has a chance to possess the ball 
+  In 2019, the Kansas City Chiefs proposed a rule change in which the second team was guaranteed an possession even if the first team scored an opening drive touchdown.This gives the second team a chance to match a field goal
+-->
+
+In 2019, the Kansas City Chiefs proposed changing the NFL's overtime rule to allow both teams an opportunity to possess the ball, even if the first team scored an opening drive touchdown[^kcstar]
+
+[^kcstar]: Read more about the specific details in [this](https://www.kansascity.com/sports/spt-columns-blogs/for-petes-sake/article257657753.html) article from the *Kansas City Star*.
+
+For sudden death overtimes, there is a clear advantage to taking possession of the ball first: if you defer possession, there's a very good chance that you will never get possession.
+But under Kansas City's proposed rules, having a guaranteed possession changes the decision calculus.
+To quantify what advantage or disadvantage the team receiving the ball second would have under the new rules, the NFL League Office set out to estimate the probability that the second team, when trailing by a touchdown, actually scored a touchdown.
+If this probability is extremely low, there is not much justification for the rule change.
+
+At first glance, estimating this probability seems straightforward: we simply find all drives in which a team trails by a touchdown and compute the proportion of these drives that result in a touchdown.
+While there are many such drives[^second], none of them quite capture the unique scenario presented by the new overtime rules.
+That is because, under the proposed rules[^eventually], if the first team scored an opening drive touchdown, the second team
+
+  1. Would *never* punt or kick a field goal on fourth down[^guarantee]
+  2. Must score a touchdown to extend the game
+  3. Are relatively unconcerned about the clock[^fourdown]
+
+[^second]: Indeed, it would include the second drive of all games in which the first team scored an opening drive touchdown. 
+
+[^eventually]: The rules were eventually adopted in 2022, after a particularly thrilling game playoff game between [Kansas City and the Buffalo](https://www.espn.com/nfl/recap/_/gameId/401326633), in which the lead changed three times in the last two minutes of regulation.
+
+[^guarantee]: Doing so would **guarantee** that the team loses the game.
+
+[^fourdown]: In regulation games, teams trailing by fewer than 7 points near the ends of halfs often eschew punting or kicking --- the so-caled "four down territory". But decision making in those situations is often affected by things like time left or numbers of timeouts that are less materially important in the proposed overtime.
+
+### Overview
+
+We will use play-by-play data from the 2009 to 2018 seasons to *simulate* entire drives for the team possessing the ball second in overtime while trailing by a touchdown.
+These data are available [here]()
+Instead of building a statistical model to predict the number of yards gained on any one play given the down, distance, and field position (hereafter "starting context"), we will instead use *re-sampling*.
+Specifically, we will simulate the outcome of the current play using the outcome of a play randomly selected from historical plays with *similar* starting contexts. 
+
+To make this concrete, imagine that the second team faces 2nd and 5 from their opponents 25 yard line in one simulated drive.
+To simulate the outcome of the play, we can find all other plays in which teams trailing by 7 points of fewer faced 2nd and 5 from around the 25 yard line and then randomly draw one outcome from there.
+we fill find all plays with a *similar* starting context and then simulate the outcome of the current play by randomly select the outcome of one of those plays
+
+given the down, distance, and field position at the start of a play in our simulated drive, we will randomly select one play with similar starting characteristics and use that as the simualted outcome for the play.
+
+
+## Data Preparation
+
+The data is available at [this Box link]()[^uwaccess]. It was scraped from the play-by-play data.
+We filter the data down to 
+
+[^uwaccess]: You must signed in with your UW-Madison NetID to download the CSV.
+
+
+## Resampling A Single Play
+
+
+
+### Re-Sampling Function
+
+In order to simulate an entire drive, we need to run through the above steps repeatedly, once for every simulated play.
+To make our simulation code a bit easier to read and less prone to errors, we will create a function that re-samples the outcome of a play based on the starting context.
+This function also includes an additional argument `yds.pad`, which is the amount of "padding" to apply to `yds.to.goal` variable.
+By default, the argument is set to `NULL` and the function hard codes the heuristic padding introduced above.
+But, if you wanted to re-run the simulation using slightly different padding (e.g., only sample plays starting within 1 yard of `yds.to.goal` uniformly or sampling plays within 1 yard of `yds.to.goal`).
+The function returns a *list* containing several elements:
+
+  1. `down`: the new down that results *after* the play. So long as the team does not turn the ball over, this will be the down in the e starting context of the next play
+  2. `yds.to.go`: the new distance to the first down marker that results *after* the play. This helps define the starting context of the next play (assuming the team does not turn the ball over)
+  3. `yds.to.goal`: the new distance to the goal that results *after* the play. This helps define the starting context of the next play (assuming the team doesn ot turn the ball over)
+  4. `play_type`: run or pass
+  5. `incompletion`: true/false
+  6. `turnover`: a string recording the type of turnover (if any). If no turnover resulted, this is set to `NA`. Otherwise, it takes values `Fumble`, `Interception`, or `Safety`. 
+  7. `touchdown`: a logical variable indicating whether or not the play resulted in a touchdown. 
+
+```{r}
+#| label: simulate-outcome-fn
+#| eval: true
+#| echo: true
+
+resample_play <- function(down, yds.to.go, yds.to.goal, yds.pad = NULL){
+  
+  if(is.null(yds.pad)){
+    
+  }
+  
+  down.orig <- ifelse(down == 4, c(3,4), down)
+  yds.to.go.orig <- yds.to.go
+  yds.to.goal.orig <- yds.to.goal
+  
+  
+  if(down.orig == 4){
+    tmp_plays <-
+      all_plays |>
+      dplyr::filter(down %in% c(3,4))
+    
+  } else{
+    
+    
+    
+    
+  } 
+  
+  
+  
+}
+
+```
