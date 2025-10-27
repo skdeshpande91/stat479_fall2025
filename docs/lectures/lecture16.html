@@ -301,6 +301,10 @@ window.Quarto = {
     <a class="dropdown-item" href="../slides/lecture15.html">
  <span class="dropdown-text">Lecture 15: Markov Chains II</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../slides/lecture16.html">
+ <span class="dropdown-text">Lecture 16: Plackett-Luce Models</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item">
@@ -495,7 +499,7 @@ window.Quarto = {
 
 <section id="sec-overview" class="level2">
 <h2 class="anchored" data-anchor-id="sec-overview">Overview</h2>
-<p>The NFL Draft is an annual meeting in which American football teams select newly eligible players. Prior to the NFL Draft, which is typically held in April, many fans and media analysts create <em>mock drafts</em>, in which they attempt to predict the order of players selected in the actual draft<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Whiel they initially served primarily as entertainment in the off-season, there is now a whole cottage industry of draft experts and analysts who regularly publish mock drafts in the lead up to the NFL Draft. These mock drafts can be used by fans to help calibrate expectations. They also are increasingly used by teams, who attempt to lean on the “wisdom of the crowd” to glean insight about the relative rankings of players and other teams’ preferences.</p>
+<p>The NFL Draft is an annual meeting in which American football teams select newly eligible players. Prior to the NFL Draft, which is typically held in April, many fans and media analysts create <em>mock drafts</em>, in which they attempt to predict the order of players selected in the actual draft<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. While they initially served primarily as entertainment in the off-season, there is now a whole cottage industry of draft experts and analysts who regularly publish mock drafts in the lead up to the NFL Draft. These mock drafts can be used by fans to help calibrate expectations. They also are increasingly used by teams, who attempt to lean on the “wisdom of the crowd” to glean insight about the relative rankings of players and other teams’ preferences.</p>
 <p>All this to say: mock drafts contain a considerable amount of information, especially when it comes to comparing players. Unlike game results data, in which we observe a winner and loser, mock draft data typically consist of a list of players ranked in some order. In this lecture, we will introduce the Plackett-Luce model , an extension of the Bradley-Terry models we introduced in <a href="../lectures/lecture12.html">Lecture 12</a>, that allows us to derive a single, global ranking of players, based on multiple observed partial rankings. After formally introducing the model (<a href="#sec-pl-model" class="quarto-xref">Section&nbsp;2</a>) and discussing how to fit the model in R (<a href="#sec-fit-pl" class="quarto-xref">Section&nbsp;2.3</a>), we will walk through a simple example with only 3 items (<a href="#sec-three-item" class="quarto-xref">Section&nbsp;2.2</a>). Then, we fit a Plackett-Luce model to mock drafts of the first three rounds of the NFL draft (<a href="#sec-draft" class="quarto-xref">Section&nbsp;3</a>) before building a simulation of the first round (<a href="#sec-nfl-simulation" class="quarto-xref">Section&nbsp;4</a>). Using this simulation, we compute the probability that certain prospects being available at certain picks.</p>
 </section>
 <section id="sec-pl-model" class="level2">
@@ -505,7 +509,7 @@ window.Quarto = {
 <p>Suppose that <span class="math inline">\(n\)</span> raters<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> (numbered <span class="math inline">\(i = 1, \ldots, n\)</span>) rank <span class="math inline">\(p\)</span> total items<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> (numbered <span class="math inline">\(j = 1, 2, \ldots, p\)</span>). Each rater <span class="math inline">\(i\)</span> reports a rank ordering of their <span class="math inline">\(n_{i}\)</span> items. For each rater <span class="math inline">\(i,\)</span> let <span class="math inline">\(i(1), i(2), \ldots, i(n_{i})\)</span> be the <em>indices</em> of the items that rater <span class="math inline">\(i.\)</span><a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> Our observations take the form <span class="math display">\[
 i(1) \succ i(2) \succ \cdots \succ i(n_{i}),
 \]</span> which we read to mean that rater <span class="math inline">\(i\)</span>’s top-rated item was <span class="math inline">\(i(1),\)</span> followed by <span class="math inline">\(i(2),\)</span> then <span class="math inline">\(i(3),\)</span> etc. In other words, although we will <strong>not</strong> assume that each rater fully ranks all <span class="math inline">\(p\)</span> items, we will assume that they provide their top <span class="math inline">\(n_{i}\)</span> rankings</p>
-<p>The <strong>Plackett-Luce</strong> model assumes that each rater <em>sequentially</em> generates their rankings. First, they select their top-rated item $i(1) out of the set of all items <span class="math inline">\(\{1, 2, \ldots, p\}.\)</span> Then, conditionally on having selected the first item <span class="math inline">\(i(1),\)</span> they select their second-ranked item <span class="math inline">\(i(2)\)</span> from the set of remaining items <span class="math inline">\(\{1, 2, \ldots, p\} \setminus \{i(1)\}\)</span><a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>. More generally, after selecting the top <span class="math inline">\(k\)</span> items <span class="math inline">\(i(1), \ldots, i(k)\)</span>, rater <span class="math inline">\(i\)</span> selects their <span class="math inline">\((k+1)\)</span>-st ranked item from the set of currently available items <span class="math inline">\(\{1, 2, \ldots, p\} \setminus \{i(1), \ldots, i(k)\}.\)</span></p>
+<p>The <strong>Plackett-Luce</strong> model assumes that each rater <em>sequentially</em> generates their rankings. First, they select their top-rated item <span class="math inline">\(i(1)\)</span> out of the set of all items <span class="math inline">\(\{1, 2, \ldots, p\}.\)</span> Then, conditionally on having selected the first item <span class="math inline">\(i(1),\)</span> they select their second-ranked item <span class="math inline">\(i(2)\)</span> from the set of remaining items <span class="math inline">\(\{1, 2, \ldots, p\} \setminus \{i(1)\}\)</span><a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>. More generally, after selecting the top <span class="math inline">\(k\)</span> items <span class="math inline">\(i(1), \ldots, i(k)\)</span>, rater <span class="math inline">\(i\)</span> selects their <span class="math inline">\((k+1)\)</span>-st ranked item from the set of currently available items <span class="math inline">\(\{1, 2, \ldots, p\} \setminus \{i(1), \ldots, i(k)\}.\)</span></p>
 <p>The Plackett-Luce model further assumes that each item <span class="math inline">\(j\)</span> has a latent “desirability” <span class="math inline">\(\lambda_{j}\)</span> and that the probability of selecting item <span class="math inline">\(j\)</span> from a subset <span class="math inline">\(\mathcal{S} \subset \{1, 2, \ldots, p\}\)</span> <span class="math display">\[
 \mathbb{P}(\textrm{select } j \textrm{ from } \mathcal{S}) =
 \begin{cases}
@@ -530,7 +534,7 @@ Note: Identifiability
 </section>
 <section id="sec-three-item" class="level3">
 <h3 class="anchored" data-anchor-id="sec-three-item">Example: Plackett-Luce with 3 items</h3>
-<p>As a concrete example, suppose we have three items <span class="math inline">\(A\)</span>, <span class="math inline">\(B\)</span>, and $C4 and two raters. Further suppose that Rater 1 ranks <span class="math inline">\(A \succ B \succ C\)</span> and Rater 2 only returns their top-ranked item, which is <span class="math inline">\(C\)</span>. According to the Plackett-Luce model, the probability of observing Rater 1’s ranking <span class="math inline">\(A \succ B \succ C\)</span> can be decomposed as <span class="math display">\[
+<p>As a concrete example, suppose we have three items <span class="math inline">\(A\)</span>, <span class="math inline">\(B\)</span>, and <span class="math inline">\(C\)</span> and two raters. Further suppose that Rater 1 ranks <span class="math inline">\(A \succ B \succ C\)</span> and Rater 2 only returns their top-ranked item, which is <span class="math inline">\(C\)</span>. According to the Plackett-Luce model, the probability of observing Rater 1’s ranking <span class="math inline">\(A \succ B \succ C\)</span> can be decomposed as <span class="math display">\[
 \begin{align}
 \mathbb{P}(A \succ B \succ C) &amp;= \mathbb{P}(\textrm{select } A \textrm{ from } \{A, B, C\}) \\
 ~ &amp;~\times \mathbb{P}(\textrm{select } B \textrm{ from } \{B, C\}) \\
@@ -598,7 +602,9 @@ Note: Identifiability
  0.0000000 -0.5006691 -4.9505260 -2.5287292 </code></pre>
 </div>
 </div>
-<p>Based on these</p>
+<!--
+ Work out the selection probabilities
+-->
 </section>
 </section>
 <section id="sec-draft" class="level2">
