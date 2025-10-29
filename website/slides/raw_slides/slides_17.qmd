@@ -1,0 +1,91 @@
+---
+title: "STAT 479 Lecture 17"
+subtitle: "New NFL Overtime Rules"
+format: revealjs
+execute:
+  cache: true
+---
+
+## NFL Overtime
+
+- NFL games consist of 4 15-minute quarters
+- What happens when the score is tied at the end of Q4?
+  - Pre-1974: game declared a tie
+  - 1974-2010: "sudden death" overtime
+  - 2010-2022: modified sudden death
+  - 2022-present: both teams get possession
+
+## Problems w/ Earlier Formats
+
+- Sudden death: first team to score wins
+  - One team can take possession, kick a FG, and win
+  - Opposing team never possesses ball
+  - Huge advantage to team w/ first possession
+. . . 
+
+- Modified Sudden Death: can't win with first-possession FG
+  - If first team scores TD, game ends
+  - If first team kicks FG or doesn't score: second team gets possession
+  - Team w/ first possession still has advantage
+
+## Proposed Solution
+
+- Give both teams a chance to possess the ball
+- If first team scores a TD, second team has chance to tie/win
+
+. . .
+
+- $\mathbb{P}(\textrm{second team scores TD} \vert \textrm{first team scores TD})$???
+  - If prob. very low, is it reasonable to change the rule?
+  - If prob. very high,
+
+
+
+## Estimating $\mathbb{P}(\textrm{second team scores TD} \vert \textrm{first team scores TD})$
+
+- Idea: use empirical estimate
+  - Find all drives following opening-drive TDs in OT
+  - Compute proportion ending in TD
+- Problem: prior to 2022, there were **no** such drives!
+
+## Model-based Simulation{.smaller}
+
+- Starting context: down, distance, yardline, time, etc.
+- Theoretically feasiable to model play components:
+  - Play type (run vs pass) given starting context
+  - Yards gained & time elapsed given starting context & play type
+
+. . . 
+
+- What about penalties???
+  - Pre-snap penalty given starting context
+  - Play type given starting context & no pre-snap penalty
+  - Penalty during play given starting context & no pre-snap penalty
+  - Yards gained & time elapsed given startign context, no penalties
+  - Post-play penalty given all else...
+
+## Re-sampling Based Simulation
+
+- Imagine simulating drive play-by-play
+- Given starting context:
+  - Find pool of *similar* existing plays
+  - Randomly sample play from that pool
+- Repeat until simulated drive ends
+
+## Challenges
+
+- Unique decision-making environment
+- In OT, trailing by $<= 8$ points, second team
+  - Will **never** punt or kick of a field goal nor attempt a fake
+  - Must score a TD to extend the game
+  - Is relatively unconcerned about time
+- How to define "similar"??
+
+## Plan
+
+1. Build a pool of plays from which to sample
+2. Determine dist. of starting positions for second OT drive
+3. Write function to sample similar play
+4. Simulate & visualize drives
+
+
