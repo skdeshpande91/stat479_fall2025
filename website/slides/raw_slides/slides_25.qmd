@@ -1,0 +1,68 @@
+---
+title: "STAT479 Lecture 25"
+subtitle: "Next Steps"
+format: revealjs
+execute:
+  cache: true
+---
+
+# Additional Topics
+
+## Voronoi Tesselations (definition)
+
+- Consider $n$ points $x_{1}, \ldots x_{n}$ in space $\mathbb{X}$
+- Let $d(\cdot, \cdot)$ be distance metric on $\mathbb{X}$
+- For each $i = 1, \ldots, n$ define $\mathcal{X}_{i}$ as
+$$
+\mathcal{X}_{i} = \left\{x \in \mathbb{X}: d(x, x_{i}) \leq d(x, x_{j}) \text{ for all } j \neq i\right\}
+$$
+- $\mathcal{X}_{i}$: all points in $\mathbb{X}$ **closer** to $x_{i}$ than to any other $x_{j}$
+
+## Voroni Tesselation (example)
+
+- Can compute using [**deldir**](https://cran.r-project.org/web/packages/deldir/index.html) package in R
+
+```{r}
+#| label: example-voronoi
+#| eval: true
+#| echo: false
+#| fig-width: 8
+#| fig-height: 8
+#| fig-align: center
+#| output: false
+
+set.seed(42)
+x <- runif(20)
+y <- runif(20)
+dxy <- deldir(x,y,rw=c(0,1,0,1))
+cxy1 <- cvt(dxy,verb=TRUE)
+plot(cxy1$tiles)
+with(cxy1$centroids,points(x,y,pch=16))
+```
+
+## Voronoi Tesselations (applications)
+
+- [Cervone et al. (2016)](https://www.lukebornn.com/papers/cervone_ssac_2016.pdf): definition of court ownership
+- Quantify impact of different actions in terms of how much space/court value was created
+
+
+![](courty_realty.png){width=50%}
+
+## Continuous Space Ownership
+
+- Voronoi partitions assume pitch control is discrete
+  - Players either own or don't own a point
+  - Any point can be owned by exactly one player
+-[Fernandez & Bornn (2018)](https://www.lukebornn.com/papers/fernandez_ssac_2018.pdf): incorporated speed & direction for more continuous understanding
+
+![](pitch_control.png){width=50%}
+
+
+
+## Bezier Curves (definition)
+
+
+<!--
+ visual example of Bezier curve
+-->
+

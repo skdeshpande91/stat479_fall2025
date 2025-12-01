@@ -4687,5 +4687,82 @@
     "title": "STAT 479 Lecture 16",
     "section": "Simulation",
     "text": "Simulation\n\n\\(\\mathbb{P}(\\textrm{Saquon available at 11} \\vert \\textrm{Saquon not picked top-3})\\)\nHelper function determines whether player picked in top-\\(k\\)"
+  },
+  {
+    "objectID": "slides/raw_slides/slides_24.html#decathlon-overview",
+    "href": "slides/raw_slides/slides_24.html#decathlon-overview",
+    "title": "STAT 479 Lecture 24",
+    "section": "Decathlon Overview",
+    "text": "Decathlon Overview\n\n\n\n\n\n\nEvents spread over 2 days\nSuccess requires speed, strength, & skill\nIndividual event scores aggregated into a single score"
+  },
+  {
+    "objectID": "slides/raw_slides/slides_24.html#best-decathlon-performances",
+    "href": "slides/raw_slides/slides_24.html#best-decathlon-performances",
+    "title": "STAT 479 Lecture 24",
+    "section": "Best Decathlon Performances",
+    "text": "Best Decathlon Performances\n\n\n\n\n\n\nCan someone break 9200? What would it take?\nMax out in one event? Be good but not elite at all? ## Statistical Model\n\\(j\\)-th performance in event \\(e\\) by athlete \\(i\\): \\[\n\\begin{align}\ny_{e,i,j} &= \\alpha_{e,i} + \\sum_{d = 1}^{D}{\\gamma_{e,d}\\phi_{d}(\\text{age}_{i,j})} \\\\\n~& + \\beta_{e,1}Y_{1,i,j} + \\beta_{e,2}Y_{2,i,j} + \\cdots + \\beta_{e,e-1}Y_{e-1,i,j} + \\epsilon_{e,i,j}\n\\end{align}\n\\]\nAthlete-event random effect: \\(\\alpha_{e,i} \\sim N(\\mu_{e}, \\sigma_{e})\\)\n\\(\\phi_{1}(\\cdot), \\ldots, \\phi_{D}(\\cdot)\\): spline functions"
+  },
+  {
+    "objectID": "slides/raw_slides/slides_24.html#statistical-model",
+    "href": "slides/raw_slides/slides_24.html#statistical-model",
+    "title": "STAT 479 Lecture 24",
+    "section": "Statistical Model",
+    "text": "Statistical Model\n\n\\(j\\)-th performance in event \\(e\\) by athlete \\(i\\): \\[\n\\begin{align}\ny_{e,i,j} &= \\alpha_{e,i} + \\sum_{d = 1}^{D}{\\gamma_{e,d}\\phi_{d}(\\text{age}_{i,j})} \\\\\n~& + \\beta_{e,1}Y_{1,i,j} + \\beta_{e,2}Y_{2,i,j} + \\cdots + \\beta_{e,e-1}Y_{e-1,i,j} + \\epsilon_{e,i,j}\n\\end{align}\n\\]\nAthlete-event random effect: \\(\\alpha_{e,i} \\sim N(\\mu_{e}, \\sigma_{e})\\)\n\\(\\phi_{1}(\\cdot), \\ldots, \\phi_{D}(\\cdot)\\): spline functions"
+  },
+  {
+    "objectID": "slides/raw_slides/slides_24.html#digression-splines",
+    "href": "slides/raw_slides/slides_24.html#digression-splines",
+    "title": "STAT 479 Lecture 24",
+    "section": "Digression: Splines",
+    "text": "Digression: Splines"
+  },
+  {
+    "objectID": "slides/raw_slides/slides_24.html#undeterstanding-the-model",
+    "href": "slides/raw_slides/slides_24.html#undeterstanding-the-model",
+    "title": "STAT 479 Lecture 24",
+    "section": "Undeterstanding the model",
+    "text": "Undeterstanding the model\n\nModel has loads of parameters:\n\n\\(\\alpha_{e,i}\\)’s: capture each athlete’s latent skill in each event\n\\(\\gamma_{e,d}\\)’s: govern how performance in each event changes over time\n\\(\\beta_{e,e'}\\): captures inter-event relationships\n\nIf we knew the parameter values, we could\n\nPredict age curve for each event & overall score\nUse simulation to estimate prob. each athlete breaks record"
+  },
+  {
+    "objectID": "slides/raw_slides/slides_24.html#model-fitting",
+    "href": "slides/raw_slides/slides_24.html#model-fitting",
+    "title": "STAT 479 Lecture 24",
+    "section": "Model Fitting",
+    "text": "Model Fitting\n\nClassical approach: maximum likelihood estimation\n\nFind values of \\(\\boldsymbol{\\alpha}, \\boldsymbol{\\beta},\\) and \\(\\boldsymbol{\\gamma}\\) that make observed data most likely\nTake STAT 310 or 312 (or, starting in Fall 2027 STAT 410) for details\n\nUse \\(\\boldsymbol{\\hat \\alpha}, \\boldsymbol{\\hat \\beta},\\) and \\(\\boldsymbol{\\hat \\gamma}\\) to make predictions\n\n\n\nHow to propagate estimation uncertainty about \\(\\boldsymbol{\\alpha}, \\boldsymbol{\\beta},\\) and \\(\\boldsymbol{\\gamma}\\) to downstream predictions?\nClassical approach (i.e., standard errors) doesn’t easily allow for this\nStandard errors only capture dataset-to-dataset variability"
+  },
+  {
+    "objectID": "slides/raw_slides/slides_24.html#types-of-uncertainty",
+    "href": "slides/raw_slides/slides_24.html#types-of-uncertainty",
+    "title": "STAT 479 Lecture 24",
+    "section": "Types of Uncertainty",
+    "text": "Types of Uncertainty\n\nAleatoric: inherent uncertainty in a system\nEpistemic: due to ignorance/lack of knowledge\n\n\n\nEg: consider a coin with unknown bias \\(\\mathbb{P}(\\textrm{heads})\\)\nEpistemic uncertainty about \\(\\mathbb{P}(\\textrm{heads})\\)\n\nIf we repeatedly flip, we can learn \\(\\mathbb{P}(\\textrm{heads})\\)\nThe more data we get, the less uncertainty!\n\nAleatoric: uncertainty about result of next flip\n\nEven if we know \\(\\mathbb{P}(\\textrm{heads})\\), there’s still uncertainty about result of next flip\nCan’t be reduced with more data"
+  },
+  {
+    "objectID": "slides/raw_slides/slides_24.html#the-big-bayesian-picture",
+    "href": "slides/raw_slides/slides_24.html#the-big-bayesian-picture",
+    "title": "STAT 479 Lecture 24",
+    "section": "The Big Bayesian Picture",
+    "text": "The Big Bayesian Picture\n\nQuantify all uncertainties using probability distributions\nUpdate, combine, and propagate uncertainty using probability calculus\nGeneral workflow: data \\(Y\\) and unknown parameter \\(\\theta\\)\n\nSpecify likelihood \\(p(y \\vert \\theta)\\) & prior \\(p(\\theta)\\)\nCompute posterior distribution \\(p(\\theta \\vert y)\\)\n\nPosterior quantifies all post-data uncertainty given the observed data"
+  },
+  {
+    "objectID": "slides/raw_slides/slides_24.html#advantages-of-bayesian-modeling",
+    "href": "slides/raw_slides/slides_24.html#advantages-of-bayesian-modeling",
+    "title": "STAT 479 Lecture 24",
+    "section": "Advantages of Bayesian Modeling",
+    "text": "Advantages of Bayesian Modeling\n\nFor most models, finite data do not uniquely determine parameter value\nMultiple parameter values could fit data reasonably well\nPosterior distributions capture this\nCan propagate uncertainty about parameter values to downstream predictions\nCan make probabilistic statement: “93% prob. \\(\\theta\\) lies in this interval”"
+  },
+  {
+    "objectID": "slides/raw_slides/slides_24.html#inter-event-dependence",
+    "href": "slides/raw_slides/slides_24.html#inter-event-dependence",
+    "title": "STAT 479 Lecture 24",
+    "section": "Inter-event Dependence",
+    "text": "Inter-event Dependence\n\n\n.1 second decrease in 100m associated w/ ~24 second increase in 1500m time\nPosterior fully concentrated on negative values"
+  },
+  {
+    "objectID": "slides/raw_slides/slides_24.html#posterior-predictive-simulations",
+    "href": "slides/raw_slides/slides_24.html#posterior-predictive-simulations",
+    "title": "STAT 479 Lecture 24",
+    "section": "Posterior Predictive Simulations",
+    "text": "Posterior Predictive Simulations"
   }
 ]
