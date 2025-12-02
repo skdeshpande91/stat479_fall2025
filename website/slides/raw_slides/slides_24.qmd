@@ -12,10 +12,6 @@ execute:
 
 ![](decathlon.png){width=90% fig-align="center"}
 
-- Events spread over 2 days
-- Success requires speed, strength, & skill
-- Individual event scores aggregated into a single score
-
 ## Best Decathlon Performances
 
 ![](decathlon-scores.png){fig-align="center"}
@@ -33,8 +29,9 @@ y_{e,i,j} &= \alpha_{e,i} + \sum_{d = 1}^{D}{\gamma_{e,d}\phi_{d}(\text{age}_{i,
 \end{align}
 $$
 - Athlete-event random effect: $\alpha_{e,i} \sim N(\mu_{e}, \sigma_{e})$
-- $\phi_{d}(x) = x^{d}$: allow non-linear performance evolution
+- $\phi_{d}(x) = x^{d}$: allows for non-linear performance evolution
 
+<!--
 ## Understanding the model
 
 - Model has loads of parameters:
@@ -45,7 +42,7 @@ $$
 - If we knew the parameter values, we could 
   - Predict age curve for each event & overall score
   - Estimate prob. of breaking record via simulation
-
+-->
 ## Model Fitting
 
 - Classical approach: maximum likelihood estimation
@@ -54,7 +51,7 @@ $$
 
 - Use $\boldsymbol{\hat \alpha}, \boldsymbol{\hat \beta},$ and $\boldsymbol{\hat \gamma}$ to make predictions
 
-- How to propagate *estimation* uncertainty to downstream predictions?
+- Problem: how to propagate *estimation* uncertainty to predictions?
 
 # Digression: A Bayesian Approach
   
@@ -71,8 +68,8 @@ $$
   - The more data we get, the less uncertainty!
 
 - Aleatoric: uncertainty about result of next flip
-  - Even if we know $\mathbb{P}(\textrm{heads})$, there's still uncertainty about result of next flip
-  - Can't be reduced with more data
+  - Even if we know $\mathbb{P}(\textrm{heads})$, can't perfectly predict next flip
+  - Can't be reduced!
 
 
 ## The Big Bayesian Picture
@@ -83,64 +80,41 @@ $$
 - General workflow: data $Y$ and unknown parameter $\theta$
   - Specify likelihood $p(y \vert \theta)$ & prior $p(\theta)$
   - Compute posterior distribution $p(\theta \vert y)$
-- Posterior quantifies all post-data uncertainty **given the observed data*
-
-## Advantages of Bayesian Modeling
-
-- Multiple parameter values can provide good fits to data
-- No longer forced to commit to single estimate to drive downstream prediction
-- Can make probabilistic statements: "93% prob. $\theta$ lies in this interval"
-- Sequential nature: use data to update prior beliefs
+- Posterior quantifies uncertainty **given the observed data**
 
 
-## Example: Flipping a Strange Coin
+
+
+## Example: Coin Flipping
 
 - Consider a coin with unknown $\mathbb{P}(\textrm{heads}) = \theta \in [0,1]$
 - Flip the coin 10 times and observe $Y = 4$ heads.
-- We will flip 5 more times. What's your prediction for $Y^{\star}$? 
+- What's your prediction for $Y^{\star},$ number of heads in 100 more flips?  
 
-. . . 
+## Example: Likelihood Specification
 
-- Classical approach: $\hat{\theta} = 0.4$
-- $\mathbb{P}(Y^{\star} = k \vert \theta) = \binom{5}{k}\theta^{k}(1 - \theta)^{5-k}$
-- $E[Y^{\star} \vert \theta = 0.4] = 2$ and $\mathbb{P}(Y^{\star} = 2 \vert \theta = 0.4)$ is largest
-
+- Likelihood: $p(y \vert \theta) = \binom{10}{y}\theta^{y}(1 - \theta)^{10-k}$
 
 ```{r}
-#| label: fig-coin-classical
+#| label: fig-likelihood
 #| eval: true
 #| echo: false
 #| fig-width: 8
 #| fig-height: 4.5
 #| fig-align: center
-
+oi_colors <- palette.colors(palette = "Okabe-Ito")
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
-plot(1, type = "n",
-     xlim = c(0, 5), ylim = c(0, 0.5),
-     xlab = "k", ylab = "Prob", main = "Distribution of Y*")
-for(x in 0:5){
-  points(x = x, y = dbinom(x, size = 5, prob = 0.4))
-  lines(x = c(x,x), y = c(par("usr")[3], dbinom(x, size = 5, prob = 0.4)))
-}
+theta_seq <- seq(0, 1, by = 0.001)
 
+likelihood <- dbinom(x = 4, size = 10, prob = theta_seq)
+
+plot(1, type = "n", xlim = c(0, 1), ylim = c(0, 0.3),
+     xlab = "theta", ylab = "P(Y = 4 | theta)", main = "Likelihood")
+lines(theta_seq, likelihood, col = oi_colors[9])
+lines(x = c(0.4, 0.4), y = c(par("usr")[3], dbinom(4,10,0.4)), lty = 2)
+points(x = 0.4, y = dbinom(4, 10, 0.4), pch = 16, col = oi_colors[9])
 ```
 
-- Then, we'll flip the coin an additional 5 times & count $Y^{\star}$
-
-
-
-## Example: Likelihood Specification
-
-- Consider a coin with unknown $\mathbb{P}(\textrm{heads}) = \theta \in [0,1]$
-- We will flip $n = 10$ times & record number of heads $Y$
-- Goal: Quantify our uncertainty about $\theta$ after observing $Y = 4.$
-
-. . . 
-
-- Likelihood: $p(y \vert \theta) = \binom{10}{y}\theta^{y}(1 - \theta)^{10-k}$
-  - If $\theta = 0.5,$ prob. of seeing $Y = 4$ is 20.5%
-  - If $\theta = 0.4,$ prob. of seeing $Y = 4$ is 25.1%
-  - If $\theta = 0.1,$ prob. of seeing $Y = 4$ is 1%
 
 ## Example: Prior Specification
 - What do we believe about the coin **prior** to flipping it & seeing data?
@@ -149,6 +123,7 @@ for(x in 0:5){
   - Best estimate of $\theta$ is *prior mean*: $\hat{\theta} = 1/2$
   - 95% prior prob. that $\theta \in [0.025, 0.975]$ 
 
+## Example: Prior Visualization
 ```{r}
 #| label: fig-prior-density
 #| eval: true
@@ -157,103 +132,205 @@ for(x in 0:5){
 #| fig-height: 4.5
 #| fig-align: center
 
-oi_colors <- palette.colors(palette = "Okabe-Ito")
-theta_seq <- seq(0, 1, by = 0.005)
-a <- 1
-b <- 1
+a_prior <- 1
+b_prior <- 1
 prior_dens <- rep(1, times = length(theta_seq))
-theta_ix <- which(theta_seq >= 0.025 & theta_seq <= 0.975)
+prior_theta_ix <- which(theta_seq >= 0.025 & theta_seq <= 0.975)
 
-prior_ci_x <- theta_seq[theta_ix]
-prior_ci_y_top <- prior_dens[theta_ix]
-prior_ci_y_bot <- rep(par("usr")[3], times = length(theta_ix))
+prior_ci_x <- theta_seq[prior_theta_ix]
+prior_ci_y_top <- prior_dens[prior_theta_ix]
+prior_ci_y_bot <- rep(0, times = length(prior_theta_ix))
 
 
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
 plot(1, type = "n", xlim = c(0,1), ylim = c(0, 3),
-     xlab = "theta", ylab = "Density", main = "Prior & Posterior")
+     xlab = "theta", ylab = "Density", main = "Prior")
 lines(theta_seq, prior_dens, col = oi_colors[3])
 
 polygon(x = c(prior_ci_x, rev(prior_ci_x)),
         y = c(prior_ci_y_bot, rev(prior_ci_y_top)),
         col = adjustcolor(col = oi_colors[3], alpha.f = 0.5),
         border = NA)
+points(x = 0.5, y = 1, pch = 16, col = oi_colors[3])
+lines(x = c(0.5, 0.5), y = c(par("usr")[3], 1), lty = 2, col = oi_colors[3])
 
 ```
 
 ## Example: Posterior Distribution
 
-- $p(\theta \vert Y = 4) \propto \theta^{4+1-1}(1 - \theta)^{6+1-1}$ meaning $\theta \vert Y = 4 \sim \textrm{Beta}(5,7)$
+- $\theta \vert Y = 4 \sim \textrm{Beta}(5,7)$
   - Best guess: $\hat{\theta} = (4 + 1)/(10 + 1)$
   - 95% prob. that $\theta$ in `{r} round(qbeta(c(0.025, 0.975), 5, 7), digits = 2)`
 ```{r}
 #| label: fig-beta-binomial
 #| eval: true
 #| echo: false
-#| fig-width: 8
-#| fig-height: 4.5
+#| fig-width: 7.2
+#| fig-height: 4.05
 #| fig-align: "center"
 
 y <- 4
 n <- 10
+a_post <- a_prior + y
+b_post <- b_prior + n - y
 
-post_dens <- dbeta(theta_seq, shape1 = y+a, shape2 = n-y+b)
+post_dens <- dbeta(theta_seq, shape1 = a_post, shape2 = b_post)
 
-theta_ix_post <- which(theta_seq >= qbeta(0.025, a+y, b+n-y) & theta_seq <= qbeta(0.975, a+y, b+n-y))
+post_theta_ix <- which(theta_seq >= qbeta(0.025, a_post, b_post) & theta_seq <= qbeta(0.975, a_post, b_post))
 
-post_ci_x <- theta_seq[theta_ix_post]
-post_ci_y_top <- post_dens[theta_ix_post]
-post_ci_y_bot <- rep(par("usr")[3], times = length(theta_ix_post))
+post_ci_x <- theta_seq[post_theta_ix]
+post_ci_y_top <- post_dens[post_theta_ix]
+post_ci_y_bot <- rep(0, times = length(post_theta_ix))
 
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
-plot(1, type = "n", xlim = c(0,1), ylim = c(0, 3)),
+plot(1, type = "n", xlim = c(0,1), ylim = c(0, 3),
      xlab = "theta", ylab = "Density", main = "Posterior")
-#lines(theta_seq, prior_dens, col = oi_colors[3])
-lines(theta_seq, post_dens, col = oi_colors[4])
+lines(theta_seq, post_dens, col = oi_colors[2])
 
 polygon(x = c(post_ci_x, rev(post_ci_x)),
         y = c(post_ci_y_bot, rev(post_ci_y_top)),
         col = adjustcolor(col = oi_colors[2], alpha.f = 0.5),
         border = NA)
-
+post_mean <- a_post/(a_post+b_post)
+lines(x = c(post_mean, post_mean), 
+      y = c(par("usr")[3], dbeta(post_mean, a_post, b_post)),
+      lty = 2, col = oi_colors[2])
+points(x = post_mean, y = dbeta(post_mean, a_post, b_post), pch = 16, col = oi_colors[2])
 ```
 
 
 ## Example: Posterior Predictive
 
-- Say we flip the coin another 5 times; $Y^{\star}$ is number of heads
 - $\mathbb{P}(Y^{\star} = k \vert Y = 4) = \int{ \mathbb{P}(Y^{\star} = k \vert \theta)p(\theta \vert Y = 4)d\theta}$
-
+- Simulation: for $m = 1, \ldots, M$
+  - Draw a posterior sample $\theta^{(m)}$
+  - Then simulate $Y^{\star} \sim \textrm{Binomial}(100, \theta^{(m)})$
 
 ```{r}
-#| label: fig-post-pred
+#| label: post-pred
+#| eval: true
+#| echo: true
+theta_draws <- rbeta(n = 5e5, shape1 = a_post, shape2 = b_post)
+ystar <- rbinom(n = 5e5, size = 100, prob = theta_draws)
+round(sort(table(ystar)/5e5, decreasing = TRUE), digits = 4)[1:10]
+```
+
+## Example 2: Motivation{.smaller}
+
+- [Muriel Bristol](https://en.wikipedia.org/wiki/Muriel_Bristol): correctly determined tea/milk order in 8 of 8 cups
+- [Paul the Octopus](https://en.wikipedia.org/wiki/Paul_the_Octopus): correctly predicted winner in 8 of 8 World Cup games
+
+- $\theta_{1}$: prob. Muriel Bristol gets order right
+- $\theta_{2}$: prob. Paul correctly picks winner
+- Do we really believe $\theta_{1} = \theta_{2} = 100\%$???
+
+## Motivating Example: Prior Elicitation
+
+- $\textrm{Beta}(15,5)$ prior for $\theta_{1}$:
+  - Best guess (pre-data): `{r} round(15/(15+5), digits = 2)`
+  - 95% prob. on interval `{r} round( qbeta(c(0.025, 0.975), 15, 5), digits = 2)`
+  - Plausible to develop palette over decades of daily tea consumption
+  
+- $\textrm{Beta}(5, 95)$ prior for $\theta_{2}$:
+  - Best guess (pre-data): `{r} round(5/(5+95), digits = 2)`
+  - 95% prob. on interval `{r} round( qbeta(c(0.025, 0.975), 5, 95), digits = 2)`
+  - What would an octopus know about football??
+  
+## Example 2: Posterior Summaries
+
+- Posterior $\theta_{1} \vert Y_{1} = 8 \sim \textrm{Beta}(23, 5)$
+  - Best guess: `{r} round( (8+15)/(8+15+5), digits = 2)`
+  - 95% prob. on interval `{r} round( qbeta(c(0.025, 0.975), 8+15, 5), digits = 2)`
+
+- Posterior $\theta_{2} \vert Y_{2} = 8 \sim \textrm{Beta}(13, 95)$
+  - Best guess: `{r} round( (8+5)/(8+5+95), digits = 2)`
+  - 95% prob. on interval `{r} round( qbeta(c(0.025, 0.975), 8+5, 95), digits = 2)`
+
+## Example 2: Posterior Visualization
+
+```{r}
+#| label: fig-example2-theta1-theta2
 #| eval: true
 #| echo: false
+#| fig-width: 8
+#| fig-height: 4.5
+#| fig-align: center
+
+a1 <- 8+15
+b1 <- 0 + 5
+
+a2 <- 8 + 5
+b2 <- 8 + 95
+
+post_dens1 <- dbeta(theta_seq, shape1 = a1, shape2 = b1)
+post_dens2 <- dbeta(theta_seq, shape1 = a2, shape2 = b2)
 
 
-theta_draws <- rbeta(n = 1e5, shape1 = y+n, shape2 = n-y+b)
-ystar <- rbinom(n = 1e5, size = 5, prob = theta_draws)
-post_pred <- table(ystar)/1e5
+theta1_ix <- which(theta_seq >= qbeta(0.025, a1, b1) & theta_seq <= qbeta(0.975, a1, b1))
+theta2_ix <- which(theta_seq >= qbeta(0.025, a2, b2) & theta_seq <= qbeta(0.975, a2, b2))
 
+x1 <- theta_seq[theta1_ix]
+x2 <- theta_seq[theta2_ix]
+
+y1_top <- post_dens1[theta1_ix]
+y2_top <- post_dens2[theta2_ix]
+
+y1_bot <- rep(0, times = length(theta1_ix))
+y2_bot <- rep(0, times = length(theta2_ix))
+
+
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+plot(1, type = "n",
+     xlim = c(0,1), ylim = c(0, max(c(post_dens1, post_dens2))),
+     xlab = "theta", ylab = "Density", main = "Posteriors of theta1 & theta2")
+
+
+
+lines(theta_seq, post_dens1, col = oi_colors[4])
+lines(theta_seq, post_dens2, col = oi_colors[8])
+
+
+polygon(x = c(x1, rev(x1)), y = c(y1_bot, rev(y1_top)),
+        col = adjustcolor(oi_colors[4], alpha.f = 0.4),
+        border = NA)
+polygon(x = c(x2, rev(x2)),
+        y = c(y2_bot, rev(y2_top)),
+        col = adjustcolor(oi_colors[8], alpha.f = 0.4),
+        border = NA)
+
+post_mean1 <- a1/(a1+b1)
+post_mean2 <- a2/(a2+b2)
+
+lines(x = c(post_mean1, post_mean1), y = c(0, dbeta(post_mean1, a1, b1)), col = oi_colors[4], lty = 2)
+points(x = post_mean1, y = dbeta(post_mean1, a1, b1), pch = 16, col = oi_colors[4])
+
+lines(x = c(post_mean2, post_mean2), y = c(0, dbeta(post_mean2, a2, b2)), col = oi_colors[8], lty = 2)
+points(x = post_mean2, y = dbeta(post_mean2, a2, b2), pch = 16, col = oi_colors[8])
 
 
 ```
 
 
+## Advantages of Bayesian Modeling
+
+- Incorporate prior knowledge!
+- Multiple parameter values can provide good fits to data
+- No longer forced to commit to single estimate to drive downstream prediction
+- Can make probabilistic statements: "93% prob. $\theta$ lies in this interval"
+- Sequential nature: use data to update prior beliefs
+
 ## Bayesian Modeling in Practice
 
-- Likelihood & prior: specify a complete data generating process:
-  - To generate data $Y$, first draw $\theta$ and then draw $Y \vert \theta$
-- Output is a whole distribution not just a point estimate
-- In practice, we obtain *samples* from the posterior
-
+- Most posteriors are not standard distributions
+- Must *approximate* posterior means, quantiles, etc.
+- Markov chain Monte Carlo: construct a Markov chain whose invariant dist. is the posterior
 
 
 # Decathlon Modeling Results
 
 ## Inter-event Dependence
 
-![](decathlon-beta.png){width=50%}
+![](decathlon-beta.png){width=50% fig-align="center"}
 
 - .1 second decrease in 100m associated w/ ~24 second increase in 1500m time
 - Posterior fully concentrated on negative values
@@ -267,13 +344,28 @@ y^{\star(m)}_{e,i,j} &= \alpha^{(m)}_{e,i} + \sum_{d = 1}^{D}{\gamma^{(m)}_{e,d}
 ~& + \beta^{(m)}_{e,1}Y_{1,i,j} + \beta^{(m)}_{e,2}Y_{2,i,j} + \cdots + \beta^{(m)}_{e,e-1}Y_{e-1,i,j} + \sigma^{(m)}\epsilon^{\star (m)}_{e,i,j},
 \end{align}
 $$
-where $\epsilon^{\star(m)} \sim N(0,1)$ indepently of other parameters
+where $\epsilon^{\star(m)} \sim N(0,1)$
 
 - $y^{\star (1)}_{e,i,j}, \ldots, y^{\star} (M)}_{e,i,j}$: sample from posterior of $Y_{e,i,j}$ given all data.
+
 
 ## Posterior Predictive Simulations
 
 ![](decathlon-predictive.png){width=50% fig-align="center"}
 
+## Predicted Age Curve
+
+
+![](decathlon-age-curves.png){width=85% fig-align="center"}
+
+
+## Athlete Profiles
+
+
+![](decathlon-quantiles.png){width=85% fig-align="center"}
+
+## Breaking 9200
+
+![](decathlon-profiles){fig-align="center"}
 
 
