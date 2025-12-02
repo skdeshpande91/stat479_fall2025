@@ -82,18 +82,24 @@ $$
   - Compute posterior distribution $p(\theta \vert y)$
 - Posterior quantifies uncertainty **given the observed data**
 
+## Example: Tea, Milk, Octopi, & FIFA
+
+- [Paul the Octopus](https://en.wikipedia.org/wiki/Paul_the_Octopus): predicted football matches
+  - Picked from food boxes w/ nations' flags
+  - Correctly predicted $Y_{1} = 8$ out of 8 games!
+
+- Milk or tea first? 
+  - [Muriel Bristol](https://en.wikipedia.org/wiki/Muriel_Bristol) claimed to taste difference
+  - Correctly determined order in $Y_{2} = 8$ out of 8 cup! 
 
 
 
-## Example: Coin Flipping
 
-- Consider a coin with unknown $\mathbb{P}(\textrm{heads}) = \theta \in [0,1]$
-- Flip the coin 10 times and observe $Y = 4$ heads.
-- What's your prediction for $Y^{\star},$ number of heads in 100 more flips?  
+## Example: Classical Statistics{.smaller}
 
-## Example: Likelihood Specification
-
-- Likelihood: $p(y \vert \theta) = \binom{10}{y}\theta^{y}(1 - \theta)^{10-k}$
+- $Y_{1} \sim \textrm{Binomial}(8, \theta_{1})$ & $Y_{2} \sim \textrm{Binomial}(8, \theta_{2}).$
+- We observe $Y_{1} = Y_{2} = 8$
+- Classical Statistics: $\hat{\theta}_{1} = \hat{\theta}_{2} = 1$
 
 ```{r}
 #| label: fig-likelihood
@@ -106,209 +112,258 @@ oi_colors <- palette.colors(palette = "Okabe-Ito")
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
 theta_seq <- seq(0, 1, by = 0.001)
 
-likelihood <- dbinom(x = 4, size = 10, prob = theta_seq)
+likelihood <- dbinom(x = 8, size = 8, prob = theta_seq)
 
-plot(1, type = "n", xlim = c(0, 1), ylim = c(0, 0.3),
-     xlab = "theta", ylab = "P(Y = 4 | theta)", main = "Likelihood")
+plot(1, type = "n", xlim = c(0, 1), ylim = c(0, 1),
+     xlab = "theta", ylab = "P(Y = 8 | theta)", main = "Likelihood")
 lines(theta_seq, likelihood, col = oi_colors[9])
-lines(x = c(0.4, 0.4), y = c(par("usr")[3], dbinom(4,10,0.4)), lty = 2)
-points(x = 0.4, y = dbinom(4, 10, 0.4), pch = 16, col = oi_colors[9])
+lines(x = c(1, 1), y = c(par("usr")[3], dbinom(8,8,1)), lty = 2)
+points(x = 1, y = dbinom(8, 8, 1), pch = 16, col = oi_colors[9])
 ```
 
 
-## Example: Prior Specification
-- What do we believe about the coin **prior** to flipping it & seeing data?
-- Absent more information, uniform prior not unreasonable: $p(\theta) = 1$
-- Prior to seeing any data:
-  - Best estimate of $\theta$ is *prior mean*: $\hat{\theta} = 1/2$
-  - 95% prior prob. that $\theta \in [0.025, 0.975]$ 
+## Example: Prior for $\theta_{1}${.smaller}
 
-## Example: Prior Visualization
+- Relatively implausible that octopi know soccer
+- More likely than not Paul is randomly guessing
+- $\theta_{1} \sim \textrm{Beta}(20,20)$: 
+
 ```{r}
-#| label: fig-prior-density
-#| eval: true
-#| echo: false
-#| fig-width: 8
-#| fig-height: 4.5
-#| fig-align: center
-
-a_prior <- 1
-b_prior <- 1
-prior_dens <- rep(1, times = length(theta_seq))
-prior_theta_ix <- which(theta_seq >= 0.025 & theta_seq <= 0.975)
-
-prior_ci_x <- theta_seq[prior_theta_ix]
-prior_ci_y_top <- prior_dens[prior_theta_ix]
-prior_ci_y_bot <- rep(0, times = length(prior_theta_ix))
-
-
-par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
-plot(1, type = "n", xlim = c(0,1), ylim = c(0, 3),
-     xlab = "theta", ylab = "Density", main = "Prior")
-lines(theta_seq, prior_dens, col = oi_colors[3])
-
-polygon(x = c(prior_ci_x, rev(prior_ci_x)),
-        y = c(prior_ci_y_bot, rev(prior_ci_y_top)),
-        col = adjustcolor(col = oi_colors[3], alpha.f = 0.5),
-        border = NA)
-points(x = 0.5, y = 1, pch = 16, col = oi_colors[3])
-lines(x = c(0.5, 0.5), y = c(par("usr")[3], 1), lty = 2, col = oi_colors[3])
-
-```
-
-## Example: Posterior Distribution
-
-- $\theta \vert Y = 4 \sim \textrm{Beta}(5,7)$
-  - Best guess: $\hat{\theta} = (4 + 1)/(10 + 1)$
-  - 95% prob. that $\theta$ in `{r} round(qbeta(c(0.025, 0.975), 5, 7), digits = 2)`
-```{r}
-#| label: fig-beta-binomial
+#| label: fig-prior-paul
 #| eval: true
 #| echo: false
 #| fig-width: 7.2
 #| fig-height: 4.05
 #| fig-align: "center"
 
-y <- 4
-n <- 10
-a_post <- a_prior + y
-b_post <- b_prior + n - y
+oi_colors <- palette.colors(palette = "Okabe-Ito")
+theta_seq <- seq(0, 1, by = 0.001)
 
-post_dens <- dbeta(theta_seq, shape1 = a_post, shape2 = b_post)
+a1_prior <- 10
+b1_prior <- 10
+y1 <- 8
+n1 <- 8
 
-post_theta_ix <- which(theta_seq >= qbeta(0.025, a_post, b_post) & theta_seq <= qbeta(0.975, a_post, b_post))
+a1_post <- a1_prior + y1
+b1_post <- b1_prior + n1 - y1
 
-post_ci_x <- theta_seq[post_theta_ix]
-post_ci_y_top <- post_dens[post_theta_ix]
-post_ci_y_bot <- rep(0, times = length(post_theta_ix))
+prior1 <- dbeta(theta_seq, shape1 = a1_prior, shape2 = b1_prior)
+post1 <- dbeta(theta_seq, shape1 = a1_post, shape2 = b1_post)
+
+theta1_ix_prior <- 
+  which(theta_seq >= qbeta(0.025, a1_prior, b1_prior) & theta_seq <= qbeta(0.975, a1_prior, b1_prior))
+
+x1_prior <- theta_seq[theta1_ix_prior]
+y1_prior_top <- prior1[theta1_ix_prior]
+y1_prior_bot <- rep(0, times = length(theta1_ix_prior))
+
+prior1_mean <- a1_prior/(a1_prior + b1_prior)
+
+
+theta1_ix_post <- 
+  which(theta_seq >= qbeta(0.025, a1_post, b1_post) & theta_seq <= qbeta(0.975, a1_post, b1_post))
+x1_post <- theta_seq[theta1_ix_post]
+y1_post_top <- post1[theta1_ix_post]
+y1_post_bot <- rep(0, times = length(theta1_ix_post))
+
+post1_mean <- a1_post/(a1_post + b1_post)
 
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
-plot(1, type = "n", xlim = c(0,1), ylim = c(0, 3),
-     xlab = "theta", ylab = "Density", main = "Posterior")
-lines(theta_seq, post_dens, col = oi_colors[2])
-
-polygon(x = c(post_ci_x, rev(post_ci_x)),
-        y = c(post_ci_y_bot, rev(post_ci_y_top)),
+plot(1, type = "n", 
+     xlim = c(0,1), ylim = c(0, max(c(prior1, post1))),
+     main = c("Prior (theta1)"), xlab = "theta1", ylab = "Density")
+abline(h = 0)
+lines(theta_seq, prior1, col = oi_colors[2])
+polygon(x = c(x1_prior, rev(x1_prior)),
+        y = c(y1_prior_top, rev(y1_prior_bot)),
         col = adjustcolor(col = oi_colors[2], alpha.f = 0.5),
         border = NA)
-post_mean <- a_post/(a_post+b_post)
-lines(x = c(post_mean, post_mean), 
-      y = c(par("usr")[3], dbeta(post_mean, a_post, b_post)),
-      lty = 2, col = oi_colors[2])
-points(x = post_mean, y = dbeta(post_mean, a_post, b_post), pch = 16, col = oi_colors[2])
+lines(x = c(prior1_mean, prior1_mean), y = c(0, dbeta(prior1_mean, a1_prior, b1_prior)), lty = 2,
+      col = oi_colors[2])
+points(x = prior1_mean, y = dbeta(prior1_mean, a1_prior, b1_prior), pch = 16, col = oi_colors[2])
 ```
+## Example: Posterior for $\theta_{1}${.smaller}
 
-
-## Example: Posterior Predictive
-
-- $\mathbb{P}(Y^{\star} = k \vert Y = 4) = \int{ \mathbb{P}(Y^{\star} = k \vert \theta)p(\theta \vert Y = 4)d\theta}$
-- Simulation: for $m = 1, \ldots, M$
-  - Draw a posterior sample $\theta^{(m)}$
-  - Then simulate $Y^{\star} \sim \textrm{Binomial}(100, \theta^{(m)})$
+- Posterior: $\theta_{1} \vert Y_{1} = 8 \sim \textrm{Beta}(18, 10)$
+  - Best guess: $\hat{\theta}_{1} = $ `{r} round(post1_mean, digits = 2)`
+  - 95% interval: `{r} round( qbeta(c(0.025, 0.975), a1_post, b1_post), digits = 2)`
 
 ```{r}
-#| label: post-pred
-#| eval: true
-#| echo: true
-theta_draws <- rbeta(n = 5e5, shape1 = a_post, shape2 = b_post)
-ystar <- rbinom(n = 5e5, size = 100, prob = theta_draws)
-round(sort(table(ystar)/5e5, decreasing = TRUE), digits = 4)[1:10]
-```
-
-## Example 2: Motivation{.smaller}
-
-- [Muriel Bristol](https://en.wikipedia.org/wiki/Muriel_Bristol): correctly determined tea/milk order in 8 of 8 cups
-- [Paul the Octopus](https://en.wikipedia.org/wiki/Paul_the_Octopus): correctly predicted winner in 8 of 8 World Cup games
-
-- $\theta_{1}$: prob. Muriel Bristol gets order right
-- $\theta_{2}$: prob. Paul correctly picks winner
-- Do we really believe $\theta_{1} = \theta_{2} = 100\%$???
-
-## Motivating Example: Prior Elicitation
-
-- $\textrm{Beta}(15,5)$ prior for $\theta_{1}$:
-  - Best guess (pre-data): `{r} round(15/(15+5), digits = 2)`
-  - 95% prob. on interval `{r} round( qbeta(c(0.025, 0.975), 15, 5), digits = 2)`
-  - Plausible to develop palette over decades of daily tea consumption
-  
-- $\textrm{Beta}(5, 95)$ prior for $\theta_{2}$:
-  - Best guess (pre-data): `{r} round(5/(5+95), digits = 2)`
-  - 95% prob. on interval `{r} round( qbeta(c(0.025, 0.975), 5, 95), digits = 2)`
-  - What would an octopus know about football??
-  
-## Example 2: Posterior Summaries
-
-- Posterior $\theta_{1} \vert Y_{1} = 8 \sim \textrm{Beta}(23, 5)$
-  - Best guess: `{r} round( (8+15)/(8+15+5), digits = 2)`
-  - 95% prob. on interval `{r} round( qbeta(c(0.025, 0.975), 8+15, 5), digits = 2)`
-
-- Posterior $\theta_{2} \vert Y_{2} = 8 \sim \textrm{Beta}(13, 95)$
-  - Best guess: `{r} round( (8+5)/(8+5+95), digits = 2)`
-  - 95% prob. on interval `{r} round( qbeta(c(0.025, 0.975), 8+5, 95), digits = 2)`
-
-## Example 2: Posterior Visualization
-
-```{r}
-#| label: fig-example2-theta1-theta2
+#| label: fig-post-paul
 #| eval: true
 #| echo: false
-#| fig-width: 8
-#| fig-height: 4.5
-#| fig-align: center
+#| fig-width: 7.2
+#| fig-height: 4.05
+#| fig-align: "center"
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+plot(1, type = "n", 
+     xlim = c(0,1), ylim = c(0, max(c(prior1, post1))),
+     main = c("Prior & Posterior"), xlab = "theta1", ylab = "Density")
+abline(h = 0)
+lines(theta_seq, prior1, col = oi_colors[2])
+polygon(x = c(x1_prior, rev(x1_prior)),
+        y = c(y1_prior_top, rev(y1_prior_bot)),
+        col = adjustcolor(col = oi_colors[2], alpha.f = 0.5),
+        border = NA)
+lines(x = c(prior1_mean, prior1_mean), y = c(0, dbeta(prior1_mean, a1_prior, b1_prior)), lty = 2,
+      col = oi_colors[2])
+points(x = prior1_mean, y = dbeta(prior1_mean, a1_prior, b1_prior), pch = 16, col = oi_colors[2])
 
-a1 <- 8+15
-b1 <- 0 + 5
+lines(theta_seq, post1, col = oi_colors[3])
+polygon(x = c(x1_post, rev(x1_post)),
+        y = c(y1_post_top, rev(y1_post_bot)),
+        col = adjustcolor(col = oi_colors[3], alpha.f = 0.5),
+        border = NA)
+lines(x = c(post1_mean, post1_mean), y = c(0, dbeta(post1_mean, a1_post, b1_post)), lty = 2,
+      col = oi_colors[3])
+points(x = post1_mean, y = dbeta(post1_mean, a1_post, b1_post), pch = 16, col = oi_colors[3])
 
-a2 <- 8 + 5
-b2 <- 8 + 95
+legend("topleft", legend = c("Prior","Posterior"), pch = c(15, 15),
+       col = adjustcolor(col = oi_colors[2:3], alpha.f = 0.5), border = NA)
+```
 
-post_dens1 <- dbeta(theta_seq, shape1 = a1, shape2 = b1)
-post_dens2 <- dbeta(theta_seq, shape1 = a2, shape2 = b2)
+## Example: Prior for $\theta_{2}${.smaller}
+
+- Plausible to refine palette over decades of daily tea consumption
+- $\theta_{2}$ is probably over 50%
+- $\theta_{2} \sim \textrm{Beta}(15,5)$
+
+```{r}
+#| label: fig-prior-tea
+#| eval: true
+#| echo: false
+#| fig-width: 7.2
+#| fig-height: 4.05
+#| fig-align: "center"
+a2_prior <- 15
+b2_prior <- 5
+y2 <- 8
+n2 <- 8
+
+a2_post <- a2_prior + y2
+b2_post <- b2_prior + n2 - y2
+
+prior2 <- dbeta(theta_seq, shape1 = a2_prior, shape2 = b2_prior)
+post2 <- dbeta(theta_seq, shape1 = a2_post, shape2 = b2_post)
+
+theta2_ix_prior <- 
+  which(theta_seq >= qbeta(0.025, a2_prior, b2_prior) & theta_seq <= qbeta(0.975, a2_prior, b2_prior))
+
+x2_prior <- theta_seq[theta2_ix_prior]
+y2_prior_top <- prior2[theta2_ix_prior]
+y2_prior_bot <- rep(0, times = length(theta2_ix_prior))
+
+prior2_mean <- a2_prior/(a2_prior + b2_prior)
 
 
-theta1_ix <- which(theta_seq >= qbeta(0.025, a1, b1) & theta_seq <= qbeta(0.975, a1, b1))
-theta2_ix <- which(theta_seq >= qbeta(0.025, a2, b2) & theta_seq <= qbeta(0.975, a2, b2))
+theta2_ix_post <- 
+  which(theta_seq >= qbeta(0.025, a2_post, b2_post) & theta_seq <= qbeta(0.975, a2_post, b2_post))
+x2_post <- theta_seq[theta2_ix_post]
+y2_post_top <- post2[theta2_ix_post]
+y2_post_bot <- rep(0, times = length(theta2_ix_post))
 
-x1 <- theta_seq[theta1_ix]
-x2 <- theta_seq[theta2_ix]
-
-y1_top <- post_dens1[theta1_ix]
-y2_top <- post_dens2[theta2_ix]
-
-y1_bot <- rep(0, times = length(theta1_ix))
-y2_bot <- rep(0, times = length(theta2_ix))
-
+post2_mean <- a2_post/(a2_post + b2_post)
 
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
-plot(1, type = "n",
-     xlim = c(0,1), ylim = c(0, max(c(post_dens1, post_dens2))),
-     xlab = "theta", ylab = "Density", main = "Posteriors of theta1 & theta2")
-
-
-
-lines(theta_seq, post_dens1, col = oi_colors[4])
-lines(theta_seq, post_dens2, col = oi_colors[8])
-
-
-polygon(x = c(x1, rev(x1)), y = c(y1_bot, rev(y1_top)),
-        col = adjustcolor(oi_colors[4], alpha.f = 0.4),
+plot(1, type = "n", 
+     xlim = c(0,1), ylim = c(0, max(c(prior2, post2))),
+     main = c("Prior (theta2)"), xlab = "theta1", ylab = "Density")
+abline(h = 0)
+lines(theta_seq, prior2, col = oi_colors[5])
+polygon(x = c(x2_prior, rev(x2_prior)),
+        y = c(y2_prior_top, rev(y2_prior_bot)),
+        col = adjustcolor(col = oi_colors[5], alpha.f = 0.5),
         border = NA)
-polygon(x = c(x2, rev(x2)),
-        y = c(y2_bot, rev(y2_top)),
-        col = adjustcolor(oi_colors[8], alpha.f = 0.4),
-        border = NA)
-
-post_mean1 <- a1/(a1+b1)
-post_mean2 <- a2/(a2+b2)
-
-lines(x = c(post_mean1, post_mean1), y = c(0, dbeta(post_mean1, a1, b1)), col = oi_colors[4], lty = 2)
-points(x = post_mean1, y = dbeta(post_mean1, a1, b1), pch = 16, col = oi_colors[4])
-
-lines(x = c(post_mean2, post_mean2), y = c(0, dbeta(post_mean2, a2, b2)), col = oi_colors[8], lty = 2)
-points(x = post_mean2, y = dbeta(post_mean2, a2, b2), pch = 16, col = oi_colors[8])
-
+lines(x = c(prior2_mean, prior2_mean), y = c(0, dbeta(prior2_mean, a2_prior, b2_prior)), lty = 2,
+      col = oi_colors[5])
+points(x = prior2_mean, y = dbeta(prior2_mean, a2_prior, b2_prior), pch = 16, col = oi_colors[5])
 
 ```
+
+
+## Example: Posterior for $\theta_{2}${.smaller}
+- $\theta_{2} \vert Y_{2} = 8 \sim \textrm{Beta}(23, 5)$
+  - Best guess: `{r} round(post2_mean, digits = 2)`
+  - 95% interval: `{r} round( qbeta(c(0.025, 0.975), a2_post, b2_post), digits = 2)`
+  
+```{r}
+#| label: fig-post-tea
+#| eval: true
+#| echo: false
+#| fig-width: 7.2
+#| fig-height: 4.05
+#| fig-align: "center"
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+plot(1, type = "n", 
+     xlim = c(0,1), ylim = c(0, max(c(prior2, post2))),
+     main = c("Prior & Posterior"), xlab = "theta2", ylab = "Density")
+abline(h = 0)
+lines(theta_seq, prior2, col = oi_colors[5])
+polygon(x = c(x2_prior, rev(x2_prior)),
+        y = c(y2_prior_top, rev(y2_prior_bot)),
+        col = adjustcolor(col = oi_colors[5], alpha.f = 0.5),
+        border = NA)
+lines(x = c(prior2_mean, prior2_mean), y = c(0, dbeta(prior2_mean, a2_prior, b2_prior)), lty = 2,
+      col = oi_colors[5])
+points(x = prior2_mean, y = dbeta(prior2_mean, a2_prior, b2_prior), pch = 16, col = oi_colors[5])
+
+lines(theta_seq, post2, col = oi_colors[4])
+polygon(x = c(x2_post, rev(x2_post)),
+        y = c(y2_post_top, rev(y2_post_bot)),
+        col = adjustcolor(col = oi_colors[4], alpha.f = 0.5),
+        border = NA)
+lines(x = c(post2_mean, post2_mean), y = c(0, dbeta(post2_mean, a2_post, b2_post)), lty = 2,
+      col = oi_colors[4])
+points(x = post2_mean, y = dbeta(post2_mean, a2_post, b2_post), pch = 16, col = oi_colors[4])
+
+legend("topleft", legend = c("Prior","Posterior"), pch = c(15, 15),
+       col = adjustcolor(col = oi_colors[5:4], alpha.f = 0.5), border = NA)
+```
+
+## Example: Posterior Predictive{.smaller}
+
+- What if we asked Paul & Muriel for 4 more predictions?
+- $\mathbb{P}(Y_{1}^{\star} = k \vert Y_{1} = 8) = \int{ \mathbb{P}(Y_{1}^{\star} = k \vert \theta)p(\theta \vert Y_{1} = 8)d\theta}$
+- Simulation: for $m = 1, \ldots, M$
+  - Draw a posterior sample $\theta_{1}^{(m)}$
+  - Then simulate $Y_{1}^{\star} \sim \textrm{Binomial}(4, \theta_{1}^{(m)})$
+
+```{r}
+#| label: post-pred1
+#| eval: true
+#| echo: true
+n_sims <- 5e5
+theta1_draws <- rbeta(n = 5e5, shape1 = a1_post, shape2 = b1_post)
+ystar1 <- rbinom(n = 5e5, size = 4, prob = theta1_draws)
+round(table(ystar1)/n_sims, digits = 2)
+```
+
+```{r}
+#| label: post-pred2
+#| eval: true
+#| echo: false
+theta2_draws <- rbeta(n = 5e5, shape1 = a2_post, shape2 = b2_post)
+ystar2 <- rbinom(n = 5e5, size = 4, prob = theta2_draws)
+round(table(ystar2)/n_sims, digits = 2)
+```
+
+## Example: Uncertainty about functionals{.smaller}
+
+- Best estimate for $\theta_{1} - \theta_{2}$: `{r} round( mean(theta1_draws - theta2_draws), digits = 2)`; 95% interval `{r} round( quantile(theta1_draws - theta2_draws, probs = c(0.025, 0.975)), digits = 2)`
+- $\mathbb{P}(\theta_{1} > \theta_{2} \vert Y_{1} = Y_{2} = 8)$ = `{r} round( mean(theta1_draws > theta2_draws), digits = 2)`
+
+```{r}
+#| label: fig-hist-theta-diff
+#| eval: true
+#| echo: false
+#| fig-width: 7.2
+#| fig-height: 4.05
+#| fig-align: center
+hist(theta1_draws - theta2_draws, breaks = 100,
+     xlab = "theta1-theta2", main = "Posterior of theta1-theta2")
+abline(v = 0, col = oi_colors[8])
+```
+
 
 
 ## Advantages of Bayesian Modeling
@@ -346,7 +401,7 @@ y^{\star(m)}_{e,i,j} &= \alpha^{(m)}_{e,i} + \sum_{d = 1}^{D}{\gamma^{(m)}_{e,d}
 $$
 where $\epsilon^{\star(m)} \sim N(0,1)$
 
-- $y^{\star (1)}_{e,i,j}, \ldots, y^{\star} (M)}_{e,i,j}$: sample from posterior of $Y_{e,i,j}$ given all data.
+- $y^{\star (1)}_{e,i,j}, \ldots, y^{\star (M)}_{e,i,j}$: sample from posterior of $Y_{e,i,j}$ given all data.
 
 
 ## Posterior Predictive Simulations

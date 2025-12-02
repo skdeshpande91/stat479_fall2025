@@ -6,11 +6,11 @@
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="../../site_libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
 <link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
 <link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.7.32">
+  <meta name="generator" content="quarto-1.7.31">
 
   <title>STAT479 – STAT 479 Lecture 24</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -304,22 +304,31 @@ y_{e,i,j} &amp;= \alpha_{e,i} + \sum_{d = 1}^{D}{\gamma_{e,d}\phi_{d}(\text{age}
 <li><p>Posterior quantifies uncertainty <strong>given the observed data</strong></p></li>
 </ul>
 </section>
-<section id="example-coin-flipping" class="slide level2">
-<h2>Example: Coin Flipping</h2>
+<section id="example-tea-milk-octopi-fifa" class="slide level2">
+<h2>Example: Tea, Milk, Octopi, &amp; FIFA</h2>
 <ul>
-<li>Consider a coin with unknown <span class="math inline">\(\mathbb{P}(\textrm{heads}) = \theta \in [0,1]\)</span></li>
-<li>Flip the coin 10 times and observe <span class="math inline">\(Y = 4\)</span> heads.</li>
-<li>What’s your prediction for <span class="math inline">\(Y^{\star},\)</span> number of heads in 100 more flips?</li>
+<li><a href="https://en.wikipedia.org/wiki/Paul_the_Octopus">Paul the Octopus</a>: predicted football matches
+<ul>
+<li>Picked from food boxes w/ nations’ flags</li>
+<li>Correctly predicted <span class="math inline">\(Y_{1} = 8\)</span> out of 8 games!</li>
+</ul></li>
+<li>Milk or tea first?
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Muriel_Bristol">Muriel Bristol</a> claimed to taste difference</li>
+<li>Correctly determined order in <span class="math inline">\(Y_{2} = 8\)</span> out of 8 cup!</li>
+</ul></li>
 </ul>
 </section>
-<section id="example-likelihood-specification" class="slide level2">
-<h2>Example: Likelihood Specification</h2>
+<section id="example-classical-statistics" class="slide level2 smaller">
+<h2>Example: Classical Statistics</h2>
 <ul>
-<li>Likelihood: <span class="math inline">\(p(y \vert \theta) = \binom{10}{y}\theta^{y}(1 - \theta)^{10-k}\)</span></li>
+<li><span class="math inline">\(Y_{1} \sim \textrm{Binomial}(8, \theta_{1})\)</span> &amp; <span class="math inline">\(Y_{2} \sim \textrm{Binomial}(8, \theta_{2}).\)</span></li>
+<li>We observe <span class="math inline">\(Y_{1} = Y_{2} = 8\)</span></li>
+<li>Classical Statistics: <span class="math inline">\(\hat{\theta}_{1} = \hat{\theta}_{2} = 1\)</span></li>
 </ul>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div id="fig-likelihood" class="quarto-float quarto-figure quarto-figure-center" width="768" data-fig-align="center">
+<div id="fig-likelihood" class="quarto-float quarto-figure quarto-figure-center" data-fig-align="center" width="768">
 <figure class="quarto-float quarto-float-fig">
 <div aria-describedby="fig-likelihood-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <a href="slides_24_files/figure-revealjs/fig-likelihood-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;1: "><img data-src="slides_24_files/figure-revealjs/fig-likelihood-1.png" id="fig-likelihood" class="quarto-figure quarto-figure-center" width="768"></a>
@@ -332,28 +341,21 @@ Figure&nbsp;1
 </div>
 </div>
 </section>
-<section id="example-prior-specification" class="slide level2">
-<h2>Example: Prior Specification</h2>
+<section id="example-prior-for-theta_1" class="slide level2 smaller">
+<h2>Example: Prior for <span class="math inline">\(\theta_{1}\)</span></h2>
 <ul>
-<li>What do we believe about the coin <strong>prior</strong> to flipping it &amp; seeing data?</li>
-<li>Absent more information, uniform prior not unreasonable: <span class="math inline">\(p(\theta) = 1\)</span></li>
-<li>Prior to seeing any data:
-<ul>
-<li>Best estimate of <span class="math inline">\(\theta\)</span> is <em>prior mean</em>: <span class="math inline">\(\hat{\theta} = 1/2\)</span></li>
-<li>95% prior prob. that <span class="math inline">\(\theta \in [0.025, 0.975]\)</span></li>
-</ul></li>
+<li>Relatively implausible that octopi know soccer</li>
+<li>More likely than not Paul is randomly guessing</li>
+<li><span class="math inline">\(\theta_{1} \sim \textrm{Beta}(20,20)\)</span>:</li>
 </ul>
-</section>
-<section id="example-prior-visualization" class="slide level2">
-<h2>Example: Prior Visualization</h2>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div id="fig-prior-density" class="quarto-float quarto-figure quarto-figure-center" width="768" data-fig-align="center">
+<div id="fig-prior-paul" class="quarto-float quarto-figure quarto-figure-center" data-fig-align="center" width="691.2">
 <figure class="quarto-float quarto-float-fig">
-<div aria-describedby="fig-prior-density-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="slides_24_files/figure-revealjs/fig-prior-density-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;2: "><img data-src="slides_24_files/figure-revealjs/fig-prior-density-1.png" id="fig-prior-density" class="quarto-figure quarto-figure-center" width="768"></a>
+<div aria-describedby="fig-prior-paul-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="slides_24_files/figure-revealjs/fig-prior-paul-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;2: "><img data-src="slides_24_files/figure-revealjs/fig-prior-paul-1.png" id="fig-prior-paul" class="quarto-figure quarto-figure-center" width="691"></a>
 </div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-prior-density-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-prior-paul-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;2
 </figcaption>
 </figure>
@@ -361,23 +363,23 @@ Figure&nbsp;2
 </div>
 </div>
 </section>
-<section id="example-posterior-distribution" class="slide level2">
-<h2>Example: Posterior Distribution</h2>
+<section id="example-posterior-for-theta_1" class="slide level2 smaller">
+<h2>Example: Posterior for <span class="math inline">\(\theta_{1}\)</span></h2>
 <ul>
-<li><span class="math inline">\(\theta \vert Y = 4 \sim \textrm{Beta}(5,7)\)</span>
+<li>Posterior: <span class="math inline">\(\theta_{1} \vert Y_{1} = 8 \sim \textrm{Beta}(18, 10)\)</span>
 <ul>
-<li>Best guess: <span class="math inline">\(\hat{\theta} = (4 + 1)/(10 + 1)\)</span></li>
-<li>95% prob. that <span class="math inline">\(\theta\)</span> in 0.17, 0.69</li>
+<li>Best guess: $_{1} = $ 0.64</li>
+<li>95% interval: 0.46, 0.81</li>
 </ul></li>
 </ul>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div id="fig-beta-binomial" class="quarto-float quarto-figure quarto-figure-center" width="691.2" data-fig-align="center">
+<div id="fig-post-paul" class="quarto-float quarto-figure quarto-figure-center" data-fig-align="center" width="691.2">
 <figure class="quarto-float quarto-float-fig">
-<div aria-describedby="fig-beta-binomial-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="slides_24_files/figure-revealjs/fig-beta-binomial-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;3: "><img data-src="slides_24_files/figure-revealjs/fig-beta-binomial-1.png" id="fig-beta-binomial" class="quarto-figure quarto-figure-center" width="691"></a>
+<div aria-describedby="fig-post-paul-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="slides_24_files/figure-revealjs/fig-post-paul-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;3: "><img data-src="slides_24_files/figure-revealjs/fig-post-paul-1.png" id="fig-post-paul" class="quarto-figure quarto-figure-center" width="691"></a>
 </div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-beta-binomial-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-post-paul-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;3
 </figcaption>
 </figure>
@@ -385,80 +387,97 @@ Figure&nbsp;3
 </div>
 </div>
 </section>
-<section id="example-posterior-predictive" class="slide level2">
+<section id="example-prior-for-theta_2" class="slide level2 smaller">
+<h2>Example: Prior for <span class="math inline">\(\theta_{2}\)</span></h2>
+<ul>
+<li>Plausible to refine palette over decades of daily tea consumption</li>
+<li><span class="math inline">\(\theta_{2}\)</span> is probably over 50%</li>
+<li><span class="math inline">\(\theta_{2} \sim \textrm{Beta}(15,5)\)</span></li>
+</ul>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-prior-tea" class="quarto-float quarto-figure quarto-figure-center" data-fig-align="center" width="691.2">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-prior-tea-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="slides_24_files/figure-revealjs/fig-prior-tea-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Figure&nbsp;4: "><img data-src="slides_24_files/figure-revealjs/fig-prior-tea-1.png" id="fig-prior-tea" class="quarto-figure quarto-figure-center" width="691"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-prior-tea-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="example-posterior-for-theta_2" class="slide level2 smaller">
+<h2>Example: Posterior for <span class="math inline">\(\theta_{2}\)</span></h2>
+<ul>
+<li><span class="math inline">\(\theta_{2} \vert Y_{2} = 8 \sim \textrm{Beta}(23, 5)\)</span>
+<ul>
+<li>Best guess: 0.82</li>
+<li>95% interval: 0.66, 0.94</li>
+</ul></li>
+</ul>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-post-tea" class="quarto-float quarto-figure quarto-figure-center" data-fig-align="center" width="691.2">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-post-tea-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="slides_24_files/figure-revealjs/fig-post-tea-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7" title="Figure&nbsp;5: "><img data-src="slides_24_files/figure-revealjs/fig-post-tea-1.png" id="fig-post-tea" class="quarto-figure quarto-figure-center" width="691"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-post-tea-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="example-posterior-predictive" class="slide level2 smaller">
 <h2>Example: Posterior Predictive</h2>
 <ul>
-<li><span class="math inline">\(\mathbb{P}(Y^{\star} = k \vert Y = 4) = \int{ \mathbb{P}(Y^{\star} = k \vert \theta)p(\theta \vert Y = 4)d\theta}\)</span></li>
+<li>What if we asked Paul &amp; Muriel for 4 more predictions?</li>
+<li><span class="math inline">\(\mathbb{P}(Y_{1}^{\star} = k \vert Y_{1} = 8) = \int{ \mathbb{P}(Y_{1}^{\star} = k \vert \theta)p(\theta \vert Y_{1} = 8)d\theta}\)</span></li>
 <li>Simulation: for <span class="math inline">\(m = 1, \ldots, M\)</span>
 <ul>
-<li>Draw a posterior sample <span class="math inline">\(\theta^{(m)}\)</span></li>
-<li>Then simulate <span class="math inline">\(Y^{\star} \sim \textrm{Binomial}(100, \theta^{(m)})\)</span></li>
+<li>Draw a posterior sample <span class="math inline">\(\theta_{1}^{(m)}\)</span></li>
+<li>Then simulate <span class="math inline">\(Y_{1}^{\star} \sim \textrm{Binomial}(4, \theta_{1}^{(m)})\)</span></li>
 </ul></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a>theta_draws <span class="ot">&lt;-</span> <span class="fu">rbeta</span>(<span class="at">n =</span> <span class="fl">5e5</span>, <span class="at">shape1 =</span> a_post, <span class="at">shape2 =</span> b_post)</span>
-<span id="cb1-2"><a></a>ystar <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="at">n =</span> <span class="fl">5e5</span>, <span class="at">size =</span> <span class="dv">100</span>, <span class="at">prob =</span> theta_draws)</span>
-<span id="cb1-3"><a></a><span class="fu">round</span>(<span class="fu">sort</span>(<span class="fu">table</span>(ystar)<span class="sc">/</span><span class="fl">5e5</span>, <span class="at">decreasing =</span> <span class="cn">TRUE</span>), <span class="at">digits =</span> <span class="dv">4</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a>n_sims <span class="ot">&lt;-</span> <span class="fl">5e5</span></span>
+<span id="cb1-2"><a></a>theta1_draws <span class="ot">&lt;-</span> <span class="fu">rbeta</span>(<span class="at">n =</span> <span class="fl">5e5</span>, <span class="at">shape1 =</span> a1_post, <span class="at">shape2 =</span> b1_post)</span>
+<span id="cb1-3"><a></a>ystar1 <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="at">n =</span> <span class="fl">5e5</span>, <span class="at">size =</span> <span class="dv">4</span>, <span class="at">prob =</span> theta1_draws)</span>
+<span id="cb1-4"><a></a><span class="fu">round</span>(<span class="fu">table</span>(ystar1)<span class="sc">/</span>n_sims, <span class="at">digits =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>ystar
-    40     37     41     38     42     39     43     44     36     45 
-0.0262 0.0258 0.0258 0.0258 0.0258 0.0257 0.0255 0.0254 0.0254 0.0250 </code></pre>
+<pre><code>ystar1
+   0    1    2    3    4 
+0.02 0.13 0.30 0.36 0.19 </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>ystar2
+   0    1    2    3    4 
+0.00 0.03 0.13 0.37 0.48 </code></pre>
 </div>
 </div>
 </section>
-<section id="example-2-motivation" class="slide level2 smaller">
-<h2>Example 2: Motivation</h2>
+<section id="example-uncertainty-about-functionals" class="slide level2 smaller">
+<h2>Example: Uncertainty about functionals</h2>
 <ul>
-<li><p><a href="https://en.wikipedia.org/wiki/Muriel_Bristol">Muriel Bristol</a>: correctly determined tea/milk order in 8 of 8 cups</p></li>
-<li><p><a href="https://en.wikipedia.org/wiki/Paul_the_Octopus">Paul the Octopus</a>: correctly predicted winner in 8 of 8 World Cup games</p></li>
-<li><p><span class="math inline">\(\theta_{1}\)</span>: prob. Muriel Bristol gets order right</p></li>
-<li><p><span class="math inline">\(\theta_{2}\)</span>: prob. Paul correctly picks winner</p></li>
-<li><p>Do we really believe <span class="math inline">\(\theta_{1} = \theta_{2} = 100\%\)</span>???</p></li>
+<li>Best estimate for <span class="math inline">\(\theta_{1} - \theta_{2}\)</span>: -0.18; 95% interval -0.4, 0.05</li>
+<li><span class="math inline">\(\mathbb{P}(\theta_{1} &gt; \theta_{2} \vert Y_{1} = Y_{2} = 8)\)</span> = 0.06</li>
 </ul>
-</section>
-<section id="motivating-example-prior-elicitation" class="slide level2">
-<h2>Motivating Example: Prior Elicitation</h2>
-<ul>
-<li><span class="math inline">\(\textrm{Beta}(15,5)\)</span> prior for <span class="math inline">\(\theta_{1}\)</span>:
-<ul>
-<li>Best guess (pre-data): 0.75</li>
-<li>95% prob. on interval 0.54, 0.91</li>
-<li>Plausible to develop palette over decades of daily tea consumption</li>
-</ul></li>
-<li><span class="math inline">\(\textrm{Beta}(5, 95)\)</span> prior for <span class="math inline">\(\theta_{2}\)</span>:
-<ul>
-<li>Best guess (pre-data): 0.05</li>
-<li>95% prob. on interval 0.02, 0.1</li>
-<li>What would an octopus know about football??</li>
-</ul></li>
-</ul>
-</section>
-<section id="example-2-posterior-summaries" class="slide level2">
-<h2>Example 2: Posterior Summaries</h2>
-<ul>
-<li>Posterior <span class="math inline">\(\theta_{1} \vert Y_{1} = 8 \sim \textrm{Beta}(23, 5)\)</span>
-<ul>
-<li>Best guess: 0.82</li>
-<li>95% prob. on interval 0.66, 0.94</li>
-</ul></li>
-<li>Posterior <span class="math inline">\(\theta_{2} \vert Y_{2} = 8 \sim \textrm{Beta}(13, 95)\)</span>
-<ul>
-<li>Best guess: 0.12</li>
-<li>95% prob. on interval 0.07, 0.19</li>
-</ul></li>
-</ul>
-</section>
-<section id="example-2-posterior-visualization" class="slide level2">
-<h2>Example 2: Posterior Visualization</h2>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div id="fig-example2-theta1-theta2" class="quarto-float quarto-figure quarto-figure-center" width="768" data-fig-align="center">
+<div id="fig-hist-theta-diff" class="quarto-float quarto-figure quarto-figure-center" data-fig-align="center" width="691.2">
 <figure class="quarto-float quarto-float-fig">
-<div aria-describedby="fig-example2-theta1-theta2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="slides_24_files/figure-revealjs/fig-example2-theta1-theta2-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Figure&nbsp;4: "><img data-src="slides_24_files/figure-revealjs/fig-example2-theta1-theta2-1.png" id="fig-example2-theta1-theta2" class="quarto-figure quarto-figure-center" width="768"></a>
+<div aria-describedby="fig-hist-theta-diff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="slides_24_files/figure-revealjs/fig-hist-theta-diff-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8" title="Figure&nbsp;6: "><img data-src="slides_24_files/figure-revealjs/fig-hist-theta-diff-1.png" id="fig-hist-theta-diff" class="quarto-figure quarto-figure-center" width="691"></a>
 </div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-example2-theta1-theta2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-hist-theta-diff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6
 </figcaption>
 </figure>
 </div>
@@ -492,7 +511,7 @@ Figure&nbsp;4
 <h2>Inter-event Dependence</h2>
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><a href="decathlon-beta.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7"><img data-src="decathlon-beta.png" class="quarto-figure quarto-figure-center" style="width:50.0%"></a></p>
+<p><a href="decathlon-beta.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9"><img data-src="decathlon-beta.png" class="quarto-figure quarto-figure-center" style="width:50.0%"></a></p>
 </figure>
 </div>
 <ul>
@@ -509,14 +528,14 @@ y^{\star(m)}_{e,i,j} &amp;= \alpha^{(m)}_{e,i} + \sum_{d = 1}^{D}{\gamma^{(m)}_{
 ~&amp; + \beta^{(m)}_{e,1}Y_{1,i,j} + \beta^{(m)}_{e,2}Y_{2,i,j} + \cdots + \beta^{(m)}_{e,e-1}Y_{e-1,i,j} + \sigma^{(m)}\epsilon^{\star (m)}_{e,i,j},
 \end{align}
 \]</span> where <span class="math inline">\(\epsilon^{\star(m)} \sim N(0,1)\)</span></p></li>
-<li><p><span class="math inline">\(y^{\star (1)}_{e,i,j}, \ldots, y^{\star} (M)}_{e,i,j}\)</span>: sample from posterior of <span class="math inline">\(Y_{e,i,j}\)</span> given all data.</p></li>
+<li><p><span class="math inline">\(y^{\star (1)}_{e,i,j}, \ldots, y^{\star (M)}_{e,i,j}\)</span>: sample from posterior of <span class="math inline">\(Y_{e,i,j}\)</span> given all data.</p></li>
 </ul>
 </section>
 <section id="posterior-predictive-simulations" class="slide level2">
 <h2>Posterior Predictive Simulations</h2>
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><a href="decathlon-predictive.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8"><img data-src="decathlon-predictive.png" class="quarto-figure quarto-figure-center" style="width:50.0%"></a></p>
+<p><a href="decathlon-predictive.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10"><img data-src="decathlon-predictive.png" class="quarto-figure quarto-figure-center" style="width:50.0%"></a></p>
 </figure>
 </div>
 </section>
@@ -524,7 +543,7 @@ y^{\star(m)}_{e,i,j} &amp;= \alpha^{(m)}_{e,i} + \sum_{d = 1}^{D}{\gamma^{(m)}_{
 <h2>Predicted Age Curve</h2>
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><a href="decathlon-age-curves.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9"><img data-src="decathlon-age-curves.png" class="quarto-figure quarto-figure-center" style="width:85.0%"></a></p>
+<p><a href="decathlon-age-curves.png" class="lightbox" data-gallery="quarto-lightbox-gallery-11"><img data-src="decathlon-age-curves.png" class="quarto-figure quarto-figure-center" style="width:85.0%"></a></p>
 </figure>
 </div>
 </section>
@@ -532,7 +551,7 @@ y^{\star(m)}_{e,i,j} &amp;= \alpha^{(m)}_{e,i} + \sum_{d = 1}^{D}{\gamma^{(m)}_{
 <h2>Athlete Profiles</h2>
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><a href="decathlon-quantiles.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10"><img data-src="decathlon-quantiles.png" class="quarto-figure quarto-figure-center" style="width:85.0%"></a></p>
+<p><a href="decathlon-quantiles.png" class="lightbox" data-gallery="quarto-lightbox-gallery-12"><img data-src="decathlon-quantiles.png" class="quarto-figure quarto-figure-center" style="width:85.0%"></a></p>
 </figure>
 </div>
 </section>
@@ -540,7 +559,7 @@ y^{\star(m)}_{e,i,j} &amp;= \alpha^{(m)}_{e,i} + \sum_{d = 1}^{D}{\gamma^{(m)}_{
 <h2>Breaking 9200</h2>
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><a href="decathlon-profiles.png" class="lightbox" data-gallery="quarto-lightbox-gallery-11"><img data-src="decathlon-profiles.png" class="quarto-figure quarto-figure-center"></a></p>
+<p><a href="decathlon-profiles.png" class="lightbox" data-gallery="quarto-lightbox-gallery-13"><img data-src="decathlon-profiles.png" class="quarto-figure quarto-figure-center"></a></p>
 </figure>
 </div>
 
