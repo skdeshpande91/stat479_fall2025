@@ -26,16 +26,15 @@ $$
 #| label: example-voronoi
 #| eval: true
 #| echo: false
-#| fig-width: 8
-#| fig-height: 8
+#| fig-width: 5
+#| fig-height: 5
 #| fig-align: center
-#| output: false
 library(deldir)
 set.seed(42)
 x <- runif(20)
 y <- runif(20)
 dxy <- deldir(x,y,rw=c(0,1,0,1))
-cxy1 <- cvt(dxy,verb=TRUE)
+cxy1 <- cvt(dxy,verb=FALSE)
 plot(cxy1$tiles)
 with(cxy1$centroids,points(x,y,pch=16))
 ```
@@ -46,23 +45,171 @@ with(cxy1$centroids,points(x,y,pch=16))
 - Quantify impact of different actions in terms of how much space/court value was created
 
 
-![](courty_realty.png){width=50%}
+![](courty_realty.png){width=75% fig-align="center"}
 
 ## Continuous Space Ownership
 
-- Voronoi partitions assume pitch control is discrete
-  - Players either own or don't own a point
-  - Any point can be owned by exactly one player
--[Fernandez & Bornn (2018)](https://www.lukebornn.com/papers/fernandez_ssac_2018.pdf): incorporated speed & direction for more continuous understanding
+- [Fernandez & Bornn (2018)](https://www.lukebornn.com/papers/fernandez_ssac_2018.pdf): incorporated speed & direction
+- Facilitates continuous understanding of space ownershp
 
-![](pitch_control.png){width=50%}
-
-
+![](pitch_control.png){width=60% fig-align="center"}
 
 ## Bezier Curves (definition)
 
+- Given $D+1$ control points $\boldsymbol{b}_{0}, \ldots, \boldsymbol{b}_{D}$ in $\mathbb{R}^{2}$
+- Degree $D$ Bezier curve is
+$$
+\boldsymbol{x}(t) = \sum_{d = 0}^{D}{\binom{D}{d}t^{d}(1-t)^{D-d}\boldsymbol{b}_{d}}.
+$$
+-  $\boldsymbol{x}(0) = \boldsymbol{b}_{0}$ and $\boldsymbol{x}(1) = \boldsymbol{b}_{D}$
+- Used widely in computer graphics
 
-<!--
- visual example of Bezier curve
--->
+## Bezier Curve Example 1
+
+```{r}
+#| label: fig-bezier-example1
+#| eval: true
+#| echo: false
+#| fig-width: 6
+#| fig-height: 6
+#| fig-align: center
+#| fig-cap: Quadratic Bezier curve example
+controls <- data.frame(x = c(1, 4, 10), y = c(1, 10, 7))
+t <- seq(0, 1, by = 0.001)
+
+x <- (1-t)^2 * controls$x[1] + 2 * t*(1-t) * controls$x[2] + t^2 * controls$x[3] 
+y <- (1-t)^2 * controls$y[1] + 2 * t*(1-t) * controls$y[2] + t^2 *controls$y[3] 
+
+oi_colors <- palette.colors(palette = "Okabe-Ito")
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+plot(1, type = "n", xlim = c(0, 10), ylim = c(0,10), xlab = "x", ylab = "y")
+points(controls, pch = 16, cex = 1, col = oi_colors[9])
+lines(x,y)
+```
+
+## Bezier Curve Example 2
+
+```{r}
+#| label: fig-bezier-example2
+#| eval: true
+#| echo: false
+#| fig-width: 6
+#| fig-height: 6
+#| fig-align: center
+#| fig-cap: Quadratic Bezier curve example
+
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+plot(1, type = "n", xlim = c(0, 10), ylim = c(0,10), xlab = "x", ylab = "y")
+points(controls, pch = 16, cex = 1, col = oi_colors[9])
+lines(x,y, col = oi_colors[3])
+
+
+t_ix <- which(t == 0.3)
+
+x01 <- (1 - t)*controls$x[1] + t * controls$x[2]
+y01 <- (1 - t)*controls$y[1] + t * controls$y[2]
+
+x12 <- (1 - t)*controls$x[2] + t * controls$x[3]
+y12 <- (1-t)*controls$y[2] + t * controls$y[3]
+
+
+lines(x01, y01, col = oi_colors[9])
+lines(x12, y12, col = oi_colors[9])
+
+
+
+points(x01[t_ix], y01[t_ix], col =  oi_colors[4], pch = 16)
+points(x12[t_ix], y12[t_ix], col = oi_colors[4], pch = 16)
+lines(x = c(x01[t_ix], x12[t_ix]), y = c(y01[t_ix], y12[t_ix]), col = oi_colors[4])
+points(x[t_ix], y[t_ix], pch = 16, col = oi_colors[3])
+
+t2_ix <- which(t == 0.5)
+points(x01[t2_ix], y01[t2_ix], col =  oi_colors[8], pch = 16)
+points(x12[t2_ix], y12[t2_ix], col = oi_colors[8], pch = 16)
+lines(x = c(x01[t2_ix], x12[t2_ix]), y = c(y01[t2_ix], y12[t2_ix]), col = oi_colors[8])
+points(x[t2_ix], y[t2_ix], pch = 16, col = oi_colors[3])
+```
+
+
+
+## Bezier Curve Applications I
+
+- [Miller & Bornn (2017)](https://www.lukebornn.com/papers/miller_ssac_2017.pdf): clusters of NBA actions
+
+
+![](millerbornn.png){width=75% fig-align="center"}
+
+## Bezier Curve Applications II
+
+- [Chu et al. (2019)](https://arxiv.org/pdf/1908.02423): clustering NFL routes
+
+![](chu_routes.png){width=75% fig-align="center"}
+
+## Bezier Curve Applications III{.smaller}
+
+- Bayesian model: prior over control points $\Rightarrow$ posterior over remaining trajectory
+
+# Next Steps
+
+## Additional Training{.smaller}
+
+- Calculus-based probability: STAT/MATH 309, STAT 409, or MATH 431
+  - Understanding joint, conditional, and marginal probabilities
+  - Common distributions are building blocks of more sophisticated models
+  
+- Statistical inference: STAT/MATH 310, STAT 410
+
+- Bayesian Statistics: STAT 479 (Fall 2027)
+  - [*Bayes Rules!*](https://www.bayesrulesbook.com): Very good (online) textbook
+  - Email me if you'd like to sit in on STAT 775 next semester (MW 9:30-10:45)
+
+- Fundamental: gain experience w/ modeling
+
+
+## Building Your Portfolio
+
+- Continue developing your projects!
+  - Build more sophisticated models
+  - Run more elaborate calculations/simulation
+  - Re-assess certain analysis decisions
+
+- Work on personal research projects
+- Focus on answering substantive questions
+
+- Essential: put your code on GitHub
+
+
+## Sharing Your Work I
+
+- Build a website or blog w/ technical reports as posts
+- [Alex Hayes' website](https://www.alexpghayes.com) is a good example
+- Quarto make it *very* easy to maintain a blog/website
+  -  for this class' website
+  - Tips from [Drew Dimmery](https://ddimmery.com/posts/quarto-website/) & [Danielle Navarro](https://blog.djnavarro.net/posts/2022-04-20_porting-to-quarto/)
+- Can host websites on GitHub for free
+  - This classes website & its [source code](https://github.com/skdeshpande91/stat479_fall2025)
+  - [Netlify](https://www.netlify.com) is also popular (but not free)
+
+## Sharing Your Work II{.smaller}
+
+- Sports Analytics Club on campus
+- [CMU Reproducible Research Competition](https://www.cmsaconference.com/research-competition)
+  - Deadline usually in August
+  - Requirement: short paper + all code/data on GitHub
+- [USCLAP](https://www.causeweb.org/usproc/usclap): undergraduate class project competition
+  - Deadline December 18
+  - Requirement: 3-page **blinded** report
+  - Some small cash prizes & chance to present at a conference
+- Joint Statistics Meeting (August 1-6, 2026 in Boston)
+  - Abstract deadline February 2
+  - Let's discuss off-line!
+  
+## Sharing Your Work III{.smaller}
+
+- [*SIAM Undergraduate Research Online*](https://www.siam.org/publications/siam-journals/siam-undergraduate-research-online-siuro/)
+  - Peer-reviewed journal focuses on undergraduate research in applied & computational math
+- [*Journal of Sports Analytics*](https://journals.sagepub.com/home/san)
+- [*Journal of Quantitative Analysis in Sports*](https://www.degruyterbrill.com/journal/key/jqas/html)
+  - JQAS requires more statistical sophistication than JAS
+- If you're interested in developing a class project or personal project into a research paper, let's discuss!
 
